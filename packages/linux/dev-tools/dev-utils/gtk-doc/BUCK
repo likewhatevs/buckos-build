@@ -1,0 +1,33 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# gtk-doc - GTK+ documentation generator
+download_source(
+    name = "gtk-doc-src",
+    src_uri = "https://download.gnome.org/sources/gtk-doc/1.33/gtk-doc-1.33.2.tar.xz",
+    sha256 = "cc1b709a20eb030a278a1f9842a362e00402b7f834ae1df4c1998a723152bf43",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "gtk-doc",
+    source = ":gtk-doc-src",
+    iuse = ["emacs"],
+    use_configure = {
+        "-emacs": "--disable-emacs",
+        "emacs": "--enable-emacs",
+    },
+    version = "1.33.2",
+    description = "GTK+ documentation generator",
+    homepage = "https://wiki.gnome.org/DocumentationProject/GtkDoc",
+    license = "GPL-2+",
+    configure_args = [
+        "-Dprefix=/usr",
+        "-Dtests=false",
+    ],
+    deps = [
+        "lang//python:python",
+        "dev-tools//dev-utils/itstool:itstool",
+    ],
+    visibility = ["PUBLIC"],
+)

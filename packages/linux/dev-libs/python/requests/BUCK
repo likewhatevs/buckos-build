@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "requests",
+    version = "2.32.3",
+    iuse = ["socks5", "test-rust"],
+    use_configure = {
+        "-socks5": "--disable-socks5",
+        "-test-rust": "--disable-test-rust",
+        "socks5": "--enable-socks5",
+        "test-rust": "--enable-test-rust",
+    },
+    src_uri = "https://github.com/psf/requests/archive/refs/tags/v2.32.3.tar.gz",
+    sha256 = "f665576fc02d02e7b7f21630b915d70c14288f48decf76fad89b16a9f3975c42",
+    deps = [
+        "dev-libs//python/certifi:certifi",
+        "dev-libs//python/charset-normalizer:charset-normalizer",
+        "dev-libs//python/idna:idna",
+        "dev-libs//python/urllib3:urllib3",
+    ],
+)

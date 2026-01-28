@@ -1,0 +1,29 @@
+# Kernel virtualization tools aggregator
+
+filegroup(
+    name = "virtme-tools",
+    srcs = [
+        "emulation//kernel/virtme-ng:virtme-ng",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "kvm-tools",
+    srcs = [
+        "emulation//kernel/kvmtool:kvmtool",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-kernel-tools",
+    srcs = [
+        ":virtme-tools",
+        ":kvm-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

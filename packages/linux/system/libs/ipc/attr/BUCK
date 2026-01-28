@@ -1,0 +1,59 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "attr-src",
+    # Use savannah release which includes pre-generated configure script
+    src_uri = "https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.xz",
+    sha256 = "f2e97b0ab7ce293681ab701915766190d607a1dba7fae8a718138150b700a70b",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "attr",
+    source = ":attr-src",
+    iuse = ["debug", "nls", "static-libs"],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-nls": "--disable-nls",
+        "-static-libs": "--disable-static",
+        "debug": "--enable-debug",
+        "nls": "--enable-nls",
+        "static-libs": "--enable-static",
+    },
+    version = "2.5.2",
+    category = "system/libs/ipc",
+    slot = "0",
+    description = "Extended attribute support library",
+    homepage = "https://savannah.nongnu.org/projects/attr/",
+    license = "LGPL-2.1",
+
+    src_prepare = '''
+# Release tarball includes configure - no autoreconf needed
+# Just patch to disable NLS if not wanted
+true
+''',
+
+    src_configure = '''
+./configure \\
+    --prefix=/usr \\
+    --libdir=/usr/lib64 \\
+    --build=$(gcc -dumpmachine) \\
+    --host=$(gcc -dumpmachine) \\
+    --disable-static \\
+    --disable-nls
+''',
+
+    src_compile = '''
+make -j$(nproc)
+''',
+
+    src_install = '''
+make DESTDIR="$DESTDIR" install
+''',
+
+    # No bdepend needed - configure is pre-generated
+    bdepend = [],
+    depend = [],
+    visibility = ["PUBLIC"],
+)

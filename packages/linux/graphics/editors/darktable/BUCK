@@ -1,0 +1,125 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "darktable-src",
+    src_uri = "https://github.com/darktable-org/darktable/releases/download/release-4.6.1/darktable-4.6.1.tar.xz",
+    sha256 = "16edc0a070293e2d3cda4ea10e49bda9bde932e23f9e62e2fa2e7ac74acf7afd",
+    signature_sha256 = "74ffb2d0b24f0e001ca0fb6ed53a0009a8b9331626cd57dfb3512118362b76de",
+)
+
+autotools_package(
+    name = "darktable",
+    source = ":darktable-src",
+    iuse = [
+        "/",
+        "X",
+        "avif",
+        "colord",
+        "cups",
+        "gamepad",
+        "geolocation",
+        "gphoto2",
+        "graphicsmagick",
+        "heif",
+        "jpeg2k",
+        "jpegxl",
+        "keyring",
+        "kwallet",
+        "l10n_}",
+        "lto",
+        "lua",
+        "midi",
+        "opencl",
+        "openexr",
+        "openmp",
+        "tools",
+        "wayland",
+        "webp",
+    ],
+    use_configure = {
+        "-/": "--disable-/",
+        "-X": "--without-x",
+        "-avif": "--disable-avif",
+        "-colord": "--disable-colord",
+        "-cups": "--disable-cups",
+        "-gamepad": "--disable-gamepad",
+        "-geolocation": "--disable-geolocation",
+        "-gphoto2": "--disable-gphoto2",
+        "-graphicsmagick": "--disable-graphicsmagick",
+        "-heif": "--disable-heif",
+        "-jpeg2k": "--disable-jpeg2k",
+        "-jpegxl": "--disable-jpegxl",
+        "-keyring": "--disable-keyring",
+        "-kwallet": "--disable-kwallet",
+        "-l10n_}": "--disable-l10n_}",
+        "-lto": "--disable-lto",
+        "-lua": "--disable-lua",
+        "-midi": "--disable-midi",
+        "-opencl": "--disable-opencl",
+        "-openexr": "--disable-openexr",
+        "-openmp": "--disable-openmp",
+        "-tools": "--disable-tools",
+        "-wayland": "--disable-wayland",
+        "-webp": "--without-webp",
+        "/": "--enable-/",
+        "X": "--with-x",
+        "avif": "--enable-avif",
+        "colord": "--enable-colord",
+        "cups": "--enable-cups",
+        "gamepad": "--enable-gamepad",
+        "geolocation": "--enable-geolocation",
+        "gphoto2": "--enable-gphoto2",
+        "graphicsmagick": "--enable-graphicsmagick",
+        "heif": "--enable-heif",
+        "jpeg2k": "--enable-jpeg2k",
+        "jpegxl": "--enable-jpegxl",
+        "keyring": "--enable-keyring",
+        "kwallet": "--enable-kwallet",
+        "l10n_}": "--enable-l10n_}",
+        "lto": "--enable-lto",
+        "lua": "--enable-lua",
+        "midi": "--enable-midi",
+        "opencl": "--enable-opencl",
+        "openexr": "--enable-openexr",
+        "openmp": "--enable-openmp",
+        "tools": "--enable-tools",
+        "wayland": "--enable-wayland",
+        "webp": "--with-webp",
+    },
+    version = "4.6.1",
+    description = "Photography workflow application and raw developer",
+    homepage = "https://www.darktable.org/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBINARY_PACKAGE_BUILD=ON \
+    -DBUILD_USERMANUAL=OFF \
+    -DUSE_LIBSECRET=ON \
+    -DUSE_LUA=OFF \
+    -DUSE_OPENCL=ON \
+    -DRAWSPEED_ENABLE_LTO=ON
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT make install
+""",
+    deps = [
+        "desktop//gtk:gtk3",
+        "system//libs/database/sqlite:sqlite",
+        "network//curl:curl",
+        "dev-libs//exiv2:exiv2",
+        "system//libs/graphics/lcms2:lcms2",
+        "dev-libs//pugixml:pugixml",
+    ],
+    bdepend = [
+        "dev-tools//dev-utils/intltool:intltool",
+    ],
+    visibility = ["PUBLIC"],
+)

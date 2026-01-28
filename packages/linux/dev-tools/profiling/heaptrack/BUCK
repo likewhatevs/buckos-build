@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# Heaptrack - A heap memory profiler
+
+cmake_package(
+    name = "heaptrack",
+    version = "1.5.0",
+    src_uri = "https://github.com/KDE/heaptrack/archive/refs/tags/v1.5.0.tar.gz",
+    sha256 = "44e6aefc13460556acced7192bf3600605cd7a5f3a46e670c3127aeae97e19dd",
+    description = "A heap memory profiler for Linux",
+    homepage = "https://github.com/KDE/heaptrack",
+    license = "LGPL-2.1",
+    iuse = ["gui", "zstd"],
+    deps = [
+        "system//libs/libunwind:libunwind",
+        "dev-libs//boost:boost",
+        "core//zlib:zlib",
+    ],
+    use_deps = {
+        "gui": [
+            "graphics//qt:qt",
+        ],
+    },
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    use_cmake = {
+        "-gui": "-DHEAPTRACK_BUILD_GUI=OFF",
+        "-zstd": "-DENABLE_ZSTD=OFF",
+        "gui": "-DHEAPTRACK_BUILD_GUI=ON",
+        "zstd": "-DENABLE_ZSTD=ON",
+    },
+    visibility = ["PUBLIC"],
+)

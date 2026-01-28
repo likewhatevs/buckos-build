@@ -1,0 +1,50 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# libffi - official release tarball includes pre-generated configure
+autotools_package(
+    name = "libffi",
+    # No autoreconf needed - tarball has pre-generated configure
+    bdepend = [],
+    src_prepare = "",
+    version = "3.4.4",
+    src_uri = "https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz",
+    sha256 = "d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676",
+    signature_required = False,
+    description = "Foreign Function Interface library",
+    homepage = "https://sourceware.org/libffi/",
+    license = "MIT",
+
+    # USE flags this package supports
+    iuse = [
+        "debug",
+        "exec-static-trampoline",
+        "pax-kernel",
+        "static-libs",
+        "test",
+    ],
+
+    # Default USE flags
+    use_defaults = [],
+
+    # Base configure arguments
+    configure_args = [
+        "--disable-exec-static-tramp",
+    ],
+
+    # Conditional configure arguments
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-exec-static-trampoline": "--disable-exec-static-trampoline",
+        "-pax-kernel": "--disable-pax-kernel",
+        "-static-libs": "--disable-static",
+        "-test": "--disable-pax_emutramp",
+        "debug": "--enable-debug",
+        "exec-static-trampoline": "--enable-exec-static-trampoline",
+        "pax-kernel": "--enable-pax-kernel",
+        "static-libs": "--enable-static",
+        "test": "--enable-pax_emutramp",
+    },
+
+    visibility = ["PUBLIC"],
+)

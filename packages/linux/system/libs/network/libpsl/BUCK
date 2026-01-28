@@ -1,0 +1,40 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+meson_package(
+    name = "libpsl",
+    version = "0.21.5",
+    src_uri = "https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz",
+    sha256 = "1dcc9ceae8b128f3c0b3f654decd0e1e891afc6ff81098f227ef260449dae208",
+    signature_sha256 = "87d819c4b61b6880ebe788edb411b92ac6ac47c7a2fb72899a8446a485d4607a",
+    signature_required = False,
+
+    description = "Public Suffix List library",
+    homepage = "https://github.com/rockdaboot/libpsl",
+    license = "MIT",
+
+    # USE flags:
+    # static-libs - Build static libraries
+    # builtin - Use built-in PSL data instead of loading at runtime
+    # idn - Enable IDN/Unicode support (libidn2)
+    # icu - Use ICU library for Unicode support
+    iuse = ["static-libs", "builtin", "idn", "icu"],
+    use_defaults = ["builtin"],
+
+    # Use meson_args instead of use_options for boolean options
+    # use_options generates enabled/disabled but builtin needs true/false
+
+    use_deps = {
+        "idn": ["network//dns/libraries/libidn2:libidn2"],
+        "icu": ["system//libs/utility/icu:icu"],
+    },
+
+    meson_args = [
+        "-Dtests=false",
+        "-Dbuiltin=true",  # Use built-in PSL data
+    ],
+
+    deps = [],
+
+    visibility = ["PUBLIC"],
+)

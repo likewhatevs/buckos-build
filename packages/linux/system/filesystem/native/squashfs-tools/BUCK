@@ -1,0 +1,39 @@
+load("@root//defs:package_defs.bzl", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+make_package(
+    name = "squashfs-tools",
+    version = "4.6.1",
+    src_uri = "https://github.com/plougher/squashfs-tools/archive/refs/tags/4.6.1.tar.gz",
+    sha256 = "9c4974e07c61547dae14af4ed1f358b7d04618ae194e54d6be72ee126f0d2f53",
+    signature_required = False,
+    description = "Tools for creating and extracting SquashFS filesystems",
+    homepage = "https://github.com/plougher/squashfs-tools",
+    license = "GPL-2.0",
+    src_configure = "cd squashfs-tools",
+    src_compile = """
+cd squashfs-tools
+make -j$(nproc) \
+    XZ_SUPPORT=1 \
+    LZO_SUPPORT=1 \
+    ZSTD_SUPPORT=1 \
+    GZIP_SUPPORT=1 \
+    LZMA_XZ_SUPPORT=1
+""",
+    src_install = """
+cd squashfs-tools
+mkdir -p "$DESTDIR/usr/bin"
+mkdir -p "$DESTDIR/usr/share/man/man1"
+install -m 755 mksquashfs "$DESTDIR/usr/bin/"
+install -m 755 unsquashfs "$DESTDIR/usr/bin/"
+install -m 755 sqfstar "$DESTDIR/usr/bin/" || true
+install -m 644 ../USAGE "$DESTDIR/usr/share/man/man1/mksquashfs.1" || true
+""",
+    deps = [
+        "core//zlib:zlib",
+        "system//libs/compression/xz:xz",
+        "system//libs/compression/lzo:lzo",
+        "system//libs/compression/zstd:zstd",
+    ],
+    visibility = ["PUBLIC"],
+)

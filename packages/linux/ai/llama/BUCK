@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "llama",
+    version = "2.0.0",
+    src_uri = "https://github.com/meta-llama/llama/archive/refs/tags/v2.tar.gz",
+    sha256 = "a75de1dc742014a2f87055ba9a7016cae9aecf906a0094a6cb85d0d00bfd6dd6",
+    signature_required = False,
+    description = "Meta LLaMA language model - inference code and weights",
+    homepage = "https://github.com/facebookresearch/llama",
+    license = "GPL-3.0",
+    deps = [
+        "ai//ml-frameworks/fairscale:fairscale",
+    ],
+    visibility = ["PUBLIC"],
+)

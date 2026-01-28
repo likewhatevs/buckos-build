@@ -1,0 +1,53 @@
+# Font collections and families
+
+filegroup(
+    name = "libre-fonts",
+    srcs = [
+        "fonts//collections/liberation-fonts:liberation-fonts",
+        "fonts//collections/dejavu-fonts:dejavu-fonts",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "google-fonts",
+    srcs = [
+        "fonts//collections/noto-fonts:noto-fonts",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "adobe-fonts",
+    srcs = [
+        "fonts//collections/source-fonts:source-sans",
+        "fonts//collections/source-fonts:source-serif",
+        "fonts//collections/source-fonts:source-code-pro",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "essential-fonts",
+    srcs = [
+        "fonts//collections/liberation-fonts:liberation-fonts",
+        "fonts//collections/dejavu-fonts:dejavu-fonts",
+        "fonts//collections/source-fonts:source-code-pro",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-collections",
+    srcs = [
+        ":libre-fonts",
+        ":google-fonts",
+        ":adobe-fonts",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,60 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# crun - Fast and lightweight OCI runtime
+download_source(
+    name = "crun-src",
+    src_uri = "https://github.com/containers/crun/archive/refs/tags/1.18.tar.gz",
+    sha256 = "3efedc1bd7fde9bfc333f982ccd58eccb12e5f202946252d2c7de713bf452601",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+autotools_package(
+    name = "crun",
+    source = ":crun-src",
+    iuse = [
+        "bpf",
+        "caps",
+        "criu",
+        "seccomp",
+        "selinux",
+        "static-libs",
+        "systemd",
+    ],
+    use_configure = {
+        "-bpf": "--disable-bpf",
+        "-caps": "--disable-libcap",
+        "-criu": "--disable-criu",
+        "-seccomp": "--disable-seccomp",
+        "-selinux": "--disable-selinux",
+        "-static-libs": "--disable-static",
+        "-systemd": "--disable-systemd",
+        "bpf": "--enable-bpf",
+        "caps": "--enable-libcap",
+        "criu": "--enable-criu",
+        "seccomp": "--enable-seccomp",
+        "selinux": "--enable-selinux",
+        "static-libs": "--enable-static",
+        "systemd": "--enable-systemd",
+    },
+    version = "1.18",
+    description = "Fast and lightweight OCI runtime written in C",
+    homepage = "https://github.com/containers/crun",
+    license = "GPL-2.0",
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-shared",
+        "--with-python-bindings",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/ipc/libcap:libcap",
+        "system//libs/data/yajl:yajl",
+        "system//libs/ipc/libseccomp:libseccomp",
+        "system//init/systemd:systemd",
+        "lang//python:python",
+    ],
+    visibility = ["PUBLIC"],
+)

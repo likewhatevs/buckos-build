@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+load("@root//defs:use_flags.bzl", "use_dep")
+
+download_source(
+    name = "libbpf-src",
+    src_uri = "https://github.com/libbpf/libbpf/archive/refs/tags/v1.4.6.tar.gz",
+    sha256 = "d4cf3ee697d9bd959ad3c0f5c6757370a2559e54448761271e15a23c31c1082e",
+    signature_required = False,
+)
+
+binary_package(
+    name = "libbpf",
+    srcs = [":libbpf-src"],
+    version = "1.4.6",
+    visibility = ["PUBLIC"],
+)

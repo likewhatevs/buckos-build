@@ -1,0 +1,327 @@
+# System Libraries - Comprehensive aggregator for all system libraries
+# This provides convenient groups for common application dependencies
+
+# =============================================================================
+# Media System Libraries - Libraries that applications commonly link against
+# =============================================================================
+
+# Image Format Libraries - For loading and saving image files
+filegroup(
+    name = "image-libs",
+    srcs = [
+        "system//libs/image/libpng:libpng",
+        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
+        "system//libs/image/libwebp:libwebp",
+        "system//libs/image/libtiff:libtiff",
+        "system//libs/image/giflib:giflib",
+        "system//libs/image/openjpeg:openjpeg",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Font Libraries - For text rendering and font handling
+filegroup(
+    name = "font-libs",
+    srcs = [
+        "system//libs/font/freetype:freetype",
+        "system//libs/font/fontconfig:fontconfig",
+        "system//libs/font/harfbuzz:harfbuzz",
+        "system//libs/font/fribidi:fribidi",
+        "system//libs/font/graphite2:graphite2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# 2D Graphics Libraries - For drawing and rendering
+filegroup(
+    name = "graphics-libs",
+    srcs = [
+        "system//libs/graphics/pixman:pixman",
+        "system//libs/graphics/cairo:cairo",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Audio Codec Libraries - For audio encoding/decoding
+filegroup(
+    name = "audio-codec-libs",
+    srcs = [
+        "system//libs/audio/libogg:libogg",
+        "system//libs/audio/libvorbis:libvorbis",
+        "system//libs/audio/flac:flac",
+        "system//libs/audio/opus:opus",
+        "system//libs/audio/lame:lame",
+        "system//libs/audio/mpg123:libmpg123",
+        "system//libs/audio/speex:speex",
+        "system//libs/audio/speex:speexdsp",
+        "system//libs/audio/wavpack:wavpack",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Audio I/O Libraries - For audio input/output
+filegroup(
+    name = "audio-io-libs",
+    srcs = [
+        "system//libs/audio/alsa-lib:alsa-lib",
+        "system//libs/audio/libsamplerate:libsamplerate",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Libraries - For video codecs and disc playback
+filegroup(
+    name = "video-libs",
+    srcs = [
+        "system//libs/video/theora:theora",
+        "system//libs/video/libass:libass",
+        "system//libs/video/libdvdcss:libdvdcss",
+        "system//libs/video/libdvdread:libdvdread",
+        "system//libs/video/libdvdnav:libdvdnav",
+        "system//libs/video/libbluray:libbluray",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Multimedia Framework Libraries - SDL2 and audio frameworks
+filegroup(
+    name = "multimedia-libs",
+    srcs = [
+        "system//libs/multimedia/sdl2:sdl2",
+        "system//libs/multimedia/openal-soft:openal-soft",
+        "system//libs/multimedia/portaudio:portaudio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Input Libraries - For input device handling
+filegroup(
+    name = "input-libs",
+    srcs = [
+        "system//libs/input/libevdev:libevdev",
+        "system//libs/input/mtdev:mtdev",
+        "system//libs/input/libinput:libinput",
+        "system//libs/input/libxkbcommon:libxkbcommon",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# CD/DVD Support Libraries
+filegroup(
+    name = "disc-libs",
+    srcs = [
+        "system//libs/audio/libcdio:libcdio",
+        "system//libs/audio/libcdio:libcdio-paranoia",
+        "system//libs/video/libdvdcss:libdvdcss",
+        "system//libs/video/libdvdread:libdvdread",
+        "system//libs/video/libdvdnav:libdvdnav",
+        "system//libs/video/libbluray:libbluray",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Convenience Groups
+# =============================================================================
+
+# Essential Media Libraries - Minimal set for basic media support
+filegroup(
+    name = "media-essential",
+    srcs = [
+        ":image-libs",
+        ":font-libs",
+        ":graphics-libs",
+        "system//libs/audio/alsa-lib:alsa-lib",
+        "system//libs/audio/libogg:libogg",
+        "system//libs/audio/libvorbis:libvorbis",
+        "system//libs/audio/opus:opus",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop Media Libraries - Complete set for desktop applications
+filegroup(
+    name = "media-desktop",
+    srcs = [
+        ":image-libs",
+        ":font-libs",
+        ":graphics-libs",
+        ":audio-codec-libs",
+        ":audio-io-libs",
+        ":video-libs",
+        ":input-libs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Full Media Libraries - Everything for comprehensive media support
+filegroup(
+    name = "media-full",
+    srcs = [
+        ":media-desktop",
+        ":multimedia-libs",
+        ":disc-libs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# SDL2 Development - All SDL2 libraries for game/multimedia development
+filegroup(
+    name = "sdl2-dev",
+    srcs = [
+        "system//libs/multimedia/sdl2:sdl2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Audio Development - Complete audio codec and I/O stack
+filegroup(
+    name = "audio-dev",
+    srcs = [
+        ":audio-codec-libs",
+        ":audio-io-libs",
+        "system//libs/multimedia/openal-soft:openal-soft",
+        "system//libs/multimedia/portaudio:portaudio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Other System Library Categories
+# =============================================================================
+
+# Compression Libraries
+filegroup(
+    name = "compression-libs",
+    srcs = [
+        "system//libs/compression/zstd:zstd",
+        "system//libs/compression/lz4:lz4",
+        "system//libs/compression/snappy:snappy",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Crypto Libraries
+filegroup(
+    name = "crypto-libs",
+    srcs = [
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/crypto/libgcrypt:libgcrypt",
+        "system//libs/crypto/libsodium:libsodium",
+        "system//libs/crypto/gnutls:gnutls",
+        "system//libs/crypto/nettle:nettle",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Data Format Libraries
+filegroup(
+    name = "data-libs",
+    srcs = [
+        "system//libs/data/libxml2:libxml2",
+        "system//libs/data/libxslt:libxslt",
+        "system//libs/data/json-c:json-c",
+        "system//libs/data/jansson:jansson",
+        "system//libs/data/expat:expat",
+        "system//libs/data/yaml:yaml",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Database Libraries
+filegroup(
+    name = "database-libs",
+    srcs = [
+        "system//libs/database/sqlite:sqlite",
+        "system//libs/database/lmdb:lmdb",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Network Libraries
+filegroup(
+    name = "network-libs",
+    srcs = [
+        "system//libs/network/curl:curl",
+        "system//libs/network/libssh2:libssh2",
+        "system//libs/network/nghttp2:nghttp2",
+        "system//libs/network/c-ares:c-ares",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# IPC Libraries
+filegroup(
+    name = "ipc-libs",
+    srcs = [
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/ipc/libcap:libcap",
+        "system//libs/ipc/libseccomp:libseccomp",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Utility Libraries
+filegroup(
+    name = "utility-libs",
+    srcs = [
+        "system//libs/utility/pcre2:pcre2",
+        "system//libs/utility/icu:icu",
+        "system//libs/utility/gmp:gmp",
+        "system//libs/utility/libffi:libffi",
+        "system//libs/utility/libevent:libevent",
+        "system//libs/utility/libuv:libuv",
+        "system//libs/compression/libarchive:libarchive",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All System Libraries
+# =============================================================================
+
+filegroup(
+    name = "all",
+    srcs = [
+        ":image-libs",
+        ":font-libs",
+        ":graphics-libs",
+        ":audio-codec-libs",
+        ":audio-io-libs",
+        ":video-libs",
+        ":multimedia-libs",
+        ":input-libs",
+        ":compression-libs",
+        ":crypto-libs",
+        ":data-libs",
+        ":database-libs",
+        ":network-libs",
+        ":ipc-libs",
+        ":utility-libs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

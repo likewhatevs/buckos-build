@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# cppcheck - Static analysis for C/C++ (cmake build)
+# USE flags: qt5, pcre, test
+# Default: pcre
+
+download_source(
+    name = "cppcheck-src",
+    src_uri = "https://github.com/danmar/cppcheck/archive/2.13.0.tar.gz",
+    sha256 = "8229afe1dddc3ed893248b8a723b428dc221ea014fbc76e6289840857c03d450",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "cppcheck",
+    source = ":cppcheck-src",
+    iuse = [
+        "charts",
+        "gui",
+        "htmlreport",
+        "pcre",
+    ],
+    use_configure = {
+        "-charts": "--disable-charts",
+        "-gui": "--disable-gui",
+        "-htmlreport": "--disable-htmlreport",
+        "-pcre": "--disable-pcre",
+        "charts": "--enable-charts",
+        "gui": "--enable-gui",
+        "htmlreport": "--enable-htmlreport",
+        "pcre": "--enable-pcre",
+    },
+    version = "2.13.0",
+    description = "Static analysis tool for C/C++ code",
+    homepage = "https://cppcheck.sourceforge.io/",
+    license = "GPL-3",
+    bdepend = [
+        "dev-tools//build-systems/cmake:cmake",
+    ],
+    configure_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DUSE_MATCHCOMPILER=ON",
+    ],
+    visibility = ["PUBLIC"],
+)

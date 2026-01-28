@@ -1,0 +1,70 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# FreeType - High-quality font rendering library
+
+cmake_package(
+    name = "freetype",
+    version = "2.13.2",
+    src_uri = "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.xz",
+    sha256 = "12991c4e55c506dd7f9b765933e62fd2be2e06d421505d7950a132e4f1bb484d",
+    description = "High-quality and portable font engine",
+    homepage = "https://www.freetype.org/",
+    license = "FTL GPL-2.0",
+    iuse = [
+        "X",
+        "adobe-cff",
+        "brotli",
+        "bzip2",
+        "cleartype-hinting",
+        "debug",
+        "fontforge",
+        "harfbuzz",
+        "png",
+        "static-libs",
+        "svg",
+        "utils",
+    ],
+    # Note: harfbuzz disabled by default to avoid circular dependency
+    # (harfbuzz depends on freetype, freetype can optionally use harfbuzz)
+    use_defaults = ["png"],
+    deps = [
+        "core//zlib:zlib",
+        "system//libs/compression/bzip2:bzip2",
+    ],
+    use_deps = {
+        "harfbuzz": ["graphics//harfbuzz:harfbuzz"],
+        "brotli": ["dev-libs//misc/brotli:brotli"],
+        "png": ["media//image/libpng:libpng"],
+    },
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+    ],
+    use_cmake = {
+        "-X": "-DENABLE_X=OFF",
+        "-adobe-cff": "-DENABLE_ADOBE_CFF=OFF",
+        "-brotli": "-DFT_DISABLE_BROTLI=ON",
+        "-bzip2": "-DENABLE_BZIP2=OFF",
+        "-cleartype-hinting": "-DENABLE_CLEARTYPE_HINTING=OFF",
+        "-debug": "-DCMAKE_BUILD_TYPE=Release",
+        "-fontforge": "-DENABLE_FONTFORGE=OFF",
+        "-harfbuzz": "-DFT_DISABLE_HARFBUZZ=ON",
+        "-png": "-DFT_DISABLE_PNG=ON",
+        "-static-libs": "-DBUILD_STATIC_LIBS=OFF",
+        "-svg": "-DENABLE_SVG=OFF",
+        "-utils": "-DENABLE_UTILS=OFF",
+        "X": "-DENABLE_X=ON",
+        "adobe-cff": "-DENABLE_ADOBE_CFF=ON",
+        "brotli": "-DFT_REQUIRE_BROTLI=ON",
+        "bzip2": "-DENABLE_BZIP2=ON",
+        "cleartype-hinting": "-DENABLE_CLEARTYPE_HINTING=ON",
+        "debug": "-DCMAKE_BUILD_TYPE=Debug",
+        "fontforge": "-DENABLE_FONTFORGE=ON",
+        "harfbuzz": "-DFT_REQUIRE_HARFBUZZ=ON",
+        "png": "-DFT_REQUIRE_PNG=ON",
+        "static-libs": "-DBUILD_STATIC_LIBS=ON",
+        "svg": "-DENABLE_SVG=ON",
+        "utils": "-DENABLE_UTILS=ON",
+    },
+    visibility = ["PUBLIC"],
+)

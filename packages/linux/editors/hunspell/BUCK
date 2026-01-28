@@ -1,0 +1,50 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# hunspell - Spell checker and morphological analyzer
+
+download_source(
+    name = "hunspell-src",
+    src_uri = "https://github.com/hunspell/hunspell/releases/download/v1.7.2/hunspell-1.7.2.tar.gz",
+    sha256 = "11ddfa39afe28c28539fe65fc4f1592d410c1e9b6dd7d8a91ca25d85e9ec65b8",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "hunspell",
+    source = ":hunspell-src",
+    iuse = [
+        "l10n_${lang}",
+        "ncurses",
+        "nls",
+        "readline",
+        "static-libs",
+    ],
+    use_configure = {
+        "-l10n_${lang}": "--disable-l10n_${lang}",
+        "-ncurses": "--without-ncurses",
+        "-nls": "--disable-nls",
+        "-readline": "--without-readline",
+        "-static-libs": "--disable-static",
+        "l10n_${lang}": "--enable-l10n_${lang}",
+        "ncurses": "--with-ncurses",
+        "nls": "--enable-nls",
+        "readline": "--with-readline",
+        "static-libs": "--enable-static",
+    },
+    version = "1.7.2",
+    description = "Spell checker and morphological analyzer",
+    homepage = "https://hunspell.github.io/",
+    license = "MPL-1.1",
+    configure_args = [
+        "--prefix=/usr",
+        "--with-ui",
+        "--with-readline",
+        "--disable-static",
+    ],
+    deps = [
+        "core//readline:readline",
+        "core//ncurses:ncurses",
+    ],
+    visibility = ["PUBLIC"],
+)

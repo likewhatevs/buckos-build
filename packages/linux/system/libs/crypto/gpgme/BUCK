@@ -1,0 +1,67 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "gpgme",
+    version = "1.23.2",
+    src_uri = "https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-1.23.2.tar.bz2",
+    sha256 = "9499e8b1f33cccb6815527a1bc16049d35a6198a6c5fae0185f2bd561bce5224",
+    signature_required = False,
+    description = "GnuPG Made Easy - library for accessing GnuPG",
+    homepage = "https://www.gnupg.org/related_software/gpgme/",
+    license = "LGPL-2.1",
+
+    # USE flags: static-libs, cxx, qt5, python, test
+    iuse = [
+        "common-lisp",
+        "cxx",
+        "python",
+        "qt5",
+        "static-libs",
+        "test",
+    ],
+    use_defaults = ["cxx"],
+
+    use_configure = {
+        "-common-lisp": "--disable-common-lisp",
+        "-cxx": "--disable-languages=cpp",
+        "-python": "--disable-languages=python",
+        "-qt5": "--disable-languages=qt",
+        "-static-libs": "--disable-static",
+        "common-lisp": "--enable-common-lisp",
+        "cxx": "--enable-languages=cpp",
+        "python": "--enable-languages=python",
+        "qt5": "--enable-languages=qt",
+        "static-libs": "--enable-static",
+    },
+
+    use_deps = {
+        "qt5": ["dev-libs//qt5:qt5"],
+        "python": ["lang//python:python"],
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-shared",
+    ] + ([
+        "--disable-gpg-test",
+        "--disable-gpgsm-test",
+        "--disable-gpgconf-test",
+        "--disable-g13-test",
+    ]),
+
+    pre_configure = """
+# Available USE flags:
+# - static-libs: Build static libraries
+# - cxx: Build C++ language bindings
+# - qt5: Build Qt5 language bindings
+# - python: Build Python language bindings
+# - test: Enable GPG component tests
+""",
+
+    deps = [
+        "system//security/gnupg:gnupg",
+        "system//libs/crypto/libgpg-error:libgpg-error",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,80 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# GDM - GNOME Display Manager
+# =============================================================================
+
+download_source(
+    name = "gdm-src",
+    src_uri = "https://download.gnome.org/sources/gdm/45/gdm-45.0.1.tar.xz",
+    sha256 = "6572578c05e3c6569d6ed269f7de2aaf3a035657654586d8243907bb7a6ffa85",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "gdm",
+    source = ":gdm-src",
+    iuse = [
+        "X",
+        "accessibility",
+        "audit",
+        "bluetooth-sound",
+        "branding",
+        "elogind",
+        "fprint",
+        "plymouth",
+        "selinux",
+        "systemd",
+        "tcpd",
+        "wayland",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-accessibility": "--disable-accessibility",
+        "-audit": "--disable-audit",
+        "-bluetooth-sound": "--disable-bluetooth-sound",
+        "-branding": "--disable-branding",
+        "-elogind": "--disable-elogind",
+        "-fprint": "--disable-fprint",
+        "-plymouth": "--disable-plymouth",
+        "-selinux": "--disable-selinux",
+        "-systemd": "--disable-systemd",
+        "-tcpd": "--disable-tcpd",
+        "-wayland": "--disable-wayland",
+        "X": "--with-x",
+        "accessibility": "--enable-accessibility",
+        "audit": "--enable-audit",
+        "bluetooth-sound": "--enable-bluetooth-sound",
+        "branding": "--enable-branding",
+        "elogind": "--enable-elogind",
+        "fprint": "--enable-fprint",
+        "plymouth": "--enable-plymouth",
+        "selinux": "--enable-selinux",
+        "systemd": "--enable-systemd",
+        "tcpd": "--enable-tcpd",
+        "wayland": "--enable-wayland",
+    },
+    version = "45.0.1",
+    description = "GNOME Display Manager",
+    homepage = "https://wiki.gnome.org/Projects/GDM",
+    license = "GPL-2.0",
+    bdepend = [
+        "dev-tools//build-systems/meson:meson",
+        "dev-tools//build-systems/ninja:ninja",
+    ],
+    pre_configure = """
+mkdir -p build
+cd build
+meson setup .. --prefix=/usr \\
+    -Dgdm-xsession=true \\
+    -Drun-dir=/run/gdm \\
+    -Dsystemd-journal=false \\
+    -Dplymouth=disabled
+""",
+    deps = [
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,27 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# aemu - Android Emulator Utilities
+# Common utility library for Android emulation, used by gfxstream and QEMU
+
+# NOTE: Original URL uses main branch which has dynamic content.
+# Source archived at mirror.buckos.org for reproducible builds.
+# Downloaded 2026-01-18 from: https://android.googlesource.com/platform/hardware/google/aemu/+archive/refs/heads/main.tar.gz
+cmake_package(
+    name = "aemu",
+    version = "0.1.2-20260118",
+    src_uri = "https://mirror.buckos.org/a/aemu-main-20260118.tar.gz",
+    sha256 = "86d4a783a54765b727e2b7b7f8a5689407eb7e3c2fe507d8e0b09a9b45f42508",
+    description = "Android emulation utilities library for common C++ functions",
+    homepage = "https://android.googlesource.com/platform/hardware/google/aemu",
+    license = "Apache-2.0",
+    deps = [],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_STANDARD=17",
+        "-DCMAKE_C_STANDARD=11",
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DAEMU_COMMON_GEN_PKGCONFIG=ON",
+        "-DBUILD_STANDALONE=ON",
+    ],
+    visibility = ["PUBLIC"],
+)

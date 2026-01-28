@@ -1,0 +1,76 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# firefox - Mozilla Firefox web browser
+#
+# USE flags:
+#   alsa        - Enable ALSA audio support
+#   pulseaudio  - Enable PulseAudio support
+#   wayland     - Enable Wayland support
+#   X           - Enable X11 support
+#   debug       - Enable debugging symbols
+
+download_source(
+    name = "firefox-src",
+    src_uri = "https://archive.mozilla.org/pub/firefox/releases/128.0/source/firefox-128.0.source.tar.xz",
+    sha256 = "65271ffefb235ea1e162a081f2074a0f06fce27b2f613f573c126ba8eef95172",
+    signature_sha256 = "5059489e128bd00646476d68784e49558998afc5a14d75f3efe00901b48b69d4",
+    signature_required=False,
+)
+
+binary_package(
+    name = "firefox",
+    srcs = [":firefox-src"],
+    version = "128.0",
+    description = "Mozilla Firefox web browser - fast, private, and secure",
+    homepage = "https://www.mozilla.org/firefox/",
+    license = "MPL-2.0",
+    install_script = """
+        cd $SRCS
+
+        # Clear RUSTFLAGS as Firefox's configure is sensitive to its format
+        unset RUSTFLAGS
+
+        # Create mozconfig
+        cat > mozconfig << 'MOZCONFIG'
+ac_add_options --enable-application=browser
+ac_add_options --enable-official-branding
+ac_add_options --enable-optimize
+ac_add_options --disable-debug
+ac_add_options --prefix=/usr
+ac_add_options --libdir=/usr/lib
+ac_add_options --enable-alsa
+ac_add_options --enable-pulseaudio
+ac_add_options --with-system-zlib
+ac_add_options --with-system-png
+ac_add_options --with-system-jpeg
+ac_add_options --with-system-webp
+ac_add_options --with-system-icu
+ac_add_options --with-system-libvpx
+ac_add_options --enable-system-ffi
+ac_add_options --enable-system-pixman
+MOZCONFIG
+
+        export MOZCONFIG="$PWD/mozconfig"
+        export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=pip
+
+        ./mach build
+        DESTDIR="$OUT" ./mach install
+    """,
+    deps = use_dep(
+        {
+            "zlib": ["core//zlib:zlib"],
+            "gtk": ["desktop//gtk:gtk3"],
+            # TODO: nss, nspr, and cbindgen packages need to be created
+            # "nss": ["network//nss:nss"],
+            # "nspr": ["network//nspr:nspr"],
+            "python": ["lang//python:python"],
+            "rust": ["lang//rust:rust"],
+            # "cbindgen": ["lang//cbindgen:cbindgen"],
+            "nodejs": ["lang//nodejs:nodejs"],
+            "ncurses": ["core//ncurses:ncurses"],  # For Python curses module (libtinfow)
+        },
+        ["zlib", "gtk", "python", "rust", "nodejs", "ncurses"],
+    ),
+    visibility = ["PUBLIC"],
+)

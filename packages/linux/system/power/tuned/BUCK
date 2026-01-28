@@ -1,0 +1,26 @@
+# tuned - Adaptive System Tuning Daemon
+# Dynamic system tuning based on usage patterns
+
+load("@root//defs:package_defs.bzl", "python_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+python_package(
+    name = "tuned",
+    version = "2.22.1",
+    iuse = ["ppd"],
+    use_configure = {
+        "-ppd": "--disable-ppd",
+        "ppd": "--enable-ppd",
+    },
+    src_uri = "https://github.com/redhat-performance/tuned/archive/refs/tags/v2.22.1.tar.gz",
+    sha256 = "b0b4cf3d02a4c002bde141cdb18301177a94316f63e9d69162cedd7ebccd4d22",
+    signature_required = False,
+    description = "Adaptive system tuning daemon with power-saving profiles",
+    homepage = "https://github.com/redhat-performance/tuned",
+    license = "GPL-2.0",
+    deps = [
+        "lang//python:python",
+        "system//libs/ipc/dbus:dbus",
+    ],
+    visibility = ["PUBLIC"],
+)

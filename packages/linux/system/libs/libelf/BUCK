@@ -1,0 +1,50 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "libelf",
+    # Release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "0.8.13",
+    src_uri = "https://fossies.org/linux/misc/old/libelf-0.8.13.tar.gz",
+    sha256 = "591a9b4ec81c1f2042a97aa60564e0cb79d041c52faa7416acb38bc95bd2c76d",
+    signature_required = False,
+    description = "ELF object file access library",
+    homepage = "https://directory.fsf.org/wiki/Libelf",
+    license = "LGPL-2.0",
+    iuse = [
+        "compat",
+        "debug",
+        "nls",
+        "static-libs",
+    ],
+    use_defaults = ["compat"],
+    use_configure = {
+        "-compat": "--disable-compat",
+        "-debug": "--disable-debug",
+        "-nls": "--disable-nls",
+        "-static-libs": "--disable-static",
+        "compat": "--enable-compat",
+        "debug": "--enable-debug",
+        "nls": "--enable-nls",
+        "static-libs": "--enable-static",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--libdir=/usr/lib64",
+    ],
+    src_install = """
+# libelf's old Makefile doesn't properly respect DESTDIR, so we need to
+# pre-create directories and ensure DESTDIR is set correctly
+mkdir -p "$D/usr/lib64"
+mkdir -p "$D/usr/include"
+mkdir -p "$D/usr/include/libelf"
+# Use D instead of DESTDIR (the ebuild framework sets D for us)
+make DESTDIR="$D" install || true
+# Fix any permission issues during install
+chmod -R u+w "$D" 2>/dev/null || true
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

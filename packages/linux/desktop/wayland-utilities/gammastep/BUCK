@@ -1,0 +1,54 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "gammastep-src",
+    src_uri = "https://gitlab.com/chinstrap/gammastep/-/archive/v2.0.9/gammastep-v2.0.9.tar.gz",
+    sha256 = "bbb9d90e1cf30920c1017db4ce5c4652e4c7843fd4c4e34164d99ecbc3bbb4c0",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "gammastep",
+    source = ":gammastep-src",
+    iuse = [
+        "appindicator",
+        "geoclue",
+        "gtk",
+        "nls",
+        "wayland",
+    ],
+    use_configure = {
+        "-appindicator": "--disable-appindicator",
+        "-geoclue": "--disable-geoclue",
+        "-gtk": "--disable-gtk",
+        "-nls": "--disable-nls",
+        "-wayland": "--disable-wayland",
+        "appindicator": "--enable-appindicator",
+        "geoclue": "--enable-geoclue",
+        "gtk": "--enable-gtk",
+        "nls": "--enable-nls",
+        "wayland": "--enable-wayland",
+    },
+    version = "2.0.9",
+    description = "Adjust the color temperature of your screen according to your surroundings",
+    homepage = "https://gitlab.com/chinstrap/gammastep",
+    license = "GPL-3.0",
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-wayland",
+        "--disable-drm",
+    ],
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-libs//misc/gettext:gettext",
+        "dev-tools//build-systems/intltool:intltool",
+    ],
+    deps = [
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+    ],
+    visibility = ["PUBLIC"],
+)

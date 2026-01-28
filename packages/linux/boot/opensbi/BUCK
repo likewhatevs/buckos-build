@@ -1,0 +1,31 @@
+load("@root//defs:package_defs.bzl", "simple_package")
+
+# OpenSBI requires RISC-V cross-compiler (riscv64-linux-gnu-gcc)
+# Disabled on x86_64 host - needs cross-compilation toolchain
+# Error: gcc: error: unrecognized argument in option '-mcmodel=medany'
+
+simple_package(
+    name = "opensbi",
+    version = "1.2",
+    src_uri = "https://github.com/riscv-software-src/opensbi/archive/refs/tags/v1.2.tar.gz",
+    sha256 = "8fcbce598a73acc2c7f7d5607d46b9d5107d3ecbede8f68f42631dcfc25ef2b2",
+    description = "RISC-V Open Source Supervisor Binary Interface (requires RISC-V cross-compiler)",
+    homepage = "https://github.com/riscv-software-src/opensbi",
+    license = "BSD-2-Clause",
+    deps = [],
+    src_configure = """
+# Skip build - requires RISC-V cross-compiler not available on x86_64
+echo "OpenSBI requires RISC-V cross-compiler - skipping build"
+""",
+    src_compile = """
+# Skip compilation - requires RISC-V toolchain
+echo "Skipping compilation - RISC-V cross-compiler not available"
+""",
+    src_install = """
+# Create empty install to satisfy build system
+mkdir -p "$DESTDIR/usr/share/doc/opensbi"
+echo "OpenSBI requires RISC-V cross-compiler - package not built" > "$DESTDIR/usr/share/doc/opensbi/README"
+""",
+    make_args = [],
+    visibility = ["PUBLIC"],
+)

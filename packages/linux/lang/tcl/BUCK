@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# =============================================================================
+# Tcl - Tool Command Language
+# =============================================================================
+
+autotools_package(
+    name = "tcl",
+    version = "8.6.13",
+    src_uri = "https://prdownloads.sourceforge.net/tcl/tcl8.6.13-src.tar.gz",
+    sha256 = "43a1fae7412f61ff11de2cfd05d28cfc3a73762f354a417c62370a54e2caf066",
+    signature_required = False,
+    description = "Tool Command Language - scripting language",
+    homepage = "https://www.tcl.tk/",
+    license = "BSD",
+    # Tcl's configure is in the unix subdirectory
+    src_prepare = "true",
+    src_configure = """
+        cd unix
+        ./configure --prefix=/usr --mandir=/usr/share/man --enable-threads
+    """,
+    src_compile = """
+        cd unix
+        make -j$(nproc)
+    """,
+    src_install = """
+        cd unix
+        make DESTDIR="$DESTDIR" install install-private-headers
+        ln -sf tclsh8.6 "$DESTDIR/usr/bin/tclsh"
+    """,
+    visibility = ["PUBLIC"],
+)

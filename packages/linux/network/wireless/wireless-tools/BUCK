@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl","download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+make_package(
+    name = "wireless-tools",
+    version = "29",
+    src_uri = "https://hewlettpackard.github.io/wireless-tools/wireless_tools.29.tar.gz",
+    sha256 = "6fb80935fe208538131ce2c4178221bab1078a1656306bce8909c19887e2e5a1",
+    signature_required = False,
+
+    iuse = ["multicall"],
+    use_configure = {
+        "-multicall": "--disable-multicall",
+        "multicall": "--enable-multicall",
+    },
+    use_defaults = [],
+
+    make_args = [
+        "PREFIX=/usr",
+        "INSTALL_DIR=/usr/sbin",
+        "INSTALL_LIB=/usr/lib",
+        "INSTALL_INC=/usr/include",
+        "INSTALL_MAN=/usr/share/man",
+    ],
+
+    post_install = """
+make install PREFIX=/usr INSTALL_DIR="$DESTDIR/usr/sbin" INSTALL_LIB="$DESTDIR/usr/lib" INSTALL_INC="$DESTDIR/usr/include" INSTALL_MAN="$DESTDIR/usr/share/man"
+""",
+
+    deps = [
+    ],
+
+    description = "Tools for manipulating Linux Wireless Extensions (iwconfig, iwlist, etc.)",
+    homepage = "https://hewlettpackard.github.io/wireless-tools/",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

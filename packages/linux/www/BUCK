@@ -1,0 +1,53 @@
+# Web browsers package group
+
+filegroup(
+    name = "gui-browsers",
+    srcs = [
+        "www//firefox:firefox",
+        "www//chromium:chromium",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "text-browsers",
+    srcs = [
+        "www//lynx:lynx",
+        "www//w3m:w3m",
+        "www//links:links",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-browsers",
+    srcs = [
+        ":gui-browsers",
+        ":text-browsers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Web servers
+filegroup(
+    name = "web-servers",
+    srcs = [
+        "www//servers:all-web-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All www packages
+filegroup(
+    name = "all",
+    srcs = [
+        ":all-browsers",
+        ":web-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

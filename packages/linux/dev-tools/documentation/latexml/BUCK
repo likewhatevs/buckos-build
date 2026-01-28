@@ -1,0 +1,35 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+
+download_source(
+    name = "latexml-src",
+    src_uri = "https://github.com/brucemiller/LaTeXML/archive/refs/tags/v0.8.8.tar.gz",
+    sha256 = "8a26ee4b5cc37db0c5733131187e2821283004e77e9edb27f4f37b76c6077b52",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "latexml",
+    source = ":latexml-src",
+    version = "0.8.8",
+    description = "LaTeX to XML/HTML/MathML Converter",
+    homepage = "https://dlmf.nist.gov/LaTeXML/",
+    license = "CC0-1.0",
+    pre_configure = """
+        perl Makefile.PL PREFIX="${EPREFIX:-/usr}" INSTALLDIRS=vendor NOMKTEXLSR=1
+    """,
+    configure_args = [],
+    deps = [
+        "lang//perl:perl",
+        "lang//perl/xml:xml-libxml",
+        "lang//perl/xml:xml-libxslt",
+        "lang//perl/data:json-xs",
+        "lang//perl/network:lwp",
+        "lang//perl/data:archive-zip",
+        "lang//perl/data:image-size",
+        "lang//perl/data:text-unidecode",
+        "lang//perl/cli:file-which",
+        "lang//perl/parsers:parse-recdescent",
+        "lang//perl/network:uri",
+    ],
+    visibility = ["PUBLIC"],
+)

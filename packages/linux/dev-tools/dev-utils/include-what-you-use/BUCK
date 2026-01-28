@@ -1,0 +1,17 @@
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+cmake_package(
+    name = "include-what-you-use",
+    version = "0.21",
+    src_uri = "https://github.com/include-what-you-use/include-what-you-use/archive/refs/tags/0.21.tar.gz",
+    sha256 = "a472fe8587376d041585c72e5643200f8929899f787725f0ba9e5b3d3820d401",
+    signature_required = False,
+    description = "Tool for analyzing #includes in C and C++ source files",
+    homepage = "https://include-what-you-use.org/",
+    license = "LLVM",
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    visibility = ["PUBLIC"],
+)

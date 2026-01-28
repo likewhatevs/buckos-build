@@ -1,0 +1,35 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "oidn",
+    version = "2.2.2",
+    iuse = [
+        "apps",
+        "cuda",
+        "hip",
+        "openimageio",
+    ],
+    use_cmake = {
+        "-apps": "-DENABLE_APPS=OFF",
+        "-cuda": "-DWITH_CUDA=OFF",
+        "-hip": "-DENABLE_HIP=OFF",
+        "-openimageio": "-DENABLE_OPENIMAGEIO=OFF",
+        "apps": "-DENABLE_APPS=ON",
+        "cuda": "-DWITH_CUDA=ON",
+        "hip": "-DENABLE_HIP=ON",
+        "openimageio": "-DENABLE_OPENIMAGEIO=ON",
+    },
+    src_uri = "https://github.com/OpenImageDenoise/oidn/releases/download/v2.2.2/oidn-2.2.2.src.tar.gz",
+    sha256 = "d26b75fa216165086f65bf48c80648290f2cfed7d3c4bfc1e86c247b46c96b7e",
+    cmake_args = [
+        "-DOIDN_DEVICE_CPU=ON",
+        "-DOIDN_DEVICE_CUDA=OFF",
+        "-DOIDN_DEVICE_HIP=OFF",
+        "-DOIDN_DEVICE_SYCL=OFF",
+        "-DOIDN_APPS=OFF",
+        "-DBUILD_SHARED_LIBS=ON",
+    ],
+    deps = [
+        "dev-libs//misc/tbb:tbb",
+    ],
+)

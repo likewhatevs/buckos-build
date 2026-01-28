@@ -1,0 +1,39 @@
+# Multimedia Libraries aggregator
+
+filegroup(
+    name = "sdl2-core",
+    srcs = [
+        "system//libs/multimedia/sdl2:sdl2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "sdl2-all",
+    srcs = [
+        "system//libs/multimedia/sdl2:sdl2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "audio-frameworks",
+    srcs = [
+        "system//libs/multimedia/openal-soft:openal-soft",
+        "system//libs/multimedia/portaudio:portaudio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all",
+    srcs = [
+        ":sdl2-all",
+        ":audio-frameworks",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

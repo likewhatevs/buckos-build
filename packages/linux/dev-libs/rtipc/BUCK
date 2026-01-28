@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "rtipc",
+    version = "1.0.1",
+    src_uri = "https://mirror.buckos.org/r/rtipc-1.0.1.tar.gz",
+    sha256 = "94dc35aff192ca82da2b8f160421be92b573423f364e1e5af952d8b268c61512",
+    cmake_args = [
+        "-DDEBUG=OFF",
+    ],
+    deps = [
+        "dev-libs//serialization/libyaml:libyaml",
+        "dev-libs//crypto/mhash:mhash",
+    ],
+    maintainers = ["buckos"],
+)

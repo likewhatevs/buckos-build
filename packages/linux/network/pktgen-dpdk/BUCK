@@ -1,0 +1,23 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+meson_package(
+    name = "pktgen-dpdk",
+    version = "25.05.3",
+    src_uri = "https://github.com/pktgen/pktgen-dpdk/archive/refs/tags/pktgen-25.05.3.tar.gz",
+    sha256 = "2b0f49db46f71605bcdebcd5aaac047689e3b1960e10418994f37ccf327672da",
+    meson_args = [
+        "-Ddefault_library=static",
+        "-Denable_lua=true",
+    ],
+    deps = [
+        "network//libs/dpdk:dpdk",
+        "system//libs/numactl:numactl",
+        "network//libpcap:libpcap",
+        "dev-libs//libbsd:libbsd",
+        "system//libs/crypto/openssl:openssl",
+        "dev-libs//zlib:zlib",
+        "lang//lua:lua",
+        "dev-libs//json/json-c:json-c",
+        "system//libs/libelf:libelf",
+    ],
+)

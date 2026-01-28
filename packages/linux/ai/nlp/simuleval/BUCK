@@ -1,0 +1,22 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "simuleval",
+    version = "1.1.4",
+    src_uri = "https://github.com/facebookresearch/SimulEval/archive/refs/tags/v1.1.4.tar.gz",
+    sha256 = "e12c90e7d5f80eee751a0a543ca1649339c90bc61d709875fc0e750fcd37a072",
+    deps = [
+        "dev-tools//testing/pytest:pytest",
+        "dev-tools//testing/pytest-cov:pytest-cov",
+        "ai//nlp/sacrebleu:sacrebleu",
+        "network//http/tornado:tornado",
+        "audio//libraries/soundfile:soundfile",
+        "dev-libs//python/pandas:pandas",
+        "network//http/requests:requests",
+        "dev-libs//python/textgrid:textgrid",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/pyyaml:pyyaml",
+        "dev-libs//python/bitarray:bitarray",
+        "dev-libs//python/pydub:pydub",
+    ],
+)

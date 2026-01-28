@@ -1,0 +1,129 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# PostgreSQL - Advanced open source relational database
+#
+# USE flags:
+#   ssl       - Enable SSL/TLS support with OpenSSL
+#   readline  - Enable command-line editing in psql
+#   zlib      - Enable compression support
+#   xml       - Enable XML support
+#   python    - Enable PL/Python stored procedures
+#   perl      - Enable PL/Perl stored procedures
+#   tcl       - Enable PL/Tcl stored procedures
+#   uuid      - Enable UUID support
+#   ldap      - Enable LDAP authentication
+#   pam       - Enable PAM authentication
+#   systemd   - Enable systemd integration
+
+autotools_package(
+    name = "postgresql",
+    version = "16.4",
+    src_uri = "https://ftp.postgresql.org/pub/source/v16.4/postgresql-16.4.tar.bz2",
+    sha256 = "971766d645aa73e93b9ef4e3be44201b4f45b5477095b049125403f9f3386d6f",
+    description = "Advanced open source relational database",
+    homepage = "https://www.postgresql.org/",
+    license = "PostgreSQL",
+    iuse = [
+        "debug",
+        "icu",
+        "kerberos",
+        "ldap",
+        "llvm",
+        "lz4",
+        "nls",
+        "numa",
+        "oauth",
+        "pam",
+        "perl",
+        "python",
+        "readline",
+        "selinux",
+        "ssl",
+        "static-libs",
+        "systemd",
+        "tcl",
+        "uring",
+        "uuid",
+        "xml",
+        "zlib",
+        "zstd",
+    ],
+    use_defaults = ["ssl", "readline", "zlib", "uuid"],
+    deps = [
+        "core//zlib:zlib",
+        "core//readline:readline",
+        "dev-libs//text/icu:icu",
+    ],
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "xml": ["dev-libs//libxml2:libxml2"],
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc/postgresql",
+        "--localstatedir=/var",
+        "--enable-thread-safety",
+        "--with-system-tzdata=/usr/share/zoneinfo",
+        "--with-icu",
+    ],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-icu": "--disable-icu",
+        "-kerberos": "--disable-kerberos",
+        "-ldap": "--without-ldap",
+        "-llvm": "--disable-llvm",
+        "-lz4": "--without-lz4",
+        "-nls": "--disable-nls",
+        "-numa": "--disable-numa",
+        "-oauth": "--disable-oauth",
+        "-pam": "--without-pam",
+        "-perl": "--without-perl",
+        "-python": "--without-python",
+        "-readline": "--without-readline",
+        "-selinux": "--disable-selinux",
+        "-ssl": "--without-ssl",
+        "-static-libs": "--disable-static",
+        "-systemd": "--without-systemd",
+        "-tcl": "--without-tcl",
+        "-uring": "--disable-uring",
+        "-uuid": "--without-uuid",
+        "-xml": "--without-libxml",
+        "-zlib": "--without-zlib",
+        "-zstd": "--without-zstd",
+        "debug": "--enable-debug",
+        "icu": "--enable-icu",
+        "kerberos": "--enable-kerberos",
+        "ldap": "--with-ldap",
+        "llvm": "--enable-llvm",
+        "lz4": "--with-lz4",
+        "nls": "--enable-nls",
+        "numa": "--enable-numa",
+        "oauth": "--enable-oauth",
+        "pam": "--with-pam",
+        "perl": "--with-perl",
+        "python": "--with-python",
+        "readline": "--with-readline",
+        "selinux": "--enable-selinux",
+        "ssl": "--with-ssl=openssl",
+        "static-libs": "--enable-static",
+        "systemd": "--with-systemd",
+        "tcl": "--with-tcl",
+        "uring": "--enable-uring",
+        "uuid": "--with-uuid=e2fs",
+        "xml": "--with-libxml",
+        "zlib": "--with-zlib",
+        "zstd": "--with-zstd",
+    },
+    post_install = """
+# Create data directory
+mkdir -p "$DESTDIR/var/lib/postgresql/data"
+chmod 700 "$DESTDIR/var/lib/postgresql/data"
+
+# Create log directory
+mkdir -p "$DESTDIR/var/log/postgresql"
+
+# Create run directory
+mkdir -p "$DESTDIR/run/postgresql"
+""",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,60 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "dia-src",
+    src_uri = "https://github.com/GNOME/dia/archive/refs/tags/DIA_0_97_2.tar.gz",
+    sha256 = "13437d52f2c5cfdae7ecde8bd5ed0a53a388b0331698236d0ec63453b8a13016",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "dia",
+    source = ":dia-src",
+    iuse = [
+        "X",
+        "pdf",
+        "python",
+        "wmf",
+        "xslt",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-pdf": "--disable-pdf",
+        "-python": "--disable-python",
+        "-wmf": "--disable-wmf",
+        "-xslt": "--disable-xslt",
+        "X": "--with-x",
+        "pdf": "--enable-pdf",
+        "python": "--enable-python",
+        "wmf": "--enable-wmf",
+        "xslt": "--enable-xslt",
+    },
+    version = "0.97.2",
+    description = "Diagram creation program for GNOME",
+    homepage = "https://wiki.gnome.org/Apps/Dia",
+    license = "GPL-2.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+meson setup .. \
+    --prefix=/usr \
+    -Dbuildtype=release \
+    -Ddoc=false
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT meson install
+""",
+    deps = [
+        "desktop//gtk:gtk3",
+        "system//libs/data/libxml2:libxml2",
+        "system//libs/graphics/cairo:cairo",
+        "fonts//libraries/pango:pango",
+        # "core//graphene:graphene",  # TODO: not packaged yet
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)

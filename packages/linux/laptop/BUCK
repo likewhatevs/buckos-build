@@ -1,0 +1,163 @@
+# Laptop packages - power management, hardware control, wireless, and utilities
+# Comprehensive toolset for laptop-specific functionality
+
+# Power management tools
+filegroup(
+    name = "power",
+    srcs = [
+        "laptop//power:all-power",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Brightness control
+filegroup(
+    name = "brightness",
+    srcs = [
+        "laptop//brightness:all-brightness",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Hardware monitoring
+filegroup(
+    name = "monitoring",
+    srcs = [
+        "laptop//monitoring:all-monitoring",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Input devices (touchpad, stylus)
+filegroup(
+    name = "input",
+    srcs = [
+        "laptop//input:all-input",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Wireless (WiFi, Bluetooth)
+filegroup(
+    name = "wireless",
+    srcs = [
+        "laptop//wireless:all-wireless",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Battery utilities
+filegroup(
+    name = "battery",
+    srcs = [
+        "laptop//battery:all-battery",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential laptop packages - minimal set for basic functionality
+filegroup(
+    name = "essential",
+    srcs = [
+        "laptop//power:power-essential",
+        "laptop//brightness:brightness-essential",
+        "laptop//monitoring:monitoring-essential",
+        "laptop//input:input-essential",
+        "laptop//wireless:wireless-essential",
+        "laptop//battery:battery-essential",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Console-only laptop packages (no GUI)
+filegroup(
+    name = "console",
+    srcs = [
+        "laptop//power/tlp:tlp",
+        "laptop//power/acpid:acpid",
+        "laptop//power/cpupower:cpupower",
+        "laptop//brightness/brightnessctl:brightnessctl",
+        "laptop//brightness/light:light",
+        "laptop//monitoring/lm-sensors:lm-sensors",
+        "laptop//monitoring/acpi:acpi",
+        "laptop//monitoring/powertop:powertop",
+        "laptop//input/libevdev:libevdev",
+        "laptop//input/libinput:libinput",
+        "laptop//wireless/iwd:iwd",
+        "laptop//battery/upower:upower",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop/GUI laptop packages
+filegroup(
+    name = "desktop",
+    srcs = [
+        ":essential",
+        "laptop//wireless/blueman:blueman",
+        "laptop//brightness/ddcutil:ddcutil",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# ThinkPad-specific packages
+filegroup(
+    name = "thinkpad",
+    srcs = [
+        ":essential",
+        "laptop//battery/tp_smapi:tp_smapi",
+        "laptop//battery/acpi_call:acpi_call",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Intel-specific packages
+filegroup(
+    name = "intel",
+    srcs = [
+        ":essential",
+        "laptop//power/thermald:thermald",
+        "laptop//monitoring/i7z:i7z",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Power-efficient profile for maximum battery life
+filegroup(
+    name = "power-efficient",
+    srcs = [
+        "laptop//power/tlp:tlp",
+        "laptop//power/auto-cpufreq:auto-cpufreq",
+        "laptop//power/thermald:thermald",
+        "laptop//monitoring/powertop:powertop",
+        "laptop//battery/laptop-mode-tools:laptop-mode-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All laptop packages
+filegroup(
+    name = "all",
+    srcs = [
+        ":power",
+        ":brightness",
+        ":monitoring",
+        ":input",
+        ":wireless",
+        ":battery",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,63 @@
+# =============================================================================
+# OpenCL - Open Computing Language support
+# =============================================================================
+#
+# OpenCL headers and ICD loader for GPU compute across vendors.
+# Provides vendor-neutral GPU computing interface.
+#
+# =============================================================================
+
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# OpenCL headers
+cmake_package(
+    name = "opencl-headers",
+    version = "2024.05.08",
+    src_uri = "https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2024.05.08.tar.gz",
+    sha256 = "3c3dd236d35f4960028f4f58ce8d963fb63f3d50251d1e9854b76f1caab9a309",
+    signature_required = False,
+    description = "OpenCL API headers",
+    homepage = "https://www.khronos.org/opencl/",
+    license = "Apache-2.0",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# OpenCL ICD Loader
+cmake_package(
+    name = "opencl-icd-loader",
+    version = "2024.05.08",
+    src_uri = "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/refs/tags/v2024.05.08.tar.gz",
+    sha256 = "eb2c9fde125ffc58f418d62ad83131ba686cccedcb390cc7e6bb81cc5ef2bd4f",
+    signature_required = False,
+    description = "OpenCL Installable Client Driver (ICD) Loader",
+    homepage = "https://www.khronos.org/opencl/",
+    license = "Apache-2.0",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_INSTALL_LIBDIR=lib64",
+        "-DOPENCL_ICD_LOADER_BUILD_TESTING=OFF",
+    ],
+    env = {
+        "CFLAGS": "-O2 -march=x86-64 -pipe",
+        "LDFLAGS": "-Wl,-O1,--as-needed",
+    },
+    deps = [
+        ":opencl-headers",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Combined OpenCL package
+filegroup(
+    name = "opencl",
+    srcs = [
+        ":opencl-headers",
+        ":opencl-icd-loader",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "binary_package", "download_source")
+
+download_source(
+    name = "bcdec-src",
+    src_uri = "https://github.com/iOrange/bcdec/archive/refs/heads/main.tar.gz",
+    sha256 = "37563d7e0daead648bd6360db86226c849fc66e48ad833a565294cbcb5080132",
+)
+
+binary_package(
+    name = "bcdec",
+    srcs = [":bcdec-src"],
+    version = "0.0.0",
+    install_script = """
+# GitHub archive extracts to bcdec-main/ subdirectory
+cd "$SRCS"
+if [ -d bcdec-main ]; then
+    cd bcdec-main
+fi
+mkdir -p "$OUT/usr/include/bcdec"
+cp bcdec.h "$OUT/usr/include/bcdec/"
+""",
+    description = "Header-only C library for BC texture decompression",
+    homepage = "https://github.com/iOrange/bcdec",
+    license = "MIT",
+    visibility = ["PUBLIC"],
+)

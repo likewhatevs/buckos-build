@@ -1,0 +1,58 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Hyprland - Dynamic tiling Wayland compositor
+# =============================================================================
+
+download_source(
+    name = "hyprland-src",
+    src_uri = "https://github.com/hyprwm/Hyprland/releases/download/v0.36.0/source-v0.36.0.tar.gz",
+    sha256 = "8e44c379794663accf928458b5e363ed248d56fc5f267e6b3759146fdf1229bb",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "hyprland",
+    source = ":hyprland-src",
+    iuse = ["X", "qtutils", "systemd"],
+    use_configure = {
+        "-X": "--without-x",
+        "-qtutils": "--disable-qtutils",
+        "-systemd": "--disable-systemd",
+        "X": "--with-x",
+        "qtutils": "--enable-qtutils",
+        "systemd": "--enable-systemd",
+    },
+    version = "0.36.0",
+    description = "Hyprland - Dynamic tiling Wayland compositor",
+    homepage = "https://hyprland.org/",
+    license = "BSD-3-Clause",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr \\
+    -DNO_XWAYLAND=OFF \\
+    -DNO_SYSTEMD=ON
+""",
+    deps = [
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libinput:libinput",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Hyprland meta-package
+filegroup(
+    name = "hyprland-desktop",
+    srcs = [
+        ":hyprland",
+        "graphics//rendering/wayland:wayland",
+        "desktop//mesa:mesa",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

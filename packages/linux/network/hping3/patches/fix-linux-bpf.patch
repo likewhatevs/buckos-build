@@ -1,0 +1,13 @@
+--- a/libpcap_stuff.c
++++ b/libpcap_stuff.c
+@@ -16,7 +16,9 @@
+ #include <string.h>
+ #include <stdlib.h>
+ #include <sys/ioctl.h>
++#if (!defined OSTYPE_LINUX) && (!defined __sun__)
+ #include <net/bpf.h>
++#endif
+ #include <pcap.h>
+
+ #include "globals.h"
+

@@ -1,0 +1,29 @@
+load("@root//defs:package_defs.bzl","download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# hackbench - Scheduler benchmark and stress test
+#
+# USE flags: (minimal flags for this benchmark)
+
+make_package(
+    name = "hackbench",
+    version = "2.6",
+    src_uri = "https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git/snapshot/rt-tests-2.6.tar.gz",
+    sha256 = "6a9449c11a9ccb37e6c86082bf904337dda928fdcd69f6bd4a4c6567e071ae6d",
+    signature_required = False,
+    description = "Scheduler benchmark and stress test - measures process scheduling",
+    homepage = "https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git",
+    license = "GPL-2.0",
+    iuse = [],
+    use_defaults = [],
+    deps = [],
+    src_configure = """
+# rt-tests uses make directly
+true
+""",
+    src_install = """
+mkdir -p "$DESTDIR/usr/bin"
+cp hackbench "$DESTDIR/usr/bin/" 2>/dev/null || true
+""",
+    visibility = ["PUBLIC"],
+)

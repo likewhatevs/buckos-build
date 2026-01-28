@@ -1,0 +1,44 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+meson_package(
+    name = "aravis",
+    version = "0.8.30",
+    iuse = [
+        "fast-heartbeat",
+        "gstreamer",
+        "introspection",
+        "packet-socket",
+        "usb",
+        "viewer",
+    ],
+    use_configure = {
+        "-fast-heartbeat": "--disable-fast-heartbeat",
+        "-gstreamer": "--disable-gstreamer",
+        "-introspection": "--disable-introspection",
+        "-packet-socket": "--disable-packet-socket",
+        "-usb": "--disable-usb",
+        "-viewer": "--disable-viewer",
+        "fast-heartbeat": "--enable-fast-heartbeat",
+        "gstreamer": "--enable-gstreamer",
+        "introspection": "--enable-introspection",
+        "packet-socket": "--enable-packet-socket",
+        "usb": "--enable-usb",
+        "viewer": "--enable-viewer",
+    },
+    src_uri = "https://github.com/AravisProject/aravis/releases/download/{version}/aravis-{version}.tar.xz",
+    sha256 = "40380f06fa04524a7875bd456e5a5ea78b2c058fa84b5598bc6e0642fcef00b0",
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/libusb:libusb",
+        "system//libs/data/libxml2:libxml2",
+        "core//zlib:zlib",
+    ],
+    meson_args = [
+        "-Dviewer=disabled",
+        "-Dgst-plugin=disabled",
+        "-Ddocumentation=disabled",
+        "-Dintrospection=disabled",
+        "-Dusb=enabled",
+        "-Dpacket-socket=enabled",
+    ],
+)

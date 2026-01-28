@@ -1,0 +1,19 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "tabrep",
+    version = "0.1.0",
+    src_uri = "https://github.com/jacobyhsi/tabrep/archive/a605a0bfceac7db8a71c893c79e133525976ad7d.tar.gz",
+    sha256 = "31c8b7a8e53d224760ba1a0f39f21fcdab40de27cae0ae11b3c2eff9da060664",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/scikit-learn:scikit-learn",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/networkx:networkx",
+        "dev-libs//python/numba:numba",
+        "dev-libs//python/pyarrow:pyarrow",
+    ],
+)

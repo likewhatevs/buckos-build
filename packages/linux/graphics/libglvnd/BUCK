@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+meson_package(
+    name = "libglvnd",
+    version = "1.4.0",
+    iuse = ["X"],
+    use_configure = {
+        "-X": "--without-x",
+        "X": "--with-x",
+    },
+    src_uri = "https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.4.0/libglvnd-v1.4.0.tar.gz",
+    sha256 = "33b8b993adf47a21bc1c46bcf970927edeb9884390d5b09b1aed051d600c0b2f",
+    meson_args = [
+        "-Dasm=enabled",
+        "-Dx11=enabled",
+        "-Dglx=enabled",
+        "-Degl=true",
+        "-Dgles1=true",
+        "-Dgles2=true",
+    ],
+    deps = [
+        "graphics//xorg/libs/libx11:libx11",
+        "graphics//xorg/libs/libxext:libxext",
+        "graphics//xorg/protos/glproto:glproto",
+    ],
+)

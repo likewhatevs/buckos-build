@@ -1,0 +1,40 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "dnsmasq-src",
+    src_uri = "https://thekelleys.org.uk/dnsmasq/dnsmasq-2.90.tar.xz",
+    sha256 = "8e50309bd837bfec9649a812e066c09b6988b73d749b7d293c06c57d46a109e4",
+    signature_sha256 = "2e3f407edb90caafecb64096d6f4cdba6a995dbbd014af5ad153ac83cace5da8",
+    signature_required=False,
+)
+
+binary_package(
+    name = "dnsmasq",
+    srcs = [":dnsmasq-src"],
+    version = "2.90",
+    description = "Lightweight DNS forwarder and DHCP server",
+    homepage = "https://thekelleys.org.uk/dnsmasq/doc.html",
+    license = "GPL-2.0-or-later",
+    install_script = """
+cd "$SRCS"
+
+COPTS="-DHAVE_DNSSEC -DHAVE_LIBIDN2 -DHAVE_IPV6"
+
+make -j$(nproc) PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var COPTS="$COPTS"
+
+make install PREFIX="$OUT/usr" SYSCONFDIR="$OUT/etc" LOCALSTATEDIR="$OUT/var" DESTDIR=""
+
+mkdir -p "$OUT/etc"
+mkdir -p "$OUT/usr/share/dnsmasq"
+install -Dm644 dnsmasq.conf.example "$OUT/etc/dnsmasq.conf"
+if [ -f trust-anchors.conf ]; then
+    install -Dm644 trust-anchors.conf "$OUT/usr/share/dnsmasq/trust-anchors.conf"
+fi
+""",
+    deps = [
+        "network//dns/libraries/libidn2:libidn2",
+        "system//libs/crypto/nettle:nettle",
+    ],
+    visibility = ["PUBLIC"],
+)

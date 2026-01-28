@@ -1,0 +1,40 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# unzip - Info-ZIP extraction utility for .zip archives
+
+download_source(
+    name = "unzip-src",
+    src_uri = "https://downloads.sourceforge.net/infozip/unzip60.tar.gz",
+    sha256 = "036d96991646d0449ed0aa952e4fbe21b476ce994abc276e49d30e686708bd37",
+    signature_required = False,
+)
+
+# unzip uses a Makefile, not autotools
+# Old C code has format string issues that trigger -Werror=format-security
+autotools_package(
+    name = "unzip",
+    source = ":unzip-src",
+    iuse = ["bzip2", "natspec", "unicode"],
+    use_configure = {
+        "-bzip2": "--without-bzip2",
+        "-natspec": "--disable-natspec",
+        "-unicode": "--disable-unicode",
+        "bzip2": "--with-bzip2",
+        "natspec": "--enable-natspec",
+        "unicode": "--enable-unicode",
+    },
+    version = "6.0",
+    description = "Info-ZIP extraction utility for .zip archives",
+    homepage = "https://infozip.sourceforge.net/UnZip.html",
+    license = "Info-ZIP",
+    env = {"CFLAGS": "-O2 -Wno-format-security -Wno-implicit-function-declaration -Wno-old-style-definition -Wno-implicit-int"},
+    src_configure = "true",
+    src_compile = """
+make -f unix/Makefile -j$(nproc) generic CC=gcc LOCAL_UNZIP="$CFLAGS"
+""",
+    src_install = """
+make -f unix/Makefile prefix="$DESTDIR/usr" install
+""",
+    visibility = ["PUBLIC"],
+)

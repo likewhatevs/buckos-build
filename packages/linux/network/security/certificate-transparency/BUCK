@@ -1,0 +1,11 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# certificate-transparency - DISABLED
+# Repository archived by owner on Aug 2, 2023. No longer maintained.
+# Use certificate-transparency-go instead for active development.
+
+filegroup(
+    name = "certificate-transparency",
+    srcs = [],
+    visibility = ["PUBLIC"],
+)

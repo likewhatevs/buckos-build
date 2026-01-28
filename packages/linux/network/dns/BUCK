@@ -1,0 +1,202 @@
+# =============================================================================
+# DNS Packages - Filegroup Organization
+# =============================================================================
+# Individual package definitions are in their respective subdirectories.
+# This file provides convenient filegroups for organizing DNS packages by category.
+
+# =============================================================================
+# DNS Libraries - Core DNS programming libraries
+# =============================================================================
+
+filegroup(
+    name = "dns-libraries",
+    srcs = [
+        "network//dns/libraries/c-ares:c-ares",
+        "network//dns/libraries/ldns:ldns",
+        "network//dns/libraries/getdns:getdns",
+        "network//dns/libraries/libidn:libidn",
+        "network//dns/libraries/libidn2:libidn2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Authoritative DNS Servers - Primary DNS servers
+# =============================================================================
+
+filegroup(
+    name = "authoritative-servers",
+    srcs = [
+        "network//dns/servers/bind:bind",
+        "network//dns/servers/powerdns:powerdns",
+        "network//dns/servers/nsd:nsd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Recursive DNS Resolvers - Caching and recursive resolvers
+# =============================================================================
+
+filegroup(
+    name = "recursive-resolvers",
+    srcs = [
+        "network//dns/servers/pdns-recursor:pdns-recursor",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Lightweight DNS Servers - Small footprint DNS servers
+# =============================================================================
+
+filegroup(
+    name = "lightweight-servers",
+    srcs = [
+        "network//dns/servers/dnsmasq:dnsmasq",
+        "network//dns/servers/coredns:coredns",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All DNS Servers - Complete server collection
+# =============================================================================
+
+filegroup(
+    name = "dns-servers",
+    srcs = [
+        "network//dns/servers/bind:bind",
+        "network//dns/servers/dnsmasq:dnsmasq",
+        "network//dns/servers/powerdns:powerdns",
+        "network//dns/servers/coredns:coredns",
+        "network//dns/servers/nsd:nsd",
+        "network//dns/servers/pdns-recursor:pdns-recursor",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# DNS Query Tools - Traditional DNS lookup utilities
+# =============================================================================
+
+filegroup(
+    name = "dns-query-tools",
+    srcs = [
+        "network//dns/tools/bind-tools:bind-tools",
+        "network//dns/tools/ldns-utils:ldns-utils",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Modern DNS Clients - Modern CLI DNS lookup tools
+# =============================================================================
+
+filegroup(
+    name = "modern-dns-clients",
+    srcs = [
+        "network//dns/tools/doggo:doggo",
+        "network//dns/tools/dog:dog",
+        "network//dns/tools/q:q",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# DNS Privacy Tools - Encrypted DNS proxies and resolvers
+# =============================================================================
+
+filegroup(
+    name = "dns-privacy-tools",
+    srcs = [
+        "network//dns/tools/dnscrypt-proxy:dnscrypt-proxy",
+        "network//dns/tools/stubby:stubby",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All DNS Tools - Complete tools collection
+# =============================================================================
+
+filegroup(
+    name = "dns-tools",
+    srcs = [
+        "network//dns/tools/bind-tools:bind-tools",
+        "network//dns/tools/ldns-utils:ldns-utils",
+        "network//dns/tools/doggo:doggo",
+        "network//dns/tools/dnscrypt-proxy:dnscrypt-proxy",
+        "network//dns/tools/stubby:stubby",
+        "network//dns/tools/dog:dog",
+        "network//dns/tools/q:q",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Essential DNS - Minimal DNS setup
+# =============================================================================
+
+filegroup(
+    name = "essential-dns",
+    srcs = [
+        "network//dns/servers/dnsmasq:dnsmasq",
+        "network//dns/tools/bind-tools:bind-tools",
+        "network//dns/libraries/c-ares:c-ares",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Enterprise DNS - Production-ready DNS servers
+# =============================================================================
+
+filegroup(
+    name = "enterprise-dns",
+    srcs = [
+        "network//dns/servers/bind:bind",
+        "network//dns/servers/powerdns:powerdns",
+        "network//dns/servers/nsd:nsd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Cloud DNS - Cloud-native and modern DNS solutions
+# =============================================================================
+
+filegroup(
+    name = "cloud-dns",
+    srcs = [
+        "network//dns/servers/coredns:coredns",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All DNS Packages - Complete collection
+# =============================================================================
+
+filegroup(
+    name = "all-dns",
+    srcs = [
+        ":dns-servers",
+        ":dns-tools",
+        ":dns-libraries",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

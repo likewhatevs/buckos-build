@@ -1,0 +1,36 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "expat-src",
+    src_uri = "https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.xz",
+    sha256 = "274db254a6979bde5aad404763a704956940e465843f2a9bd9ed7af22e2c0efc",
+    signature_sha256 = "96bc5f146eb81a4d1a12b841788a88456b6a287c1143eb29ac7cf5c8f0c6a5b5",
+    signature_required = False,
+)
+
+# expat - official release tarball includes pre-generated configure
+autotools_package(
+    name = "expat",
+    # No autoreconf needed - tarball has pre-generated configure
+    bdepend = [],
+    src_prepare = "",
+    source = ":expat-src",
+    iuse = ["examples", "static-libs", "unicode"],
+    use_configure = {
+        "-examples": "--disable-examples",
+        "-static-libs": "--disable-static",
+        "-unicode": "--disable-unicode",
+        "examples": "--enable-examples",
+        "static-libs": "--enable-static",
+        "unicode": "--enable-unicode",
+    },
+    version = "2.6.3",
+    description = "Stream-oriented XML parser library",
+    homepage = "https://libexpat.github.io/",
+    license = "MIT",
+    configure_args = [
+        "--disable-static",
+    ],
+    visibility = ["PUBLIC"],
+)

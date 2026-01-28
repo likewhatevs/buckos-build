@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "diff-so-fancy-src",
+    src_uri = "https://github.com/so-fancy/diff-so-fancy/archive/refs/tags/v1.4.4.tar.gz",
+    sha256 = "3eac2cfb3b1de9d14b6a712941985d6b240b7f3726c94a5e337317c7161e869d",
+    signature_required = False,
+)
+
+binary_package(
+    name = "diff-so-fancy",
+    srcs = [":diff-so-fancy-src"],
+    version = "1.4.4",
+    description = "Good-lookin' diffs with diff-highlight and more",
+    homepage = "https://github.com/so-fancy/diff-so-fancy",
+    license = "MIT",
+    install_script = """
+        cd $SRCS
+        mkdir -p "$OUT/usr/bin" "$OUT/usr/lib/diff-so-fancy"
+        cp -r lib/* "$OUT/usr/lib/diff-so-fancy/"
+        cp diff-so-fancy "$OUT/usr/bin/"
+        chmod +x "$OUT/usr/bin/diff-so-fancy"
+    """,
+    visibility = ["PUBLIC"],
+)

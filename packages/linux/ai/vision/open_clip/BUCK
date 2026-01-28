@@ -1,0 +1,18 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "open_clip",
+    version = "2.7.0",
+    src_uri = "https://github.com/mlfoundations/open_clip/archive/refs/tags/v2.7.0.tar.gz",
+    sha256 = "bd2ed777f0a058a37b54c08d2d54084dc55c113bcebeac10cbf7c6ce5d86688a",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "dev-libs//python/ftfy:ftfy",
+        "dev-libs//python/regex:regex",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/huggingface-hub:huggingface-hub",
+        "dev-libs//python/sentencepiece:sentencepiece",
+        "dev-libs//serialization/protobuf:protobuf",
+    ],
+    maintainers = ["buckos"],
+)

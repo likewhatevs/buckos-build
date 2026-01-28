@@ -1,0 +1,31 @@
+# =============================================================================
+# Network Filesystem Tools
+# =============================================================================
+# Utilities for network-based filesystems including NFS, CIFS/SMB, SSHFS,
+# and distributed filesystems.
+
+# Filegroup for all network filesystem tools
+filegroup(
+    name = "network",
+    srcs = [
+        "system//filesystem/network/nfs-utils:nfs-utils",
+        "system//filesystem/network/cifs-utils:cifs-utils",
+        "system//filesystem/network/sshfs:sshfs",
+        "system//filesystem/network/davfs2:davfs2",
+        "system//filesystem/network/curlftpfs:curlftpfs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Common network filesystem tools
+filegroup(
+    name = "common",
+    srcs = [
+        "system//filesystem/network/nfs-utils:nfs-utils",
+        "system//filesystem/network/cifs-utils:cifs-utils",
+        "system//filesystem/network/sshfs:sshfs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

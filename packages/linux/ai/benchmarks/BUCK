@@ -1,0 +1,11 @@
+filegroup(
+    name = "benchmarks",
+    srcs = [
+        "ai//benchmarks/appworld:appworld",
+        "ai//benchmarks/chakra:chakra",
+        "ai//benchmarks/mlcommons:mlcommons-loadgen",
+        "ai//benchmarks/mlcommons:mlcommons-logging",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

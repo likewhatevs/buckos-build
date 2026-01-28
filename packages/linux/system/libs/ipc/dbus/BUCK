@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "dbus",
+    version = "1.14.10",
+    src_uri = "https://dbus.freedesktop.org/releases/dbus/dbus-1.14.10.tar.xz",
+    sha256 = "ba1f21d2bd9d339da2d4aa8780c09df32fea87998b73da24f49ab9df1e36a50f",
+    signature_sha256 = "5f292cd0603c3d736026ed3f4d1c1937847981669c1f0a389083518f013e1081",
+    signature_required = False,
+    description = "Message bus system",
+    homepage = "https://www.freedesktop.org/wiki/Software/dbus/",
+    license = "AFL-2.1",
+    iuse = ["systemd", "doc", "static-libs"],
+    use_defaults = [],
+    use_configure = {
+        "systemd": "--enable-systemd",
+        "-systemd": "--disable-systemd",
+        "doc": "--enable-doxygen-docs --enable-xml-docs",
+        "-doc": "--disable-doxygen-docs --disable-xml-docs",
+        "static-libs": "--enable-static",
+        "-static-libs": "--disable-static",
+    },
+    use_deps = {
+        "systemd": ["system//init/systemd:systemd"],
+    },
+    configure_args = [
+        "--with-system-socket=/run/dbus/system_bus_socket",
+        "--with-console-auth-dir=/run/console",
+        "--localstatedir=/var",
+        "--runstatedir=/run",
+    ],
+    deps = [
+        "system//libs/data/expat:expat",
+    ],
+    visibility = ["PUBLIC"],
+)

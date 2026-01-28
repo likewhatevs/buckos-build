@@ -1,0 +1,39 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "ocproxy",
+    version = "1.60",
+    src_uri = "https://github.com/cernekee/ocproxy/archive/refs/tags/v1.60.tar.gz",
+    sha256 = "a7367647f07df33869e2f79da66b6f104f6495ae806b12a8b8d9ca82fb7899ac",
+    signature_required = False,
+
+    iuse = [],
+    use_defaults = [],
+
+    src_prepare = """
+# GitHub archive doesn't include pre-generated configure script
+autoreconf -fiv
+""",
+
+    use_configure = {},
+
+    configure_args = [
+        "--prefix=/usr",
+    ],
+
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+    ],
+
+    deps = [
+        "system//libs/utility/libevent:libevent",
+    ],
+
+    description = "User-level SOCKS and port-forwarding proxy for OpenConnect",
+    homepage = "https://github.com/cernekee/ocproxy",
+    license = "BSD-3-Clause",
+    visibility = ["PUBLIC"],
+)

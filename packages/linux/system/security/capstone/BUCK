@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# capstone - Package from third-party
+
+cmake_package(
+    name = "capstone",
+    version = "5.0.6",
+    iuse = ["python", "static-libs"],
+    use_cmake = {
+        "-python": "-DENABLE_PYTHON=OFF",
+        "-static-libs": "-DBUILD_STATIC_LIBS=OFF",
+        "python": "-DENABLE_PYTHON=ON",
+        "static-libs": "-DBUILD_STATIC_LIBS=ON",
+    },
+    src_uri = "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0.6.tar.gz",
+    sha256 = "240ebc834c51aae41ca9215d3190cc372fd132b9c5c8aa2d5f19ca0c325e28f9",
+    description = "capstone package",
+    homepage = "https://github.com/capstone-engine/capstone.git",
+    license = "BSD",
+    deps = [],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+    ],
+    visibility = ["PUBLIC"],
+)

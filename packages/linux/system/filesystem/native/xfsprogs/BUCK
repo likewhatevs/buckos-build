@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "xfsprogs-src",
+    src_uri = "https://mirrors.edge.kernel.org/pub/linux/utils/fs/xfs/xfsprogs/xfsprogs-6.6.0.tar.xz",
+    sha256 = "50ca2f4676df8fab4cb4c3ef3dd512d5551e6844d40a65a31d5b8e03593d22df",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "xfsprogs",
+    source = ":xfsprogs-src",
+    iuse = [
+        "icu",
+        "libedit",
+        "nls",
+        "selinux",
+        "static-libs",
+    ],
+    use_configure = {
+        "-icu": "--disable-icu",
+        "-libedit": "--disable-libedit",
+        "-nls": "--disable-nls",
+        "-selinux": "--disable-selinux",
+        "-static-libs": "--disable-static",
+        "icu": "--enable-icu",
+        "libedit": "--enable-libedit",
+        "nls": "--enable-nls",
+        "selinux": "--enable-selinux",
+        "static-libs": "--enable-static",
+    },
+    version = "6.6.0",
+    description = "XFS filesystem utilities (mkfs.xfs, xfs_repair, xfs_info, etc.)",
+    homepage = "https://xfs.wiki.kernel.org/",
+    license = "GPL-2.0",
+    configure_args = [
+        "--enable-editline=yes",
+        "--enable-blkid=yes",
+    ],
+    deps = [
+        "core//util-linux:util-linux",
+        "core//readline:readline",
+    ],
+    visibility = ["PUBLIC"],
+)

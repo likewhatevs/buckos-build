@@ -1,0 +1,24 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "bigvgan",
+    version = "1.0.0",
+    src_uri = "https://github.com/NVIDIA/BigVGAN/archive/refs/heads/main.tar.gz",
+    sha256 = "cd03350c41b4238472f9d0380922f5446fdd6877d01138c5e39ba82c5c5c175d",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/huggingface-hub:huggingface-hub",
+        "ai//audio/librosa:librosa",
+        "ai//audio/soundfile:soundfile",
+        "ai//ml-frameworks/tensorboard:tensorboard",
+        "dev-libs//python/matplotlib:matplotlib",
+        "ai//audio/pesq:pesq",
+        "ai//audio/auraloss:auraloss",
+        "ai//audio/nnaudio:nnaudio",
+        "dev-tools//build-systems/ninja:ninja",
+    ],
+    maintainers = ["buckos"],
+)

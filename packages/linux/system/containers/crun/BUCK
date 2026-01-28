@@ -1,0 +1,51 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# crun - A fast and lightweight OCI runtime
+
+autotools_package(
+    name = "crun",
+    version = "1.14",
+    src_uri = "https://github.com/containers/crun/releases/download/1.14/crun-1.14.tar.gz",
+    sha256 = "f6ceb53ef6c686b1e8bc7e4a52cfac3ebec915edc6bc750ac600a8b3decb6e13",
+    description = "A fast and lightweight OCI runtime",
+    homepage = "https://github.com/containers/crun",
+    license = "GPL-2.0",
+    iuse = [
+        "bpf",
+        "caps",
+        "criu",
+        "seccomp",
+        "selinux",
+        "static-libs",
+        "systemd",
+    ],
+    use_defaults = ["seccomp", "caps"],
+    deps = [
+        "dev-libs//misc/yajl:yajl",
+    ],
+    use_deps = {
+        "systemd": ["system//init/systemd:systemd"],
+        "seccomp": ["system//libs/ipc/libseccomp:libseccomp"],
+        "caps": ["system//libs/ipc/libcap:libcap"],
+    },
+    configure_args = [
+        "--prefix=${PREFIX}",
+    ],
+    use_configure = {
+        "-bpf": "--disable-bpf",
+        "-caps": "--disable-caps",
+        "-criu": "--disable-criu",
+        "-seccomp": "--disable-seccomp",
+        "-selinux": "--disable-selinux",
+        "-static-libs": "--disable-static",
+        "-systemd": "--without-systemd",
+        "bpf": "--enable-bpf",
+        "caps": "--enable-caps",
+        "criu": "--enable-criu",
+        "seccomp": "--enable-seccomp",
+        "selinux": "--enable-selinux",
+        "static-libs": "--enable-static",
+        "systemd": "--with-systemd",
+    },
+    visibility = ["PUBLIC"],
+)

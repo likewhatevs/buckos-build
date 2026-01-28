@@ -1,0 +1,123 @@
+load("@root//defs:package_defs.bzl", "meson_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# GTK3 - GIMP Toolkit version 3
+autotools_package(
+    name = "gtk3",
+    version = "3.24.41",
+    src_uri = "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.41.tar.xz",
+    sha256 = "47da61487af3087a94bc49296fd025ca0bc02f96ef06c556e7c8988bd651b6fa",
+    signature_required = False,
+    description = "Multi-platform toolkit for creating graphical user interfaces",
+    homepage = "https://www.gtk.org/",
+    license = "LGPL-2.1+",
+    iuse = ["introspection", "X", "wayland", "broadway", "cups", "cloudprint", "colord", "doc", "test", "examples", "demos"],
+    use_defaults = ["X", "wayland"],
+    use_configure = {
+        "introspection": "-Dintrospection=true",
+        "-introspection": "-Dintrospection=false",
+        "X": "-Dx11-backend=true",
+        "-X": "-Dx11-backend=false",
+        "wayland": "-Dwayland-backend=true",
+        "-wayland": "-Dwayland-backend=false",
+        "broadway": "-Dbroadway-backend=true",
+        "-broadway": "-Dbroadway-backend=false",
+        "cups": "-Dprint-backends=cups",
+        "-cups": "-Dprint-backends=file",
+        "cloudprint": "-Dcloudproviders=true",
+        "-cloudprint": "-Dcloudproviders=false",
+        "colord": "-Dcolord=yes",
+        "-colord": "-Dcolord=no",
+        "doc": "-Dgtk_doc=true",
+        "-doc": "-Dgtk_doc=false",
+        "test": "-Dtests=true",
+        "-test": "-Dtests=false",
+        "examples": "-Dexamples=true",
+        "-examples": "-Dexamples=false",
+        "demos": "-Ddemos=true",
+        "-demos": "-Ddemos=false",
+    },
+    use_deps = {
+        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
+        "cups": ["system//printing/cups:cups"],
+        "colord": ["system//color/colord:colord"],
+    },
+    pre_configure = """
+mkdir -p build
+cd build
+# USE flags: introspection, X, wayland, broadway, cups, cloudprint, colord, doc, test, examples, demos
+meson setup .. --prefix=/usr \
+    $CONFIGURE_ARGS
+""",
+    deps = [
+        "dev-libs//glib:glib",
+        "fonts//libraries/freetype:freetype",
+        "fonts//libraries/pango:pango",
+        "desktop//cairo:cairo",
+        "desktop//gdk-pixbuf:gdk-pixbuf",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# GTK4 - GIMP Toolkit version 4
+autotools_package(
+    name = "gtk4",
+    version = "4.14.1",
+    src_uri = "https://download.gnome.org/sources/gtk/4.14/gtk-4.14.1.tar.xz",
+    sha256 = "fcefb3f132f8cc4711a9efa5b353c9ae9bb5eeff0246fa74dbc2f2f839b9e308",
+    signature_required = False,
+    description = "Multi-platform toolkit for creating graphical user interfaces (GTK4)",
+    homepage = "https://www.gtk.org/",
+    license = "LGPL-2.1+",
+    iuse = ["introspection", "X", "wayland", "broadway", "vulkan", "gstreamer", "cloudprint", "colord", "cups", "doc", "test", "examples", "demos"],
+    use_defaults = ["X", "wayland", "vulkan"],
+    use_configure = {
+        "introspection": "-Dintrospection=enabled",
+        "-introspection": "-Dintrospection=disabled",
+        "X": "-Dx11-backend=true",
+        "-X": "-Dx11-backend=false",
+        "wayland": "-Dwayland-backend=true",
+        "-wayland": "-Dwayland-backend=false",
+        "broadway": "-Dbroadway-backend=true",
+        "-broadway": "-Dbroadway-backend=false",
+        "vulkan": "-Dvulkan=enabled",
+        "-vulkan": "-Dvulkan=disabled",
+        "gstreamer": "-Dmedia-gstreamer=enabled",
+        "-gstreamer": "-Dmedia-gstreamer=disabled",
+        "cloudprint": "-Dcloudproviders=enabled",
+        "-cloudprint": "-Dcloudproviders=disabled",
+        "colord": "-Dcolord=enabled",
+        "-colord": "-Dcolord=disabled",
+        "cups": "-Dprint-cups=enabled",
+        "-cups": "-Dprint-cups=disabled",
+        "doc": "-Dgtk_doc=true",
+        "-doc": "-Dgtk_doc=false",
+        "test": "-Dbuild-tests=true",
+        "-test": "-Dbuild-tests=false",
+        "examples": "-Dbuild-examples=true",
+        "-examples": "-Dbuild-examples=false",
+        "demos": "-Dbuild-demos=true",
+        "-demos": "-Dbuild-demos=false",
+    },
+    use_deps = {
+        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
+        "gstreamer": ["graphics//video/gstreamer:gstreamer"],
+        "colord": ["system//color/colord:colord"],
+        "cups": ["system//printing/cups:cups"],
+    },
+    pre_configure = """
+mkdir -p build
+cd build
+# USE flags: introspection, X, wayland, broadway, vulkan, gstreamer, cloudprint, colord, cups, doc, test, examples, demos
+meson setup .. --prefix=/usr \
+    $CONFIGURE_ARGS
+""",
+    deps = [
+        "dev-libs//glib:glib",
+        "fonts//libraries/freetype:freetype",
+        "fonts//libraries/pango:pango",
+        "desktop//cairo:cairo",
+        "desktop//gdk-pixbuf:gdk-pixbuf",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,36 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# monit - Process supervisor and monitoring tool
+# USE flags: ssl, pam
+
+autotools_package(
+    name = "monit",
+    version = "5.34.3",
+    src_uri = "https://mmonit.com/monit/dist/monit-5.34.3.tar.gz",
+    sha256 = "669d8b95ddec124d1444ba5264f67fdeae8e90e53b2929719f4750fc5ff3ba60",
+    signature_required = False,
+    description = "Utility for monitoring and managing Unix systems",
+    homepage = "https://mmonit.com/monit/",
+    license = "GPL-3.0",
+    iuse = ["ssl", "pam"],
+    use_defaults = ["ssl"],
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "pam": ["system//security/auth/pam:pam"],
+    },
+    use_configure = {
+        "ssl": "--with-ssl-dir=/usr",
+        "-ssl": "--without-ssl",
+        "pam": "--with-pam",
+        "-pam": "--without-pam",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc/monit",
+        "--bindir=/usr/sbin",
+    ],
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

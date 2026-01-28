@@ -1,0 +1,52 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# ncurses - Package from third-party
+
+cmake_package(
+    name = "ncurses",
+    version = "6.5",
+    iuse = [
+        "ada",
+        "cxx",
+        "debug",
+        "gpm",
+        "minimal",
+        "profile",
+        "stack-realign",
+        "static-libs",
+        "tinfo",
+        "trace",
+    ],
+    use_cmake = {
+        "-ada": "-DENABLE_ADA=OFF",
+        "-cxx": "-DENABLE_CXX=OFF",
+        "-debug": "-DCMAKE_BUILD_TYPE=Release",
+        "-gpm": "-DENABLE_GPM=OFF",
+        "-minimal": "-DENABLE_MINIMAL=OFF",
+        "-profile": "-DENABLE_PROFILE=OFF",
+        "-stack-realign": "-DENABLE_STACK_REALIGN=OFF",
+        "-static-libs": "-DBUILD_STATIC_LIBS=OFF",
+        "-tinfo": "-DENABLE_TINFO=OFF",
+        "-trace": "-DENABLE_TRACE=OFF",
+        "ada": "-DENABLE_ADA=ON",
+        "cxx": "-DENABLE_CXX=ON",
+        "debug": "-DCMAKE_BUILD_TYPE=Debug",
+        "gpm": "-DENABLE_GPM=ON",
+        "minimal": "-DENABLE_MINIMAL=ON",
+        "profile": "-DENABLE_PROFILE=ON",
+        "stack-realign": "-DENABLE_STACK_REALIGN=ON",
+        "static-libs": "-DBUILD_STATIC_LIBS=ON",
+        "tinfo": "-DENABLE_TINFO=ON",
+        "trace": "-DENABLE_TRACE=ON",
+    },
+    src_uri = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz",
+    sha256 = "136d91bc269a9a5785e5f9e980bc76ab57428f604ce3e5a5a90cebc767971cc6",
+    description = "ncurses package",
+    license = "unknown",
+    deps = [],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+    ],
+    visibility = ["PUBLIC"],
+)

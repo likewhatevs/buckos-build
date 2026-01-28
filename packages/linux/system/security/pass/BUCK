@@ -1,0 +1,52 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+# pass - Standard Unix password manager
+download_source(
+    name = "pass-src",
+    src_uri = "https://github.com/zx2c4/password-store/archive/refs/tags/1.7.4.tar.gz",
+    sha256 = "ff00bd2db86d8be722fc674f40abdc9b88701e47396378b15a4222c63c1d5243",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "pass",
+    source = ":pass-src",
+    iuse = [
+        "X",
+        "dmenu",
+        "emacs",
+        "git",
+        "importers",
+        "wayland",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-dmenu": "--disable-dmenu",
+        "-emacs": "--disable-emacs",
+        "-git": "--disable-git",
+        "-importers": "--disable-importers",
+        "-wayland": "--disable-wayland",
+        "X": "--with-x",
+        "dmenu": "--enable-dmenu",
+        "emacs": "--enable-emacs",
+        "git": "--enable-git",
+        "importers": "--enable-importers",
+        "wayland": "--enable-wayland",
+    },
+    version = "1.7.4",
+    description = "Standard Unix password manager",
+    homepage = "https://www.passwordstore.org",
+    license = "GPL-2+",
+    src_compile = """
+make
+""",
+    src_install = """
+make install DESTDIR="$DESTDIR" PREFIX=/usr
+""",
+    rdepend = [
+        "core//bash:bash",
+        "dev-tools//vcs/git:git",
+        "system//security/gnupg:gnupg",
+    ],
+    visibility = ["PUBLIC"],
+)

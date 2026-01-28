@@ -1,0 +1,58 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# nghttp2 - HTTP/2 C Library
+
+cmake_package(
+    name = "nghttp2",
+    version = "1.59.0",
+    src_uri = "https://github.com/nghttp2/nghttp2/releases/download/v1.59.0/nghttp2-1.59.0.tar.gz",
+    sha256 = "90fd27685120404544e96a60ed40398a3457102840c38e7215dc6dec8684470f",
+    description = "HTTP/2 C Library and tools",
+    homepage = "https://nghttp2.org/",
+    license = "MIT",
+    iuse = [
+        "app",
+        "asio",
+        "debug",
+        "hpack-tools",
+        "jemalloc",
+        "python",
+        "systemd",
+        "utils",
+        "xml",
+    ],
+    use_defaults = ["app"],
+    deps = [
+        "system//libs/crypto/openssl:openssl",
+        "core//zlib:zlib",
+    ],
+    use_deps = {
+        "python": ["lang//python:python"],
+        "asio": ["dev-libs//boost:boost"],
+    },
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DENABLE_LIB_ONLY=OFF",
+    ],
+    use_cmake = {
+        "-app": "-DENABLE_APP=OFF",
+        "-asio": "-DENABLE_ASIO_LIB=OFF",
+        "-debug": "-DCMAKE_BUILD_TYPE=Release",
+        "-hpack-tools": "-DENABLE_HPACK_TOOLS=OFF",
+        "-jemalloc": "-DENABLE_JEMALLOC=OFF",
+        "-python": "-DENABLE_PYTHON_BINDINGS=OFF",
+        "-systemd": "-DENABLE_SYSTEMD=OFF",
+        "-utils": "-DENABLE_UTILS=OFF",
+        "-xml": "-DENABLE_XML=OFF",
+        "app": "-DENABLE_APP=ON",
+        "asio": "-DENABLE_ASIO_LIB=ON",
+        "debug": "-DCMAKE_BUILD_TYPE=Debug",
+        "hpack-tools": "-DENABLE_HPACK_TOOLS=ON",
+        "jemalloc": "-DENABLE_JEMALLOC=ON",
+        "python": "-DENABLE_PYTHON_BINDINGS=ON",
+        "systemd": "-DENABLE_SYSTEMD=ON",
+        "utils": "-DENABLE_UTILS=ON",
+        "xml": "-DENABLE_XML=ON",
+    },
+    visibility = ["PUBLIC"],
+)

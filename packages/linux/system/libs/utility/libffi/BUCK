@@ -1,0 +1,42 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "libffi-src",
+    src_uri = "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz",
+    sha256 = "b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "libffi",
+    # GitHub releases/download tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    source = ":libffi-src",
+    iuse = [
+        "debug",
+        "exec-static-trampoline",
+        "pax-kernel",
+        "static-libs",
+    ],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-exec-static-trampoline": "--disable-exec-static-trampoline",
+        "-pax-kernel": "--disable-pax-kernel",
+        "-static-libs": "--disable-static",
+        "debug": "--enable-debug",
+        "exec-static-trampoline": "--enable-exec-static-trampoline",
+        "pax-kernel": "--enable-pax-kernel",
+        "static-libs": "--enable-static",
+    },
+    version = "3.4.6",
+    description = "Foreign Function Interface library",
+    homepage = "https://sourceware.org/libffi/",
+    license = "MIT",
+    configure_args = [
+        "--disable-static",
+        "--disable-exec-static-tramp",
+    ],
+    visibility = ["PUBLIC"],
+)

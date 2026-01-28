@@ -1,0 +1,19 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "rife",
+    version = "4.26",
+    src_uri = "https://github.com/hzwer/Practical-RIFE/archive/refs/heads/main.tar.gz",
+    sha256 = "e3bc1913dea685e668829803a6eca47b2a8a5ee26139c26a16bd2ba279a7ff95",
+    description = "Real-Time Intermediate Flow Estimation for Video Frame Interpolation",
+    homepage = "https://github.com/hzwer/Practical-RIFE",
+    license = "MIT",
+    deps = [
+        "lang//python:python",
+        "dev-libs//python/numpy:numpy",
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//ml-frameworks/torchvision:torchvision",
+        "ai//vision/opencv:opencv",
+    ],
+    visibility = ["PUBLIC"],
+)

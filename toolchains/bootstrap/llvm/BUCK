@@ -1,0 +1,166 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+# =============================================================================
+# LLVM Bootstrap Toolchain
+# =============================================================================
+# LLVM is required for building Rust from source.
+# We build LLVM 21.1.x from source using the C/C++ bootstrap toolchain.
+#
+# Bootstrap chain:
+#   bootstrap-toolchain (C/C++) -> llvm-bootstrap -> llvm-toolchain
+
+# =============================================================================
+# LLVM Source (21.1.8)
+# =============================================================================
+
+download_source(
+    name = "llvm-src",
+    src_uri = "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/llvm-project-21.1.8.src.tar.xz",
+    sha256 = "4633a23617fa31a3ea51242586ea7fb1da7140e426bd62fc164261fe036aa142",
+    signature_required = False,
+)
+
+# =============================================================================
+# LLVM Bootstrap Build
+# =============================================================================
+# Build LLVM from source with minimal configuration for Rust compilation
+
+ebuild_package(
+    name = "llvm-bootstrap",
+    source = ":llvm-src",
+    version = "21.1.8",
+    category = "toolchain/bootstrap",
+    slot = "0",
+    description = "LLVM compiler infrastructure - bootstrap build for Rust",
+    homepage = "https://llvm.org/",
+    license = "Apache-2.0-with-LLVM-exceptions",
+    bootstrap_stage = "stage2",
+
+    env = {
+        # Use release build for speed
+        "CMAKE_BUILD_TYPE": "Release",
+        # Parallel build
+        "MAKEFLAGS": "-j$(nproc)",
+    },
+
+    src_configure = '''
+# Create build directory
+mkdir -p build
+cd build
+
+# Configure LLVM with CMake
+# Minimal configuration for Rust bootstrap
+cmake -G "Unix Makefiles" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/lib/llvm/21 \
+    -DLLVM_TARGETS_TO_BUILD="X86" \
+    -DLLVM_ENABLE_PROJECTS="clang;lld" \
+    -DLLVM_BUILD_LLVM_DYLIB=ON \
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DLLVM_ENABLE_ASSERTIONS=OFF \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_EH=ON \
+    -DLLVM_INCLUDE_TESTS=OFF \
+    -DLLVM_INCLUDE_EXAMPLES=OFF \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
+    -DLLVM_INCLUDE_DOCS=OFF \
+    -DLLVM_ENABLE_BINDINGS=OFF \
+    -DLLVM_ENABLE_ZLIB=ON \
+    -DLLVM_ENABLE_ZSTD=OFF \
+    -DLLVM_ENABLE_LIBXML2=OFF \
+    -DLLVM_ENABLE_TERMINFO=ON \
+    -DLLVM_ENABLE_FFI=OFF \
+    -DCLANG_ENABLE_ARCMT=OFF \
+    -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
+    -DCLANG_PLUGIN_SUPPORT=OFF \
+    ../llvm
+
+echo "LLVM configured for x86_64 target"
+''',
+
+    src_compile = '''
+cd build
+cmake --build . -- -j$(nproc)
+''',
+
+    src_install = '''
+cd build
+
+# Install to DESTDIR
+DESTDIR="$DESTDIR" cmake --install .
+
+# Create version symlink
+ln -sf llvm/21 "$DESTDIR/usr/lib/llvm-21"
+
+echo "LLVM ${PV} installed to /usr/lib/llvm/21"
+''',
+
+    bdepend = ["toolchains//bootstrap:bootstrap-toolchain"],
+    depend = [
+        "root//packages/linux/core/zlib:zlib",
+    ],
+    use_bootstrap = False,
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# LLVM Toolchain Aggregate
+# =============================================================================
+# This target provides LLVM for Rust and other package builds.
+
+ebuild_package(
+    name = "llvm-toolchain",
+    source = ":llvm-src",  # Dummy source
+    version = "21.1.8",
+    category = "toolchain/bootstrap",
+    slot = "0",
+    description = "LLVM toolchain for BuckOS package builds",
+    homepage = "https://llvm.org/",
+    license = "Apache-2.0-with-LLVM-exceptions",
+
+    src_configure = "true",
+    src_compile = "true",
+
+    src_install = '''
+# Copy LLVM from llvm-bootstrap to tools directory structure
+mkdir -p "$DESTDIR/tools"
+
+IFS=':' read -ra DEP_ARRAY <<< "$DEP_BASE_DIRS"
+for dep_dir in "${DEP_ARRAY[@]}"; do
+    if [ -d "$dep_dir/usr/lib/llvm/21" ]; then
+        echo "Found LLVM at: $dep_dir/usr/lib/llvm/21"
+        # Copy the entire LLVM installation
+        cp -a "$dep_dir/usr/lib/llvm/21" "$DESTDIR/tools/llvm"
+
+        # Create symlinks in tools/bin for PATH
+        mkdir -p "$DESTDIR/tools/bin"
+        for bin in "$DESTDIR/tools/llvm/bin"/*; do
+            if [ -f "$bin" ]; then
+                name=$(basename "$bin")
+                ln -sf ../llvm/bin/"$name" "$DESTDIR/tools/bin/$name"
+            fi
+        done
+        break
+    fi
+done
+
+if [ ! -x "$DESTDIR/tools/llvm/bin/llvm-config" ]; then
+    echo "ERROR: Could not find llvm-bootstrap output"
+    exit 1
+fi
+
+# Create marker file
+cat > "$DESTDIR/tools/.llvm-toolchain" << 'EOF'
+BuckOS LLVM Toolchain
+LLVM version: 21.1.8
+Built from source for Rust bootstrap
+EOF
+
+echo "LLVM toolchain assembled in /tools"
+''',
+
+    bdepend = [":llvm-bootstrap"],
+    depend = [],
+    use_bootstrap = False,
+    visibility = ["PUBLIC"],
+)

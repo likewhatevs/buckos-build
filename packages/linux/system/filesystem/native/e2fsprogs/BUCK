@@ -1,0 +1,51 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "e2fsprogs-src",
+    src_uri = "https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.47.0/e2fsprogs-1.47.0.tar.xz",
+    sha256 = "144af53f2bbd921cef6f8bea88bb9faddca865da3fbc657cc9b4d2001097d5db",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "e2fsprogs",
+    source = ":e2fsprogs-src",
+    iuse = [
+        "archive",
+        "cron",
+        "fuse",
+        "nls",
+        "static-libs",
+        "tools",
+    ],
+    use_configure = {
+        "-archive": "--disable-archive",
+        "-cron": "--disable-cron",
+        "-fuse": "--disable-fuse",
+        "-nls": "--disable-nls",
+        "-static-libs": "--disable-static",
+        "-tools": "--disable-tools",
+        "archive": "--enable-archive",
+        "cron": "--enable-cron",
+        "fuse": "--enable-fuse",
+        "nls": "--enable-nls",
+        "static-libs": "--enable-static",
+        "tools": "--enable-tools",
+    },
+    version = "1.47.0",
+    description = "Ext2/3/4 filesystem utilities (mke2fs, e2fsck, tune2fs, etc.)",
+    homepage = "http://e2fsprogs.sourceforge.net/",
+    license = "GPL-2.0",
+    configure_args = [
+        "--enable-elf-shlibs",
+        "--disable-libblkid",
+        "--disable-libuuid",
+        "--disable-uuidd",
+        "--disable-fsck",
+    ],
+    deps = [
+        "core//util-linux:util-linux",
+    ],
+    visibility = ["PUBLIC"],
+)

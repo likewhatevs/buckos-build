@@ -1,0 +1,54 @@
+# Hardware monitoring packages for laptops
+
+filegroup(
+    name = "sensors",
+    srcs = [
+        "laptop//monitoring/lm-sensors:lm-sensors",
+        "laptop//monitoring/acpi:acpi",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "power-analysis",
+    srcs = [
+        "laptop//monitoring/powertop:powertop",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "cpu-monitoring",
+    srcs = [
+        "laptop//monitoring/i7z:i7z",
+        "laptop//monitoring/s-tui:s-tui",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "monitoring-essential",
+    srcs = [
+        "laptop//monitoring/lm-sensors:lm-sensors",
+        "laptop//monitoring/acpi:acpi",
+        "laptop//monitoring/powertop:powertop",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-monitoring",
+    srcs = [
+        "laptop//monitoring/lm-sensors:lm-sensors",
+        "laptop//monitoring/powertop:powertop",
+        "laptop//monitoring/acpi:acpi",
+        "laptop//monitoring/s-tui:s-tui",
+        "laptop//monitoring/i7z:i7z",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

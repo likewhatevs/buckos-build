@@ -1,0 +1,67 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "lvm2-src",
+    src_uri = "https://mirrors.kernel.org/sourceware/lvm2/LVM2.2.03.23.tgz",
+    sha256 = "74e794a9e9dee1bcf8a2065f65b9196c44fdf321e22d63b98ed7de8c9aa17a5d",
+    signature_sha256 = "baf194cf8262601e73c7be64b9720300e1f738be7d801eac6bf02f49934dff41",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "lvm2",
+    source = ":lvm2-src",
+    iuse = [
+        "lvm",
+        "readline",
+        "sanlock",
+        "selinux",
+        "static",
+        "static-libs",
+        "systemd",
+        "thin",
+        "udev",
+        "valgrind",
+    ],
+    use_configure = {
+        "-lvm": "--disable-lvm",
+        "-readline": "--without-readline",
+        "-sanlock": "--disable-sanlock",
+        "-selinux": "--disable-selinux",
+        "-static": "--disable-static",
+        "-static-libs": "--disable-static",
+        "-systemd": "--disable-systemd",
+        "-thin": "--disable-thin",
+        "-udev": "--disable-udev",
+        "-valgrind": "--disable-valgrind",
+        "lvm": "--enable-lvm",
+        "readline": "--with-readline",
+        "sanlock": "--enable-sanlock",
+        "selinux": "--enable-selinux",
+        "static": "--enable-static",
+        "static-libs": "--enable-static",
+        "systemd": "--enable-systemd",
+        "thin": "--enable-thin",
+        "udev": "--enable-udev",
+        "valgrind": "--enable-valgrind",
+    },
+    version = "2.03.23",
+    description = "Logical Volume Manager 2 utilities (lvm, pvcreate, vgcreate, lvcreate)",
+    homepage = "https://sourceware.org/lvm2/",
+    license = "GPL-2.0",
+    configure_args = [
+        "--enable-cmdlib",
+        "--enable-pkgconfig",
+        "--enable-udev_sync",
+        "--enable-udev_rules",
+        "--with-udevdir=/lib/udev/rules.d",
+        "--disable-selinux",
+    ],
+    deps = [
+        "core//util-linux:util-linux",
+        "system//init/eudev:eudev",
+        "system//libs/io/libaio:libaio",
+    ],
+    visibility = ["PUBLIC"],
+)

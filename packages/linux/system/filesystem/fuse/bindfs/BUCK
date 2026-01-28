@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "bindfs-src",
+    src_uri = "https://bindfs.org/downloads/bindfs-1.17.6.tar.gz",
+    sha256 = "d3beb3cc69bb2b6802cc539588e921fea973ed6191b133f2024719311d1cc18b",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "bindfs",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    source = ":bindfs-src",
+    iuse = ["debug"],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "debug": "--enable-debug",
+    },
+    version = "1.17.6",
+    description = "FUSE filesystem for mirroring directories with permission remapping",
+    homepage = "https://bindfs.org/",
+    license = "GPL-2.0",
+    configure_args = [],
+    deps = [
+        "system//filesystem/fuse/fuse3:fuse3",
+    ],
+    visibility = ["PUBLIC"],
+)

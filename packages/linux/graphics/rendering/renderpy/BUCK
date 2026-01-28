@@ -1,0 +1,13 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "renderpy",
+    version = "0.0.1",
+    src_uri = "https://github.com/liu115/renderpy/archive/refs/heads/main.tar.gz",
+    sha256 = "4c0531e23c6db42563ffb2a4995df33f411ef15f813c8a2d09141a4e8106d23a",
+    deps = [
+        "graphics//opencv:opencv",
+        "dev-libs//glew:glew",
+        "graphics//xorg:mesa",
+    ],
+)

@@ -1,0 +1,33 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# =============================================================================
+# Go - Open source programming language (pre-built binary)
+# =============================================================================
+
+download_source(
+    name = "go-src",
+    src_uri = "https://go.dev/dl/go1.25.5.linux-amd64.tar.gz",
+    sha256 = "9e9b755d63b36acf30c12a9a3fc379243714c1c6d3dd72861da637f336ebb35b",
+    signature_required = False,
+)
+
+binary_package(
+    name = "go",
+    srcs = [":go-src"],
+    version = "1.25.5",
+    description = "Go is an open source programming language that makes it easy to build simple, reliable, and efficient software",
+    homepage = "https://go.dev/",
+    license = "BSD-3-Clause",
+    install_script = """
+        # Install pre-built Go to /usr/lib/go (standard location)
+        mkdir -p $OUT/usr/lib/go
+        cp -r $SRCS/* $OUT/usr/lib/go/
+
+        # Create symlinks in /usr/bin using relative paths
+        mkdir -p $OUT/usr/bin
+        ln -sf ../lib/go/bin/go $OUT/usr/bin/go
+        ln -sf ../lib/go/bin/gofmt $OUT/usr/bin/gofmt
+    """,
+    visibility = ["PUBLIC"],
+)

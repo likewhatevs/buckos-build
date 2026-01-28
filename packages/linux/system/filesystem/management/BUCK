@@ -1,0 +1,90 @@
+# =============================================================================
+# Disk and Volume Management Tools
+# =============================================================================
+# Tools for partitioning, volume management, RAID arrays, encryption,
+# and disk administration.
+
+# Filegroup for all disk/volume management tools
+filegroup(
+    name = "management",
+    srcs = [
+        "system//filesystem/management/parted:parted",
+        "system//filesystem/management/gptfdisk:gptfdisk",
+        "system//filesystem/management/lvm2:lvm2",
+        "system//filesystem/management/mdadm:mdadm",
+        "system//filesystem/management/cryptsetup:cryptsetup",
+        "system//filesystem/management/dmraid:dmraid",
+        "system//filesystem/management/multipath-tools:multipath-tools",
+        "system//filesystem/management/hdparm:hdparm",
+        "system//filesystem/management/nvme-cli:nvme-cli",
+        "system//filesystem/management/smartmontools:smartmontools",
+        "system//filesystem/management/udisks2:udisks2",
+        "system//filesystem/management/quota:quota",
+        "system//filesystem/management/fio:fio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential partitioning tools
+filegroup(
+    name = "partitioning",
+    srcs = [
+        "system//filesystem/management/parted:parted",
+        "system//filesystem/management/gptfdisk:gptfdisk",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Volume and RAID management
+filegroup(
+    name = "volume-management",
+    srcs = [
+        "system//filesystem/management/lvm2:lvm2",
+        "system//filesystem/management/mdadm:mdadm",
+        "system//filesystem/management/dmraid:dmraid",
+        "system//filesystem/management/multipath-tools:multipath-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Encryption tools
+filegroup(
+    name = "encryption",
+    srcs = [
+        "system//filesystem/management/cryptsetup:cryptsetup",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Disk utilities and monitoring
+filegroup(
+    name = "disk-utilities",
+    srcs = [
+        "system//filesystem/management/hdparm:hdparm",
+        "system//filesystem/management/nvme-cli:nvme-cli",
+        "system//filesystem/management/smartmontools:smartmontools",
+        "system//filesystem/management/udisks2:udisks2",
+        "system//filesystem/management/quota:quota",
+        "system//filesystem/management/fio:fio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Common management tools
+filegroup(
+    name = "common",
+    srcs = [
+        "system//filesystem/management/parted:parted",
+        "system//filesystem/management/gptfdisk:gptfdisk",
+        "system//filesystem/management/lvm2:lvm2",
+        "system//filesystem/management/cryptsetup:cryptsetup",
+        "system//filesystem/management/smartmontools:smartmontools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

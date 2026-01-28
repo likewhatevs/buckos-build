@@ -1,0 +1,54 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "rawtherapee-src",
+    src_uri = "https://github.com/Beep6581/RawTherapee/releases/download/5.10/rawtherapee-5.10.tar.xz",
+    sha256 = "a799b53cd54dba4a211479e342ffc9c5db1c44d3d6c3a27d5cc13adf0debd2da",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "rawtherapee",
+    source = ":rawtherapee-src",
+    iuse = ["jpegxl", "openmp", "tcmalloc"],
+    use_configure = {
+        "-jpegxl": "--disable-jpegxl",
+        "-openmp": "--disable-openmp",
+        "-tcmalloc": "--disable-tcmalloc",
+        "jpegxl": "--enable-jpegxl",
+        "openmp": "--enable-openmp",
+        "tcmalloc": "--enable-tcmalloc",
+    },
+    version = "5.10",
+    description = "Cross-platform raw image processing program",
+    homepage = "https://rawtherapee.com/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCACHE_NAME_SUFFIX="" \
+    -DWITH_LTO=ON \
+    -DWITH_PROF=OFF \
+    -DWITH_BENCHMARK=OFF \
+    -DOPTION_OMP=ON
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT make install
+""",
+    deps = [
+        "desktop//gtk:gtk3",
+        "system//libs/graphics/lcms2:lcms2",
+        "dev-libs//fftw:fftw",
+        # "dev-libs//libiptcdata:libiptcdata",  # TODO: not packaged yet
+        "dev-libs//lensfun:lensfun",
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "seamless_communication",
+    version = "1.0.0",
+    # Note: No versioned tags available, using main branch
+    src_uri = "https://github.com/facebookresearch/seamless_communication/archive/refs/heads/main.tar.gz",
+    sha256 = "87541e6b12697efec7eb1c2a1d240df2283a74aa0f427e8d8b54f22ccbcf6152",
+    deps = [
+        "ai//ml-frameworks/fairseq2:fairseq2",
+        "audio//analysis/librosa:librosa",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/soundfile:soundfile",
+        "dev-libs//python/tqdm:tqdm",
+    ],
+)

@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "himalaya-src",
+    src_uri = "https://github.com/pimalaya/himalaya/archive/v1.0.0.tar.gz",
+    sha256 = "2f16737d4ff29b8495979045abb94723b684b200b98cab27ae45f8b270da5b9c",
+    signature_required = False,
+)
+
+binary_package(
+    name = "himalaya",
+    srcs = [":himalaya-src"],
+    version = "1.0.0",
+    description = "CLI to manage emails written in Rust",
+    homepage = "https://pimalaya.org/himalaya/",
+    license = "MIT",
+    install_script = """
+        cd $SRCS
+        export CARGO_HOME="$PWD/.cargo"
+        cargo build --release --locked
+        install -Dm755 target/release/himalaya "$OUT/usr/bin/himalaya"
+
+        # Install shell completions
+        mkdir -p "$OUT/usr/share/bash-completion/completions"
+        mkdir -p "$OUT/usr/share/zsh/site-functions"
+        mkdir -p "$OUT/usr/share/fish/vendor_completions.d"
+        ./target/release/himalaya completion bash > "$OUT/usr/share/bash-completion/completions/himalaya"
+        ./target/release/himalaya completion zsh > "$OUT/usr/share/zsh/site-functions/_himalaya"
+        ./target/release/himalaya completion fish > "$OUT/usr/share/fish/vendor_completions.d/himalaya.fish"
+    """,
+    deps = [
+        "lang//rust:rust",
+        "system//libs/crypto/openssl:openssl",
+    ],
+    visibility = ["PUBLIC"],
+)

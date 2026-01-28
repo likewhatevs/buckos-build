@@ -1,0 +1,255 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# -----------------------------------------------------------------------------
+# systemd - System and service manager
+# -----------------------------------------------------------------------------
+
+meson_package(
+    name = "systemd",
+    version = "256.7",
+    src_uri = "https://github.com/systemd/systemd/archive/refs/tags/v256.7.tar.gz",
+    sha256 = "896d76ff65c88f5fd9e42f90d152b0579049158a163431dd77cdc57748b1d7b0",
+    signature_required = False,
+    # Exclude test/fuzz files and unit files with escaped characters in names
+    # The \x2d in filenames causes Buck2 path relativization errors
+    # Note: The backslash in filenames needs to be matched literally
+    exclude_patterns = [
+        "*/test/fuzz/*",
+        "*system-systemd?x2d*",  # Match system-systemd\x2d* (? matches the backslash)
+    ],
+    # Create stub meson.build for excluded test/fuzz directory
+    # Remove references to excluded unit files with escaped names
+    src_prepare = """
+        mkdir -p test/fuzz
+        cat > test/fuzz/meson.build << 'FUZZ_STUB'
+# Stub - fuzz tests excluded from build
+fuzz_sanitizers = []
+fuzz_testsdir = 'test/fuzz'
+FUZZ_STUB
+
+        # Remove multi-line dict entries referencing excluded unit files with \\x2d in names
+        # These files are excluded from extraction because Buck2 can't handle the escaped paths
+        # The entries look like: { 'file' : 'system-systemd\\x2dcryptsetup.slice', 'conditions' : [...], },
+        # Use perl for multi-line regex to delete entire dict blocks
+        perl -i -0777 -pe "s/\\{[^{}]*x2dcryptsetup[^{}]*\\},?\\s*//gs" units/meson.build
+        perl -i -0777 -pe "s/\\{[^{}]*x2dveritysetup[^{}]*\\},?\\s*//gs" units/meson.build
+    """,
+    description = "System and service manager",
+    homepage = "https://systemd.io/",
+    license = "GPL-2.0-or-later LGPL-2.1-or-later",
+    iuse = [
+        "acl",
+        "apparmor",
+        "audit",
+        "boot",
+        "bpf",
+        "cgroup-hybrid",
+        "cryptsetup",
+        "curl",
+        "dns-over-tls",
+        "elfutils",
+        "fido2",
+        "gcrypt",
+        "gnutls",
+        "homed",
+        "http",
+        "idn",
+        "importd",
+        "iptables",
+        "kernel-install",
+        "kmod",
+        "lz4",
+        "lzma",
+        "openssl",
+        "pam",
+        "passwdqc",
+        "pcre",
+        "pkcs11",
+        "policykit",
+        "pwquality",
+        "qrcode",
+        "resolvconf",
+        "seccomp",
+        "selinux",
+        "sysv-utils",
+        "tpm",
+        "ukify",
+        "vanilla",
+        "xkb",
+        "xz",
+        "zstd",
+    ],
+    use_defaults = ["pam", "acl", "lz4", "xz", "zstd"],
+    use_deps = {
+        "pam": ["system//security/auth/pam:pam"],
+        "acl": ["system//libs/ipc/acl:acl"],
+    },
+    use_meson = {
+        "apparmor": "-Dapparmor=enabled",
+        "-apparmor": "-Dapparmor=disabled",
+        "boot": "-Dgnu-efi=enabled",
+        "-boot": "-Dgnu-efi=disabled",
+        "bpf": "-Dbpf-framework=enabled",
+        "-bpf": "-Dbpf-framework=disabled",
+        "cgroup-hybrid": "-Ddefault-hierarchy=hybrid",
+        "-cgroup-hybrid": "-Ddefault-hierarchy=unified",
+        "cryptsetup": "-Dlibcryptsetup=enabled",
+        "-cryptsetup": "-Dlibcryptsetup=disabled",
+        "curl": "-Dlibcurl=enabled",
+        "-curl": "-Dlibcurl=disabled",
+        "dns-over-tls": "-Ddns-over-tls=true",
+        "-dns-over-tls": "-Ddns-over-tls=false",
+        "elfutils": "-Delfutils=enabled",
+        "-elfutils": "-Delfutils=disabled",
+        "fido2": "-Dlibfido2=enabled",
+        "-fido2": "-Dlibfido2=disabled",
+        "gnutls": "-Dgnutls=enabled",
+        "-gnutls": "-Dgnutls=disabled",
+        "homed": "-Dhomed=enabled",
+        "-homed": "-Dhomed=disabled",
+        "http": "-Dmicrohttpd=enabled",
+        "-http": "-Dmicrohttpd=disabled",
+        "idn": "-Dlibidn2=enabled",
+        "-idn": "-Dlibidn2=disabled",
+        "importd": "-Dimportd=enabled",
+        "-importd": "-Dimportd=disabled",
+        "iptables": "-Dlibiptc=enabled",
+        "-iptables": "-Dlibiptc=disabled",
+        "kernel-install": "-Dkernel-install=true",
+        "-kernel-install": "-Dkernel-install=false",
+        "kmod": "-Dkmod=enabled",
+        "-kmod": "-Dkmod=disabled",
+        "lzma": "-Dxz=enabled",
+        "-lzma": "-Dxz=disabled",
+        "openssl": "-Dopenssl=enabled",
+        "-openssl": "-Dopenssl=disabled",
+        "passwdqc": "-Dpasswdqc=enabled",
+        "-passwdqc": "-Dpasswdqc=disabled",
+        "pcre": "-Dpcre2=enabled",
+        "-pcre": "-Dpcre2=disabled",
+        "pkcs11": "-Dp11kit=enabled",
+        "-pkcs11": "-Dp11kit=disabled",
+        "policykit": "-Dpolkit=enabled",
+        "-policykit": "-Dpolkit=disabled",
+        "pwquality": "-Dpwquality=enabled",
+        "-pwquality": "-Dpwquality=disabled",
+        "qrcode": "-Dqrencode=enabled",
+        "-qrcode": "-Dqrencode=disabled",
+        "resolvconf": "-Dresolve=true",
+        "-resolvconf": "-Dresolve=false",
+        "seccomp": "-Dseccomp=enabled",
+        "-seccomp": "-Dseccomp=disabled",
+        "sysv-utils": "-Dsysvinit-path=/etc/init.d",
+        "-sysv-utils": "-Dsysvinit-path=",
+        "tpm": "-Dtpm2=enabled",
+        "-tpm": "-Dtpm2=disabled",
+        "ukify": "-Dukify=enabled",
+        "-ukify": "-Dukify=disabled",
+        "vanilla": "-Dmode=vanilla",
+        "-vanilla": "-Dmode=release",
+        "xkb": "-Dxkbcommon=enabled",
+        "-xkb": "-Dxkbcommon=disabled",
+    },
+    meson_args = [
+        "-Dsysconfdir=/etc",
+        "-Dmode=release",
+        # Disable features not needed (feature type: enabled/disabled/auto)
+        "-Dselinux=disabled",
+        "-Daudit=disabled",
+        "-Dlibcryptsetup=enabled",
+        "-Dgcrypt=disabled",
+        "-Dp11kit=disabled",
+        "-Dlibfido2=disabled",
+        "-Dtpm2=disabled",
+        "-Dqrencode=disabled",
+        "-Dmicrohttpd=disabled",
+        "-Dlibcurl=disabled",
+        "-Delfutils=disabled",
+        # Compression support
+        "-Dzlib=enabled",
+        "-Dbzip2=disabled",
+        "-Dxz=enabled",
+        "-Dlz4=enabled",
+        "-Dzstd=enabled",
+        "-Ddefault-compression=zstd",
+        # Enable kmod support for systemd-modules-load (required for initramfs)
+        "-Dkmod=enabled",
+        # Minimal components
+        "-Dstandalone-binaries=true",
+        "-Dstatic-libsystemd=false",
+        "-Dstatic-libudev=false",
+        # Disable optional components (feature type: enabled/disabled)
+        "-Dman=disabled",
+        "-Dhtml=disabled",
+        "-Dtranslations=false",
+        "-Dtests=false",
+        "-Dinstall-tests=false",
+        "-Dslow-tests=false",
+        "-Dfuzz-tests=false",
+        # Disable network components not needed for base install
+        "-Dresolve=false",
+        "-Dtimesyncd=false",
+        "-Dnetworkd=false",
+        # Essential boot/init components (required for initramfs and system boot)
+        "-Dtmpfiles=true",       # systemd-tmpfiles (required for initramfs)
+        "-Dsysusers=true",       # systemd-sysusers (user/group setup)
+        "-Drandomseed=true",     # systemd-random-seed (entropy)
+        "-Dvconsole=true",       # vconsole configuration
+        "-Dhibernate=true",      # hibernate/suspend support
+        "-Dldconfig=true",       # ldconfig support
+        "-Defi=true",            # EFI support
+        "-Dkernel-install=true", # kernel-install helper
+        # Keep essential components (boolean type: true/false)
+        "-Dlogind=true",
+        "-Dhostnamed=true",
+        "-Dlocaled=true",
+        "-Dtimedated=true",
+        "-Dfirstboot=true",
+        # Disable optional services (mixed types)
+        "-Dcoredump=false",
+        "-Dpstore=false",
+        "-Doomd=false",
+        "-Dimportd=disabled",
+        "-Dhomed=disabled",
+        "-Dportabled=false",
+        "-Dsysext=false",
+        "-Duserdb=false",
+        # Use PAM and ACL if enabled (feature type: enabled/disabled/auto)
+        "-Dpam=auto",
+        "-Dacl=auto",
+    ],
+    bdepend = [
+        "dev-tools//dev-utils/gperf:gperf",  # Perfect hash generator (build-time)
+        "lang//python:python",  # Python for meson
+        "lang//python/jinja2:jinja2",  # Jinja2 templating (required by meson)
+        "lang//python/jinja2:markupsafe",  # Required by jinja2
+    ],
+    src_install = """
+# Install with meson
+meson install -C build --destdir "$DESTDIR"
+
+# Fix hardcoded build paths in systemd unit files
+# Meson's find_program() finds dependencies at build paths, which don't exist at runtime
+echo "Fixing hardcoded build paths in systemd unit files..."
+find "$DESTDIR/usr/lib/systemd/system" -name "*.service" -type f -exec sed -i 's|/home/daniel/git/buckos-build/buck-out/[^/]*/[^/]*/[^/]*/[^/]*/packages/linux/system/libs/kmod/__kmod__/kmod/usr/bin/kmod|/usr/bin/kmod|g' {} \;
+echo "Fixed kmod paths in systemd unit files"
+""",
+    deps = [
+        "core//util-linux:util-linux",  # libmount, libblkid
+        "core//zlib:zlib",
+        "system//libs/ipc/libseccomp:libseccomp",  # Required for seccomp support
+        "system//libs/compression/lz4:lz4",  # For lz4 compression
+        "system//libs/compression/xz:xz",  # For liblzma (xz compression)
+        "system//libs/compression/zstd:zstd",  # For zstd compression
+        "system//libs/ipc/libcap:libcap",  # Required - POSIX capabilities
+        "system//libs/kmod:kmod",  # For systemd-modules-load
+        # For LUKS/dm-crypt support (cryptsetup and its dependencies)
+        "system//security/cryptsetup:cryptsetup",
+        "system//security/cryptsetup:lvm2",  # devmapper
+        "system//init/eudev:eudev",  # libudev (needed by lvm2/devmapper)
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/data/json-c:json-c",
+        "system//libs/crypto/argon2:argon2",
+    ],
+    visibility = ["PUBLIC"],
+)

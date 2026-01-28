@@ -1,0 +1,53 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+
+download_source(
+    name = "apr-src",
+    src_uri = "https://archive.apache.org/dist/apr/apr-1.7.5.tar.gz",
+    sha256 = "3375fa365d67bcf945e52b52cba07abea57ef530f40b281ffbe977a9251361db",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "apr",
+    source = ":apr-src",
+    iuse = [
+        "old-kernel",
+        "selinux",
+        "static-libs",
+        "urandom",
+        "valgrind",
+    ],
+    use_configure = {
+        "-old-kernel": "--disable-old-kernel",
+        "-selinux": "--disable-selinux",
+        "-static-libs": "--disable-static",
+        "-urandom": "--disable-urandom",
+        "-valgrind": "--disable-valgrind",
+        "old-kernel": "--enable-old-kernel",
+        "selinux": "--enable-selinux",
+        "static-libs": "--enable-static",
+        "urandom": "--enable-urandom",
+        "valgrind": "--enable-valgrind",
+    },
+    version = "1.7.5",
+    description = "Apache Portable Runtime library",
+    homepage = "https://apr.apache.org/",
+    license = "Apache-2.0",
+    configure_args = [
+        "--disable-static",
+        "--enable-threads",
+    ],
+    src_install = """
+        make DESTDIR="$DESTDIR" install
+
+        # Copy build tools that apr-util needs
+        mkdir -p "$DESTDIR/usr/share/apr-1/build"
+        cp -r build/*.mk build/*.awk build/libtool "$DESTDIR/usr/share/apr-1/build/" || true
+
+        # Ensure libtool script is executable
+        if [ -f "$DESTDIR/usr/share/apr-1/build/libtool" ]; then
+            chmod +x "$DESTDIR/usr/share/apr-1/build/libtool"
+        fi
+    """,
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,32 @@
+# Audio daemons and sound servers
+
+filegroup(
+    name = "alsa-packages",
+    srcs = [
+        "audio//daemons/alsa-lib:alsa-lib",
+        "audio//daemons/alsa-utils:alsa-utils",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "sound-servers",
+    srcs = [
+        "audio//daemons/pulseaudio:pulseaudio",
+        "audio//daemons/pipewire:pipewire",
+        "audio//daemons/jack2:jack2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-daemons",
+    srcs = [
+        ":alsa-packages",
+        ":sound-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

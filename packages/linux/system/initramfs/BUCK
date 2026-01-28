@@ -1,0 +1,129 @@
+# =============================================================================
+# Initramfs Generation Packages
+# =============================================================================
+# Tools for creating initial RAM filesystem (initramfs/initrd) images.
+# These are essential for booting Linux systems with complex storage setups.
+
+# =============================================================================
+# Package Groups
+# =============================================================================
+
+# All initramfs generators
+filegroup(
+    name = "all-initramfs-tools",
+    srcs = [
+        "system//initramfs/dracut:dracut",
+        "system//initramfs/mkinitcpio:mkinitcpio",
+        "system//initramfs/genkernel:genkernel",
+        "system//initramfs/initramfs-tools:initramfs-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Modern/recommended initramfs generators
+filegroup(
+    name = "modern-initramfs",
+    srcs = [
+        "system//initramfs/dracut:dracut",
+        "system//initramfs/mkinitcpio:mkinitcpio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Dracut (Fedora/RHEL/openSUSE default)
+filegroup(
+    name = "dracut-stack",
+    srcs = [
+        "system//initramfs/dracut:dracut",
+        "system//libs/kmod:kmod",
+        "system//init/eudev:eudev",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# mkinitcpio (Arch Linux default)
+filegroup(
+    name = "mkinitcpio-stack",
+    srcs = [
+        "system//initramfs/mkinitcpio:mkinitcpio",
+        "system//libs/kmod:kmod",
+        "system//init/eudev:eudev",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# genkernel (Gentoo default)
+filegroup(
+    name = "genkernel-stack",
+    srcs = [
+        "system//initramfs/genkernel:genkernel",
+        "system//libs/kmod:kmod",
+        "system//init/eudev:eudev",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# initramfs-tools (Debian/Ubuntu default)
+filegroup(
+    name = "initramfs-tools-stack",
+    srcs = [
+        "system//initramfs/initramfs-tools:initramfs-tools",
+        "system//libs/kmod:kmod",
+        "system//init/eudev:eudev",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Base dependencies for all initramfs tools
+filegroup(
+    name = "initramfs-base-deps",
+    srcs = [
+        "system//libs/kmod:kmod",
+        "system//init/eudev:eudev",
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "system//apps/coreutils:coreutils",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Full boot stack - everything needed to boot from initramfs
+filegroup(
+    name = "full-boot-stack",
+    srcs = [
+        # Initramfs generator (pick one)
+        "system//initramfs/dracut:dracut",
+        # Kernel module management
+        "system//libs/kmod:kmod",
+        # Device management
+        "system//init/eudev:eudev",
+        # Filesystem tools
+        "system//filesystem/management/lvm2:lvm2",
+        "system//filesystem/management/mdadm:mdadm",
+        "system//filesystem/management/cryptsetup:cryptsetup",
+        # Bootloader
+        "boot//grub:grub",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Minimal boot stack - just the essentials
+filegroup(
+    name = "minimal-boot-stack",
+    srcs = [
+        "system//initramfs/dracut:dracut",
+        "system//libs/kmod:kmod",
+        "system//init/eudev:eudev",
+        "boot//grub:grub",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

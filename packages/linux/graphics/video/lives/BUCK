@@ -1,0 +1,39 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# LiVES - Video editing system and VJ tool
+
+download_source(
+    name = "lives-src",
+    src_uri = "http://lives-video.com/releases/LiVES-3.2.0.tar.bz2",
+    sha256 = "5aa438b5af7e97f77bbbeadf032cfd8d64aca0a880780180600d5aada05c229a",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "lives",
+    source = ":lives-src",
+    version = "3.2.0",
+    description = "Video editing system and VJ tool",
+    homepage = "http://lives-video.com/",
+    license = "GPL-3.0-or-later",
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-shared",
+        "--disable-static",
+    ],
+    make_args = [],
+    post_install = """
+DESTDIR=$OUT make install
+""",
+    deps = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "desktop//gtk:gtk3",
+        # "core//frei0r:frei0r",  # TODO: not packaged yet,
+        "audio//daemons/pulseaudio:pulseaudio",
+    ],
+    bdepend = [
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    visibility = ["PUBLIC"],
+)

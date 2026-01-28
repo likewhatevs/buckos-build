@@ -1,0 +1,107 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "vim",
+    version = "9.1.0",
+    src_uri = "https://github.com/vim/vim/archive/v9.1.0.tar.gz",
+    sha256 = "ddb435f6e386c53799a3025bdc5a3533beac735a0ee596cb27ada97366a1c725",
+    signature_required = False,
+    description = "Highly configurable text editor built to make creating and changing any kind of text very efficient",
+    homepage = "https://www.vim.org/",
+    license = "Vim",
+
+    # USE flags this package supports
+    iuse = [
+        "X",
+        "acl",
+        "crypt",
+        "cscope",
+        "debug",
+        "gpm",
+        "gtk",
+        "lua",
+        "minimal",
+        "ncurses",
+        "nls",
+        "perl",
+        "python",
+        "racket",
+        "ruby",
+        "selinux",
+        "sound",
+        "tcl",
+        "terminal",
+        "vim-pager",
+    ],
+
+    # Default USE flags
+    use_defaults = ["ncurses"],
+
+    # Conditional dependencies
+    use_deps = {
+        "python": ["lang//python:python"],
+        "perl": ["lang//perl:perl"],
+        "ruby": ["lang//ruby:ruby"],
+        "lua": ["lang//lua:lua"],
+        "ncurses": ["core//ncurses:ncurses"],
+    },
+
+    # Conditional configure arguments
+    use_configure = {
+        "-X": "--without-x",
+        "-acl": "--disable-acl",
+        "-crypt": "--disable-crypt",
+        "-cscope": "--disable-cscope",
+        "-debug": "--disable-debug",
+        "-gpm": "--disable-gpm",
+        "-gtk": "--enable-gui=no",
+        "-lua": "--disable-luainterp",
+        "-minimal": "--disable-minimal",
+        "-nls": "--disable-nls",
+        "-perl": "--disable-perlinterp",
+        "-python": "--disable-python3",
+        "-racket": "--disable-racket",
+        "-ruby": "--disable-rubyinterp",
+        "-selinux": "--disable-selinux",
+        "-sound": "--disable-sound",
+        "-tcl": "--disable-tcl",
+        "-terminal": "--disable-terminal",
+        "-vim-pager": "--disable-vim-pager",
+        "X": "--with-x",
+        "acl": "--enable-acl",
+        "crypt": "--enable-crypt",
+        "cscope": "--enable-cscope",
+        "debug": "--enable-debug",
+        "gpm": "--enable-gpm",
+        "gtk": "--enable-gui=gtk3",
+        "lua": "--enable-luainterp",
+        "minimal": "--enable-minimal",
+        "nls": "--enable-nls",
+        "perl": "--enable-perlinterp",
+        "python": "--enable-python3interp",
+        "racket": "--enable-racket",
+        "ruby": "--enable-rubyinterp",
+        "selinux": "--enable-selinux",
+        "sound": "--enable-sound",
+        "tcl": "--enable-tcl",
+        "terminal": "--enable-terminal",
+        "vim-pager": "--enable-vim-pager",
+    },
+
+    # Base configure arguments (always applied)
+    configure_args = [
+        "--with-features=huge",
+        "--enable-multibyte",
+        "--disable-netbeans",
+    ],
+
+    pre_configure = """
+# Vim source is in src directory, need to run configure from there
+cd src
+""",
+
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,453 @@
+#!/usr/bin/env python3
+"""
+Generate a standalone shell script for downloading all BuckOS sources.
+
+This script scans BUCK files and generates a self-contained bash script
+that can be run on any system with curl/wget to download all sources.
+
+Perfect for creating mirror servers or offline builds.
+
+Usage:
+    ./scripts/generate-download-script.py > download-all.sh
+    ./scripts/generate-download-script.py --output downloads.sh --rate-limit 5
+
+    # On mirror server:
+    bash download-all.sh
+"""
+
+import argparse
+import os
+import re
+import sys
+from pathlib import Path
+from typing import List, Tuple
+from urllib.parse import urlparse
+
+
+def extract_downloads_from_buck_files() -> List[Tuple[str, str, str]]:
+    """
+    Parse BUCK files to extract download information.
+
+    Returns:
+        List of (package_name, url, sha256) tuples
+    """
+    downloads = []
+    buck_files = []
+    unstable_urls = []
+
+    # Find all BUCK files
+    for root, dirs, files in os.walk("packages"):
+        # Skip hidden directories
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for file in files:
+            if file == "BUCK":
+                buck_files.append(os.path.join(root, file))
+
+    print(f"Scanning {len(buck_files)} BUCK files...", file=sys.stderr)
+
+    for buck_file in buck_files:
+        try:
+            with open(buck_file, "r") as f:
+                content = f.read()
+
+            # Remove comments to avoid matching commented-out URLs
+            # Remove single-line comments
+            content = re.sub(r'#[^\n]*', '', content)
+
+            # Extract package name from path as fallback
+            package_path = buck_file.replace("packages/", "").replace("/BUCK", "")
+
+            # Find download_source and http_file calls with their associated package names
+            # Pattern: Look for name field near src_uri
+            # First, split into individual rule definitions
+            rules = re.split(r'\n(?=\w+_package\(|download_source\(|http_file\()', content)
+
+            for rule in rules:
+                # Extract name field if present
+                name_match = re.search(r'name\s*=\s*"([^"]+)"', rule)
+                package_name = name_match.group(1) if name_match else package_path
+
+                # Clean up package name - remove -src suffix and lowercase
+                package_name = package_name.replace("-src", "").lower()
+
+                # Find src_uri and sha256 in this rule
+                pattern = r'src_uri\s*=\s*"([^"]+)"[^}]*?sha256\s*=\s*"([^"]+)"'
+                matches = re.findall(pattern, rule, re.DOTALL)
+
+                for url, sha256 in matches:
+                    # Skip empty or placeholder URLs
+                    if url and not url.startswith("...") and sha256 and sha256 != "0" * 64:
+                        # Mark unstable GitHub archive URLs (will skip verification)
+                        if "/archive/" in url and "/refs/heads/" in url:
+                            unstable_urls.append((package_name, url))
+                            print(f"Warning: Unstable URL (will skip verification): {url}", file=sys.stderr)
+                            # Add with empty checksum to indicate no verification
+                            downloads.append((package_name, url, ""))
+                        else:
+                            downloads.append((package_name, url, sha256))
+
+            # Also look for name field to get better package names
+            name_pattern = r'name\s*=\s*"([^"]+)"'
+            names = re.findall(name_pattern, content)
+
+        except Exception as e:
+            print(f"Warning: Failed to parse {buck_file}: {e}", file=sys.stderr)
+
+    # Deduplicate by URL
+    seen_urls = set()
+    unique_downloads = []
+    for pkg, url, sha256 in downloads:
+        if url not in seen_urls:
+            seen_urls.add(url)
+            unique_downloads.append((pkg, url, sha256))
+
+    if unstable_urls:
+        print(f"\nFound {len(unstable_urls)} unstable URLs (branch archives)", file=sys.stderr)
+        print("Note: Checksum verification will be skipped for these files", file=sys.stderr)
+        print("Recommend using tagged releases instead of branch heads for reproducible builds", file=sys.stderr)
+
+    return unique_downloads
+
+
+def generate_shell_script(
+    downloads: List[Tuple[str, str, str]],
+    output_dir: str = "downloads",
+    rate_limit: float = 5.0,
+    use_wget: bool = False,
+    skip_verification: bool = False,
+) -> str:
+    """
+    Generate a standalone shell script for downloading all sources.
+
+    Args:
+        downloads: List of (package_name, url, sha256) tuples
+        output_dir: Output directory for downloads
+        rate_limit: Downloads per second
+        use_wget: Use wget instead of curl
+
+    Returns:
+        Shell script as string
+    """
+
+    download_cmd = "wget" if use_wget else "curl"
+
+    script = f"""#!/bin/bash
+#
+# BuckOS Source Download Script
+# Generated by scripts/generate-download-script.py
+#
+# This script downloads all source files needed to build BuckOS.
+# Run this on your mirror server or for offline builds.
+#
+# Total files: {len(downloads)}
+# Rate limit: {rate_limit} requests/second
+#
+
+# Configuration
+# Note: We don't use 'set -e' so that failed downloads don't stop the entire script
+OUTPUT_DIR="{output_dir}"
+RATE_LIMIT={rate_limit}
+PARALLEL_JOBS=4
+TOTAL_FILES={len(downloads)}
+
+# Colors for output
+RED='\\033[0;31m'
+GREEN='\\033[0;32m'
+YELLOW='\\033[1;33m'
+NC='\\033[0m' # No Color
+
+# Statistics
+DOWNLOADED=0
+CACHED=0
+FAILED=0
+BYTES_DOWNLOADED=0
+
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
+
+# Function to verify SHA256
+verify_sha256() {{
+    local file="$1"
+    local expected="$2"
+
+    if [ -z "$expected" ]; then
+        return 0  # No checksum to verify
+    fi
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        echo "$expected  $file" | sha256sum -c --quiet
+    elif command -v shasum >/dev/null 2>&1; then
+        echo "$expected  $file" | shasum -a 256 -c --quiet
+    else
+        echo "${{YELLOW}}Warning: No SHA256 tool found, skipping verification${{NC}}" >&2
+        return 0
+    fi
+}}
+
+# Function to download a file
+download_file() {{
+    local url="$1"
+    local output="$2"
+    local sha256="$3"
+    local package="$4"
+
+    # Check if file exists and is valid
+    if [ -f "$output" ]; then
+        if verify_sha256 "$output" "$sha256" 2>/dev/null; then
+            echo "${{GREEN}}✓${{NC}} [$package] Cached: $(basename "$output")"
+            CACHED=$((CACHED + 1))
+            return 0
+        else
+            echo "${{YELLOW}}✗${{NC}} [$package] Checksum mismatch for cached $(basename "$output"), re-downloading..."
+            rm -f "$output"
+        fi
+    fi
+
+    # Rate limiting (simple sleep-based)
+    sleep $(echo "scale=4; 1.0 / $RATE_LIMIT" | bc -l)
+
+    # Create parent directory
+    mkdir -p "$(dirname "$output")"
+
+    # Download with retries
+    local max_retries=3
+    local attempt=1
+
+    while [ $attempt -le $max_retries ]; do
+        echo "⬇ [$package] Downloading $(basename "$output") (attempt $attempt/$max_retries)..."
+
+        if [ "{download_cmd}" = "curl" ]; then
+            if curl -f -L -o "$output.tmp" --connect-timeout 30 --max-time 300 "$url"; then
+                break
+            fi
+        else
+            if wget -O "$output.tmp" --connect-timeout=30 --read-timeout=300 "$url"; then
+                break
+            fi
+        fi
+
+        attempt=$((attempt + 1))
+        if [ $attempt -le $max_retries ]; then
+            sleep $((2 ** (attempt - 1)))  # Exponential backoff
+        fi
+    done
+
+    if [ $attempt -gt $max_retries ]; then
+        echo "${{RED}}✗ [$package] Failed to download: $(basename "$output")${{NC}}" >&2
+        echo "   URL: $url" >&2
+        FAILED=$((FAILED + 1))
+        rm -f "$output.tmp"
+        return 1
+    fi
+
+    # Verify checksum (if enabled)
+    if [ "{skip_verification}" != "True" ]; then
+        if ! verify_sha256 "$output.tmp" "$sha256"; then
+            echo "${{RED}}✗ SHA256 mismatch for: $(basename "$output")${{NC}}" >&2
+            echo "${{YELLOW}}  (Use --skip-verification to download anyway)${{NC}}" >&2
+            FAILED=$((FAILED + 1))
+            rm -f "$output.tmp"
+            return 1
+        fi
+    fi
+
+    # Move to final location
+    mv "$output.tmp" "$output"
+
+    local size=$(stat -f%z "$output" 2>/dev/null || stat -c%s "$output" 2>/dev/null || echo 0)
+    local size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc -l)
+
+    echo "${{GREEN}}✓${{NC}} [$package] Downloaded: $(basename "$output") (${{size_mb}} MB)"
+    DOWNLOADED=$((DOWNLOADED + 1))
+    BYTES_DOWNLOADED=$((BYTES_DOWNLOADED + size))
+
+    return 0
+}}
+
+# Print header
+echo "========================================"
+echo "BuckOS Source Download Script"
+echo "========================================"
+echo "Output directory: $OUTPUT_DIR"
+echo "Total files: $TOTAL_FILES"
+echo "Rate limit: $RATE_LIMIT req/sec"
+echo "========================================"
+echo ""
+
+# Check for required tools
+if ! command -v {download_cmd} >/dev/null 2>&1; then
+    echo "${{RED}}Error: {download_cmd} not found. Please install {download_cmd}.${{NC}}" >&2
+    exit 1
+fi
+
+if ! command -v bc >/dev/null 2>&1; then
+    echo "${{YELLOW}}Warning: bc not found. Rate limiting will be disabled.${{NC}}" >&2
+    RATE_LIMIT=0
+fi
+
+# Download all files
+echo "Starting downloads..."
+echo ""
+
+"""
+
+    # Add download commands for each file
+    for i, (package, url, sha256) in enumerate(downloads, 1):
+        # Extract filename from URL
+        parsed = urlparse(url)
+        original_filename = os.path.basename(parsed.path)
+
+        if not original_filename:
+            original_filename = f"file_{i}"
+
+        # Create new filename with package name prefix
+        # Format: package-name-version.tar.gz
+        # But avoid duplicates if filename already starts with package name
+        if original_filename.lower().startswith(package.lower() + "-"):
+            filename = original_filename
+        else:
+            filename = f"{package}-{original_filename}"
+
+        # Create subdirectory based on first letter of package name
+        first_letter = package[0].lower() if package else 'other'
+        output_path = f"$OUTPUT_DIR/{first_letter}/{filename}"
+
+        # Escape special characters in URL
+        url_escaped = url.replace('"', '\\"').replace('$', '\\$')
+
+        script += f"""# [{i}/{len(downloads)}] {package}
+download_file "{url_escaped}" "{output_path}" "{sha256}" "{package}"
+
+"""
+
+    # Add summary
+    script += f"""
+# Print summary
+echo ""
+echo "========================================"
+echo "Download Complete!"
+echo "========================================"
+echo "Downloaded: $DOWNLOADED"
+echo "Cached: $CACHED"
+echo "Failed: $FAILED"
+SIZE_MB=$(echo "scale=2; $BYTES_DOWNLOADED / 1024 / 1024" | bc -l 2>/dev/null || echo "0")
+echo "Total size: ${{SIZE_MB}} MB"
+echo "========================================"
+
+if [ $FAILED -gt 0 ]; then
+    echo ""
+    echo "${{YELLOW}}Warning: $FAILED files failed to download.${{NC}}"
+    echo "Common causes:"
+    echo "  - 404 errors: URL may be incorrect or file moved"
+    echo "  - Network issues: temporary outages"
+    echo "  - Rate limiting: server rejected too many requests"
+    echo ""
+    echo "You can:"
+    echo "  1. Re-run this script (it will skip successful downloads)"
+    echo "  2. Check BUCK files for incorrect URLs"
+    echo "  3. Wait and try again later"
+fi
+
+# Create manifest
+cat > "$OUTPUT_DIR/MANIFEST.txt" << 'MANIFEST_EOF'
+BuckOS Source Mirror Manifest
+Generated: $(date)
+
+Total files: {len(downloads)}
+Downloaded: $DOWNLOADED
+Cached: $CACHED
+Failed: $FAILED
+Total size: ${{SIZE_MB}} MB
+
+Files:
+MANIFEST_EOF
+
+# List all files
+find "$OUTPUT_DIR" -type f ! -name "MANIFEST.txt" | sort >> "$OUTPUT_DIR/MANIFEST.txt"
+
+echo ""
+echo "Manifest created: $OUTPUT_DIR/MANIFEST.txt"
+
+if [ $FAILED -gt 0 ]; then
+    echo ""
+    echo "${{RED}}Warning: $FAILED files failed to download.${{NC}}"
+    echo "You can re-run this script to retry failed downloads."
+    exit 1
+fi
+
+exit 0
+"""
+
+    return script
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate a standalone shell script for downloading all BuckOS sources"
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        help="Output script file (default: stdout)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        "-d",
+        type=str,
+        default="downloads",
+        help="Download directory in generated script (default: downloads)",
+    )
+    parser.add_argument(
+        "--rate-limit",
+        "-r",
+        type=float,
+        default=5.0,
+        help="Downloads per second (default: 5.0)",
+    )
+    parser.add_argument(
+        "--wget",
+        action="store_true",
+        help="Use wget instead of curl",
+    )
+    parser.add_argument(
+        "--skip-verification",
+        action="store_true",
+        help="Skip SHA256 checksum verification (faster, less safe)",
+    )
+
+    args = parser.parse_args()
+
+    # Extract downloads from BUCK files
+    downloads = extract_downloads_from_buck_files()
+
+    if not downloads:
+        print("Error: No downloads found!", file=sys.stderr)
+        return 1
+
+    print(f"Found {len(downloads)} unique source files", file=sys.stderr)
+
+    # Generate shell script
+    script = generate_shell_script(
+        downloads,
+        output_dir=args.output_dir,
+        rate_limit=args.rate_limit,
+        use_wget=args.wget,
+        skip_verification=args.skip_verification,
+    )
+
+    # Write to output
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(script)
+        os.chmod(args.output, 0o755)  # Make executable
+        print(f"Generated: {args.output}", file=sys.stderr)
+        print(f"Run with: bash {args.output}", file=sys.stderr)
+    else:
+        print(script)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

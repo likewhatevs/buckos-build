@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "wan",
+    version = "2.2.0",
+    src_uri = "https://github.com/Wan-Video/Wan2.2/archive/refs/heads/main.tar.gz",
+    sha256 = "214cbdf14307317c5d5beb881baba9e91f4c34117bef914e8092689442cc47fe",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "dev-libs//python/numpy:numpy",
+        "graphics//bitmap/opencv:opencv",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/tqdm:tqdm",
+        "ai//nlp/transformers:transformers",
+    ],
+)

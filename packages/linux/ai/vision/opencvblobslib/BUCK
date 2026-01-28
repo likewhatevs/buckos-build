@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "opencvblobslib",
+    version = "1.0.1",
+    src_uri = "https://github.com/OpenCVBlobsLib/opencvblobslib/archive/refs/heads/master.tar.gz",
+    sha256 = "fd62ad1defe6de4fd3a9b15b7da27ab088b6101ffb0d644171d7161eb83dff03",
+    deps = [
+        "ai//vision/opencv:opencv",
+    ],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# tshark - Command-line network protocol analyzer (Wireshark CLI)
+# =============================================================================
+
+autotools_package(
+    name = "tshark",
+    version = "4.2.3",
+    src_uri = "https://www.wireshark.org/download/src/all-versions/wireshark-4.2.3.tar.xz",
+    sha256 = "958bd5996f543d91779b1a4e7e952dcd7b0245fe82194202c3333a8f78795811",
+    signature_required = False,
+
+
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "lua": ["dev-tools//lua"],
+        "zlib": ["core//zlib:zlib"],
+        "nghttp2": ["network//nghttp2:nghttp2"],
+    },
+
+
+    configure_args = [
+        "--disable-wireshark",
+        "--enable-tshark",
+        "--disable-editcap",
+        "--disable-capinfos",
+        "--disable-mergecap",
+        "--disable-text2pcap",
+        "--disable-dftest",
+        "--disable-randpkt",
+        "--disable-dumpcap",
+        "--disable-rawshark",
+    ],
+
+    deps = [
+        "network//libpcap:libpcap",
+        "dev-libs//glib:glib",
+    ],
+
+    description = "Command-line network protocol analyzer",
+    homepage = "https://www.wireshark.org/",
+    license = "GPL-2.0-or-later",
+    visibility = ["PUBLIC"],
+)

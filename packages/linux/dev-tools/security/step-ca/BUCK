@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "go_package")
+
+go_package(
+    name = "step-ca",
+    version = "0.28.3",
+    src_uri = "https://github.com/smallstep/certificates/archive/refs/tags/v0.28.3.tar.gz",
+    sha256 = "f7f5f6d875feb0060743a85999e3f6de5eeaa41ccd3588ec1bc560ed67b93eba",
+    bins = ["step-ca"],
+    packages = ["./cmd/step-ca"],
+    deps = [
+        "lang//go:go",
+        "system//security/smartcard:pcsc-lite",
+    ],
+    maintainers = ["buckos"],
+)

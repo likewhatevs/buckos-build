@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "cmake_package", "python_package")
+
+cmake_package(
+    name = "mlcommons-loadgen",
+    version = "5.1.1",
+    src_uri = "https://github.com/mlcommons/inference/archive/refs/tags/v5.1.1.tar.gz",
+    sha256 = "0c39c955203c83f1e98424e8feae868d6298890fa387ed1d3a1de864e3781d4d",
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_STANDARD=14",
+    ],
+    pre_configure = """
+        cd loadgen
+    """,
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)
+
+python_package(
+    name = "mlcommons-logging",
+    version = "5.1.0-rc4",
+    src_uri = "https://github.com/mlcommons/logging/archive/refs/tags/5.1.0-rc4.tar.gz",
+    sha256 = "bd59ead86835b2fb1a1e1bf8a52d77887608d55a6c4132f7318c44d814929c20",
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)

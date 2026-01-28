@@ -1,0 +1,33 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# gperf - Perfect hash function generator
+
+autotools_package(
+    name = "gperf",
+    # GNU release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "3.1",
+    src_uri = "https://mirrors.kernel.org/gnu/gperf/gperf-3.1.tar.gz",
+    sha256 = "588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2",
+    signature_sha256 = "0554c9102d257d266bb4d9fb4bf76737abcecfc84a06884de84f8f8ff21c23e0",
+    signature_required = False,
+    description = "Perfect hash function generator",
+    homepage = "https://www.gnu.org/software/gperf/",
+    license = "GPL-3",
+
+    iuse = ["doc"],
+    use_defaults = [],
+    use_configure = {
+        "doc": "--enable-doc",
+        "-doc": "--disable-doc",
+    },
+    configure_args = [
+        "--prefix=/usr",
+    ],
+
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

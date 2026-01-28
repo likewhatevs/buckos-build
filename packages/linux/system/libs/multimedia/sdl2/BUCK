@@ -1,0 +1,50 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "sdl2",
+    version = "2.30.8",
+    src_uri = "https://github.com/libsdl-org/SDL/releases/download/release-2.30.8/SDL2-2.30.8.tar.gz",
+    sha256 = "380c295ea76b9bd72d90075793971c8bcb232ba0a69a9b14da4ae8f603350058",
+    signature_required = False,
+    description = "Simple DirectMedia Layer - cross-platform multimedia library",
+    homepage = "https://www.libsdl.org/",
+    license = "Zlib",
+    iuse = ["X", "wayland", "opengl", "vulkan", "alsa", "pulseaudio", "pipewire", "static-libs"],
+    use_defaults = ["X", "wayland", "opengl", "vulkan", "alsa"],
+    use_configure = {
+        "X": "-DSDL_X11=ON",
+        "-X": "-DSDL_X11=OFF",
+        "wayland": "-DSDL_WAYLAND=ON",
+        "-wayland": "-DSDL_WAYLAND=OFF",
+        "opengl": "-DSDL_OPENGL=ON",
+        "-opengl": "-DSDL_OPENGL=OFF",
+        "vulkan": "-DSDL_VULKAN=ON",
+        "-vulkan": "-DSDL_VULKAN=OFF",
+        "alsa": "-DSDL_ALSA=ON",
+        "-alsa": "-DSDL_ALSA=OFF",
+        "pulseaudio": "-DSDL_PULSEAUDIO=ON",
+        "-pulseaudio": "-DSDL_PULSEAUDIO=OFF",
+        "pipewire": "-DSDL_PIPEWIRE=ON",
+        "-pipewire": "-DSDL_PIPEWIRE=OFF",
+        "static-libs": "-DSDL_SHARED=OFF -DSDL_STATIC=ON",
+        "-static-libs": "-DSDL_SHARED=ON -DSDL_STATIC=OFF",
+    },
+    use_deps = {
+        "alsa": ["system//libs/audio/alsa-lib:alsa-lib"],
+        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
+        "opengl": ["desktop//mesa:mesa"],
+        "vulkan": ["desktop//mesa:mesa"],
+    },
+    configure_args = [],
+    pre_configure = """
+mkdir -p build
+cd build
+# USE flags: X, wayland, opengl, vulkan, alsa, pulseaudio, pipewire, static-libs
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    $CONFIGURE_ARGS
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

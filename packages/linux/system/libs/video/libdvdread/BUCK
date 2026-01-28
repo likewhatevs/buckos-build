@@ -1,0 +1,36 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "libdvdread-src",
+    src_uri = "https://download.videolan.org/pub/videolan/libdvdread/6.1.3/libdvdread-6.1.3.tar.bz2",
+    sha256 = "ce35454997a208cbe50e91232f0e73fb1ac3471965813a13b8730a8f18a15369",
+    signature_sha256 = "822ade93d02b3185124261c6d3ed01d3c70f22ad68c102c9171792911726ef65",
+)
+
+# libdvdread - official release tarball includes pre-generated configure
+autotools_package(
+    name = "libdvdread",
+    # No autoreconf needed - tarball has pre-generated configure
+    bdepend = [],
+    src_prepare = "",
+    source = ":libdvdread-src",
+    iuse = ["css", "static-libs"],
+    use_configure = {
+        "-css": "--disable-css",
+        "-static-libs": "--disable-static",
+        "css": "--enable-css",
+        "static-libs": "--enable-static",
+    },
+    version = "6.1.3",
+    description = "Library for reading DVD video discs",
+    homepage = "https://www.videolan.org/developers/libdvdread.html",
+    license = "GPL-2.0-or-later",
+    configure_args = [
+        "--prefix=/usr",
+        "--disable-static",
+        "--enable-shared",
+    ],
+    deps = [],
+    visibility = ["PUBLIC"],
+)

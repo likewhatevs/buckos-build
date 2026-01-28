@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+
+download_source(
+    name = "assimp-src",
+    src_uri = "https://github.com/assimp/assimp/archive/refs/tags/v5.4.3.tar.gz",
+    sha256 = "66dfbaee288f2bc43172440a55d0235dfc7bf885dda6435c038e8000e79582cb",
+    signature_required = False,
+)
+
+binary_package(
+    name = "assimp",
+    srcs = [":assimp-src"],
+    version = "5.4.3",
+    visibility = ["PUBLIC"],
+)

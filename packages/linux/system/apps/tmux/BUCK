@@ -1,0 +1,60 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# tmux - Terminal multiplexer
+# USE flags: utf8proc, systemd, static-libs
+
+autotools_package(
+    name = "tmux",
+    version = "3.4",
+    src_uri = "https://github.com/tmux/tmux/releases/download/3.4/tmux-3.4.tar.gz",
+    sha256 = "551ab8dea0bf505c0ad6b7bb35ef567cdde0ccb84357df142c254f35a23e19aa",
+    signature_required = False,
+    description = "Terminal multiplexer with client-server model",
+    homepage = "https://tmux.github.io",
+    license = "ISC",
+    iuse = [
+        "debug",
+        "jemalloc",
+        "selinux",
+        "sixel",
+        "static-libs",
+        "systemd",
+        "utempter",
+        "utf8proc",
+        "vim-syntax",
+    ],
+    use_defaults = [],
+    use_deps = {
+        "systemd": ["system//init/systemd:systemd"],
+    },
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-jemalloc": "--disable-jemalloc",
+        "-selinux": "--disable-selinux",
+        "-sixel": "--disable-sixel",
+        "-static-libs": "--disable-static",
+        "-systemd": "--disable-systemd",
+        "-utempter": "--disable-utempter",
+        "-utf8proc": "--disable-utf8proc",
+        "-vim-syntax": "--disable-vim-syntax",
+        "debug": "--enable-debug",
+        "jemalloc": "--enable-jemalloc",
+        "selinux": "--enable-selinux",
+        "sixel": "--enable-sixel",
+        "static-libs": "--enable-static",
+        "systemd": "--enable-systemd",
+        "utempter": "--enable-utempter",
+        "utf8proc": "--enable-utf8proc",
+        "vim-syntax": "--enable-vim-syntax",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+    ],
+    deps = [
+        "core//ncurses:ncurses",
+        "system//libs/utility/libevent:libevent",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# cloc - Count lines of code
+download_source(
+    name = "cloc-src",
+    src_uri = "https://github.com/AlDanial/cloc/releases/download/v2.06/cloc-2.06.tar.gz",
+    sha256 = "27b6b007a5d482e5f50b23984cbe10f6a9f26e1052e9c7e010edfdcf879dc554",
+    signature_required = False,
+)
+
+binary_package(
+    name = "cloc",
+    srcs = [":cloc-src"],
+    version = "2.06",
+    description = "Count blank lines, comment lines, and physical lines of source code",
+    homepage = "https://github.com/AlDanial/cloc",
+    license = "GPL-2.0",
+    install_script = """
+        cd "$SRCS"
+        # cloc is a single Perl script, just install it
+        install -Dm755 cloc "$OUT/usr/bin/cloc"
+        # Install man page if it exists
+        if [ -f cloc.1 ]; then
+            install -Dm644 cloc.1 "$OUT/usr/share/man/man1/cloc.1"
+        fi
+    """,
+    deps = [
+        "lang//perl:perl",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,18 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "ucxx",
+    version = "0.43.00",
+    src_uri = "https://github.com/rapidsai/ucxx/archive/refs/tags/v0.43.00.tar.gz",
+    sha256 = "8b693b0bf3dfbcf2b8fce11095dfb2f396d940cfb9ee56ad93d7c9988b554d59",
+    cmake_args = [
+        "-DBUILD_TESTS=OFF",
+        "-DBUILD_BENCHMARKS=OFF",
+        "-DBUILD_EXAMPLES=OFF",
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DUCXX_ENABLE_RMM=OFF",
+    ],
+    deps = [
+        "network//libs/ucx:ucx",
+    ],
+)

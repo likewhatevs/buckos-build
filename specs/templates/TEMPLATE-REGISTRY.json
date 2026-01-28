@@ -1,0 +1,197 @@
+{
+  "version": "1.0.0",
+  "generated": "2025-12-27T14:00:00.000000",
+  "total_templates": 7,
+  "templates": [
+    {
+      "id": "TEMPLATE-001",
+      "name": "Simple Autotools Package",
+      "package_type": "simple_package",
+      "spec": "PACKAGE-SPEC-001",
+      "category": "general",
+      "description": "Basic package with configure script and Makefile",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "configure_args",
+        "make_args",
+        "deps",
+        "maintainers",
+        "patches"
+      ],
+      "example": "packages/linux/core/hello/BUCK"
+    },
+    {
+      "id": "TEMPLATE-002",
+      "name": "Autotools with USE Flags",
+      "package_type": "autotools_package",
+      "spec": "PACKAGE-SPEC-001",
+      "category": "general",
+      "description": "Full autotools package with USE flag support",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "iuse",
+        "use_configure",
+        "use_deps",
+        "configure_args",
+        "make_args",
+        "deps",
+        "build_deps",
+        "patches",
+        "maintainers"
+      ],
+      "example": "packages/linux/core/bash/BUCK"
+    },
+    {
+      "id": "TEMPLATE-003",
+      "name": "CMake Package",
+      "package_type": "cmake_package",
+      "spec": "PACKAGE-SPEC-002",
+      "category": "build-system",
+      "description": "Package using CMake build system",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "cmake_args",
+        "use_options",
+        "use_deps",
+        "iuse",
+        "deps",
+        "build_deps",
+        "patches",
+        "maintainers"
+      ],
+      "example": "specs/templates/cmake-package-template.bzl"
+    },
+    {
+      "id": "TEMPLATE-004",
+      "name": "Meson Package",
+      "package_type": "meson_package",
+      "spec": "PACKAGE-SPEC-002",
+      "category": "build-system",
+      "description": "Package using Meson/Ninja build system",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "meson_args",
+        "use_options",
+        "use_deps",
+        "iuse",
+        "deps",
+        "build_deps",
+        "patches",
+        "maintainers"
+      ],
+      "example": "specs/templates/meson-package-template.bzl"
+    },
+    {
+      "id": "TEMPLATE-005",
+      "name": "Rust/Cargo Package",
+      "package_type": "cargo_package",
+      "spec": "PACKAGE-SPEC-003",
+      "category": "language",
+      "description": "Rust project with Cargo",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "bins",
+        "cargo_args",
+        "iuse",
+        "use_features",
+        "use_deps",
+        "deps",
+        "build_deps",
+        "patches",
+        "env",
+        "maintainers"
+      ],
+      "example": "specs/templates/cargo-package-template.bzl"
+    },
+    {
+      "id": "TEMPLATE-006",
+      "name": "Go Package",
+      "package_type": "go_package",
+      "spec": "PACKAGE-SPEC-004",
+      "category": "language",
+      "description": "Go project with modules",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "bins",
+        "packages",
+        "go_build_args",
+        "iuse",
+        "use_tags",
+        "use_deps",
+        "deps",
+        "build_deps",
+        "patches",
+        "env",
+        "maintainers"
+      ],
+      "example": "specs/templates/go-package-template.bzl"
+    },
+    {
+      "id": "TEMPLATE-007",
+      "name": "Python Package",
+      "package_type": "python_package",
+      "spec": "PACKAGE-SPEC-005",
+      "category": "language",
+      "description": "Python package with pip/setuptools",
+      "required_fields": [
+        "name",
+        "version",
+        "src_uri",
+        "sha256"
+      ],
+      "optional_fields": [
+        "python",
+        "iuse",
+        "use_extras",
+        "use_deps",
+        "deps",
+        "build_deps",
+        "patches",
+        "maintainers"
+      ],
+      "example": "specs/templates/python-package-template.bzl"
+    }
+  ],
+  "by_category": {
+    "general": ["TEMPLATE-001", "TEMPLATE-002"],
+    "build-system": ["TEMPLATE-003", "TEMPLATE-004"],
+    "language": ["TEMPLATE-005", "TEMPLATE-006", "TEMPLATE-007"]
+  },
+  "by_spec": {
+    "PACKAGE-SPEC-001": ["TEMPLATE-001", "TEMPLATE-002"],
+    "PACKAGE-SPEC-002": ["TEMPLATE-003", "TEMPLATE-004"],
+    "PACKAGE-SPEC-003": ["TEMPLATE-005"],
+    "PACKAGE-SPEC-004": ["TEMPLATE-006"],
+    "PACKAGE-SPEC-005": ["TEMPLATE-007"]
+  }
+}

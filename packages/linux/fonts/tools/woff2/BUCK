@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+cmake_package(
+    name = "woff2",
+    version = "1.0.2",
+    src_uri = "https://github.com/google/woff2/archive/refs/tags/v1.0.2.tar.gz",
+    sha256 = "add272bb09e6384a4833ffca4896350fdb16e0ca22df68c0384773c67a175594",
+    signature_required = False,
+    description = "Reference implementation of the WOFF 2.0 webfont compression format",
+    homepage = "https://github.com/google/woff2",
+    license = "MIT",
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+    ],
+    deps = [
+        "system//libs/compression/brotli:brotli",
+    ],
+    visibility = ["PUBLIC"],
+)

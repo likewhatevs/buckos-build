@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+
+download_source(
+    name = "llvm-mingw-src",
+    src_uri = "https://github.com/mstorsjo/llvm-mingw/releases/download/20231017/llvm-mingw-20231017-msvcrt-ubuntu-20.04-x86_64.tar.xz",
+    sha256 = "256de631a9d0048a69a5b1768f0f409ba19db46ecdde9829559956f908241667",
+)
+
+binary_package(
+    name = "llvm-mingw",
+    srcs = [":llvm-mingw-src"],
+    version = "20231017",
+    install_script = """
+        mkdir -p "$OUT/opt/llvm-mingw"
+        cp -r "$SRCS"/* "$OUT/opt/llvm-mingw/"
+
+        # Create symlinks in /usr/bin for common tools
+        mkdir -p "$OUT/usr/bin"
+        for bin in clang clang++ lld llvm-ar llvm-nm llvm-objcopy llvm-objdump llvm-ranlib llvm-strip; do
+            if [ -f "$OUT/opt/llvm-mingw/bin/$bin" ]; then
+                ln -sf "/opt/llvm-mingw/bin/$bin" "$OUT/usr/bin/mingw-$bin"
+            fi
+        done
+    """,
+    visibility = ["PUBLIC"],
+)

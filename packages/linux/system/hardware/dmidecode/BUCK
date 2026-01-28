@@ -1,0 +1,37 @@
+# dmidecode - DMI Table Decoder
+# Reports BIOS and system information from SMBIOS/DMI tables
+
+load("@root//defs:package_defs.bzl", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "dmidecode-src",
+    src_uri = "https://github.com/mirror/dmidecode/archive/refs/tags/dmidecode-3-5.tar.gz",
+    sha256 = "5eb2cdca9b6b40b412b66231ac91ffa32baf2e3b27058c8cb2fd53d60844d04e",
+    signature_required = False,
+)
+
+make_package(
+    name = "dmidecode",
+    source = ":dmidecode-src",
+    iuse = ["selinux"],
+    use_configure = {
+        "-selinux": "--disable-selinux",
+        "selinux": "--enable-selinux",
+    },
+    version = "3.5",
+    description = "DMI/SMBIOS table decoder for BIOS and system information",
+    homepage = "https://www.nongnu.org/dmidecode/",
+    license = "GPL-2.0",
+    make_args = [
+        "prefix=/usr",
+        "sbindir=/usr/sbin",
+        "mandir=/usr/share/man",
+        "docdir=/usr/share/doc/dmidecode",
+    ],
+    src_install = """
+make DESTDIR="$DESTDIR" prefix=/usr sbindir=/usr/sbin install
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

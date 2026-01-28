@@ -1,0 +1,38 @@
+# Linux Kernel Packages for BuckOS
+#
+# The BuckOS kernel system provides:
+# - Modular configuration fragments for easy customization
+# - Pre-built kernel variants for different use cases
+# - Easy extension for custom kernels
+#
+# Main packages:
+#   buckos-kernel         - Default kernel with broad hardware support
+#   buckos-kernel-minimal - Smaller footprint, essential drivers only
+#   buckos-kernel-server  - Server-optimized configuration
+#   buckos-kernel-vm      - Optimized for VM guests
+#
+# Build commands:
+#   buck2 build kernel//buckos-kernel
+#   buck2 build kernel//configs:buckos-default
+
+# Export legacy kernel config for backward compatibility
+export_file(
+    name = "kernel.config",
+    src = "kernel.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Convenience alias for the default BuckOS kernel
+alias(
+    name = "default",
+    actual = "kernel//buckos-kernel:buckos-kernel",
+    visibility = ["PUBLIC"],
+)
+
+# Alias for linux-headers (many packages expect this)
+alias(
+    name = "linux-headers",
+    actual = "kernel//src:linux-src",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,90 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# NVIDIA CUTLASS - CUDA Templates for Linear Algebra Subroutines
+# CUTLASS is a collection of CUDA C++ template abstractions for implementing
+# high-performance matrix-multiplication (GEMM) and related computations at all levels
+# and scales within CUDA. It incorporates strategies for hierarchical decomposition and
+# data movement similar to those used to implement cuBLAS and cuDNN.
+
+cmake_package(
+    name = "cutlass",
+    version = "3.9.2",
+    src_uri = "https://github.com/NVIDIA/cutlass/archive/refs/tags/v3.9.2.tar.gz",
+    sha256 = "4b97bd6cece9701664eec3a634a1f2f2061d85bf76d843fa5799e1a692b4db0d",
+    signature_required = False,
+    description = "CUDA Templates for Linear Algebra Subroutines",
+    homepage = "https://github.com/NVIDIA/cutlass",
+    license = "BSD-3-Clause",
+
+    # CUTLASS requires C++17 and CUDA 11.4+
+    # It's primarily a header-only library with optional examples/tests
+    iuse = [
+        "clang-cuda",
+        "cublas",
+        "cudnn",
+        "dot",
+        "examples",
+        "headers-only",
+        "jumbo-build",
+        "performance",
+        "profiler",
+        "tests",
+        "tools",
+    ],
+    use_cmake = {
+        "-clang-cuda": "-DENABLE_CLANG_CUDA=OFF",
+        "-cublas": "-DENABLE_CUBLAS=OFF",
+        "-cudnn": "-DENABLE_CUDNN=OFF",
+        "-dot": "-DENABLE_DOT=OFF",
+        "-headers-only": "-DENABLE_HEADERS_ONLY=OFF",
+        "-jumbo-build": "-DENABLE_JUMBO_BUILD=OFF",
+        "-performance": "-DENABLE_PERFORMANCE=OFF",
+        "-profiler": "-DENABLE_PROFILER=OFF",
+        "clang-cuda": "-DENABLE_CLANG_CUDA=ON",
+        "cublas": "-DENABLE_CUBLAS=ON",
+        "cudnn": "-DENABLE_CUDNN=ON",
+        "dot": "-DENABLE_DOT=ON",
+        "headers-only": "-DENABLE_HEADERS_ONLY=ON",
+        "jumbo-build": "-DENABLE_JUMBO_BUILD=ON",
+        "performance": "-DENABLE_PERFORMANCE=ON",
+        "profiler": "-DENABLE_PROFILER=ON",
+    },
+    use_defaults = [],
+
+    # Dependencies - CUTLASS requires CUDA toolkit
+    # Note: You'll need to add the CUDA toolkit dependency when available
+    deps = [
+        # "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+    ],
+
+    # CMake configuration
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_STANDARD=17",
+        "-DCMAKE_CUDA_STANDARD=17",
+        "-DCUTLASS_ENABLE_HEADERS_ONLY=ON",  # Header-only by default
+        "-DCUTLASS_ENABLE_EXAMPLES=OFF",
+        "-DCUTLASS_ENABLE_TOOLS=OFF",
+        "-DCUTLASS_ENABLE_LIBRARY=OFF",
+        "-DCUTLASS_ENABLE_TESTS=OFF",
+        "-DCUTLASS_ENABLE_PROFILER=OFF",
+        "-DCUTLASS_NVCC_ARCHS=80;86;89;90",  # Common architectures (Ampere, Ada, Hopper)
+    ],
+
+    # USE flag -> CMake options mapping
+    use_options = {
+        "examples": "CUTLASS_ENABLE_EXAMPLES",
+        "tests": "CUTLASS_ENABLE_TESTS",
+        "tools": "CUTLASS_ENABLE_TOOLS",
+    },
+
+    # Additional dependencies when USE flags are enabled
+    use_deps = {
+        "tests": [
+            # Google Test dependency if tests are enabled
+            # "dev-libs//testing/googletest:googletest",
+        ],
+    },
+
+    visibility = ["PUBLIC"],
+)

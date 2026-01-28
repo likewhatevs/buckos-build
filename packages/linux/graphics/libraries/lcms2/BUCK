@@ -1,0 +1,17 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+meson_package(
+    name = "lcms2",
+    version = "2.16",
+    src_uri = "https://github.com/mm2/Little-CMS/releases/download/lcms2.16/lcms2-2.16.tar.gz",
+    sha256 = "d873d34ad8b9b4cea010631f1a6228d4571da5ba8d3e9c80c4b8e9b8e3be50b6",
+    description = "Little CMS - color management engine",
+    homepage = "https://www.littlecms.com/",
+    license = "MIT",
+    meson_args = [
+        "-Djpeg=disabled",
+        "-Dtiff=disabled",
+    ],
+    deps = [],
+    visibility = ["PUBLIC"],
+)

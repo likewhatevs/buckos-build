@@ -1,0 +1,18 @@
+--- a/units/meson.build
++++ b/units/meson.build
+@@ -231,11 +231,11 @@ units = [
+           'symlinks' : ['sysinit.target.wants/'],
+         },
+         { 'file' : 'sysinit.target' },
+         { 'file' : 'syslog.socket' },
+         {
+-          'file' : 'system-systemd\\x2dcryptsetup.slice',
++          'file' : 'system-systemd-cryptsetup.slice',
+           'conditions' : ['HAVE_LIBCRYPTSETUP'],
+         },
+         {
+-          'file' : 'system-systemd\\x2dveritysetup.slice',
++          'file' : 'system-systemd-veritysetup.slice',
+           'conditions' : ['HAVE_LIBCRYPTSETUP'],
+         },
+         { 'file' : 'system-update-cleanup.service' },

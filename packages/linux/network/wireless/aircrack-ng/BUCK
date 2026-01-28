@@ -1,0 +1,69 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "aircrack-ng",
+    version = "1.7",
+    src_uri = "https://download.aircrack-ng.org/aircrack-ng-1.7.tar.gz",
+    sha256 = "05a704e3c8f7792a17315080a21214a4448fd2452c1b0dd5226a3a55f90b58c3",
+    signature_required = False,
+
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+
+    iuse = [
+        "airdrop-ng",
+        "airgraph-ng",
+        "experimental",
+        "netlink",
+        "pcre",
+        "sqlite",
+        "ssl",
+    ],
+    use_defaults = ["ssl", "sqlite", "experimental"],
+
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "sqlite": ["system//libs/database/sqlite:sqlite"],
+    },
+
+    use_configure = {
+        "-airdrop-ng": "--disable-airdrop-ng",
+        "-airgraph-ng": "--disable-airgraph-ng",
+        "-experimental": "--without-experimental",
+        "-netlink": "--disable-netlink",
+        "-pcre": "--disable-pcre",
+        "-sqlite": "--without-sqlite3",
+        "-ssl": "--without-openssl",
+        "airdrop-ng": "--enable-airdrop-ng",
+        "airgraph-ng": "--enable-airgraph-ng",
+        "experimental": "--with-experimental",
+        "netlink": "--enable-netlink",
+        "pcre": "--enable-pcre",
+        "sqlite": "--with-sqlite3",
+        "ssl": "--with-openssl",
+    },
+
+    pre_configure = """
+autoreconf -fiv
+""",
+
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-shared",
+    ],
+
+    deps = [
+        "core//zlib:zlib",
+        "network//libpcap:libpcap",
+    ],
+
+    description = "WiFi security auditing tools suite",
+    homepage = "https://www.aircrack-ng.org/",
+    license = "GPL-2.0-or-later",
+    visibility = ["PUBLIC"],
+)

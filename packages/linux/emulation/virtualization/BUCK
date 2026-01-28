@@ -1,0 +1,43 @@
+# Virtualization tools aggregator
+
+filegroup(
+    name = "libvirt-full",
+    srcs = [
+        "emulation//virtualization/libvirt:libvirt",
+        "emulation//virtualization/libvirt:libvirt-client",
+        "emulation//virtualization/libvirt:libvirt-python",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "virt-manager-full",
+    srcs = [
+        "emulation//virtualization/virt-manager:virt-manager",
+        "emulation//virtualization/virt-manager:virt-install",
+        "emulation//virtualization/virt-manager:virt-viewer",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "management-tools",
+    srcs = [
+        ":libvirt-full",
+        ":virt-manager-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-virtualization",
+    srcs = [
+        ":libvirt-full",
+        ":virt-manager-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,44 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# libssh2 - SSH2 client library
+
+cmake_package(
+    name = "libssh2",
+    version = "1.11.1",
+    src_uri = "https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.1/libssh2-1.11.1.tar.xz",
+    sha256 = "9954cb54c4f548198a7cbebad248bdc87dd64bd26185708a294b2b50771e3769",
+    description = "Client-side library implementing the SSH2 protocol",
+    homepage = "https://www.libssh2.org/",
+    license = "BSD-3-Clause",
+    iuse = [
+        "gcrypt",
+        "mbedtls",
+        "openssl",
+        "static-libs",
+        "zlib",
+    ],
+    use_defaults = ["zlib", "openssl"],
+    deps = [],
+    use_deps = {
+        "openssl": ["system//libs/crypto/openssl:openssl"],
+        "mbedtls": ["dev-libs//crypto/mbedtls:mbedtls"],
+        "zlib": ["core//zlib:zlib"],
+    },
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_EXAMPLES=OFF",
+        "-DBUILD_TESTING=OFF",
+    ],
+    use_cmake = {
+        "-gcrypt": "-DENABLE_GCRYPT=OFF",
+        "-static-libs": "-DENABLE_STATIC_LIB=OFF",
+        "-zlib": "-DENABLE_ZLIB_COMPRESSION=OFF",
+        "gcrypt": "-DENABLE_GCRYPT=ON",
+        "mbedtls": "-DCRYPTO_BACKEND=mbedTLS",
+        "openssl": "-DCRYPTO_BACKEND=OpenSSL",
+        "static-libs": "-DENABLE_STATIC_LIB=ON",
+        "zlib": "-DENABLE_ZLIB_COMPRESSION=ON",
+    },
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,70 @@
+# CAD (Computer-Aided Design) packages
+# Comprehensive collection of open-source CAD tools for electronics, 2D drafting, and 3D modeling
+
+# Electronic Design Automation (EDA) packages
+filegroup(
+    name = "eda-packages",
+    srcs = [
+        "cad//eda/ngspice:ngspice",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# 2D CAD packages
+filegroup(
+    name = "2d-cad-packages",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# 3D CAD packages
+filegroup(
+    name = "3d-cad-packages",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Circuit simulation packages
+filegroup(
+    name = "simulation-packages",
+    srcs = [
+        "cad//eda/ngspice:ngspice",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# PCB design packages
+filegroup(
+    name = "pcb-packages",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Parametric modeling packages
+filegroup(
+    name = "parametric-packages",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All CAD packages
+filegroup(
+    name = "all",
+    srcs = [
+        ":eda-packages",
+        ":2d-cad-packages",
+        ":3d-cad-packages",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

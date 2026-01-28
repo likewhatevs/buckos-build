@@ -1,0 +1,45 @@
+# =============================================================================
+# whisper.cpp - Speech recognition in C/C++
+# =============================================================================
+#
+# whisper.cpp is a port of OpenAI's Whisper automatic speech recognition
+# (ASR) model in C/C++. Features include:
+# - Pure C/C++ implementation with no dependencies
+# - Support for all Whisper model sizes (tiny to large)
+# - Real-time and batch transcription
+# - Multiple language support
+# - CPU and GPU acceleration
+# - Various output formats (text, SRT, VTT, JSON)
+#
+# Provides several binaries:
+#   whisper-cli    - Command-line transcription tool
+#   whisper-server - HTTP API server for transcription
+#   whisper-stream - Real-time streaming transcription
+#
+# =============================================================================
+
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+cmake_package(
+    name = "whisper-cpp",
+    version = "1.7.2",
+    src_uri = "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.7.2.tar.gz",
+    sha256 = "d48e1b5b6ee18b931e98ac791eba838f83eb3b81bb8917db37fe9a79fa5e3ccb",
+    signature_required = False,
+    description = "Port of OpenAI's Whisper speech recognition model in C/C++",
+    homepage = "https://github.com/ggerganov/whisper.cpp",
+    license = "MIT",
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DGGML_NATIVE=ON",
+        "-DGGML_OPENMP=ON",
+        "-DWHISPER_BUILD_TESTS=OFF",
+        "-DWHISPER_BUILD_EXAMPLES=ON",
+        "-DWHISPER_BUILD_SERVER=ON",
+    ],
+    deps = [
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,87 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "krita-src",
+    src_uri = "https://download.kde.org/stable/krita/5.2.2/krita-5.2.2.tar.gz",
+    sha256 = "c1d2e4a36d7d8aa296d021e52be493cc679d3fe5e8aa4fc13c434d33e8154ce2",
+    signature_sha256 = "a19fb65d8946fc710f4a04cc010e3f7769241aa7fffaa701bba29efdddf24f53",
+)
+
+autotools_package(
+    name = "krita",
+    source = ":krita-src",
+    iuse = [
+        "color-management",
+        "fftw",
+        "gif",
+        "gsl",
+        "heif",
+        "jpeg2k",
+        "jpegxl",
+        "media",
+        "mypaint-brush-engine",
+        "openexr",
+        "pdf",
+        "raw",
+        "webp",
+    ],
+    use_configure = {
+        "-color-management": "--disable-color-management",
+        "-fftw": "--disable-fftw",
+        "-gif": "--without-gif",
+        "-gsl": "--disable-gsl",
+        "-heif": "--disable-heif",
+        "-jpeg2k": "--disable-jpeg2k",
+        "-jpegxl": "--disable-jpegxl",
+        "-media": "--disable-media",
+        "-mypaint-brush-engine": "--disable-mypaint-brush-engine",
+        "-openexr": "--disable-openexr",
+        "-pdf": "--disable-pdf",
+        "-raw": "--disable-raw",
+        "-webp": "--without-webp",
+        "color-management": "--enable-color-management",
+        "fftw": "--enable-fftw",
+        "gif": "--with-gif",
+        "gsl": "--enable-gsl",
+        "heif": "--enable-heif",
+        "jpeg2k": "--enable-jpeg2k",
+        "jpegxl": "--enable-jpegxl",
+        "media": "--enable-media",
+        "mypaint-brush-engine": "--enable-mypaint-brush-engine",
+        "openexr": "--enable-openexr",
+        "pdf": "--enable-pdf",
+        "raw": "--enable-raw",
+        "webp": "--with-webp",
+    },
+    version = "5.2.2",
+    description = "Digital painting and illustration application",
+    homepage = "https://krita.org/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF \
+    -DENABLE_UPDATERS=OFF \
+    -DFOUNDATION_BUILD=ON
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT make install
+""",
+    deps = [
+        "desktop//kde:kf5",
+        "desktop//qt:qt5",
+        "dev-libs//boost:boost",
+        "dev-libs//eigen:eigen",
+    ],
+    bdepend = [
+        "lang//python:python",
+    ],
+    visibility = ["PUBLIC"],
+)

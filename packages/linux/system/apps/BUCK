@@ -1,0 +1,156 @@
+# =============================================================================
+# System Applications - Package Groups
+# =============================================================================
+# This file contains convenience groups that aggregate individual system/apps packages.
+# Individual packages are located in their own subdirectories.
+
+# =============================================================================
+# Package aliases - Map subdirectory targets to this package
+# =============================================================================
+
+alias(
+    name = "coreutils",
+    actual = "system//apps/coreutils:coreutils",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "shadow",
+    actual = "system//apps/shadow:shadow",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# PACKAGE GROUPS
+# =============================================================================
+
+filegroup(
+    name = "cron-packages",
+    srcs = [
+        "system//apps/cronie:cronie",
+        "system//apps/dcron:dcron",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "monitoring-packages",
+    srcs = [
+        "system//apps/htop:htop",
+        "system//apps/lsof:lsof",
+        "system//apps/strace:strace",
+        "system//apps/psmisc:psmisc",
+        "core//procps-ng:procps-ng",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "privilege-packages",
+    srcs = [
+        "system//apps/sudo:sudo",
+        "system//apps/doas:doas",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "multiplexer-packages",
+    srcs = [
+        "system//apps/tmux:tmux",
+        "system//apps/screen:screen",
+        "system//apps/mosh:mosh",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "logging-packages",
+    srcs = [
+        "system//apps/rsyslog:rsyslog",
+        "system//apps/logrotate:logrotate",
+        "system//apps/lnav:lnav",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "entropy-packages",
+    srcs = [
+        "system//apps/haveged:haveged",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "process-monitoring-packages",
+    srcs = [
+        "system//apps/monit:monit",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "bpf-packages",
+    srcs = [
+        "system//libs/bpf/libbpf:libbpf",
+        "system//apps/bpf/bpftool:bpftool",
+        "system//apps/bpf/bpftrace:bpftrace",
+        "system//apps/bpf/bpftop:bpftop",
+        "system//apps/bpf/scx-scheds:scx-scheds",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "utility-packages",
+    srcs = [
+        "core//file:file",
+        "system//apps/which:which",
+        "system//apps/tree:tree",
+        "core//less:less",
+        "system//apps/findutils:findutils",
+        "system//apps/coreutils:coreutils",
+        "system//apps/tar:tar",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "user-management-packages",
+    srcs = [
+        "system//apps/shadow:shadow",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-sys-apps",
+    srcs = [
+        ":cron-packages",
+        ":monitoring-packages",
+        ":privilege-packages",
+        ":multiplexer-packages",
+        ":logging-packages",
+        ":utility-packages",
+        ":user-management-packages",
+        ":entropy-packages",
+        ":process-monitoring-packages",
+        ":bpf-packages",
+        "system//apps/rsync:rsync",
+        "system//apps/acpid:acpid",
+        "system//apps/at:at",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

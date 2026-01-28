@@ -1,0 +1,20 @@
+load("@root//defs:package_defs.bzl", "download_source", "precompiled_package")
+
+download_source(
+    name = "wasi-sysroot-source",
+    version = "25.0",
+    src_uri = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/wasi-sysroot-${VERSION}.tar.gz",
+    sha256 = "d09c62c18efcddffe4b2fdd8c5830109cc8e36130cdbc9acdc0bd1b204c942bb",
+)
+
+precompiled_package(
+    name = "wasi-sysroot",
+    version = "25.0",
+    source = ":wasi-sysroot-source",
+    extract_to = "/usr",
+    description = "WASI sysroot for WebAssembly",
+    homepage = "https://github.com/WebAssembly/wasi-sdk",
+    license = "Apache-2.0",
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)

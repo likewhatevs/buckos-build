@@ -1,0 +1,290 @@
+# =============================================================================
+# Network Packages - Filegroup Organization
+# =============================================================================
+# Individual package definitions are in their respective subdirectories.
+# This file provides convenient filegroups for organizing packages by category.
+
+# =============================================================================
+# Package aliases - Map subdirectory targets to this package
+# =============================================================================
+
+alias(
+    name = "openssh",
+    actual = "network//openssh:openssh",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "openssl",
+    actual = "system//libs/crypto/openssl:openssl",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "curl",
+    actual = "network//curl:curl",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "iproute2",
+    actual = "network//iproute2:iproute2",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Crypto Libraries - SSL/TLS and cryptography
+# =============================================================================
+
+filegroup(
+    name = "crypto-libs",
+    srcs = [
+        "system//libs/crypto/openssl:openssl",
+        "network//ca-certificates:ca-certificates",
+        "network//nghttp2:nghttp2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Transfer Utilities - File download and transfer tools
+# =============================================================================
+
+filegroup(
+    name = "transfer-utils",
+    srcs = [
+        "network//curl:curl",
+        "network//wget:wget",
+        "network//aria2:aria2",
+        "system//apps/rsync:rsync",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Text Browsers - Text-mode web browsers
+# =============================================================================
+
+filegroup(
+    name = "browsers",
+    srcs = [
+        "www//lynx:lynx",
+        "www//links:links",
+        "www//w3m:w3m",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Network Configuration - IP and interface management
+# =============================================================================
+
+filegroup(
+    name = "network-config",
+    srcs = [
+        "network//iproute2:iproute2",
+        "network//iputils:iputils",
+        "network//net-tools:net-tools",
+        "network//dhcpcd:dhcpcd",
+        "network//ethtool:ethtool",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Remote Access - SSH and remote connectivity
+# =============================================================================
+
+filegroup(
+    name = "remote-access",
+    srcs = [
+        "network//openssh:openssh",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# VPN Solutions - Virtual private network tools
+# =============================================================================
+
+filegroup(
+    name = "vpn",
+    srcs = [
+        "network//vpn:all-vpns",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Firewall - Network security and filtering
+# =============================================================================
+
+filegroup(
+    name = "firewall",
+    srcs = [
+        "network//firewall:all-firewalls",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# DNS - Domain Name System servers, tools, and libraries
+# =============================================================================
+
+filegroup(
+    name = "dns",
+    srcs = [
+        "network//dns:all-dns",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Network Analysis - Packet capture and analysis tools
+# =============================================================================
+
+filegroup(
+    name = "packet-capture",
+    srcs = [
+        "network//libpcap:libpcap",
+        "network//tcpdump:tcpdump",
+        "network//ngrep:ngrep",
+        "network//tshark:tshark",
+        "network//wireshark:wireshark",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "bandwidth-monitors",
+    srcs = [
+        "network//iftop:iftop",
+        "network//bmon:bmon",
+        "network//vnstat:vnstat",
+        "network//darkstat:darkstat",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "network-diagnostics",
+    srcs = [
+        "network//mtr:mtr",
+        "network//fping:fping",
+        "network//arping:arping",
+        "network//iperf3:iperf3",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "security-scanners",
+    srcs = [
+        "network//nmap:nmap",
+        "network//masscan:masscan",
+        "network//hping3:hping3",
+        "network//ettercap:ettercap",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "network-analysis",
+    srcs = [
+        ":packet-capture",
+        ":bandwidth-monitors",
+        ":network-diagnostics",
+        ":security-scanners",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Network Utilities - General networking tools
+# =============================================================================
+
+filegroup(
+    name = "network-utils",
+    srcs = [
+        "network//socat:socat",
+        "network//netcat:netcat",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Wireless Tools - WiFi, Bluetooth, and SDR
+# =============================================================================
+
+filegroup(
+    name = "wireless",
+    srcs = [
+        "network//wireless:all",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All Network Tools - Combined category
+# =============================================================================
+
+filegroup(
+    name = "network-tools",
+    srcs = [
+        ":network-config",
+        ":network-analysis",
+        ":network-utils",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Messaging - Instant messaging and communication
+# =============================================================================
+
+filegroup(
+    name = "messaging",
+    srcs = [
+        "network//signal-desktop:signal-desktop",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All Network Packages
+# =============================================================================
+
+filegroup(
+    name = "all",
+    srcs = [
+        ":crypto-libs",
+        ":transfer-utils",
+        ":browsers",
+        ":network-tools",
+        ":remote-access",
+        ":vpn",
+        ":firewall",
+        ":wireless",
+        ":dns",
+        ":messaging",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

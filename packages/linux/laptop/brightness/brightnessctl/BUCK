@@ -1,0 +1,33 @@
+# brightnessctl - Read and control device brightness
+# A program to read and control device brightness on Linux
+
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "brightnessctl-src",
+    src_uri = "https://github.com/Hummer12007/brightnessctl/archive/refs/tags/0.5.1.tar.gz",
+    sha256 = "a68869e23f56ac4f2e28f1783002810ddbf10f95e1af9b48b2912fb169f46994",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+autotools_package(
+    name = "brightnessctl",
+    source = ":brightnessctl-src",
+    version = "0.5.1",
+    description = "Read and control device brightness for laptops",
+    homepage = "https://github.com/Hummer12007/brightnessctl",
+    license = "MIT",
+    configure_args = [],
+    make_args = [
+        "PREFIX=/usr",
+        "INSTALL_UDEV_RULES=1",
+        "UDEVDIR=/usr/lib/udev/rules.d",
+    ],
+    deps = [
+        "system//init/systemd:systemd",
+    ],
+    visibility = ["PUBLIC"],
+)

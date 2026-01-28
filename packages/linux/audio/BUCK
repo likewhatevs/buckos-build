@@ -1,0 +1,117 @@
+# Audio packages - sound servers, players, production tools, libraries, and utilities
+
+# Audio daemons and sound servers
+filegroup(
+    name = "daemons",
+    srcs = [
+        "audio//daemons:all-daemons",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Audio players
+filegroup(
+    name = "players",
+    srcs = [
+        "audio//players:all-players",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Music production and DAWs
+filegroup(
+    name = "production",
+    srcs = [
+        "audio//production:all-production",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Audio libraries and codecs
+filegroup(
+    name = "libraries",
+    srcs = [
+        "audio//libraries:all-libraries",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Audio utilities
+filegroup(
+    name = "utilities",
+    srcs = [
+        "audio//utilities:all-utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential audio packages (ALSA + PulseAudio/PipeWire)
+filegroup(
+    name = "essential",
+    srcs = [
+        "audio//daemons/alsa-lib:alsa-lib",
+        "audio//daemons/alsa-utils:alsa-utils",
+        "audio//daemons/pipewire:pipewire",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Console audio setup (minimal TUI/CLI audio)
+filegroup(
+    name = "console",
+    srcs = [
+        "audio//daemons/alsa-lib:alsa-lib",
+        "audio//daemons/alsa-utils:alsa-utils",
+        "audio//players/cmus:cmus",
+        "audio//players/moc:moc",
+        "audio//players/mpd:mpd",
+        "audio//utilities/sox:sox",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop audio setup (full GUI audio)
+filegroup(
+    name = "desktop",
+    srcs = [
+        ":essential",
+        "audio//utilities/pavucontrol:pavucontrol",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Music production setup
+filegroup(
+    name = "studio",
+    srcs = [
+        ":essential",
+        "audio//daemons/jack2:jack2",
+        "audio//production:all-production",
+        "audio//libraries:all-libraries",
+        "audio//utilities/sox:sox",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All audio packages
+filegroup(
+    name = "all",
+    srcs = [
+        ":daemons",
+        ":players",
+        ":production",
+        ":libraries",
+        ":utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

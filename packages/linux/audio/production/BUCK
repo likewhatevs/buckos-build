@@ -1,0 +1,20 @@
+# Music production and audio editing tools
+
+filegroup(
+    name = "daws",
+    srcs = [
+        "audio//production/lmms:lmms",
+        "audio//production/rosegarden:rosegarden",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-production",
+    srcs = [
+        ":daws",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

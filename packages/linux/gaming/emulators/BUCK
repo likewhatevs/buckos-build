@@ -1,0 +1,36 @@
+# Game emulators - Console and retro gaming
+
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+filegroup(
+    name = "emulators",
+    srcs = [
+        "gaming//emulators/retroarch:retroarch",
+        "gaming//emulators/dolphin:dolphin",
+        "gaming//emulators/pcsx2:pcsx2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Retro gaming (classic consoles)
+filegroup(
+    name = "retro-emulators",
+    srcs = [
+        "gaming//emulators/retroarch:retroarch",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Modern console emulators
+filegroup(
+    name = "modern-emulators",
+    srcs = [
+        "gaming//emulators/dolphin:dolphin",
+        "gaming//emulators/pcsx2:pcsx2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

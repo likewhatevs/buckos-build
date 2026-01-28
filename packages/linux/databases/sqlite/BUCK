@@ -1,0 +1,57 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# SQLite - Self-contained SQL database engine
+
+autotools_package(
+    name = "sqlite",
+    version = "3.45.1",
+    src_uri = "https://www.sqlite.org/2024/sqlite-autoconf-3450100.tar.gz",
+    sha256 = "cd9c27841b7a5932c9897651e20b86c701dd740556989b01ca596fcfa3d49a0a",
+    description = "Self-contained, serverless SQL database engine",
+    homepage = "https://www.sqlite.org/",
+    license = "public-domain",
+    iuse = [
+        "debug",
+        "fts5",
+        "icu",
+        "json1",
+        "readline",
+        "rtree",
+        "secure-delete",
+        "session",
+        "static-libs",
+        "tcl",
+        "tools",
+    ],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-icu": "--disable-icu",
+        "-readline": "--without-readline",
+        "-static-libs": "--disable-static",
+        "-tcl": "--disable-tcl",
+        "-tools": "--disable-tools",
+        "debug": "--enable-debug",
+        "icu": "--enable-icu",
+        "readline": "--with-readline",
+        "static-libs": "--enable-static",
+        "tcl": "--enable-tcl",
+        "tools": "--enable-tools",
+    },
+    use_defaults = ["fts5", "json1", "rtree"],
+    deps = [
+        "core//readline:readline",
+        "core//zlib:zlib",
+    ],
+    configure_args = [
+        "--prefix=${PREFIX}",
+        "--enable-shared",
+        "--disable-static",
+        "--enable-readline",
+    ],
+    # SQLite compile-time options - required for Qt6: SQLITE_ENABLE_COLUMN_METADATA
+    # Use env to set CPPFLAGS to avoid overriding the bootstrap toolchain's CFLAGS
+    env = {
+        "CPPFLAGS": "-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_COLUMN_METADATA",
+    },
+    visibility = ["PUBLIC"],
+)

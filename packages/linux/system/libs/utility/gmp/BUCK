@@ -1,0 +1,56 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# GMP - official tarball includes pre-generated configure
+download_source(
+    name = "gmp-src",
+    src_uri = "https://mirror.buckos.org/g/gmp-6.3.0.tar.xz",
+    sha256 = "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
+    signature_sha256 = "94def8c1a731854de684689126046ec93589147abd4cd0025f12d741d323aa82",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "gmp",
+    # No autoreconf needed - tarball has pre-generated configure
+    bdepend = [],
+    src_prepare = "",
+    source = ":gmp-src",
+    iuse = [
+        "asm",
+        "cpudetection",
+        "cxx",
+        "pic",
+        "static-libs",
+    ],
+    use_configure = {
+        "-asm": "--disable-asm",
+        "-cpudetection": "--disable-cpudetection",
+        "-cxx": "--disable-cxx",
+        "-pic": "--disable-pic",
+        "-static-libs": "--disable-static",
+        "asm": "--enable-asm",
+        "cpudetection": "--enable-cpudetection",
+        "cxx": "--enable-cxx",
+        "pic": "--enable-pic",
+        "static-libs": "--enable-static",
+    },
+    version = "6.3.0",
+    description = "GNU Multiple Precision Arithmetic Library",
+    homepage = "https://gmplib.org/",
+    license = "LGPL-3.0",
+    configure_args = [
+        "--enable-cxx",
+        "--disable-static",
+    ],
+    # Use -std=gnu17 to avoid C23 K&R function declaration issues in GMP's configure tests
+    env = {
+        "CFLAGS": "-O2 -std=gnu17",
+        "CXXFLAGS": "-O2",
+    },
+    # Remove .la files - they contain hardcoded paths that break cross-package builds
+    post_install = '''
+find "$DESTDIR" -name "*.la" -delete
+''',
+    visibility = ["PUBLIC"],
+)

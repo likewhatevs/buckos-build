@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+download_source(
+    name = "librtmp-src",
+    src_uri = "https://github.com/mirror/rtmpdump/archive/f1b83c10d8beb43fcc70a6e88cf4325499f25857.tar.gz",
+    sha256 = "97b0d3d20d980ac38aa9729e60e926f101854b59960fd50c82686bfdd3d420ff",
+)
+
+ebuild_package(
+    name = "librtmp",
+    source = ":librtmp-src",
+    version = "2.4",
+    description = "RTMPDump Real-Time Messaging Protocol library",
+    homepage = "https://github.com/yixia/librtmp",
+    license = "LGPL-2.0+",
+    src_configure = """
+        true
+    """,
+    src_compile = """
+        cd librtmp
+        make prefix=/usr CRYPTO=OPENSSL CC="${CC}" AR="${AR}" LD="${LD}" \
+            OPT="${CFLAGS}" LDFLAGS="${LDFLAGS}" XCFLAGS="-I${SYSROOT}/usr/include" \
+            XLDFLAGS="-L${SYSROOT}/usr/lib"
+    """,
+    src_install = """
+        cd librtmp
+        make prefix=/usr DESTDIR="${DESTDIR}" install
+    """,
+    rdepend = [
+        "system//libs/crypto/openssl:openssl",
+        "dev-libs//compression/zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

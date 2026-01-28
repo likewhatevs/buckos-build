@@ -1,0 +1,56 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# mupdf - Lightweight PDF and XPS viewer
+download_source(
+    name = "mupdf-src",
+    src_uri = "https://mupdf.com/downloads/archive/mupdf-1.23.11-source.tar.gz",
+    sha256 = "478f2a167feae2a291c8b8bc5205f2ce2f09f09b574a6eb0525bfad95a3cfe66",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "mupdf",
+    source = ":mupdf-src",
+    iuse = [
+        "X",
+        "archive",
+        "barcode",
+        "brotli",
+        "javascript",
+        "jpeg2k",
+        "opengl",
+        "ssl",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-archive": "--disable-archive",
+        "-barcode": "--disable-barcode",
+        "-brotli": "--without-brotli",
+        "-javascript": "--disable-javascript",
+        "-jpeg2k": "--disable-jpeg2k",
+        "-opengl": "--disable-opengl",
+        "-ssl": "--disable-ssl",
+        "X": "--with-x",
+        "archive": "--enable-archive",
+        "barcode": "--enable-barcode",
+        "brotli": "--with-brotli",
+        "javascript": "--enable-javascript",
+        "jpeg2k": "--enable-jpeg2k",
+        "opengl": "--enable-opengl",
+        "ssl": "--enable-ssl",
+    },
+    version = "1.23.11",
+    description = "Lightweight PDF and XPS viewer",
+    homepage = "https://mupdf.com",
+    license = "AGPL-3+",
+    configure_args = [],
+    make_args = [
+        "prefix=/usr",
+        "USE_SYSTEM_LIBS=yes",
+    ],
+    deps = [
+        "fonts//libraries/freetype:freetype",
+    ],
+    visibility = ["PUBLIC"],
+)

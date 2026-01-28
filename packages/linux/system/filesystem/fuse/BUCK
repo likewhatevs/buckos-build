@@ -1,0 +1,44 @@
+# =============================================================================
+# FUSE Filesystem Tools
+# =============================================================================
+# FUSE (Filesystem in Userspace) framework and FUSE-based filesystem utilities
+# for accessing various filesystem types without kernel modules.
+
+# Filegroup for all FUSE filesystem tools
+filegroup(
+    name = "fuse",
+    srcs = [
+        "system//filesystem/fuse/fuse3:fuse3",
+        "system//filesystem/fuse/ntfs-3g:ntfs-3g",
+        "system//filesystem/fuse/exfat-fuse:exfat-fuse",
+        "system//filesystem/fuse/bindfs:bindfs",
+        "system//filesystem/fuse/unionfs-fuse:unionfs-fuse",
+        "system//filesystem/fuse/archivemount:archivemount",
+        "system//filesystem/fuse/encfs:encfs",
+        "system//filesystem/fuse/gocryptfs:gocryptfs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Common FUSE tools
+filegroup(
+    name = "common",
+    srcs = [
+        "system//filesystem/fuse/fuse3:fuse3",
+        "system//filesystem/fuse/ntfs-3g:ntfs-3g",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Encrypted FUSE filesystems
+filegroup(
+    name = "encrypted",
+    srcs = [
+        "system//filesystem/fuse/encfs:encfs",
+        "system//filesystem/fuse/gocryptfs:gocryptfs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

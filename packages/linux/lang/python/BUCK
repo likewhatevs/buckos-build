@@ -1,0 +1,64 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Python - General-purpose programming language
+# =============================================================================
+
+autotools_package(
+    name = "python",
+    version = "3.12.1",
+    src_uri = "https://www.python.org/ftp/python/3.12.1/Python-3.12.1.tar.xz",
+    sha256 = "8dfb8f426fcd226657f9e2bd5f1e96e53264965176fa17d32658e873591aeb21",
+    signature_sha256 = "aac922eeb2bf0c29db4c29fe80ed7439ef1bbcea5a31a910fda6a16481a82077",
+    signature_required=False,
+    description = "Python is a powerful, easy to learn programming language",
+    homepage = "https://www.python.org/",
+    license = "PSF-2.0",
+
+    # USE flags this package supports
+    iuse = ["sqlite", "readline", "ncurses", "ssl"],
+
+    # Default USE flags
+    # Note: PGO disabled due to linking issues with __gcov_* symbols during cross-compile
+    use_defaults = ["sqlite", "readline", "ssl"],  # ncurses disabled by default due to wide char issues
+
+    # Conditional dependencies
+    use_deps = {
+        "sqlite": ["system//libs/database/sqlite:sqlite"],
+        "readline": ["core//readline:readline"],
+        "ncurses": ["core//ncurses:ncurses"],
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+    },
+
+    # Conditional configure arguments based on USE flags
+    use_configure = {
+        # When ncurses is disabled, prevent Python from building curses module
+        "-ncurses": "ac_cv_header_curses_h=no ac_cv_header_ncurses_h=no",
+    },
+
+    # Base configure arguments (always applied)
+    configure_args = [
+        "--enable-shared",
+        "--with-system-expat",
+        "--with-system-ffi",
+        "--with-ensurepip=install",
+    ],
+
+    deps = [
+        "core//zlib:zlib",
+        "core//expat:expat",
+        "core//libffi:libffi",
+    ],
+
+    # Fix lib-dynload path: Python stdlib is in lib/python3.12 but lib-dynload is in lib64/python3.12
+    # Create a symlink so Python can find its C extensions
+    post_install = """
+        # Create lib-dynload symlink in lib/python3.12 pointing to lib64/python3.12/lib-dynload
+        if [ -d "$DESTDIR/usr/lib64/python3.12/lib-dynload" ] && [ ! -e "$DESTDIR/usr/lib/python3.12/lib-dynload" ]; then
+            ln -sf ../../lib64/python3.12/lib-dynload "$DESTDIR/usr/lib/python3.12/lib-dynload"
+        fi
+    """,
+
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,58 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# Speex - Open Source speech codec
+
+autotools_package(
+    name = "speex",
+    version = "1.2.1",
+    src_uri = "https://downloads.xiph.org/releases/speex/speex-1.2.1.tar.gz",
+    sha256 = "4b44d4f2b38a370a2d98a78329fefc56a0cf93d1c1be70029217baae6628feea",
+    description = "Open Source speech codec designed for VoIP and file-based compression",
+    homepage = "https://www.speex.org/",
+    license = "BSD",
+    iuse = [
+        "cpu_flags_arm_v4",
+        "cpu_flags_arm_v5",
+        "cpu_flags_arm_v6",
+        "cpu_flags_x86_sse",
+        "fixed-point",
+        "float-api",
+        "shared",
+        "sse",
+        "static",
+        "utils",
+        "valgrind",
+        "vbr",
+    ],
+    use_defaults = ["shared"],
+    deps = [
+        "media//audio/ogg:ogg",
+    ],
+    configure_args = [
+        "--prefix=${PREFIX}",
+    ],
+    use_configure = {
+        "-cpu_flags_arm_v4": "--disable-cpu_flags_arm_v4",
+        "-cpu_flags_arm_v5": "--disable-cpu_flags_arm_v5",
+        "-cpu_flags_arm_v6": "--disable-cpu_flags_arm_v6",
+        "-cpu_flags_x86_sse": "--disable-cpu_flags_x86_sse",
+        "-shared": "--disable-shared",
+        "-sse": "--disable-sse",
+        "-static": "--disable-static",
+        "-utils": "--disable-utils",
+        "-valgrind": "--disable-valgrind",
+        "cpu_flags_arm_v4": "--enable-cpu_flags_arm_v4",
+        "cpu_flags_arm_v5": "--enable-cpu_flags_arm_v5",
+        "cpu_flags_arm_v6": "--enable-cpu_flags_arm_v6",
+        "cpu_flags_x86_sse": "--enable-cpu_flags_x86_sse",
+        "fixed-point": "--enable-fixed-point",
+        "float-api": "--enable-float-api",
+        "shared": "--enable-shared",
+        "sse": "--enable-sse",
+        "static": "--enable-static",
+        "utils": "--enable-utils",
+        "valgrind": "--enable-valgrind",
+        "vbr": "--enable-vbr",
+    },
+    visibility = ["PUBLIC"],
+)

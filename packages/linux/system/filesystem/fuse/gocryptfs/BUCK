@@ -1,0 +1,42 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "gocryptfs-src",
+    src_uri = "https://github.com/rfjakob/gocryptfs/releases/download/v2.4.0/gocryptfs_v2.4.0_src-deps.tar.gz",
+    sha256 = "45158daf20df7f94e0c9ec57ba07af21df2e25e15b8584bf3c7de96adbbc2efd",
+    signature_sha256 = "2fc8cac0e158f5434984578e40a13c83be5803b89e8e2cc29d5fd678af7881a4",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "gocryptfs",
+    source = ":gocryptfs-src",
+    version = "2.4.0",
+    description = "Encrypted overlay filesystem written in Go",
+    homepage = "https://nuetzlich.net/gocryptfs/",
+    license = "MIT",
+    configure_args = [],
+    src_configure = """
+# gocryptfs is a Go project, doesn't use configure
+true
+""",
+    src_compile = """
+# Build only the binary, skip man page generation (requires pandoc)
+./build.bash || go build -v -o gocryptfs .
+""",
+    src_install = """
+# Install manually to avoid make target that requires pandoc
+mkdir -p "$DESTDIR/usr/bin"
+install -m755 gocryptfs "$DESTDIR/usr/bin/"
+# Install gocryptfs-xray if it exists
+if [ -f gocryptfs-xray/gocryptfs-xray ]; then
+    install -m755 gocryptfs-xray/gocryptfs-xray "$DESTDIR/usr/bin/"
+fi
+""",
+    deps = [
+        "system//filesystem/fuse/fuse3:fuse3",
+        "system//libs/crypto/openssl:openssl",
+    ],
+    visibility = ["PUBLIC"],
+)

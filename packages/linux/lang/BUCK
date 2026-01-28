@@ -1,0 +1,107 @@
+# =============================================================================
+# Programming Languages - Category Organization
+# =============================================================================
+#
+# This file organizes programming languages into categories.
+# Individual package definitions are in their respective subdirectories.
+# =============================================================================
+
+# =============================================================================
+# Compiled Languages
+# Systems and native compiled languages
+# =============================================================================
+
+filegroup(
+    name = "compiled-languages",
+    srcs = [
+        "lang//go:go",
+        "lang//rust:rust",
+        "lang//zig:zig",
+        "lang//nim:nim",
+        "lang//crystal:crystal",
+        "lang//swift:swift",
+        "lang//kotlin-native:kotlin-native",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Interpreted Languages
+# Scripting and interpreted languages
+# =============================================================================
+
+filegroup(
+    name = "interpreted-languages",
+    srcs = [
+        "lang//python:python",
+        "lang//ruby:ruby",
+        "lang//perl:perl",
+        "lang//nodejs:nodejs",
+        "lang//lua:lua",
+        "lang//tcl:tcl",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Functional Languages
+# Functional and declarative programming languages
+# =============================================================================
+
+filegroup(
+    name = "functional-languages",
+    srcs = [
+        "lang//ocaml:ocaml",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Scientific Computing Languages
+# Languages optimized for scientific and numerical computing
+# =============================================================================
+
+filegroup(
+    name = "scientific-languages",
+    srcs = [
+        "lang//julia:julia",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Compiler Infrastructure
+# Linkers, assemblers, and toolchain utilities
+# =============================================================================
+
+filegroup(
+    name = "compiler-infrastructure",
+    srcs = [
+        "lang//binutils:binutils",
+        "lang//linkers:mold",
+        "lang//linkers:lld",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All Languages
+# Complete collection of all programming languages
+# =============================================================================
+
+filegroup(
+    name = "all-languages",
+    srcs = [
+        ":compiled-languages",
+        ":interpreted-languages",
+        ":functional-languages",
+        ":scientific-languages",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

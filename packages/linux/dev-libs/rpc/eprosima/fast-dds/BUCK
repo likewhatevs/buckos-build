@@ -1,0 +1,29 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "fast-dds",
+    version = "3.2.1",
+    src_uri = "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.2.1.tar.gz",
+    sha256 = "8c088fb967d39785f1f83454d75308ae6c55fc74fc31de173713bc293635b2fd",
+    description = "eProsima Fast DDS - C++ DDS implementation",
+    homepage = "https://github.com/eProsima/Fast-DDS",
+    license = "Apache-2.0",
+    deps = [
+        "dev-libs//rpc/eprosima/fast-cdr:fast-cdr",
+        "dev-libs//misc/asio:asio",
+        "dev-libs//crypto/openssl:openssl",
+        "dev-libs//allocators/foonathan_memory:foonathan_memory",
+        "dev-libs//json/nlohmann-json:nlohmann-json",
+        "dev-libs//json/tinyxml2:tinyxml2",
+    ],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DCOMPILE_EXAMPLES=OFF",
+        "-DTHIRDPARTY_ASIO=FORCE",
+        "-DTHIRDPARTY_fastcdr=OFF",
+        "-DTHIRDPARTY_Boost=OFF",
+    ],
+    visibility = ["PUBLIC"],
+)

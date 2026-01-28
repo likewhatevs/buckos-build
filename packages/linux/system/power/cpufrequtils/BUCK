@@ -1,0 +1,33 @@
+# cpufrequtils - CPU Frequency Utilities
+# Tools for managing CPU frequency scaling
+
+load("@root//defs:package_defs.bzl","download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "cpufrequtils-src",
+    src_uri = "https://kernel.org/pub/linux/utils/kernel/cpufreq/cpufrequtils-008.tar.xz",
+    sha256 = "a2149db551f83112209b1a8e79bd50d386979bbf64edbc69126f4e0b4f0a4cab",
+    signature_required = False,
+)
+
+make_package(
+    name = "cpufrequtils",
+    source = ":cpufrequtils-src",
+    version = "008",
+    description = "CPU frequency scaling utilities",
+    homepage = "https://kernel.org/",
+    license = "GPL-2.0",
+    make_args = [
+        "prefix=/usr",
+        "sbindir=/usr/sbin",
+        "mandir=/usr/share/man",
+        "libdir=/usr/lib",
+    ],
+    post_install = """
+        make DESTDIR=$OUT prefix=/usr install
+    """,
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

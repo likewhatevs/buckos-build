@@ -1,0 +1,55 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# haveged - HAVEGE entropy daemon
+# USE flags: nistest, systemd
+
+autotools_package(
+    name = "haveged",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    version = "1.9.19",
+    src_uri = "https://github.com/jirka-h/haveged/archive/refs/tags/v1.9.19.tar.gz",
+    sha256 = "acbb05776668657012273be9bb3310e3140b79959aa4538e4cca8d30d40c0b8f",
+    signature_required = False,
+    description = "HAVEGE entropy daemon - feeds entropy to /dev/random",
+    homepage = "https://github.com/jirka-h/haveged",
+    license = "GPL-3.0",
+    iuse = [
+        "nistest",
+        "selinux",
+        "static-libs",
+        "systemd",
+        "threads",
+    ],
+    use_defaults = [],
+    use_deps = {
+        "systemd": ["system//init/systemd:systemd"],
+    },
+    use_configure = {
+        "-nistest": "--disable-nistest",
+        "-selinux": "--disable-selinux",
+        "-static-libs": "--disable-static",
+        "-systemd": "--enable-init=none",
+        "-threads": "--disable-threads",
+        "nistest": "--enable-nistest",
+        "selinux": "--enable-selinux",
+        "static-libs": "--enable-static",
+        "systemd": "--enable-init=systemd",
+        "threads": "--enable-threads",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--enable-daemon",
+    ],
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

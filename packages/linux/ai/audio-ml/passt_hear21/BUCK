@@ -1,0 +1,13 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "passt_hear21",
+    version = "0.0.23",
+    src_uri = "https://github.com/kkoutini/passt_hear21/archive/refs/tags/0.0.23.tar.gz",
+    sha256 = "9a8466724058af5e896ed92822388deb0b1f6a48a2cb7fc1a4a1c3a3fafee5ea",
+    deps = [
+        "ai//ml-frameworks/timm:timm",
+        "media//audio/libraries/torchaudio:torchaudio",
+    ],
+    maintainers = ["buckos"],
+)

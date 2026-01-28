@@ -1,0 +1,25 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "osmium-tool",
+    version = "1.14.0",
+    src_uri = "https://github.com/osmcode/osmium-tool/archive/refs/tags/v1.14.0.tar.gz",
+    sha256 = "67765fe6b612e791aab276af601dd12410b70486946e983753f6b0442f915233",
+    cmake_args = [
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_LZ4=ON",
+    ],
+    deps = [
+        "dev-libs//boost:boost",
+        "dev-libs//compression/bzip2:bzip2",
+        "core//expat:expat",
+        "core//zlib:zlib",
+        "dev-libs//compression:lz4",
+        "dev-libs//json:rapidjson",
+        "dev-libs//serialization:protobuf",
+        "dev-libs//serialization:protozero",
+        # Note: libosmium is required but not yet available in buckos-build
+        # "dev-libs//libosmium",
+    ],
+    visibility = ["PUBLIC"],
+)

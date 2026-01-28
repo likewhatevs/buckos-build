@@ -1,0 +1,66 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Wayfire - 3D Wayland compositor
+# =============================================================================
+
+download_source(
+    name = "wayfire-src",
+    src_uri = "https://github.com/WayfireWM/wayfire/releases/download/v0.8.1/wayfire-0.8.1.tar.xz",
+    sha256 = "8ac1947b688a9ec6c4d9ee2d77311bb357a8ead25665b8000eda96952328290d",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "wayfire",
+    source = ":wayfire-src",
+    iuse = [
+        "X",
+        "dbus",
+        "gles3",
+        "openmp",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-dbus": "--disable-dbus",
+        "-gles3": "--disable-gles3",
+        "-openmp": "--disable-openmp",
+        "X": "--with-x",
+        "dbus": "--enable-dbus",
+        "gles3": "--enable-gles3",
+        "openmp": "--enable-openmp",
+    },
+    version = "0.8.1",
+    description = "Wayfire - 3D Wayland compositor",
+    homepage = "https://wayfire.org/",
+    license = "MIT",
+    pre_configure = """
+mkdir -p build
+cd build
+meson setup .. --prefix=/usr \\
+    -Duse_system_wlroots=enabled \\
+    -Duse_system_wfconfig=enabled
+""",
+    deps = [
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+        "desktop//sway:wlroots",
+        "desktop//mesa:mesa",
+        "desktop//libinput:libinput",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Wayfire meta-package
+filegroup(
+    name = "wayfire-desktop",
+    srcs = [
+        ":wayfire",
+        "desktop//sway:wlroots",
+        "graphics//rendering/wayland:wayland",
+        "desktop//mesa:mesa",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

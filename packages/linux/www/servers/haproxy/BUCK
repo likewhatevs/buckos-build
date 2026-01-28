@@ -1,0 +1,82 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# haproxy - High-performance TCP/HTTP load balancer
+#
+# NOTE: HAProxy uses make directly (no configure script)
+#
+# USE flags:
+#   ssl       - Enable SSL/TLS support with OpenSSL
+#   zlib      - Enable zlib compression
+#   pcre2     - Enable PCRE2 regular expressions
+#   prometheus - Enable Prometheus metrics exporter
+#   threads   - Enable multi-threading support
+
+download_source(
+    name = "haproxy-src",
+    src_uri = "https://www.haproxy.org/download/3.0/src/haproxy-3.0.5.tar.gz",
+    sha256 = "ae38221e85aeba038a725efbef5bfe5e76671ba7959e5eb74c39fd079e5d002e",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "haproxy",
+    source = ":haproxy-src",
+    version = "3.0.5",
+    description = "High-performance TCP/HTTP load balancer and proxy server",
+    homepage = "https://www.haproxy.org/",
+    license = "GPL-2.0",
+    rdepend = [
+        "system//libs/crypto/openssl:openssl",
+        "core//zlib:zlib",
+        "system//libs/utility/pcre2:pcre2",
+    ],
+    src_configure = "true",
+    src_compile = """
+make -j$(nproc) \\
+    TARGET=linux-glibc \\
+    USE_OPENSSL=1 \\
+    USE_ZLIB=1 \\
+    USE_PCRE2=1 \\
+    USE_PROMEX=1 \\
+    USE_THREAD=1 \\
+    PREFIX=/usr
+""",
+    src_install = """
+make PREFIX=/usr DESTDIR="$DESTDIR" install
+
+mkdir -p "$DESTDIR/etc/haproxy"
+mkdir -p "$DESTDIR/var/lib/haproxy"
+mkdir -p "$DESTDIR/var/log/haproxy"
+
+# Create default configuration
+cat > "$DESTDIR/etc/haproxy/haproxy.cfg" << 'EOF'
+global
+    log /dev/log local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+frontend http_front
+    bind *:80
+    default_backend http_back
+
+backend http_back
+    balance roundrobin
+    server server1 127.0.0.1:8080 check
+EOF
+""",
+    visibility = ["PUBLIC"],
+)

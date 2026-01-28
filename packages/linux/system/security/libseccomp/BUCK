@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libseccomp - Package from third-party
+
+autotools_package(
+    name = "libseccomp",
+    version = "2.4.2",
+    iuse = ["python", "static-libs"],
+    use_configure = {
+        "-python": "--disable-python",
+        "-static-libs": "--disable-static",
+        "python": "--enable-python",
+        "static-libs": "--enable-static",
+    },
+    src_uri = "https://github.com/seccomp/libseccomp/archive/refs/tags/v2.4.2.tar.gz",
+    sha256 = "c988dc3f6c641e12c68285afb57d69361f3bfd5b7235d067b3991bf9a57cca7e",
+    description = "libseccomp package",
+    homepage = "https://github.com/seccomp/libseccomp.git",
+    license = "LGPL",
+    source_subdir = "libseccomp-2.4.2",
+    deps = [],
+    configure_args = [
+        "--enable-shared",
+    ],
+    visibility = ["PUBLIC"],
+)

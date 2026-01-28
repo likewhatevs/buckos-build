@@ -1,0 +1,49 @@
+# Audio utilities and tools
+
+filegroup(
+    name = "conversion-tools",
+    srcs = [
+        "audio//utilities/sox:sox",
+        "audio//utilities/abcde:abcde",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "info-tools",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "control-tools",
+    srcs = [
+        "audio//utilities/pavucontrol:pavucontrol",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "synthesis-tools",
+    srcs = [
+        "audio//utilities/espeak-ng:espeak-ng",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-utilities",
+    srcs = [
+        ":conversion-tools",
+        ":info-tools",
+        ":control-tools",
+        ":synthesis-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

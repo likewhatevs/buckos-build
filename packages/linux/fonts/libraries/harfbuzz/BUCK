@@ -1,0 +1,57 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# Simplified harfbuzz for Qt6/KDE - without glib/cairo to avoid transitive deps
+meson_package(
+    name = "harfbuzz",
+    version = "8.4.0",
+    iuse = [
+        "cairo",
+        "debug",
+        "experimental",
+        "glib",
+        "graphite",
+        "icu",
+        "introspection",
+        "truetype",
+    ],
+    src_uri = "https://github.com/harfbuzz/harfbuzz/releases/download/8.4.0/harfbuzz-8.4.0.tar.xz",
+    sha256 = "af4ea73e25ab748c8c063b78c2f88e48833db9b2ac369e29bd115702e789755e",
+    signature_required = False,
+    description = "OpenType text shaping engine",
+    homepage = "https://harfbuzz.github.io/",
+    license = "MIT",
+    meson_args = [
+        "-Dglib=disabled",
+        "-Dgobject=disabled",
+        "-Dcairo=disabled",
+        "-Dfreetype=enabled",
+        "-Dicu=disabled",  # Avoid host ICU C++17 incompatibility
+        "-Dgdi=disabled",
+        "-Ddirectwrite=disabled",
+        "-Dcoretext=disabled",
+        "-Dtests=disabled",
+        "-Dintrospection=disabled",
+        "-Ddocs=disabled",
+        "-Dbenchmark=disabled",
+    ],
+    # Fix .pc files to use relocatable paths with ${pcfiledir}
+    src_install = """
+        DESTDIR="$DESTDIR" meson install -C "${BUILD_DIR:-build}"
+
+        for pc_file in "$DESTDIR"/usr/lib64/pkgconfig/*.pc; do
+            if [ -f "$pc_file" ]; then
+                sed -i \\
+                    -e 's|^prefix=/usr$|prefix=${pcfiledir}/../..|' \\
+                    -e 's|^libdir=.*|libdir=${prefix}/lib64|' \\
+                    "$pc_file"
+            fi
+        done
+    """,
+    deps = [
+        "core//zlib:zlib",
+        "system//libs/image/libpng:libpng",
+        "system//libs/compression/brotli:brotli",
+        "fonts//libraries/freetype:freetype",
+    ],
+    visibility = ["PUBLIC"],
+)

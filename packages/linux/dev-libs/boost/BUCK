@@ -1,0 +1,63 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# boost - Peer-reviewed C++ libraries
+# USE flags: python, mpi, icu, zstd, bzip2, lzma, context, coroutine
+# Default: icu, zstd, bzip2, lzma
+
+download_source(
+    name = "boost-src",
+    src_uri = "https://archives.boost.io/release/1.84.0/source/boost_1_84_0.tar.bz2",
+    sha256 = "cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454",
+    signature_required = False,
+)
+
+binary_package(
+    name = "boost",
+    srcs = [":boost-src"],
+    version = "1.84.0",
+    description = "Free peer-reviewed portable C++ source libraries",
+    homepage = "https://www.boost.org/",
+    license = "BSL-1.0",
+    install_script = """
+        # Sources are in $SRCS, work in $SRCS to build
+        cd "$SRCS"
+        ls -la
+        # Find the boost directory
+        if [ -f bootstrap.sh ]; then
+            # Already in the right directory
+            echo "Found bootstrap.sh in current directory"
+        elif [ -d boost_1_84_0 ]; then
+            echo "Found boost_1_84_0 directory"
+            cd boost_1_84_0
+        else
+            # Try to find boost directory
+            BOOST_DIR=$(find . -maxdepth 2 -name "bootstrap.sh" -type f | head -1 | xargs dirname)
+            if [ -n "$BOOST_DIR" ]; then
+                echo "Found boost in: $BOOST_DIR"
+                cd "$BOOST_DIR"
+            else
+                echo "Cannot find boost directory with bootstrap.sh"
+                exit 1
+            fi
+        fi
+        ./bootstrap.sh --prefix=/usr --with-toolset=gcc
+        ./b2 install \
+            --prefix="$OUT/usr" \
+            --without-python \
+            --without-mpi \
+            variant=release \
+            link=shared \
+            threading=multi \
+            runtime-link=shared \
+            -j$(nproc)
+    """,
+    deps = [
+        "system//libs/compression/zstd:zstd",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "core//zlib:zlib",
+        "system//libs/utility/icu:icu",
+    ],
+    visibility = ["PUBLIC"],
+)

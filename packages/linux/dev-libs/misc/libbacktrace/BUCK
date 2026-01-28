@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libbacktrace - A library to produce symbolic backtraces
+
+autotools_package(
+    name = "libbacktrace",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    version = "master",
+    src_uri = "https://github.com/ianlancetaylor/libbacktrace/archive/refs/heads/master.tar.gz",
+    sha256 = "f56c63a8a2038a526631884328b5b654104ac1ccf21607feeb6f0d85605d3260",
+    description = "A library to produce symbolic backtraces",
+    homepage = "https://github.com/ianlancetaylor/libbacktrace",
+    license = "BSD-3-Clause",
+    deps = [],
+    configure_args = [
+        "--prefix=${PREFIX}",
+        "--enable-shared",
+        "--with-pic",
+    ],
+    visibility = ["PUBLIC"],
+)

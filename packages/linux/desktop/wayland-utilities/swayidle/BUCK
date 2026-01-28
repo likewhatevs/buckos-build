@@ -1,0 +1,33 @@
+load("@root//defs:package_defs.bzl", "download_source", "meson_package")
+
+download_source(
+    name = "swayidle-src",
+    src_uri = "https://github.com/swaywm/swayidle/releases/download/1.8.0/swayidle-1.8.0.tar.gz",
+    sha256 = "16b3e76a117f2f0ff2ee5fbebf38849595cdd705db1cd5f6aceaed00d71b3aa1",
+    signature_sha256 = "ca35ab91523ee90176c4415e901e556cb587f182ce5e31fe67dc15e970df737d",
+    signature_required = False,
+)
+
+meson_package(
+    name = "swayidle",
+    source = ":swayidle-src",
+    iuse = ["elogind", "systemd"],
+    use_defaults = ["systemd"],
+    use_meson = {
+        "-elogind": "-Dlogind=disabled",
+        "-systemd": "-Dlogind=disabled",
+        "elogind": "-Dlogind=enabled",
+        "systemd": "-Dlogind=enabled",
+    },
+    version = "1.8.0",
+    description = "Idle management daemon for Wayland",
+    homepage = "https://github.com/swaywm/swayidle",
+    license = "MIT",
+    meson_args = [],
+    deps = [
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+    ],
+    visibility = ["PUBLIC"],
+)

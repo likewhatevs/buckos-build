@@ -1,0 +1,18 @@
+load("@root//defs:package_defs.bzl", "python_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# asciidoc - Python package
+# USE flags: doc, test
+# Default: none
+
+python_package(
+    name = "asciidoc",
+    version = "10.2.0",
+    src_uri = "https://github.com/asciidoc-py/asciidoc-py/releases/download/10.2.0/asciidoc-10.2.0.tar.gz",
+    sha256 = "237b2ba5c35c0ae7ccd4cd44ebf1d87c20b2695dae01798954416d492ef7fa0e",
+    signature_required = False,
+    description = "Text based document generation",
+    homepage = "https://asciidoc.org/",
+    license = "GPL-2+",
+    visibility = ["PUBLIC"],
+)

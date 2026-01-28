@@ -1,0 +1,42 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "libidn2",
+    # GNU release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "2.3.7",
+    src_uri = "https://mirrors.kernel.org/gnu/libidn/libidn2-2.3.7.tar.gz",
+    sha256 = "4c21a791b610b9519b9d0e12b8097bf2f359b12f8dd92647611a929e6bfd7d64",
+    signature_sha256 = "d4e78fc1c5a5c35980be3a04dd864574f450d55921360b0aa19326c75ada4a98",
+    signature_required = False,
+
+    iuse = ["doc", "nls", "static-libs"],
+    use_defaults = [],
+
+
+    use_configure = {
+        "-doc": "--disable-doc",
+        "-nls": "--disable-nls",
+        "-static-libs": "--disable-static",
+        "doc": "--enable-doc",
+        "nls": "--enable-nls",
+        "static-libs": "--enable-static",
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--disable-gtk-doc",
+        "--with-libunistring-prefix=/usr",
+    ],
+
+    deps = [
+    ],
+
+    description = "Implementation of IDNA2008 Internationalized Domain Names",
+    homepage = "https://www.gnu.org/software/libidn/#libidn2",
+    license = "LGPL-3.0-or-later",
+    visibility = ["PUBLIC"],
+)

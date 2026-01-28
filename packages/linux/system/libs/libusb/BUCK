@@ -1,0 +1,41 @@
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# libusb - official release tarball includes pre-generated configure
+autotools_package(
+    name = "libusb",
+    # No autoreconf needed - tarball has pre-generated configure
+    bdepend = [],
+    src_prepare = "",
+    version = "1.0.27",
+    iuse = [
+        "debug",
+        "examples",
+        "static-libs",
+        "udev",
+    ],
+    use_cmake = {
+        "-debug": "-DCMAKE_BUILD_TYPE=Release",
+        "-examples": "-DBUILD_EXAMPLES=OFF",
+        "-static-libs": "-DBUILD_STATIC_LIBS=OFF",
+        "-udev": "-DENABLE_UDEV=OFF",
+        "debug": "-DCMAKE_BUILD_TYPE=Debug",
+        "examples": "-DBUILD_EXAMPLES=ON",
+        "static-libs": "-DBUILD_STATIC_LIBS=ON",
+        "udev": "-DENABLE_UDEV=ON",
+    },
+    src_uri = "https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27.tar.bz2",
+    sha256 = "ffaa41d741a8a3bee244ac8e54a72ea05bf2879663c098c82fc5757853441575",
+    signature_sha256 = "1cd22bbfe4ce382ca9b091e2a6275c48f1c776253815cbb615da295ae0bfe687",
+    signature_required = False,
+    description = "Library for userspace USB device access",
+    homepage = "https://libusb.info/",
+    license = "LGPL-2.1",
+    configure_args = [
+        "--disable-static",
+        "--enable-shared",
+        "--disable-udev",  # Disable udev for initial bootstrap
+    ],
+    deps = [],
+    visibility = ["PUBLIC"],
+)

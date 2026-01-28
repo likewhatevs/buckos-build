@@ -1,0 +1,20 @@
+load("@root//defs:package_defs.bzl", "go_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# github-cli - GitHub CLI tool (Go build)
+# USE flags: doc, bash-completion
+# Default: bash-completion
+
+go_package(
+    name = "github-cli",
+    version = "2.43.1",
+    src_uri = "https://github.com/cli/cli/archive/refs/tags/v2.43.1.tar.gz",
+    sha256 = "1ea3f451fb7002c1fb95a7fab21e9ab16591058492628fe264c5878e79ec7c90",
+    signature_required = False,
+    description = "GitHub's official command line tool",
+    homepage = "https://cli.github.com",
+    license = "MIT",
+    packages = ["./cmd/gh"],
+    bins = ["gh"],
+    visibility = ["PUBLIC"],
+)

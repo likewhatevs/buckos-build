@@ -1,0 +1,72 @@
+load("@root//defs:package_defs.bzl", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "postfix-src",
+    src_uri = "https://de.postfix.org/ftpmirror/official/postfix-3.9.0.tar.gz",
+    sha256 = "56f5e420e7c25455a4e96c19b672f80f9a0a35fb5becc9247c9e3d5dcc617f34",
+    signature_sha256 = "62e71d0f7f50eefccdffa318be448b53c065b6f1aa3f2be8b144f764a82b23fc",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+make_package(
+    name = "postfix",
+    source = ":postfix-src",
+    version = "3.9.0",
+    description = "Fast, secure, and flexible mail transfer agent",
+    homepage = "https://www.postfix.org/",
+    license = "IPL-1.0 EPL-2.0",
+    # Postfix doesn't use autotools - skip autoreconf
+    src_prepare = """
+# Postfix uses its own build system, no autoreconf needed
+true
+""",
+    # Configure step: Generate Makefiles with custom options
+    src_configure = """
+unset LD_LIBRARY_PATH
+
+# Configure build flags - disable Berkeley DB, enable TLS and LMDB
+export CCARGS='-DUSE_TLS -DHAS_LMDB'
+export AUXLIBS='-lssl -lcrypto -lpthread -llmdb'
+
+# Generate makefiles with NO_DB=1 to avoid Berkeley DB dependency
+make -f Makefile.in MAKELEVEL= Makefiles CCARGS="$CCARGS" AUXLIBS="$AUXLIBS" OPT="$CFLAGS" DEBUG="" NO_DB=1
+""",
+    # Standard make for compilation
+    make_args = [],
+    # Install using postfix's custom install target
+    src_install = """
+make non-interactive-package install_root="$DESTDIR" \
+    config_directory=/etc/postfix \
+    daemon_directory=/usr/libexec/postfix \
+    data_directory=/var/lib/postfix \
+    html_directory=/usr/share/doc/postfix/html \
+    manpage_directory=/usr/share/man \
+    queue_directory=/var/spool/postfix \
+    readme_directory=/usr/share/doc/postfix/readme \
+    sendmail_path=/usr/sbin/sendmail \
+    newaliases_path=/usr/bin/newaliases \
+    mailq_path=/usr/bin/mailq
+
+# Create required directories
+mkdir -p "$DESTDIR/etc/postfix"
+mkdir -p "$DESTDIR/var/spool/postfix"
+mkdir -p "$DESTDIR/var/lib/postfix"
+
+# Install default configuration files
+install -Dm644 conf/main.cf "$DESTDIR/etc/postfix/main.cf"
+install -Dm644 conf/master.cf "$DESTDIR/etc/postfix/master.cf"
+
+# Create required spool directories
+for dir in active bounce corrupt defer deferred flush hold incoming maildrop pid private public saved trace; do
+    mkdir -p "$DESTDIR/var/spool/postfix/$dir"
+done
+""",
+    deps = [
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/database/lmdb:lmdb",
+    ],
+    visibility = ["PUBLIC"],
+)

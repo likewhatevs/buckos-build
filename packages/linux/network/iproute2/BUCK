@@ -1,0 +1,62 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# iproute2 - Network configuration utilities
+# =============================================================================
+
+autotools_package(
+    name = "iproute2",
+    version = "6.6.0",
+    src_uri = "https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.6.0.tar.xz",
+    sha256 = "8738c804afd09f0bf756937f0c3de23117832a98d8cbbf50386cf5005cd613ce",
+    signature_required = False,
+
+    use_defaults = ["caps"],
+
+    use_deps = {
+        "caps": ["system//libs/ipc/libcap:libcap"],
+        "elf": ["dev-tools//dev-utils/elfutils:elfutils"],
+        # TODO: Add libselinux when available:
+        # "selinux": ["system//security/selinux/libselinux:libselinux"],
+    },
+
+
+    configure_args = [],
+
+    make_args = [
+        "PREFIX=/usr",
+        "SBINDIR=/sbin",
+    ],
+
+    deps = [],
+
+    src_prepare = """
+# Fix function conflicts with glibc
+# Modern glibc provides setns, name_to_handle_at, and open_by_handle_at
+# so we need to prevent iproute2 from redefining them
+
+# Patch lib/fs.c to remove conflicting definitions
+sed -i '/#ifndef HAVE_HANDLE_AT/,/#endif/d' lib/fs.c || true
+
+# Patch include/namespace.h to remove setns redefinition
+sed -i '/^static inline int setns/,/^}/d' include/namespace.h || true
+""",
+
+    pre_configure = """
+# iproute2 uses a different build system
+./configure
+""",
+
+    # Skip autotools configure - already done in pre_configure
+    src_configure = "",
+
+    post_install = """
+make install PREFIX=/usr SBINDIR=/sbin DESTDIR="$DESTDIR"
+""",
+
+    description = "Network configuration utilities (ip, ss, bridge, etc.)",
+    homepage = "https://wiki.linuxfoundation.org/networking/iproute2",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

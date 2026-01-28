@@ -1,0 +1,69 @@
+# iwd - iNet Wireless Daemon
+# Wireless daemon for Linux optimized for minimal resources
+
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "iwd-src",
+    src_uri = "https://kernel.org/pub/linux/network/wireless/iwd-2.13.tar.xz",
+    sha256 = "5c58d0cc7c2c81540a515a7487330468c61615d23031af47be15f694fbfbc8b3",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+autotools_package(
+    name = "iwd",
+    source = ":iwd-src",
+    iuse = [
+        "client",
+        "cpu_flags_x86_aes",
+        "cpu_flags_x86_ssse3",
+        "monitor",
+        "ofono",
+        "selinux",
+        "standalone",
+        "systemd",
+        "wired",
+    ],
+    use_configure = {
+        "-client": "--disable-client",
+        "-cpu_flags_x86_aes": "--disable-cpu_flags_x86_aes",
+        "-cpu_flags_x86_ssse3": "--disable-cpu_flags_x86_ssse3",
+        "-monitor": "--disable-monitor",
+        "-ofono": "--disable-ofono",
+        "-selinux": "--disable-selinux",
+        "-standalone": "--disable-standalone",
+        "-systemd": "--disable-systemd",
+        "-wired": "--disable-wired",
+        "client": "--enable-client",
+        "cpu_flags_x86_aes": "--enable-cpu_flags_x86_aes",
+        "cpu_flags_x86_ssse3": "--enable-cpu_flags_x86_ssse3",
+        "monitor": "--enable-monitor",
+        "ofono": "--enable-ofono",
+        "selinux": "--enable-selinux",
+        "standalone": "--enable-standalone",
+        "systemd": "--enable-systemd",
+        "wired": "--enable-wired",
+    },
+    version = "2.13",
+    description = "iNet Wireless Daemon for Linux",
+    homepage = "https://iwd.wiki.kernel.org/",
+    license = "LGPL-2.1",
+    autoreconf = True,
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--localstatedir=/var",
+        "--libexecdir=/usr/lib/iwd",
+        "--disable-systemd-service",
+        "--enable-wired",
+        "--enable-ofono",
+    ],
+    deps = [
+        "system//libs/ipc/dbus:dbus",
+        "core//readline:readline",
+    ],
+    visibility = ["PUBLIC"],
+)

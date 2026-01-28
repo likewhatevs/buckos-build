@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "unique_resource",
+    version = "0.0.1",
+    src_uri = "https://github.com/okdshin/unique_resource/archive/22f857bf18105a7b99d8a3b28f5afe30d2dbe6fa.tar.gz",
+    sha256 = "fe0315b7c52ef8e645a916f6ebdf29b07d97cc9a940b12d623d2bc179f9b9e23",
+    description = "General RAII wrapper for exclusive ownership resource management",
+    homepage = "https://github.com/okdshin/unique_resource",
+    license = "BSL-1.0",
+    deps = [],
+    pre_configure = """
+cat > CMakeLists.txt << 'EOF'
+cmake_minimum_required(VERSION 3.10)
+project(unique_resource VERSION 0.0.1 LANGUAGES CXX)
+
+add_library(unique_resource INTERFACE)
+target_include_directories(unique_resource INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+
+install(FILES unique_resource.hpp DESTINATION include)
+install(TARGETS unique_resource EXPORT unique_resourceTargets)
+install(EXPORT unique_resourceTargets DESTINATION lib/cmake/unique_resource)
+EOF
+""",
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    visibility = ["PUBLIC"],
+)

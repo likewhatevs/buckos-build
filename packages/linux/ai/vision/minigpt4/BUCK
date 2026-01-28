@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "minigpt4",
+    version = "1.0.0",
+    src_uri = "https://github.com/Vision-CAIR/MiniGPT-4/archive/refs/heads/main.tar.gz",
+    sha256 = "afcd8d68c936b1b4d0d9c85918953e7ca7d7f1e7435cd6b2eb3200c7aeee90a2",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//vision/opencv:opencv",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/omegaconf:omegaconf",
+        "dev-libs//python/peft:peft",
+        "dev-libs//python/pyyaml:pyyaml",
+        "dev-libs//python/regex:regex",
+        "dev-libs//python/tokenizers:tokenizers",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/transformers:transformers",
+        "dev-libs//python/wandb:wandb",
+    ],
+)

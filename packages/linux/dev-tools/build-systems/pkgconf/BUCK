@@ -1,0 +1,45 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# pkgconf - Package compiler and linker metadata toolkit
+
+autotools_package(
+    name = "pkgconf",
+    # Official release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "2.1.0",
+    src_uri = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.1.0.tar.xz",
+    sha256 = "266d5861ee51c52bc710293a1d36622ae16d048d71ec56034a02eb9cf9677761",
+    signature_required = False,
+    description = "Package compiler and linker metadata toolkit",
+    homepage = "https://pkgconf.org/",
+    license = "ISC",
+
+    # USE flags this package supports
+    iuse = ["native-symlinks", "static-libs"],
+
+    # Default USE flags
+    use_defaults = [],
+
+    # Conditional configure arguments
+    use_configure = {
+        "-native-symlinks": "--disable-native-symlinks",
+        "-static-libs": "--disable-static",
+        "native-symlinks": "--enable-native-symlinks",
+        "static-libs": "--enable-static",
+    },
+
+    # Base configure arguments (always applied)
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--with-pkg-config-dir=/usr/lib/pkgconfig:/usr/share/pkgconfig",
+        "--with-system-libdir=/usr/lib",
+        "--with-system-includedir=/usr/include",
+    ],
+
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

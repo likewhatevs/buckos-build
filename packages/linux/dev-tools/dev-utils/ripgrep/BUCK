@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "ripgrep-src",
+    src_uri = "https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz",
+    sha256 = "f84757b07f425fe5cf11d87df6644691c644a5cd2348a2c670894272999d3ba7",
+    signature_required = False,
+)
+
+binary_package(
+    name = "ripgrep",
+    srcs = [":ripgrep-src"],
+    version = "14.1.0",
+)

@@ -1,0 +1,43 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# enchant - Generic spell checking library
+download_source(
+    name = "enchant-src",
+    src_uri = "https://github.com/AbiWord/enchant/releases/download/v2.8.2/enchant-2.8.2.tar.gz",
+    sha256 = "8f19535adb5577b83b00e02f330fe9b9eb40dd21f19e2899636fc4d3a7696375",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "enchant",
+    source = ":enchant-src",
+    iuse = [
+        "aspell",
+        "hunspell",
+        "nuspell",
+        "voikko",
+    ],
+    use_configure = {
+        "-aspell": "--disable-aspell",
+        "-hunspell": "--disable-hunspell",
+        "-nuspell": "--disable-nuspell",
+        "-voikko": "--disable-voikko",
+        "aspell": "--enable-aspell",
+        "hunspell": "--enable-hunspell",
+        "nuspell": "--enable-nuspell",
+        "voikko": "--enable-voikko",
+    },
+    version = "2.8.2",
+    description = "Generic spell checking library",
+    homepage = "https://abiword.github.io/enchant/",
+    license = "LGPL-2.1+",
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-relocatable",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+    ],
+    visibility = ["PUBLIC"],
+)

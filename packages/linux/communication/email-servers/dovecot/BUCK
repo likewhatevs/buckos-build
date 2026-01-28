@@ -1,0 +1,82 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "dovecot-src",
+    src_uri = "https://dovecot.org/releases/2.3/dovecot-2.3.21.tar.gz",
+    sha256 = "05b11093a71c237c2ef309ad587510721cc93bbee6828251549fc1586c36502d",
+    signature_sha256 = "0809b3c4ee53138d3890cfc4f784519c56f7d0b8a10545b910e7ad6186f68824",
+)
+
+# dovecot - Secure IMAP and POP3 server
+#
+# USE flags:
+#   ldap      - Enable LDAP authentication (default: disabled, has libtool linking issues)
+#   sqlite    - Enable SQLite database support (default: enabled)
+#   zlib      - Enable zlib compression (default: enabled)
+#   bzip2     - Enable bzip2 compression (default: enabled)
+#   lz4       - Enable LZ4 compression (default: enabled)
+#   zstd      - Enable Zstandard compression (default: enabled)
+#   solr      - Enable Apache Solr full-text search (default: disabled, requires expat)
+#   lucene    - Enable CLucene full-text search (default: disabled)
+
+autotools_package(
+    name = "dovecot",
+    source = ":dovecot-src",
+    version = "2.3.21",
+    description = "Secure IMAP and POP3 server",
+    homepage = "https://www.dovecot.org/",
+    license = "MIT LGPL-2.1",
+    iuse = ["ldap", "sqlite", "zlib", "bzip2", "lz4", "zstd", "solr", "lucene"],
+    use_defaults = ["sqlite", "zlib", "bzip2", "lz4", "zstd"],
+    use_deps = {
+        "ldap": ["network//ldap/openldap:openldap"],
+        "sqlite": ["system//libs/database/sqlite:sqlite"],
+        "zlib": ["core//zlib:zlib"],
+        "bzip2": ["system//libs/compression/bzip2:bzip2"],
+        "lz4": ["system//libs/compression/lz4:lz4"],
+        "zstd": ["system//libs/compression/zstd:zstd"],
+        "solr": ["core//expat:expat"],
+    },
+    use_configure = {
+        "ldap": "--with-ldap=plugin",
+        "-ldap": "--without-ldap",
+        "sqlite": "--with-sqlite",
+        "-sqlite": "--without-sqlite",
+        "zlib": "--with-zlib",
+        "-zlib": "--without-zlib",
+        "bzip2": "--with-bzlib",
+        "-bzip2": "--without-bzlib",
+        "lz4": "--with-lz4",
+        "-lz4": "--without-lz4",
+        "zstd": "--with-zstd",
+        "-zstd": "--without-zstd",
+        "solr": "--with-solr",
+        "-solr": "--without-solr",
+        "lucene": "--with-lucene",
+        "-lucene": "--without-lucene",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--localstatedir=/var",
+        "--libexecdir=/usr/lib/dovecot",
+        "--with-moduledir=/usr/lib/dovecot/modules",
+        "--with-ssl=openssl",
+        "--with-ssldir=/etc/ssl",
+    ],
+    post_install = """
+mkdir -p "$DESTDIR/etc/dovecot"
+mkdir -p "$DESTDIR/var/lib/dovecot"
+mkdir -p "$DESTDIR/var/run/dovecot"
+
+# Install example configuration
+cp -r doc/example-config/* "$DESTDIR/etc/dovecot/"
+""",
+    deps = [
+        "system//libs/crypto/openssl:openssl",
+        "dev-tools//dev-utils/flex:flex",
+        "dev-tools//dev-utils/bison:bison",
+    ],
+    visibility = ["PUBLIC"],
+)

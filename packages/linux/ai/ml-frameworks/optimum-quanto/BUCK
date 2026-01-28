@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "optimum-quanto",
+    version = "0.2.7",
+    src_uri = "https://github.com/huggingface/optimum-quanto/archive/refs/tags/v0.2.7.tar.gz",
+    sha256 = "0a579ed9049ff3c05f33a7624dd2c3d27af750476e7562717eca3fb8506e4532",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "dev-libs//python/ninja:ninja",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/safetensors:safetensors",
+        "dev-libs//python/huggingface-hub:huggingface-hub",
+    ],
+)

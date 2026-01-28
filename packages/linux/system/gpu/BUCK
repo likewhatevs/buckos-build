@@ -1,0 +1,148 @@
+# =============================================================================
+# GPU Driver Packages - Graphics Processing Unit drivers and tools
+# =============================================================================
+#
+# This category contains drivers, libraries, and tools for GPU acceleration:
+# - NVIDIA: NVIDIA drivers, CUDA toolkit
+# - AMD: AMD drivers, ROCm stack
+# - Intel: Intel drivers
+# - Generic: OpenCL support
+#
+# =============================================================================
+
+# =============================================================================
+# GPU Drivers
+# =============================================================================
+
+filegroup(
+    name = "drivers",
+    srcs = [
+        "system//gpu/drivers/nvidia:nvidia-drivers",
+        "system//gpu/drivers/amd:amd-drivers",
+        "system//gpu/drivers/intel:intel-drivers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Vendor-Specific GPU Stacks
+# =============================================================================
+
+# NVIDIA GPU Stack (drivers + CUDA)
+filegroup(
+    name = "nvidia-stack",
+    srcs = [
+        "system//gpu/drivers/nvidia:nvidia-drivers",
+        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# AMD GPU Stack (drivers + ROCm)
+filegroup(
+    name = "amd-stack",
+    srcs = [
+        "system//gpu/drivers/amd:amd-drivers",
+        "system//gpu/libraries/rocm:rocm",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Intel GPU Stack
+filegroup(
+    name = "intel-stack",
+    srcs = [
+        "system//gpu/drivers/intel:intel-drivers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# GPU Compute Libraries
+# =============================================================================
+
+filegroup(
+    name = "compute-libraries",
+    srcs = [
+        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "system//gpu/libraries/rocm:rocm",
+        "system//gpu/libraries/opencl:opencl",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# GPU Tools
+# =============================================================================
+
+filegroup(
+    name = "tools",
+    srcs = [
+        "system//gpu/tools/gpu-monitoring:gpu-monitoring",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Combined GPU Stacks
+# =============================================================================
+
+# Complete GPU stack (all drivers + libraries + tools)
+filegroup(
+    name = "gpu-full",
+    srcs = [
+        ":drivers",
+        ":compute-libraries",
+        ":tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Minimal GPU setup (drivers only)
+filegroup(
+    name = "gpu-minimal",
+    srcs = [
+        ":drivers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Convenience Aliases (using filegroup for platform support)
+# =============================================================================
+
+filegroup(
+    name = "nvidia",
+    srcs = [":nvidia-stack"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "amd",
+    srcs = [":amd-stack"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "intel",
+    srcs = [":intel-stack"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "gpu",
+    srcs = [":gpu-full"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

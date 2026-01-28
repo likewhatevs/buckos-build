@@ -1,0 +1,53 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "grim-src",
+    src_uri = "https://github.com/emersion/grim/archive/refs/tags/v1.4.0.tar.gz",
+    sha256 = "b6786e889ed93568634189a59f6b6429c041bf74883c10e8b6e2ed6772ae7ffb",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "grim",
+    source = ":grim-src",
+    iuse = ["jpeg", "man"],
+    use_configure = {
+        "-jpeg": "--without-jpeg",
+        "-man": "--disable-man",
+        "jpeg": "--with-jpeg",
+        "man": "--enable-man",
+    },
+    version = "1.4.0",
+    description = "Grab images from a Wayland compositor",
+    homepage = "https://git.sr.ht/~emersion/grim",
+    license = "MIT",
+    pre_configure = """
+mkdir -p build
+cd build
+meson setup .. \
+    --prefix=/usr \
+    -Dbuildtype=release \
+    -Djpeg=enabled \
+    -Dman-pages=disabled
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT meson install
+""",
+    deps = [
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "system//libs/graphics/cairo:cairo",
+        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
+        "system//libs/image/libpng:libpng",
+        "system//libs/graphics/pixman:pixman",
+    ],
+    bdepend = [
+        "dev-tools//doc-tools/scdoc:scdoc",
+    ],
+    visibility = ["PUBLIC"],
+)

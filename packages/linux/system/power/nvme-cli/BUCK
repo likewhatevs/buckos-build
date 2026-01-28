@@ -1,0 +1,31 @@
+# nvme-cli - NVMe Management Utilities
+# NVMe storage management including power state transitions
+
+load("@root//defs:package_defs.bzl", "meson_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+meson_package(
+    name = "nvme-cli",
+    version = "2.7.1",
+    iuse = ["json", "pdc"],
+    src_uri = "https://github.com/linux-nvme/nvme-cli/archive/refs/tags/v2.7.1.tar.gz",
+    sha256 = "4c69d0f3c8b553110d0f63f5876d56627abd2d9f5d3904e2480cedd03cb15654",
+    signature_required = False,
+    description = "NVMe storage management utilities with power state control",
+    homepage = "https://github.com/linux-nvme/nvme-cli",
+    license = "GPL-2.0",
+    meson_args = [
+        "-Ddocs=false",
+        "-Ddocs-build=false",
+        "-Dhtmldir=/usr/share/doc/nvme",
+    ],
+    use_meson = {
+        "json": "-Djson-c=enabled",
+        "-json": "-Djson-c=disabled",
+    },
+    deps = [
+        # "system//libs/libnvme:libnvme",  # TODO: not packaged yet,
+        "system//libs/data/json-c:json-c",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,34 @@
+# Buck2 outputs
+/buck-out
+buck-out/
+.buck-out/
+scripts/package-binary-rs/target
+
+
+# Installer-generated files (regenerated per-install)
+/config/use_config.bzl
+/install/BUCK
+
+# Prelude (external)
+prelude/
+
+# Downloaded sources
+downloads/
+distfiles/
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.ko
+
+# Editor files
+*~
+*.swp
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+.buckconfig

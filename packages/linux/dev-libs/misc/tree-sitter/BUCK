@@ -1,0 +1,25 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "tree-sitter-src",
+    src_uri = "https://github.com/tree-sitter/tree-sitter/archive/refs/tags/v0.22.6.tar.gz",
+    sha256 = "e2b687f74358ab6404730b7fb1a1ced7ddb3780202d37595ecd7b20a8f41861f",
+    signature_required = False,
+)
+
+binary_package(
+    name = "tree-sitter",
+    srcs = [":tree-sitter-src"],
+    version = "0.22.6",
+    description = "Incremental parsing system for programming tools",
+    homepage = "https://tree-sitter.github.io/tree-sitter/",
+    license = "MIT",
+    install_script = """
+        cd $SRCS
+        # Build library - use standard make targets
+        make PREFIX=/usr libtree-sitter.a libtree-sitter.so
+        make PREFIX=/usr DESTDIR=$OUT install
+    """,
+    visibility = ["PUBLIC"],
+)

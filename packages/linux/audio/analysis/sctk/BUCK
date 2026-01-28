@@ -1,0 +1,44 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+# SCTK - NIST Scoring Toolkit for speech recognition evaluation
+# Contains tools like sclite, sc_stats, rover, etc.
+
+download_source(
+    name = "sctk-src",
+    src_uri = "https://github.com/usnistgov/SCTK/archive/refs/tags/v2.4.12.tar.gz",
+    sha256 = "43bd2bfe60e0ad04a563ddef025e84fca4c073f8f7c02f056b59fb8e2ec4f022",
+)
+
+ebuild_package(
+    name = "sctk",
+    source = ":sctk-src",
+    version = "2.4.12",
+    description = "NIST Scoring Toolkit for speech recognition evaluation",
+    homepage = "https://github.com/usnistgov/SCTK",
+    license = "public-domain",
+    # SCTK uses a simple Makefile without configure
+    src_configure = "true",
+    src_compile = """
+# SCTK builds with just make
+make -j$(nproc) all
+""",
+    src_install = """
+mkdir -p "$DESTDIR/usr/bin"
+mkdir -p "$DESTDIR/usr/share/doc/sctk"
+
+# Install binaries
+for bin in sclite sc_stats rover asclite; do
+    if [ -f "bin/$bin" ]; then
+        install -m755 "bin/$bin" "$DESTDIR/usr/bin/"
+    elif [ -f "src/$bin/$bin" ]; then
+        install -m755 "src/$bin/$bin" "$DESTDIR/usr/bin/"
+    fi
+done
+
+# Install documentation if present
+if [ -f README.md ]; then
+    install -m644 README.md "$DESTDIR/usr/share/doc/sctk/"
+fi
+""",
+    visibility = ["PUBLIC"],
+)

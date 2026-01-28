@@ -1,0 +1,14 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "torchfilter",
+    version = "0.0",
+    src_uri = "https://github.com/stanford-iprl-lab/torchfilter/archive/da0250baf2197f59b6e67f37cafdd63015380cbb.tar.gz",
+    sha256 = "96753e0e15e2b12da2a71f90b17364fc66bc76a6f14caccda0327ef7a53475f0",
+    deps = [
+        "dev-libs//python/fannypack:fannypack",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/tqdm:tqdm",
+        "ai//ml-frameworks/pytorch:pytorch",
+    ],
+)

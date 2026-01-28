@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "cover_vqa",
+    version = "0.1",
+    src_uri = "https://github.com/taco-group/cover/archive/3ca4df590060a5ed89ccfbe6353202afa40a7a6e.tar.gz",
+    sha256 = "83562cfd059a9a727c773ca6a99342892559158bf48f3aec40965ea11ff97789",
+    deps = [
+        "dev-libs//python/torch:torch",
+        "dev-libs//python/torchvision:torchvision",
+        "dev-libs//python/opencv-python:opencv-python",
+        "dev-libs//python/decord:decord",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/timm:timm",
+        "dev-libs//python/einops:einops",
+        "dev-libs//python/wandb:wandb",
+        "dev-libs//python/scikit-video:scikit-video",
+        "dev-libs//python/thop:thop",
+        "dev-libs//python/onnx:onnx",
+        "dev-libs//python/ptflops:ptflops",
+    ],
+    maintainers = ["buckos"],
+)

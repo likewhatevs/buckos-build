@@ -1,0 +1,137 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# OpenSSL - Cryptography and SSL/TLS toolkit
+# =============================================================================
+# Multi-version package supporting both 3.6.x and 3.3.x series
+
+# OpenSSL 3.6.0 (latest stable)
+download_source(
+    name = "openssl-3.6.0-src",
+    src_uri = "https://github.com/openssl/openssl/releases/download/openssl-3.6.0/openssl-3.6.0.tar.gz",
+    sha256 = "b6a5f44b7eb69e3fa35dbf15524405b44837a481d43d81daddde3ff21fcbb8e9",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "openssl-3.6.0",
+    source = ":openssl-3.6.0-src",
+    version = "3.6.0",
+    description = "TLS/SSL and crypto library",
+    homepage = "https://www.openssl.org/",
+    license = "Apache-2.0",
+
+    src_prepare = """
+# Source extracts to openssl-3.6.0-src/ subdirectory - move contents up
+if [ -d openssl-3.6.0-src ]; then
+    mv openssl-3.6.0-src/* . 2>/dev/null || true
+    mv openssl-3.6.0-src/.* . 2>/dev/null || true
+    rmdir openssl-3.6.0-src 2>/dev/null || true
+fi
+""",
+
+    src_configure = """
+# OpenSSL uses ./Configure not ./configure
+./Configure linux-x86_64 \\
+    --prefix=/usr \\
+    --openssldir=/etc/ssl \\
+    --libdir=lib \\
+    shared \\
+    zlib-dynamic \\
+    threads \\
+    no-ssl3 \\
+    no-weak-ssl-ciphers
+""",
+
+    src_compile = """
+make -j$(nproc)
+""",
+
+    src_install = """
+make DESTDIR="$DESTDIR" install_sw install_ssldirs
+# Remove static libraries
+find "$DESTDIR" -name '*.a' -delete
+# Create symlinks for compatibility
+ln -sf libssl.so.3 "$DESTDIR/usr/lib/libssl.so" || true
+ln -sf libcrypto.so.3 "$DESTDIR/usr/lib/libcrypto.so" || true
+""",
+
+    bdepend = [
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# OpenSSL 3.3.2 (LTS stable)
+download_source(
+    name = "openssl-3.3.2-src",
+    src_uri = "https://www.openssl.org/source/openssl-3.3.2.tar.gz",
+    sha256 = "2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281",
+    signature_sha256 = "8a9ba21af0d770b3f9ee098269cfeb220a8b296639e6ad5d0593ffb7a15a742b",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "openssl-3.3.2",
+    source = ":openssl-3.3.2-src",
+    version = "3.3.2",
+    description = "TLS/SSL and crypto library (LTS)",
+    homepage = "https://www.openssl.org/",
+    license = "Apache-2.0",
+
+    src_prepare = """
+# Source extracts to openssl-3.3.2-src/ subdirectory - move contents up
+if [ -d openssl-3.3.2-src ]; then
+    mv openssl-3.3.2-src/* . 2>/dev/null || true
+    mv openssl-3.3.2-src/.* . 2>/dev/null || true
+    rmdir openssl-3.3.2-src 2>/dev/null || true
+fi
+""",
+
+    src_configure = """
+# OpenSSL uses ./config not ./configure
+./config \\
+    --prefix=/usr \\
+    --openssldir=/etc/ssl \\
+    --libdir=lib \\
+    shared \\
+    zlib-dynamic \\
+    threads
+""",
+
+    src_compile = """
+make -j$(nproc)
+""",
+
+    src_install = """
+make DESTDIR="$DESTDIR" install_sw install_ssldirs
+# Remove static libraries
+find "$DESTDIR" -name '*.a' -delete
+""",
+
+    bdepend = [
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Default alias - points to latest stable (3.6.0)
+alias(
+    name = "openssl",
+    actual = ":openssl-3.6.0",
+    visibility = ["PUBLIC"],
+)
+
+# Slot aliases for version selection
+alias(
+    name = "openssl-3.6",
+    actual = ":openssl-3.6.0",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "openssl-3.3",
+    actual = ":openssl-3.3.2",
+    visibility = ["PUBLIC"],
+)

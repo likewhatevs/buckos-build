@@ -1,0 +1,55 @@
+load("@root//defs:package_defs.bzl", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# stress-ng - Stress test tool for Linux systems
+#
+# USE flags:
+#   static   - Build static binary
+#   zlib     - Enable zlib compression tests
+
+make_package(
+    name = "stress-ng",
+    version = "0.17.08",
+    src_uri = "https://github.com/ColinIanKing/stress-ng/archive/refs/tags/V0.17.08.tar.gz",
+    sha256 = "e4982d2a1c57139dad1741d6248b00a30935f746c1f665ec5b9d53c010c8dc08",
+    signature_required = False,
+    description = "Stress test tool for Linux systems - CPU, memory, I/O, and more",
+    homepage = "https://github.com/ColinIanKing/stress-ng",
+    license = "GPL-2.0",
+    iuse = [
+        "apparmor",
+        "jpeg",
+        "keyutils",
+        "sctp",
+        "static",
+        "zlib",
+    ],
+    use_configure = {
+        "-apparmor": "--disable-apparmor",
+        "-jpeg": "--without-jpeg",
+        "-keyutils": "--disable-keyutils",
+        "-sctp": "--disable-sctp",
+        "apparmor": "--enable-apparmor",
+        "jpeg": "--with-jpeg",
+        "keyutils": "--enable-keyutils",
+        "sctp": "--enable-sctp",
+    },
+    use_defaults = [],  # Don't build static by default (requires glibc-static)
+    deps = [],
+    use_deps = {
+        "zlib": ["core//zlib:zlib"],
+    },
+    use_make = {
+        "static": "STATIC=1",
+    },
+    make_args = [],
+    make_install_args = [
+        "DESTDIR=$DESTDIR",
+    ],
+    src_install = """
+make DESTDIR="$DESTDIR" install
+mkdir -p "$DESTDIR/usr/bin"
+cp stress-ng "$DESTDIR/usr/bin/" 2>/dev/null || true
+""",
+    visibility = ["PUBLIC"],
+)

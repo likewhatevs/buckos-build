@@ -1,0 +1,107 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# PipeWire - Multimedia processing framework
+# =============================================================================
+# PipeWire provides audio/video handling for modern Linux desktops
+# It's used by KDE Plasma 6 and is the recommended audio system
+
+meson_package(
+    name = "pipewire",
+    version = "1.0.3",
+    src_uri = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.0.3/pipewire-1.0.3.tar.gz",
+    sha256 = "84fc7b1a1e2c75c8c97b95f5d11e26c5c50e5b1f07a6e247ce48bde3fd6d6ad4",
+    signature_required = False,
+    description = "Low-latency audio/video router and processor",
+    homepage = "https://pipewire.org/",
+    license = "MIT LGPL-2.1+ GPL-2.0",
+    iuse = [
+        "bluetooth",
+        "doc",
+        "flatpak",
+        "gstreamer",
+        "jack-sdk",
+        "pipewire-alsa",
+        "pulseaudio",
+        "systemd",
+        "test",
+        "udev",
+        "v4l2",
+    ],
+    use_defaults = ["pipewire-alsa", "pulseaudio", "udev", "v4l2"],
+    use_meson = {
+        "bluetooth": "-Dbluez5=enabled",
+        "-bluetooth": "-Dbluez5=disabled",
+        "doc": "-Ddocs=enabled",
+        "-doc": "-Ddocs=disabled",
+        "flatpak": "-Dflatpak=enabled",
+        "-flatpak": "-Dflatpak=disabled",
+        "gstreamer": "-Dgstreamer=enabled",
+        "-gstreamer": "-Dgstreamer=disabled",
+        "jack-sdk": "-Djack=enabled",
+        "-jack-sdk": "-Djack=disabled",
+        "pipewire-alsa": "-Dpipewire-alsa=enabled",
+        "-pipewire-alsa": "-Dpipewire-alsa=disabled",
+        "pulseaudio": "-Dpipewire-pulse=enabled",
+        "-pulseaudio": "-Dpipewire-pulse=disabled",
+        "systemd": "-Dsystemd=enabled",
+        "-systemd": "-Dsystemd=disabled",
+        "test": "-Dtests=enabled",
+        "-test": "-Dtests=disabled",
+        "udev": "-Dudev=enabled",
+        "-udev": "-Dudev=disabled",
+        "v4l2": "-Dv4l2=enabled",
+        "-v4l2": "-Dv4l2=disabled",
+    },
+    meson_args = [
+        "-Dsession-managers=[]",  # Use wireplumber separately
+        "-Dspa-plugins=enabled",
+        "-Daudiomixer=enabled",
+        "-Daudioconvert=enabled",
+        "-Dexamples=disabled",
+        "-Dman=disabled",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//libffi:libffi",
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# WirePlumber - PipeWire session manager
+# =============================================================================
+
+meson_package(
+    name = "wireplumber",
+    version = "0.5.3",
+    src_uri = "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.3/wireplumber-0.5.3.tar.gz",
+    sha256 = "f247c7b9df67f9d21d261b80d29c098de8c7d8e99eedab0d63cd53c8fef6fcda",
+    signature_required = False,
+    description = "PipeWire session manager",
+    homepage = "https://pipewire.org/",
+    license = "MIT",
+    iuse = ["doc", "systemd", "test"],
+    use_meson = {
+        "doc": "-Ddocs=enabled",
+        "-doc": "-Ddocs=disabled",
+        "systemd": "-Dsystemd=enabled",
+        "-systemd": "-Dsystemd=disabled",
+        "test": "-Dtests=enabled",
+        "-test": "-Dtests=disabled",
+    },
+    meson_args = [
+        "-Dintrospection=disabled",
+    ],
+    deps = [
+        ":pipewire",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//libffi:libffi",
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

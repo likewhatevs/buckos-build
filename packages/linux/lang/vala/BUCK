@@ -1,0 +1,38 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+
+download_source(
+    name = "vala-src",
+    src_uri = "https://download.gnome.org/sources/vala/0.56/vala-0.56.18.tar.xz",
+    sha256 = "f2affe7d40ab63db8e7b9ecc3f6bdc9c2fc7e3134c84ff2d795f482fe926a382",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "vala",
+    source = ":vala-src",
+    iuse = ["valadoc"],
+    use_configure = {
+        "-valadoc": "--disable-valadoc",
+        "valadoc": "--enable-valadoc",
+    },
+    version = "0.56.18",
+    description = "Compiler for the GObject type system",
+    homepage = "https://wiki.gnome.org/Projects/Vala",
+    license = "LGPL-2.1+",
+    # Set GI_GIRDIR to bypass gobject-introspection requirement
+    # We don't need full introspection support for just compiling vala code
+    env = {
+        "GI_GIRDIR": "/usr/share/gir-1.0",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--disable-valadoc",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+        # Transitive dependencies required by glib's pkg-config files
+        "core//libffi:libffi",
+        "system//libs/utility/pcre2:pcre2",
+    ],
+    visibility = ["PUBLIC"],
+)

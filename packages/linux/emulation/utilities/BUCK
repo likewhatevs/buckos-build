@@ -1,0 +1,63 @@
+# Emulation utilities aggregator
+
+filegroup(
+    name = "spice-full",
+    srcs = [
+        "emulation//utilities/spice:spice-protocol",
+        "emulation//utilities/spice:spice-server",
+        "emulation//utilities/spice:spice-gtk",
+        "emulation//utilities/spice:spice-vdagent",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "spice-server-only",
+    srcs = [
+        "emulation//utilities/spice:spice-protocol",
+        "emulation//utilities/spice:spice-server",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "spice-guest",
+    srcs = [
+        "emulation//utilities/spice:spice-vdagent",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "microvm-hypervisors",
+    srcs = [
+        "emulation//utilities/firecracker:firecracker",
+        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
+        "emulation//utilities/crosvm:crosvm",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "virtio-tools",
+    srcs = [
+        "emulation//utilities/virtiofsd:virtiofsd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-utilities",
+    srcs = [
+        ":spice-full",
+        ":microvm-hypervisors",
+        ":virtio-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

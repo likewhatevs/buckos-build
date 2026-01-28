@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libXrender - X Render extension library
+autotools_package(
+    name = "libXrender",
+    version = "0.9.11",
+    src_uri = "https://xorg.freedesktop.org/archive/individual/lib/libXrender-0.9.11.tar.xz",
+    sha256 = "bc53759a3a83d1ff702fb59641b3d2f7c56e05051fa0cfa93501166fa782dc24",
+    description = "X Render extension library",
+    homepage = "https://xorg.freedesktop.org/",
+    license = "MIT",
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--libdir=/usr/lib64",
+    ],
+    # Remove .la files that cause libtool path issues
+    src_install = "make DESTDIR=\"$DESTDIR\" install && find \"$DESTDIR\" -name '*.la' -delete",
+    deps = [
+        "graphics//xorg/libX11:libX11",
+        "graphics//xorg/xorgproto:xorgproto",
+        # Transitive deps for pkg-config
+        "graphics//xorg/libxcb:libxcb",
+        "graphics//xorg/libXau:libXau",
+        "graphics//xorg/libXdmcp:libXdmcp",
+    ],
+    visibility = ["PUBLIC"],
+)

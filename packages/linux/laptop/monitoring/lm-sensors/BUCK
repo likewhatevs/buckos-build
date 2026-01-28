@@ -1,0 +1,48 @@
+# lm-sensors - Linux hardware monitoring
+# Provides tools and drivers for hardware monitoring
+
+load("@root//defs:package_defs.bzl","download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "lm-sensors-src",
+    src_uri = "https://github.com/lm-sensors/lm-sensors/archive/refs/tags/V3-6-0.tar.gz",
+    sha256 = "0591f9fa0339f0d15e75326d0365871c2d4e2ed8aa1ff759b3a55d3734b7d197",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+make_package(
+    name = "lm-sensors",
+    source = ":lm-sensors-src",
+    iuse = [
+        "contrib",
+        "selinux",
+        "sensord",
+        "static-libs",
+    ],
+    use_configure = {
+        "-contrib": "--disable-contrib",
+        "-selinux": "--disable-selinux",
+        "-sensord": "--disable-sensord",
+        "-static-libs": "--disable-static",
+        "contrib": "--enable-contrib",
+        "selinux": "--enable-selinux",
+        "sensord": "--enable-sensord",
+        "static-libs": "--enable-static",
+    },
+    version = "3.6.0",
+    description = "Hardware monitoring tools for Linux",
+    homepage = "https://hwmon.wiki.kernel.org/lm_sensors",
+    license = "LGPL-2.1",
+    make_args = [
+        "PREFIX=/usr",
+        "SBINDIR=/usr/sbin",
+        "MANDIR=/usr/share/man",
+        "ETCDIR=/etc",
+    ],
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

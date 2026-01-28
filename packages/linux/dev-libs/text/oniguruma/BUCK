@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "oniguruma-src",
+    src_uri = "https://github.com/kkos/oniguruma/releases/download/v6.9.9/onig-6.9.9.tar.gz",
+    sha256 = "60162bd3b9fc6f4886d4c7a07925ffd374167732f55dce8c491bfd9cd818a6cf",
+    signature_required = False,
+)
+
+# oniguruma - official release tarball includes pre-generated configure
+autotools_package(
+    name = "oniguruma",
+    # No autoreconf needed - tarball has pre-generated configure
+    bdepend = [],
+    src_prepare = "",
+    source = ":oniguruma-src",
+    iuse = ["crnl-as-line-terminator", "static-libs"],
+    use_configure = {
+        "-crnl-as-line-terminator": "--disable-crnl-as-line-terminator",
+        "-static-libs": "--disable-static",
+        "crnl-as-line-terminator": "--enable-crnl-as-line-terminator",
+        "static-libs": "--enable-static",
+    },
+    version = "6.9.9",
+    description = "Regular expressions library with a variety of character encodings",
+    homepage = "https://github.com/kkos/oniguruma",
+    license = "BSD-2-Clause",
+    configure_args = [
+        "--disable-static",
+    ],
+    # Force C17 to avoid C23 bool keyword conflict
+    env = {
+        "CFLAGS": "-std=gnu17 -O2",
+    },
+    visibility = ["PUBLIC"],
+)

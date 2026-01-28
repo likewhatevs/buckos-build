@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package")
+
+# =============================================================================
+# netcat (OpenBSD variant) - TCP/UDP networking utility
+# =============================================================================
+
+# Note: Netcat is typically provided by busybox. This package is disabled.
+# The original OpenBSD src archive is too large (~2GB) for practical use.
+# TODO: Consider using ncat from nmap or netcat-openbsd package from Alpine
+
+binary_package(
+    name = "netcat",
+    srcs = [],
+    version = "placeholder",
+)

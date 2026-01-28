@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "comfyui",
+    version = "0.3.44",
+    src_uri = "https://github.com/comfyanonymous/ComfyUI/archive/v0.3.44.tar.gz",
+    sha256 = "d69fab2195531da312b08f9ed920d088b3964839aa6392509fd7c1f2e4c95ff9",
+    deps = [
+        "dev-libs//python/torch:torch",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/transformers:transformers",
+        "dev-libs//python/safetensors:safetensors",
+        "dev-libs//python/aiohttp:aiohttp",
+        "dev-libs//python/pyyaml:pyyaml",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/psutil:psutil",
+        "dev-libs//python/pydantic:pydantic",
+    ],
+)

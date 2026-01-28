@@ -1,0 +1,59 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# squid - Caching proxy for the Web
+#
+# USE flags:
+#   ssl       - Enable SSL/TLS support with OpenSSL
+#   ipv6      - Enable IPv6 support
+#   caps      - Enable Linux capabilities
+#   ldap      - Enable LDAP authentication
+#   pam       - Enable PAM authentication
+#   kerberos  - Enable Kerberos authentication
+
+autotools_package(
+    name = "squid",
+    version = "6.12",
+    src_uri = "https://www.squid-cache.org/Versions/v6/squid-6.12.tar.gz",
+    sha256 = "20d6c79214f75b5f889952ed79e1ab8b8c3f909b079671d77bb558a6f0b28625",
+    signature_required = False,
+    description = "Caching proxy for the Web supporting HTTP, HTTPS, FTP",
+    homepage = "https://www.squid-cache.org/",
+    license = "GPL-2.0",
+    iuse = ["ssl", "ipv6", "caps", "ldap", "pam", "kerberos"],
+    use_defaults = ["ssl", "caps"],
+    deps = [
+    ],
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "caps": ["system//libs/ipc/libcap:libcap"],
+        "ldap": ["network//openldap:openldap"],
+        "pam": ["system//pam:pam"],
+        "kerberos": ["network//krb5:krb5"],
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc/squid",
+        "--localstatedir=/var",
+        "--datadir=/usr/share/squid",
+        "--enable-delay-pools",
+        "--enable-cache-digests",
+        "--enable-removal-policies=lru,heap",
+        "--with-default-user=squid",
+    ],
+    use_configure = {
+        "ssl": "--with-openssl",
+        "-ssl": "--without-openssl",
+        "ipv6": "--enable-ipv6",
+        "-ipv6": "--disable-ipv6",
+        "caps": "--with-cap",
+        "-caps": "--without-cap",
+        "ldap": "--enable-auth-basic=LDAP",
+        "-ldap": "--disable-auth-basic",
+        "pam": "--enable-auth-basic=PAM",
+        "-pam": "--disable-auth-basic",
+        "kerberos": "--enable-auth-negotiate=kerberos",
+        "-kerberos": "--disable-auth-negotiate",
+    },
+    visibility = ["PUBLIC"],
+)

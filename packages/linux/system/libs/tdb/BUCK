@@ -1,0 +1,50 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# tdb - Trivial Database
+download_source(
+    name = "tdb-src",
+    src_uri = "https://www.samba.org/ftp/tdb/tdb-1.4.10.tar.gz",
+    sha256 = "02338e33c16c21c9e29571cef523e76b2b708636254f6f30c6cf195d48c62daf",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "tdb",
+    # tdb uses waf (Python-based build system), not autoconf
+    # The ./configure script is a waf wrapper
+    source = ":tdb-src",
+    iuse = ["python"],
+    use_configure = {
+        "-python": "--disable-python",
+        "python": "--enable-python",
+    },
+    version = "1.4.10",
+    description = "A trivial database library similar to GDBM but with support for concurrent writers",
+    homepage = "https://tdb.samba.org/",
+    license = "LGPL-3+",
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--localstatedir=/var",
+        "--disable-python",
+    ],
+    # Custom phases for waf build system
+    # Samba's waf configure wrapper script generates a Makefile
+    src_configure = '''
+# tdb uses waf - ./configure is a wrapper around waf configure
+./configure \\
+    --prefix=/usr \\
+    --sysconfdir=/etc \\
+    --localstatedir=/var \\
+    --libdir=/usr/lib64 \\
+    ${EXTRA_ECONF:-}
+''',
+    src_compile = '''
+# waf generates a Makefile, so we can use make
+make -j${MAKEOPTS:-$(nproc)}
+''',
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

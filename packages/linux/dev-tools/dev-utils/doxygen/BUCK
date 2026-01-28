@@ -1,0 +1,10 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# FIXME: doxygen.nl returns 403 - needs working URL
+genrule(
+    name = "doxygen",
+    out = "doxygen-disabled.txt",
+    cmd = "echo 'Package disabled: upstream URL returns 403' > $OUT",
+    visibility = ["PUBLIC"],
+)

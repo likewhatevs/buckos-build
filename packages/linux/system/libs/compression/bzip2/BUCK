@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+make_package(
+    name = "bzip2",
+    version = "1.0.8",
+    src_uri = "https://mirrors.kernel.org/sourceware/bzip2/bzip2-1.0.8.tar.gz",
+    sha256 = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+    signature_sha256 = "c667e2db9a3cd17bde492584263cb7c30d8050538678ece3078ae58230e6e5e1",
+    signature_required = False,
+    description = "High-quality block-sorting file compressor",
+    homepage = "https://sourceware.org/bzip2/",
+    license = "bzip2-1.0.6",
+    iuse = ["static-libs"],
+    use_defaults = [],
+    # Build both static library and shared library
+    src_compile = """
+# Build shared library first (needs -fPIC)
+make -j$MAKE_JOBS CC="${CC:-gcc}" CFLAGS="-fPIC -O2 -g -D_FILE_OFFSET_BITS=64" PREFIX=/usr -f Makefile-libbz2_so
+# Save shared library object files
+mkdir -p sharedobj
+mv *.o sharedobj/ 2>/dev/null || true
+# Build static library and binaries
+make -j$MAKE_JOBS CC="${CC:-gcc}" PREFIX=/usr libbz2.a bzip2 bzip2recover
+# Restore shared library files
+mv sharedobj/*.o . 2>/dev/null || true
+rmdir sharedobj 2>/dev/null || true
+""",
+    src_install = """
+# Install binaries and static lib
+make PREFIX="$DESTDIR/usr" install
+
+# Install shared library
+install -Dm755 libbz2.so.1.0.8 "$DESTDIR/usr/lib/libbz2.so.1.0.8"
+ln -sf libbz2.so.1.0.8 "$DESTDIR/usr/lib/libbz2.so.1.0"
+ln -sf libbz2.so.1.0.8 "$DESTDIR/usr/lib/libbz2.so.1"
+ln -sf libbz2.so.1.0.8 "$DESTDIR/usr/lib/libbz2.so"
+
+# Remove static library if not requested
+if [ "${USE_static_libs}" != "1" ]; then
+    rm -f "$DESTDIR/usr/lib/libbz2.a"
+fi
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

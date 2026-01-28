@@ -1,0 +1,23 @@
+load("@root//defs:package_defs.bzl", "python_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# Kazam - Simple screen recording program
+
+python_package(
+    name = "kazam",
+    version = "2.0.0",
+    src_uri = "https://github.com/henrywoo/kazam/archive/refs/tags/v2.0.0.tar.gz",
+    sha256 = "4c42a0833225128b1214aae637861b2de50b3524b133f2276906d2b94cf59385",
+    signature_required = False,
+    description = "Simple screen recording program",
+    homepage = "https://github.com/henrywoo/kazam",
+    license = "GPL-3.0-or-later",
+    deps = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "graphics//video/gstreamer:gstreamer",
+        "desktop//gtk:gtk3",
+        "lang//python:python",
+        "audio//daemons/pulseaudio:pulseaudio",
+    ],
+    visibility = ["PUBLIC"],
+)

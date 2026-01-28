@@ -1,0 +1,24 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "latent_nerf",
+    version = "0.0.1",
+    src_uri = "https://github.com/eladrich/latent-nerf/archive/refs/heads/main.tar.gz",
+    sha256 = "fded0686386377faeda41c74464d6b452167446eb0c7175915beea75c268360c",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//vision/torchvision:torchvision",
+        "ai//ml-frameworks/diffusers:diffusers",
+        "dev-libs//python/transformers:transformers",
+        "dev-libs//python/accelerate:accelerate",
+        "dev-libs//python/huggingface-hub:huggingface-hub",
+        "dev-libs//python/ninja:ninja",
+        "dev-libs//python/xatlas:xatlas",
+        "dev-libs//python/imageio:imageio",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/pyrallis:pyrallis",
+        "dev-libs//python/loguru:loguru",
+        "dev-libs//python/tqdm:tqdm",
+    ],
+    maintainers = ["buckos"],
+)

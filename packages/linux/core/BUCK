@@ -1,0 +1,46 @@
+# Core system libraries and utilities
+filegroup(
+    name = "all-core",
+    srcs = [
+        "core//zlib:zlib",
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "system//filesystem/native/e2fsprogs:e2fsprogs",
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+        "core//bash:bash",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "core//procps-ng:procps-ng",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "core//libnl:libnl",
+        "core//file:file",
+        "core//less:less",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Compression libraries
+filegroup(
+    name = "compression",
+    srcs = [
+        "core//zlib:zlib",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Terminal libraries
+filegroup(
+    name = "terminal-libs",
+    srcs = [
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

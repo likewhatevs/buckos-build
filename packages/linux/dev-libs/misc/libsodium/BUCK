@@ -1,0 +1,40 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libsodium - A modern, portable, easy to use crypto library
+
+autotools_package(
+    name = "libsodium",
+    # Official release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "1.0.19",
+    src_uri = "https://download.libsodium.org/libsodium/releases/libsodium-1.0.19.tar.gz",
+    sha256 = "018d79fe0a045cca07331d37bd0cb57b2e838c51bc48fd837a1472e50068bbea",
+    description = "A modern, portable, easy to use crypto library",
+    homepage = "https://libsodium.org/",
+    license = "ISC",
+    iuse = [
+        "asm",
+        "minimal",
+        "static-libs",
+        "urandom",
+    ],
+    use_defaults = ["asm"],
+    deps = [],
+    configure_args = [
+        "--prefix=${PREFIX}",
+        "--enable-shared",
+        "--disable-static",
+    ],
+    use_configure = {
+        "-asm": "--disable-asm",
+        "-minimal": "--disable-minimal",
+        "-static-libs": "--disable-static",
+        "-urandom": "--disable-urandom",
+        "asm": "--enable-asm",
+        "minimal": "--enable-minimal",
+        "static-libs": "--enable-static",
+        "urandom": "--enable-urandom",
+    },
+    visibility = ["PUBLIC"],
+)

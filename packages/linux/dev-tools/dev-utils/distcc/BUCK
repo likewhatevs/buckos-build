@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "distcc-src",
+    src_uri = "https://github.com/distcc/distcc/releases/download/v3.4/distcc-3.4.tar.gz",
+    sha256 = "2b99edda9dad9dbf283933a02eace6de7423fe5650daa4a728c950e5cd37bd7d",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "distcc",
+    # GitHub release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    source = ":distcc-src",
+    version = "3.4",
+    description = "Distributed C/C++/ObjC compiler with distcc-pump extensions",
+    homepage = "https://github.com/distcc/distcc",
+    license = "GPL-2+",
+    configure_args = [
+        "--without-gtk",
+        "--without-gnome",
+        "--with-included-popt",
+        "--without-libiberty",
+    ],
+    # Skip building include-server since it requires distutils (removed in Python 3.12+)
+    src_compile = """
+        make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} distcc distccd distccmon-text lsdistcc update-distcc-symlinks
+    """,
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,98 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# Download source - explicitly created with PUBLIC visibility for reuse
+# Using GitHub mirror since busybox.net can be unreliable
+download_source(
+    name = "busybox-src",
+    src_uri = "https://github.com/mirror/busybox/archive/refs/tags/1_36_1.tar.gz",
+    sha256 = "ea5494846c51d946e5e801d1c099b438f683af8147e0be24ca4001073143110f",
+    signature_required = False,
+    visibility = ["PUBLIC"],
+)
+
+autotools_package(
+    name = "busybox",
+    source = ":busybox-src",
+    iuse = [
+        "debug",
+        "livecd",
+        "make-symlinks",
+        "math",
+        "mdev",
+        "pam",
+        "selinux",
+        "sep-usr",
+        "static",
+        "syslog",
+        "systemd",
+    ],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-livecd": "--disable-livecd",
+        "-make-symlinks": "--disable-make-symlinks",
+        "-math": "--disable-math",
+        "-mdev": "--disable-mdev",
+        "-pam": "--disable-pam",
+        "-selinux": "--disable-selinux",
+        "-sep-usr": "--disable-sep-usr",
+        "-static": "--disable-static",
+        "-syslog": "--disable-syslog",
+        "-systemd": "--disable-systemd",
+        "debug": "--enable-debug",
+        "livecd": "--enable-livecd",
+        "make-symlinks": "--enable-make-symlinks",
+        "math": "--enable-math",
+        "mdev": "--enable-mdev",
+        "pam": "--enable-pam",
+        "selinux": "--enable-selinux",
+        "sep-usr": "--enable-sep-usr",
+        "static": "--enable-static",
+        "syslog": "--enable-syslog",
+        "systemd": "--enable-systemd",
+    },
+    version = "1.36.1",
+    description = "BusyBox combines tiny versions of many common UNIX utilities into a single small executable",
+    homepage = "https://busybox.net/",
+    license = "GPL-2.0",
+    pre_configure = """
+# Generate minimal busybox configuration with only cpio enabled
+# For end user builds, they can provide their own .config file
+export KCONFIG_NOTIMESTAMP=1
+
+# Start with allnoconfig (all options disabled)
+make allnoconfig > /dev/null 2>&1
+
+# Enable only the cpio applet which is needed for dracut
+cat >> .config << 'EOF'
+CONFIG_CPIO=y
+CONFIG_FEATURE_CPIO_O=y
+CONFIG_FEATURE_CPIO_P=y
+EOF
+
+# Run oldconfig to ensure config is valid and complete
+yes "" | make oldconfig > /dev/null 2>&1
+
+echo "Generated minimal busybox config with cpio enabled"
+""",
+    src_configure = """
+# Busybox uses Kconfig, not autotools - skip configure step
+echo "Busybox configuration already done in pre_configure"
+""",
+    make_args = [
+        "CONFIG_PREFIX=$DESTDIR",
+    ],
+    post_install = """
+# Only create cpio symlink - don't conflict with coreutils
+mkdir -p "$DESTDIR/usr/bin"
+# Remove any auto-created symlinks that might conflict
+find "$DESTDIR" -type l -name "*" ! -name "cpio" -delete 2>/dev/null || true
+# Ensure cpio symlink exists
+if [ -f "$DESTDIR/bin/busybox" ]; then
+    ln -sf /bin/busybox "$DESTDIR/usr/bin/cpio"
+elif [ -f "$DESTDIR/usr/bin/busybox" ]; then
+    ln -sf busybox "$DESTDIR/usr/bin/cpio"
+fi
+""",
+    visibility = ["PUBLIC"],
+)

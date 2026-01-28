@@ -1,0 +1,85 @@
+# =============================================================================
+# firewalld - Dynamic firewall daemon with D-Bus interface
+# =============================================================================
+
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "firewalld",
+    version = "2.1.2",
+    src_uri = "https://github.com/firewalld/firewalld/releases/download/v2.1.2/firewalld-2.1.2.tar.bz2",
+    sha256 = "94323ebff87185721caa6bff80699132f15131af73b9bcedc45e60b1827c91c5",
+    signature_required = False,
+
+    iuse = [
+        "gui",
+        "iptables",
+        "nftables",
+        "selinux",
+    ],
+    use_defaults = ["iptables"],  # Use iptables until nftables package is enabled
+
+    use_deps = {
+        # "nftables": ["network//firewall/nftables:nftables"],  # TODO: Enable when nftables package is available
+        "iptables": ["network//firewall/iptables:iptables"],
+    },
+
+    use_configure = {
+        "-selinux": "--disable-selinux",
+        "selinux": "--enable-selinux",
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--localstatedir=/var",
+        "--with-systemd-unitdir=/usr/lib/systemd/system",
+        "--with-iptables=/sbin/iptables",
+        "--with-iptables-restore=/sbin/iptables-restore",
+        "--with-ip6tables=/sbin/ip6tables",
+        "--with-ip6tables-restore=/sbin/ip6tables-restore",
+        "--with-ebtables=/sbin/ebtables",
+        "--with-ipset=/sbin/ipset",
+    ],
+
+    post_install = """
+# Create firewalld configuration directories
+mkdir -p "$DESTDIR/etc/firewalld/zones"
+mkdir -p "$DESTDIR/etc/firewalld/services"
+mkdir -p "$DESTDIR/etc/firewalld/icmptypes"
+mkdir -p "$DESTDIR/etc/firewalld/helpers"
+mkdir -p "$DESTDIR/etc/firewalld/ipsets"
+mkdir -p "$DESTDIR/etc/firewalld/policies"
+mkdir -p "$DESTDIR/var/lib/firewalld"
+mkdir -p "$DESTDIR/var/log/firewalld"
+
+# Create default firewalld.conf
+cat > "$DESTDIR/etc/firewalld/firewalld.conf" << 'FWCONF'
+# firewalld config file
+DefaultZone=public
+CleanupOnExit=yes
+CleanupModulesOnExit=no
+IPv6_rpfilter=yes
+IndividualCalls=no
+LogDenied=off
+AutomaticHelpers=system
+FirewallBackend=nftables
+FlushAllOnReload=yes
+RFC3964_IPv4=yes
+FWCONF
+chmod 644 "$DESTDIR/etc/firewalld/firewalld.conf"
+""",
+
+    deps = [
+        "network//firewall/ipset:ipset",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "lang//python:python",
+    ],
+
+    description = "Dynamic firewall daemon with D-Bus interface",
+    homepage = "https://firewalld.org/",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

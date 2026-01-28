@@ -1,0 +1,20 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "dgp",
+    version = "2.0.0",
+    src_uri = "https://github.com/TRI-ML/dgp/archive/refs/tags/v2.0.0.tar.gz",
+    sha256 = "dd8133922d1e94cfce02187ecd08a73c29f24504df0ca01b8a6a5c59685bde5d",
+    deps = [
+        "dev-libs//python/boto3:boto3",
+        "dev-libs//python/click:click",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/opencv-python:opencv-python",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/protobuf:protobuf",
+        "dev-libs//python/torch:torch",
+        "dev-libs//python/torchvision:torchvision",
+        "dev-libs//python/tqdm:tqdm",
+    ],
+)

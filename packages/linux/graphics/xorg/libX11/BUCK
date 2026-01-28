@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libX11 - Core X11 client library
+# The main X11 library that applications link against
+autotools_package(
+    name = "libX11",
+    version = "1.8.7",
+    src_uri = "https://xorg.freedesktop.org/archive/individual/lib/libX11-1.8.7.tar.xz",
+    sha256 = "05f267468e3c851ae2b5c830bcf74251a90f63f04dd7c709ca94dc155b7e99ee",
+    description = "Core X11 client library",
+    homepage = "https://xorg.freedesktop.org/",
+    license = "MIT",
+    iuse = ["ipv6", "static-libs"],
+    use_defaults = ["ipv6"],
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--libdir=/usr/lib64",
+        "--disable-specs",
+    ],
+    use_configure = {
+        "ipv6": "--enable-ipv6",
+        "-ipv6": "--disable-ipv6",
+        "static-libs": "--enable-static",
+        "-static-libs": "--disable-static",
+    },
+    # Remove .la files that cause libtool path issues
+    src_install = "make DESTDIR=\"$DESTDIR\" install && find \"$DESTDIR\" -name '*.la' -delete",
+    deps = [
+        "graphics//xorg/xorgproto:xorgproto",
+        "graphics//xorg/xtrans:xtrans",
+        "graphics//xorg/libxcb:libxcb",
+        "graphics//xorg/libXau:libXau",  # Transitive dep for pkg-config
+        "graphics//xorg/libXdmcp:libXdmcp",  # Transitive dep for pkg-config
+    ],
+    visibility = ["PUBLIC"],
+)

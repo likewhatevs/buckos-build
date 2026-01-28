@@ -1,0 +1,13 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "python_cepces",
+    version = "0.3.6",
+    src_uri = "https://github.com/opensuse/cepces/archive/refs/tags/v0.3.6.tar.gz",
+    sha256 = "603cdbb35108d9266216b6f471355beb7227e86ccb24de154104254ecde01f4b",
+    deps = [
+        "dev-libs//python/cryptography:cryptography",
+        "dev-libs//python/requests:requests",
+        "dev-libs//python/requests-gssapi:requests-gssapi",
+    ],
+)

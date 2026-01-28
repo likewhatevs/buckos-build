@@ -1,0 +1,27 @@
+load("@root//defs:package_defs.bzl", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# tree - List directory contents in tree format
+
+make_package(
+    name = "tree",
+    version = "2.1.1",
+    src_uri = "https://gitlab.com/OldManProgrammer/unix-tree/-/archive/2.1.1/unix-tree-2.1.1.tar.gz",
+    sha256 = "bcd2a0327ad40592a9c43e09a4d2ef834e6f17aa9a59012a5fb1007950b5eced",
+    signature_required = False,
+    description = "List directory contents in tree format",
+    homepage = "https://gitlab.com/OldManProgrammer/unix-tree",
+    license = "GPL-2+",
+    make_args = [
+        "PREFIX=/usr",
+    ],
+    src_install = """
+# tree's Makefile doesn't properly use DESTDIR for MANDIR, install manually
+install -d "$DESTDIR/usr/bin"
+install -d "$DESTDIR/usr/share/man/man1"
+install -m755 tree "$DESTDIR/usr/bin/"
+install -m644 doc/tree.1 "$DESTDIR/usr/share/man/man1/"
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

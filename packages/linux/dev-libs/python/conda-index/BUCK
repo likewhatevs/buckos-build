@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "conda-index",
+    version = "0.5.0",
+    src_uri = "https://github.com/conda/conda-index/archive/refs/tags/0.5.0.tar.gz",
+    sha256 = "12d78ec6dc55f64ad68761108a416ebde3dc6472f257045ddfa45378980c9074",
+    deps = [
+        "dev-libs//python/click:click",
+        "dev-libs//python/filelock:filelock",
+        "dev-libs//python/jinja2:jinja2",
+        "dev-libs//python/more-itertools:more-itertools",
+        "dev-libs//python/tomli:tomli",
+        "dev-libs//python/zstandard:zstandard",
+    ],
+)

@@ -1,0 +1,45 @@
+load("@root//defs:package_defs.bzl", "download_source", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# iputils - Network monitoring tools (ping, tracepath, etc.)
+# =============================================================================
+
+meson_package(
+    name = "iputils",
+    version = "20231222",
+    src_uri = "https://github.com/iputils/iputils/archive/refs/tags/20231222.tar.gz",
+    sha256 = "18d51e7b416da0ecbc0ae18a2cba76407ca0b5b3f32c356034f258a0cb56793f",
+    signature_required = False,
+
+    iuse = [
+        "arping",
+        "caps",
+        "clockdiff",
+        "idn",
+        "nls",
+        "tracepath",
+    ],
+    use_meson = {
+        "-arping": "-DBUILD_ARPING=false",
+        "-clockdiff": "-DBUILD_CLOCKDIFF=false",
+        "-tracepath": "-DBUILD_TRACEPATH=false",
+        "arping": "-DBUILD_ARPING=true",
+        "clockdiff": "-DBUILD_CLOCKDIFF=true",
+        "tracepath": "-DBUILD_TRACEPATH=true",
+    },
+    use_defaults = ["caps"],
+
+    use_deps = {
+        "caps": ["system//libs/ipc/libcap:libcap"],
+    },
+
+    meson_args = [],
+
+    deps = [],
+
+    description = "Network monitoring tools including ping",
+    homepage = "https://github.com/iputils/iputils",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

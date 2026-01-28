@@ -1,0 +1,64 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "libcap-src",
+    src_uri = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.70.tar.xz",
+    sha256 = "23a6ef8aadaf1e3e875f633bb2d116cfef8952dba7bc7c569b13458e1952b30f",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "libcap",
+    source = ":libcap-src",
+    iuse = ["pam", "static-libs", "tools"],
+    use_configure = {
+        "-pam": "--disable-pam",
+        "-static-libs": "--disable-static",
+        "-tools": "--disable-tools",
+        "pam": "--enable-pam",
+        "static-libs": "--enable-static",
+        "tools": "--enable-tools",
+    },
+    version = "2.70",
+    category = "system/libs/ipc",
+    slot = "0",
+    description = "POSIX capabilities library",
+    homepage = "https://sites.google.com/site/fullycapable/",
+    license = "BSD-3-Clause",
+
+    src_prepare = """
+# Source extracts to libcap-src/ subdirectory - move contents up
+if [ -d libcap-src ]; then
+    mv libcap-src/* . 2>/dev/null || true
+    mv libcap-src/.* . 2>/dev/null || true
+    rmdir libcap-src 2>/dev/null || true
+fi
+
+# Ensure all files are writable (Buck artifacts may be read-only)
+chmod -R u+w . 2>/dev/null || find . -exec chmod u+w {} + 2>/dev/null || true
+""",
+
+    # libcap doesn't use autotools - it's pure Makefile-based
+    src_configure = '''
+# No configure step - Makefile-based build
+true
+''',
+
+    src_compile = '''
+make -j$(nproc) \\
+    prefix=/usr \\
+    lib=lib \\
+    RAISE_SETFCAP=no
+''',
+
+    src_install = '''
+make DESTDIR="$DESTDIR" \\
+    prefix=/usr \\
+    lib=lib \\
+    RAISE_SETFCAP=no \\
+    install
+''',
+
+    visibility = ["PUBLIC"],
+)

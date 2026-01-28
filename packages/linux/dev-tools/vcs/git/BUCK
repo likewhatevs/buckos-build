@@ -1,0 +1,67 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "git",
+    version = "2.43.0",
+    src_uri = "https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.43.0.tar.xz",
+    sha256 = "5446603e73d911781d259e565750dcd277a42836c8e392cac91cf137aa9b76ec",
+    signature_required = False,
+    description = "Fast, scalable, distributed revision control system",
+    homepage = "https://git-scm.com/",
+    license = "GPL-2",
+
+    # USE flags this package supports
+    iuse = [
+        "curl",
+        "perl",
+        "python",
+        "pcre2",
+        "nls",
+    ],
+
+    # Default USE flags
+    use_defaults = ["curl", "perl", "python", "pcre2"],
+
+    # Conditional dependencies
+    use_deps = {
+        "curl": ["network//curl:curl"],
+        "perl": ["lang//perl:perl"],
+        "python": ["lang//python:python"],
+        "pcre2": ["system//libs/utility/pcre2:pcre2"],
+        "nls": ["dev-libs//misc/gettext:gettext"],
+    },
+
+    # Conditional configure arguments
+    use_configure = {
+        "curl": "--with-curl",
+        "-curl": "--without-curl",
+        "perl": "--with-perl=/usr/bin/perl",
+        "-perl": "--without-perl",
+        "python": "--with-python=/usr/bin/python3",
+        "-python": "--without-python",
+        "pcre2": "--with-libpcre2",
+        "-pcre2": "--without-libpcre2",
+        "nls": "--enable-nls",
+        "-nls": "--disable-nls",
+    },
+
+    # Base configure arguments (always applied)
+    configure_args = [
+        "--with-expat",
+        "--with-openssl",
+        "--with-zlib",
+    ],
+
+    make_args = [
+        "prefix=/usr",
+        "gitexecdir=/usr/libexec/git-core",
+        "NO_CROSS_DIRECTORY_HARDLINKS=1",
+        "NO_INSTALL_HARDLINKS=1",
+    ],
+    deps = [
+        "core//zlib:zlib",
+        "system//libs/crypto/openssl:openssl",
+    ],
+    visibility = ["PUBLIC"],
+)

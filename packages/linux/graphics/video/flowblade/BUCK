@@ -1,0 +1,22 @@
+load("@root//defs:package_defs.bzl", "python_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# Flowblade - Multitrack non-linear video editor
+
+python_package(
+    name = "flowblade",
+    version = "2.14.0.1",
+    src_uri = "https://github.com/jliljebl/flowblade/archive/refs/tags/v2.14.0.1.tar.gz",
+    sha256 = "78686715ebeda758add019032a0eb70d85e77f63f5d2aa479663f0a5a68c8e44",
+    signature_required = False,
+    description = "Multitrack non-linear video editor for Linux",
+    homepage = "https://jliljebl.github.io/flowblade/",
+    license = "GPL-3.0-or-later",
+    deps = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "desktop//gtk:gtk3",
+        "lang//python:python",
+        # "core//frei0r:frei0r",  # TODO: not packaged yet,
+    ],
+    visibility = ["PUBLIC"],
+)

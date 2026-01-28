@@ -1,0 +1,24 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "ovi",
+    version = "0.0.1",
+    src_uri = "https://github.com/character-ai/ovi/archive/9306ea67abf586c410216d33e15141a002cbe786.tar.gz",
+    sha256 = "f509ac3357929e289a811970ba16e1cf91bdc719e89b84cf8ac3eff72993edaf",
+    deps = [
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/opencv-python:opencv-python",
+        "dev-libs//python/imageio:imageio",
+        "dev-libs//python/omegaconf:omegaconf",
+        "dev-libs//python/protobuf:protobuf",
+        "ai//ml-frameworks/transformers:transformers",
+        "ai//ml-frameworks/accelerate:accelerate",
+        "ai//ml-frameworks/diffusers:diffusers",
+        "ai//ml-frameworks/tokenizers:tokenizers",
+        "audio//libraries/librosa:librosa",
+        "media//moviepy:moviepy",
+    ],
+)

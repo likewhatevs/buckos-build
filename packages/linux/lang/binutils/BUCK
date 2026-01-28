@@ -1,0 +1,97 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+# =============================================================================
+# Binutils - GNU Binary Utilities
+# =============================================================================
+
+download_source(
+    name = "binutils-src",
+    src_uri = "https://mirror.buckos.org/b/binutils-2.45.1.tar.xz",
+    sha256 = "5fe101e6fe9d18fdec95962d81ed670fdee5f37e3f48f0bef87bddf862513aa5",
+    signature_sha256 = "6a3cb8380ec47a98310e90d42c65be7617f3b6f3ea08d90ea98f37909e0407a2",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "binutils",
+    source = ":binutils-src",
+    iuse = [
+        "cet",
+        "debuginfod",
+        "gprofng",
+        "hardened",
+        "multitarget",
+        "nls",
+        "pgo",
+        "plugins",
+        "static-libs",
+        "vanilla",
+        "xxhash",
+        "zstd",
+    ],
+    use_configure = {
+        "-cet": "--disable-cet",
+        "-debuginfod": "--disable-debuginfod",
+        "-gprofng": "--disable-gprofng",
+        "-hardened": "--disable-hardening",
+        "-multitarget": "--disable-multitarget",
+        "-nls": "--disable-nls",
+        "-pgo": "--disable-pgo",
+        "-plugins": "--disable-plugins",
+        "-static-libs": "--disable-static",
+        "-vanilla": "--disable-vanilla",
+        "-xxhash": "--disable-xxhash",
+        "-zstd": "--without-zstd",
+        "cet": "--enable-cet",
+        "debuginfod": "--enable-debuginfod",
+        "gprofng": "--enable-gprofng",
+        "hardened": "--enable-hardening",
+        "multitarget": "--enable-multitarget",
+        "nls": "--enable-nls",
+        "pgo": "--enable-pgo",
+        "plugins": "--enable-plugins",
+        "static-libs": "--enable-static",
+        "vanilla": "--enable-vanilla",
+        "xxhash": "--enable-xxhash",
+        "zstd": "--with-zstd",
+    },
+    version = "2.45.1",
+    category = "lang",
+    description = "GNU Binary Utilities - assembler, linker, and related tools",
+    homepage = "https://www.gnu.org/software/binutils/",
+    license = "GPL-3.0",
+
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "core//zlib:zlib",
+    ],
+
+    src_prepare = '''
+# Remove any stale config.cache files that cause CPPFLAGS conflicts
+find . -name 'config.cache' -delete
+''',
+
+    src_configure = '''
+./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib64 \
+    --enable-gold \
+    --enable-ld=default \
+    --enable-plugins \
+    --enable-shared \
+    --disable-werror \
+    --with-system-zlib
+''',
+
+    src_compile = '''
+make -j$(nproc)
+''',
+
+    src_install = '''
+make DESTDIR="$DESTDIR" install
+''',
+
+    visibility = ["PUBLIC"],
+)

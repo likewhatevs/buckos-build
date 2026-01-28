@@ -1,0 +1,31 @@
+# Hypervisor packages aggregator
+
+filegroup(
+    name = "qemu-full",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu",
+        "emulation//hypervisors/qemu:qemu-guest-agent",
+        "emulation//hypervisors/qemu:qemu-img",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "qemu-minimal",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu-img",
+        "emulation//hypervisors/qemu:qemu-user",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-hypervisors",
+    srcs = [
+        ":qemu-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

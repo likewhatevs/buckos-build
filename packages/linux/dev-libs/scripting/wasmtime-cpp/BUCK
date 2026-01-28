@@ -1,0 +1,17 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "wasmtime-cpp",
+    version = "0.27.0",
+    src_uri = "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/heads/main.tar.gz",
+    sha256 = "8eeb84dffd083feca2ecc0815ee466a39919375e31cdafe276387306f134edbe",
+    cmake_args = [
+        "-DCMAKE_CXX_STANDARD=17",
+        "-DBUILD_TESTING=OFF",
+    ],
+    deps = [
+        "emulation//wasmtime:wasmtime",
+    ],
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,40 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# gfxstream - Graphics Streaming Kit (formerly Vulkan Cereal)
+# A code generator for serializing and forwarding graphics API calls for virtualized graphics
+
+meson_package(
+    name = "gfxstream",
+    version = "16.0.0_r2",
+    # Using Android 16.0.0_r2 release tag for stability
+    src_uri = "https://android.googlesource.com/platform/hardware/google/gfxstream/+archive/refs/tags/android-16.0.0_r2.tar.gz",
+    sha256 = "eb32dc8f717dace1c8a7f47602b04f8b576813a6faa7137ae91fa6367739abfe",  # Dynamic: googlesource archive
+    description = "Graphics Streaming Kit for serializing graphics API calls in virtualized environments",
+    homepage = "https://android.googlesource.com/platform/hardware/google/gfxstream",
+    license = "Apache-2.0 OR MIT",
+    deps = [
+        "emulation//aemu:aemu",
+        "desktop//libdrm:libdrm",
+    ],
+    meson_args = [
+        "-Dbuildtype=release",
+        "-Dgfxstream-build=host",
+        "-Ddecoders=['gles','vulkan']",
+        "-Dlog-level=error",
+    ],
+    iuse = [
+        "gles",
+        "vulkan",
+        "test",
+    ],
+    use_defaults = [
+        "gles",
+        "vulkan",
+    ],
+    use_options = {
+        "gles": "decoders=gles",
+        "vulkan": "decoders=vulkan",
+        "test": "tests",
+    },
+    visibility = ["PUBLIC"],
+)

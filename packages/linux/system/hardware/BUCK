@@ -1,0 +1,57 @@
+# Hardware utilities - System hardware inspection tools
+# Provides utilities for inspecting PCI, USB, DMI/SMBIOS, and general hardware
+
+# Essential hardware inspection tools
+filegroup(
+    name = "essential",
+    srcs = [
+        "system//hardware/usbutils:usbutils",
+        "system//hardware/dmidecode:dmidecode",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All hardware inspection tools
+filegroup(
+    name = "all-hardware",
+    srcs = [
+        "system//hardware/usbutils:usbutils",
+        "system//hardware/lshw:lshw",
+        "system//hardware/dmidecode:dmidecode",
+        "system//hardware/hwinfo:hwinfo",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# PCI inspection tools
+filegroup(
+    name = "pci",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# USB inspection tools
+filegroup(
+    name = "usb",
+    srcs = [
+        "system//hardware/usbutils:usbutils",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# System information tools (BIOS/DMI)
+filegroup(
+    name = "sysinfo",
+    srcs = [
+        "system//hardware/dmidecode:dmidecode",
+        "system//hardware/lshw:lshw",
+        "system//hardware/hwinfo:hwinfo",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

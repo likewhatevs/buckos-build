@@ -1,0 +1,2746 @@
+load("@root//defs:package_defs.bzl", "download_source", "cmake_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Plasma Wayland Protocols
+# =============================================================================
+# Required for kwindowsystem Wayland support
+
+download_source(
+    name = "plasma-wayland-protocols-src",
+    src_uri = "https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.20.0.tar.xz",
+    sha256 = "9818bb1462211ce5982e670abf0d964eb11fe1d0c02a1c26084db30695a79d6a",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "plasma-wayland-protocols",
+    source = ":plasma-wayland-protocols-src",
+    version = "1.20.0",
+    description = "Plasma Wayland Protocol definitions",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    deps = [
+        "desktop//kde/ecm:extra-cmake-modules",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# KDE Frameworks 6 Core Libraries
+# =============================================================================
+# These are the essential KF6 libraries needed for KDE Plasma
+
+# KCoreAddons - Core utilities and helpers
+download_source(
+    name = "kcoreaddons-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kcoreaddons-6.9.0.tar.xz",
+    sha256 = "9ce79eeeff62c0df46be1db17630344e9bee7f63655441e626923d3d4f986fbd",
+    signature_required = False,
+)
+
+# Common function to set LD_LIBRARY_PATH for Qt6 tools during cmake configure/compile
+# This uses LIBRARY_PATH (which includes all transitive dependency lib paths) to set
+# LD_LIBRARY_PATH so tools like qtpaths can find their shared libraries at runtime.
+# The filtering excludes cross-compiled glibc and bootstrap toolchain paths.
+# Also sets up -rpath-link flags for the linker to find transitive shared lib deps.
+KDE_HOST_LD_SETUP = """
+# Set LD_LIBRARY_PATH for Qt6 tools (qtpaths, moc, rcc, etc.) during CMake
+# This is needed because Qt6 tools need runtime libraries like libdouble-conversion
+# LIBRARY_PATH contains all lib paths including deps (colon-separated)
+if [ -n "${LIBRARY_PATH:-}" ]; then
+    HOST_LD_PATH=""
+    RPATH_LINK_FLAGS=""
+    OLD_IFS="$IFS"
+    IFS=":"
+    for libdir in $LIBRARY_PATH; do
+        if [ -d "$libdir" ]; then
+            # Skip paths with cross-compiled glibc (would break host tools)
+            if ls "$libdir"/libc.so* >/dev/null 2>&1; then
+                continue
+            fi
+            # Skip bootstrap toolchain paths
+            if [[ "$libdir" == */tools/lib* ]]; then
+                continue
+            fi
+            HOST_LD_PATH="${HOST_LD_PATH:+$HOST_LD_PATH:}$libdir"
+            # Add -rpath-link for linker to find transitive deps (like OpenSSL for Qt6Network)
+            RPATH_LINK_FLAGS="${RPATH_LINK_FLAGS} -Wl,-rpath-link,$libdir"
+        fi
+    done
+    IFS="$OLD_IFS"
+    if [ -n "$HOST_LD_PATH" ]; then
+        export LD_LIBRARY_PATH="$HOST_LD_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    fi
+    if [ -n "$RPATH_LINK_FLAGS" ]; then
+        export CMAKE_LINKER_FLAGS="${CMAKE_LINKER_FLAGS:-}$RPATH_LINK_FLAGS"
+    fi
+fi
+"""
+
+# Script to create EGL/GLESv2 Find modules for CMake
+# These define the GLESv2::GLESv2 and EGL::EGL imported targets that Qt6 needs
+KDE_CREATE_FIND_MODULES = """
+# Create Find modules for EGL and GLESv2 that Qt6 needs
+MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa || echo "")
+if [ -n "$MESA_PATH" ]; then
+    mkdir -p "$S/cmake-modules"
+
+    # FindEGL.cmake
+    cat > "$S/cmake-modules/FindEGL.cmake" << 'FINDEOF'
+if(NOT TARGET EGL::EGL)
+    find_library(EGL_LIBRARY NAMES EGL libEGL PATHS ${CMAKE_PREFIX_PATH} PATH_SUFFIXES lib64 lib usr/lib64 usr/lib)
+    find_path(EGL_INCLUDE_DIR NAMES EGL/egl.h PATHS ${CMAKE_PREFIX_PATH} PATH_SUFFIXES include usr/include)
+    if(EGL_LIBRARY AND EGL_INCLUDE_DIR)
+        add_library(EGL::EGL SHARED IMPORTED GLOBAL)
+        set_target_properties(EGL::EGL PROPERTIES
+            IMPORTED_LOCATION "${EGL_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${EGL_INCLUDE_DIR}"
+        )
+        set(EGL_FOUND TRUE)
+    endif()
+endif()
+FINDEOF
+
+    # FindGLESv2.cmake
+    cat > "$S/cmake-modules/FindGLESv2.cmake" << 'FINDEOF'
+if(NOT TARGET GLESv2::GLESv2)
+    find_library(GLESv2_LIBRARY NAMES GLESv2 libGLESv2 PATHS ${CMAKE_PREFIX_PATH} PATH_SUFFIXES lib64 lib usr/lib64 usr/lib)
+    find_path(GLESv2_INCLUDE_DIR NAMES GLES2/gl2.h PATHS ${CMAKE_PREFIX_PATH} PATH_SUFFIXES include usr/include)
+    if(GLESv2_LIBRARY AND GLESv2_INCLUDE_DIR)
+        add_library(GLESv2::GLESv2 SHARED IMPORTED GLOBAL)
+        set_target_properties(GLESv2::GLESv2 PROPERTIES
+            IMPORTED_LOCATION "${GLESv2_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLESv2_INCLUDE_DIR}"
+        )
+        set(GLESv2_FOUND TRUE)
+    endif()
+endif()
+FINDEOF
+fi
+"""
+
+# Common CMake configure script for KDE packages
+KDE_CMAKE_CONFIGURE = """
+mkdir -p "$S/build"
+CMAKE_PREFIX_PATH_ARG=""
+if [ -n "${CMAKE_PREFIX_PATH:-}" ]; then
+    CMAKE_PREFIX_PATH_ARG="-DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+fi
+RPATH_LINK_FLAGS=""
+LINK_DIR_FLAGS=""
+if [ -n "${LIBRARY_PATH:-}" ]; then
+    OLD_IFS="$IFS"
+    IFS=":"
+    for libdir in $LIBRARY_PATH; do
+        if [ -d "$libdir" ]; then
+            RPATH_LINK_FLAGS="${RPATH_LINK_FLAGS:+$RPATH_LINK_FLAGS }-Wl,-rpath-link,$libdir"
+            LINK_DIR_FLAGS="${LINK_DIR_FLAGS:+$LINK_DIR_FLAGS }-L$libdir"
+        fi
+    done
+    IFS="$OLD_IFS"
+fi
+CMAKE_LINKER_FLAGS="${LDFLAGS:-} ${RPATH_LINK_FLAGS:-} ${LINK_DIR_FLAGS:-}"
+
+# Find Mesa path to locate EGL/GLESv2 libraries
+MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa || echo "")
+# Find xkbcommon path
+XKB_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep xkbcommon || echo "")
+
+EGL_GLES_ARGS=""
+cat > "$S/build/egl_gles_targets.cmake" << 'TARGETS_EOF'
+# Pre-define third-party targets that Qt6 expects
+
+# Skip visibility try_compile tests since we're cross-compiling
+# GCC supports visibility attributes, so force them on
+set(COMPILER_HAS_HIDDEN_VISIBILITY TRUE CACHE BOOL "Compiler has hidden visibility" FORCE)
+set(COMPILER_HAS_HIDDEN_INLINE_VISIBILITY TRUE CACHE BOOL "Compiler has hidden inline visibility" FORCE)
+set(COMPILER_HAS_DEPRECATED TRUE CACHE BOOL "Compiler has deprecated attribute" FORCE)
+
+# LibIntl (gettext) is built into glibc - no separate library needed
+# These variables tell FindLibIntl.cmake that glibc provides libintl
+# The key is LibIntl_SYMBOL_FOUND which skips check_cxx_symbol_exists(dngettext)
+set(LibIntl_SYMBOL_FOUND TRUE CACHE BOOL "dngettext symbol found in libc" FORCE)
+set(LibIntl_INCLUDE_DIRS "" CACHE STRING "libintl headers in default search path" FORCE)
+set(LibIntl_LIBRARIES "" CACHE STRING "libintl is part of libc" FORCE)
+set(LibIntl_FOUND TRUE CACHE BOOL "libintl found" FORCE)
+set(HAVE_NL_MSG_CAT_CNTR TRUE CACHE BOOL "_nl_msg_cat_cntr exists in glibc" FORCE)
+TARGETS_EOF
+
+# Add EGL and GLESv2 targets if found
+if [ -n "$MESA_PATH" ]; then
+    EGL_LIB="$MESA_PATH/lib64/libEGL.so"
+    GLES_LIB="$MESA_PATH/lib64/libGLESv2.so"
+    EGL_INC="$MESA_PATH/include"
+    if [ -f "$EGL_LIB" ] && [ -f "$GLES_LIB" ]; then
+        cat >> "$S/build/egl_gles_targets.cmake" << EOF
+# Skip try_compile tests for EGL/GLESv2 since we're cross-compiling
+set(HAVE_EGL TRUE CACHE BOOL "EGL works" FORCE)
+set(HAVE_GLESv2 TRUE CACHE BOOL "GLESv2 works" FORCE)
+set(EGL_FOUND TRUE CACHE BOOL "EGL found" FORCE)
+set(EGL_LIBRARY "$EGL_LIB" CACHE FILEPATH "EGL library" FORCE)
+set(EGL_INCLUDE_DIR "$EGL_INC" CACHE PATH "EGL include" FORCE)
+set(GLESv2_FOUND TRUE CACHE BOOL "GLESv2 found" FORCE)
+set(GLESv2_LIBRARY "$GLES_LIB" CACHE FILEPATH "GLESv2 library" FORCE)
+set(GLESv2_INCLUDE_DIR "$EGL_INC" CACHE PATH "GLESv2 include" FORCE)
+
+if(NOT TARGET EGL::EGL)
+    add_library(EGL::EGL SHARED IMPORTED GLOBAL)
+    set_target_properties(EGL::EGL PROPERTIES
+        IMPORTED_LOCATION "$EGL_LIB"
+        INTERFACE_INCLUDE_DIRECTORIES "$EGL_INC"
+    )
+endif()
+if(NOT TARGET GLESv2::GLESv2)
+    add_library(GLESv2::GLESv2 SHARED IMPORTED GLOBAL)
+    set_target_properties(GLESv2::GLESv2 PROPERTIES
+        IMPORTED_LOCATION "$GLES_LIB"
+        INTERFACE_INCLUDE_DIRECTORIES "$EGL_INC"
+    )
+endif()
+EOF
+    fi
+fi
+
+# Add XKB target if found
+if [ -n "$XKB_PATH" ]; then
+    XKB_LIB="$XKB_PATH/lib64/libxkbcommon.so"
+    XKB_INC="$XKB_PATH/include"
+    if [ -f "$XKB_LIB" ]; then
+        cat >> "$S/build/egl_gles_targets.cmake" << EOF
+if(NOT TARGET XKB::XKB)
+    add_library(XKB::XKB SHARED IMPORTED GLOBAL)
+    set_target_properties(XKB::XKB PROPERTIES
+        IMPORTED_LOCATION "$XKB_LIB"
+        INTERFACE_INCLUDE_DIRECTORIES "$XKB_INC"
+    )
+    set(XKB_FOUND TRUE CACHE BOOL "XKB found" FORCE)
+    set(XKB_LIBRARY "$XKB_LIB" CACHE PATH "XKB library" FORCE)
+    set(XKB_INCLUDE_DIR "$XKB_INC" CACHE PATH "XKB include dir" FORCE)
+endif()
+EOF
+    fi
+fi
+
+# Use CMAKE_PROJECT_INCLUDE_BEFORE to load our targets before the project starts
+EGL_GLES_ARGS="-DCMAKE_PROJECT_INCLUDE_BEFORE=$S/build/egl_gles_targets.cmake"
+
+cmake -S "$S" -B "$S/build" \\
+    -DCMAKE_INSTALL_PREFIX="${EPREFIX:-/usr}" \\
+    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}" \\
+    -DCMAKE_INSTALL_LIBDIR="${LIBDIR:-lib64}" \\
+    -DCMAKE_C_FLAGS="${CFLAGS:-}" \\
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS:-}" \\
+    -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_LINKER_FLAGS:-}" \\
+    -DCMAKE_SHARED_LINKER_FLAGS="${CMAKE_LINKER_FLAGS:-}" \\
+    -DCMAKE_MODULE_LINKER_FLAGS="${CMAKE_LINKER_FLAGS:-}" \\
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \\
+    -DWITH_X11=OFF \\
+    $CMAKE_PREFIX_PATH_ARG \\
+    $EGL_GLES_ARGS \\
+    ${CMAKE_EXTRA_ARGS:-}
+"""
+
+cmake_package(
+    name = "kcoreaddons",
+    source = ":kcoreaddons-src",
+    version = "6.9.0",
+    description = "KDE Core Addons - Utilities and helpers",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_QCH=OFF",
+    ],
+    # Comment out ecm_install_po_files_as_qm to skip translations - Qt6LinguistTools not available
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "system//init/eudev:eudev",  # For libudev.h
+        # Qt6 runtime dependencies needed for Qt6 tools (qtpaths, moc, etc.)
+        "dev-libs//double-conversion:double-conversion",
+        # Mesa provides EGL/GLESv2 for Qt6Gui
+        "desktop//mesa:mesa",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KConfig - Configuration system
+download_source(
+    name = "kconfig-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kconfig-6.9.0.tar.xz",
+    sha256 = "b8b9dfb0bc5bc0f9c45164e02c988dd8ab10a34aea0c80b1945fd0b3267ac6f9",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kconfig",
+    source = ":kconfig-src",
+    version = "6.9.0",
+    description = "KDE Configuration Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    # Skip translations - Qt6LinguistTools not available
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "desktop//mesa:mesa",
+        # Qt6DBus needs dbus
+        "system//libs/ipc/dbus:dbus",
+        # Qt6Gui needs xkbcommon
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KI18n - Internationalization
+download_source(
+    name = "ki18n-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/ki18n-6.9.0.tar.xz",
+    sha256 = "736ae10e3a8c5dced155d3347f9dbd91c34f485d7495815f85f4d624681a1860",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "ki18n",
+    source = ":ki18n-src",
+    version = "6.9.0",
+    description = "KDE Internationalization Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    # Skip translations - Qt6LinguistTools not available
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "desktop//mesa:mesa",
+        # Qt6Gui needs xkbcommon
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# KDE Frameworks 6 Additional Libraries
+# =============================================================================
+# Additional KF6 libraries required for plasma-desktop
+
+# KArchive - File compression support
+download_source(
+    name = "karchive-src",
+    # SHA256 auto-fetched from KDE
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/karchive-6.9.0.tar.xz",
+    sha256 = "246ad8dd2b5fb83df1cb05ff1fd3934f8a52be94d124350f9e6b7c3420e9c474",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "karchive",
+    source = ":karchive-src",
+    version = "6.9.0",
+    description = "KDE Archive Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_ZSTD=OFF",
+        "-DWITH_BZIP2=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=OFF",
+    ],
+    # Patch CMakeLists.txt to disable zstd and translations
+    src_prepare = "sed -i '/pkg_check_modules.*libzstd/d' CMakeLists.txt && sed -i 's/set(HAVE_ZSTD.*/set(HAVE_ZSTD FALSE)/' CMakeLists.txt && sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "core//zlib:zlib",
+        "system//libs/compression/xz:xz",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KCodecs - Text encoding
+download_source(
+    name = "kcodecs-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kcodecs-6.9.0.tar.xz",
+    sha256 = "c88a4def4564a746bb8a6a7c127094ae9b7e47e1a5ad24f87ffb6643d42b0cb1",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kcodecs",
+    source = ":kcodecs-src",
+    version = "6.9.0",
+    description = "KDE Text Encoding Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KGuiAddons - GUI utilities
+download_source(
+    name = "kguiaddons-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kguiaddons-6.9.0.tar.xz",
+    sha256 = "f7c320bea5fb0fcc247e04e1092e19206a1298853112a87c65072d33adc8468a",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kguiaddons",
+    source = ":kguiaddons-src",
+    version = "6.9.0",
+    description = "KDE GUI Addons",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        # Disable Wayland color picker (needs PlasmaWaylandProtocols) and X11
+        "-DWITH_WAYLAND=OFF",
+        "-DWITH_X11=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "graphics//rendering/wayland:wayland",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        # Qt6Gui dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KWidgetsAddons - Widget utilities
+download_source(
+    name = "kwidgetsaddons-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kwidgetsaddons-6.9.0.tar.xz",
+    sha256 = "bda7d5cef310ad3b8e0aa9accf319c3349e2b7cbead673bd25a39af593787a48",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kwidgetsaddons",
+    source = ":kwidgetsaddons-src",
+    version = "6.9.0",
+    description = "KDE Widget Addons",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KDBusAddons - D-Bus utilities
+download_source(
+    name = "kdbusaddons-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kdbusaddons-6.9.0.tar.xz",
+    sha256 = "30a0b18f702830ee3e9ae94f0d953b0bf835f3d9c836cb22366de48065a3a74c",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kdbusaddons",
+    source = ":kdbusaddons-src",
+    version = "6.9.0",
+    description = "KDE D-Bus Addons",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    # Disable X11 code - we're Wayland-only
+    # Stub out QX11Info calls since we don't have X11 support
+    src_prepare = """sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt && \
+sed -i 's/#include <private\\/qtx11extras_p.h>//' src/kdbusservice.cpp && \
+sed -i 's/QX11Info::isPlatformX11()/false/' src/kdbusservice.cpp && \
+sed -i 's/QX11Info::setNextStartupId(desktopStartupId);/\\/\\/ X11 disabled/' src/kdbusservice.cpp && \
+sed -i 's/QX11Info::nextStartupId()/QByteArray()/' src/kdbusservice.cpp || true""",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KItemViews - Item view utilities
+download_source(
+    name = "kitemviews-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kitemviews-6.9.0.tar.xz",
+    sha256 = "874b07d4299d812a88f1e8b5f8e356ce98c2b823e527af3a72909ca2c50e3cf3",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kitemviews",
+    source = ":kitemviews-src",
+    version = "6.9.0",
+    description = "KDE Item Views Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KItemModels - Item model utilities
+download_source(
+    name = "kitemmodels-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kitemmodels-6.9.0.tar.xz",
+    sha256 = "ab4dafc0ca8219fa4789439f5aca08a72bac60da0b29026710636af7e88b7324",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kitemmodels",
+    source = ":kitemmodels-src",
+    version = "6.9.0",
+    description = "KDE Item Models Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KColorScheme - Color scheme support
+download_source(
+    name = "kcolorscheme-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kcolorscheme-6.9.0.tar.xz",
+    sha256 = "71beaae08b294b5ebf25c5174a1d55cacdce5e8991e9167d143a448b9574281a",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kcolorscheme",
+    source = ":kcolorscheme-src",
+    version = "6.9.0",
+    description = "KDE Color Scheme Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    # Disable translations - Qt6LinguistTools not available
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kguiaddons",
+        ":ki18n",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KConfigWidgets - Configuration widgets
+download_source(
+    name = "kconfigwidgets-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kconfigwidgets-6.9.0.tar.xz",
+    sha256 = "c9568cbdd9169a496a26293383cc4f7c79e94871f76a9146fb167c3c759b04ca",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kconfigwidgets",
+    source = ":kconfigwidgets-src",
+    version = "6.9.0",
+    description = "KDE Configuration Widgets",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":kcodecs",
+        ":kcolorscheme",
+        ":kguiaddons",
+        ":ki18n",
+        ":kwidgetsaddons",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Breeze Icons - KDE icon theme
+download_source(
+    name = "breeze-icons-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/breeze-icons-6.9.0.tar.xz",
+    sha256 = "618f633bafb0a5aabaa93eaa6733dfebd6e79303ef1d0a93dcf249181896bed9",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "breeze-icons",
+    source = ":breeze-icons-src",
+    version = "6.9.0",
+    description = "Breeze Icon Theme",
+    homepage = "https://kde.org/",
+    license = "LGPL-3.0+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBINARY_ICONS_RESOURCE=OFF",
+    ],
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Qt6Core transitive deps
+        "dev-libs//glib:glib",
+        "core//zlib:zlib",
+        "system//libs/utility/pcre2:pcre2",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KIconThemes - Icon theme support
+download_source(
+    name = "kiconthemes-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kiconthemes-6.9.0.tar.xz",
+    sha256 = "e24d4b4f8bd09d6edd61e7dfb2033017352452eae879c1260200a81d48bc996e",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kiconthemes",
+    source = ":kiconthemes-src",
+    version = "6.9.0",
+    description = "KDE Icon Themes Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":karchive",
+        ":kconfig",
+        ":kconfigwidgets",
+        ":kcolorscheme",
+        ":kguiaddons",
+        ":ki18n",
+        ":kwidgetsaddons",
+        ":breeze-icons",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KAuth - Authorization framework
+download_source(
+    name = "kauth-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kauth-6.9.0.tar.xz",
+    sha256 = "84cf15729bd248aa9d78c1bfecf68161782d521ac14a9b6a5bdacc29cbe3dec6",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kauth",
+    source = ":kauth-src",
+    version = "6.9.0",
+    description = "KDE Authorization Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_EXAMPLES=OFF",
+        # Disable polkit backend - not available
+        "-DKAUTH_BACKEND_NAME=FAKE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        "system//init/eudev:eudev",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KCrash - Crash handling
+download_source(
+    name = "kcrash-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kcrash-6.9.0.tar.xz",
+    sha256 = "a9734e48ad425bb426294f2de6badef3b485ff5b9bb273ba51fe2cac7aa7a456",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kcrash",
+    source = ":kcrash-src",
+    version = "6.9.0",
+    description = "KDE Crash Handler",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        # Disable X11 - we're Wayland-only
+        "-DWITH_X11=OFF",
+    ],
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        # Mesa provides EGL/GLESv2 for Qt6Gui
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KWindowSystem - Window system access
+download_source(
+    name = "kwindowsystem-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kwindowsystem-6.9.0.tar.xz",
+    sha256 = "9b0f96fb0073f7ba89788cd5a10fba6f960cea86eba2b03336fa6e309e5e875b",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kwindowsystem",
+    source = ":kwindowsystem-src",
+    version = "6.9.0",
+    description = "KDE Window System Access",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DKWINDOWSYSTEM_WAYLAND=ON",
+        "-DKWINDOWSYSTEM_X11=ON",  # X11 support for KX11Extras (required by libplasma)
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":plasma-wayland-protocols",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "desktop//mesa:mesa",
+        "core//libffi:libffi",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        # X11 dependencies (for KX11Extras)
+        "graphics//xorg/libX11:libX11",
+        "graphics//xorg/libxcb:libxcb",
+        "graphics//xorg/libXrender:libXrender",
+        "graphics//xorg/libXfixes:libXfixes",
+        "graphics//xorg/xorgproto:xorgproto",
+        # XCB utilities (for ICCCM, keysyms, etc.)
+        "graphics//xorg/xcb-util-wm:xcb-util-wm",
+        "graphics//xorg/xcb-util-keysyms:xcb-util-keysyms",
+        "graphics//xorg/xcb-util:xcb-util",
+        "graphics//xorg/libXau:libXau",
+        "graphics//xorg/libXdmcp:libXdmcp",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KIdleTime - User idle time detection
+download_source(
+    name = "kidletime-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kidletime-6.9.0.tar.xz",
+    sha256 = "e1665ef314660d8493f330069c477d1c8cfb0977be4b9f380d8e726b2694d242",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kidletime",
+    source = ":kidletime-src",
+    version = "6.9.0",
+    description = "KDE User Idle Time Detection",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_X11=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":plasma-wayland-protocols",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "desktop//mesa:mesa",
+        "core//libffi:libffi",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KNotifications - Desktop notifications
+download_source(
+    name = "knotifications-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/knotifications-6.9.0.tar.xz",
+    sha256 = "333fe1bd17a4a918cea6d51fd0535c8b88e1fb2e4f82ca730d0f8b48f0f0422f",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "knotifications",
+    source = ":knotifications-src",
+    version = "6.9.0",
+    description = "KDE Notifications Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kwindowsystem",
+        ":plasma-wayland-protocols",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        "audio//libraries:libcanberra",
+        # Transitive link dependencies
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KCompletion - Text completion
+download_source(
+    name = "kcompletion-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kcompletion-6.9.0.tar.xz",
+    sha256 = "dcce4153fa13a2c7b86f5fb2641377feda587e4af478a3937fb9bc7275db891c",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kcompletion",
+    source = ":kcompletion-src",
+    version = "6.9.0",
+    description = "KDE Completion Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kwidgetsaddons",
+        ":kcodecs",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KJobWidgets - Job progress widgets
+download_source(
+    name = "kjobwidgets-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kjobwidgets-6.9.0.tar.xz",
+    sha256 = "81867978a3add5c2539e6ac4cfd1711ae44ceb50f4654f598c5dd0ab05553716",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kjobwidgets",
+    source = ":kjobwidgets-src",
+    version = "6.9.0",
+    description = "KDE Job Widgets",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":knotifications",
+        ":kwidgetsaddons",
+        ":kconfig",
+        ":kwindowsystem",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        "audio//libraries:libcanberra",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Solid - Hardware integration
+download_source(
+    name = "solid-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/solid-6.9.0.tar.xz",
+    sha256 = "8db2540498697847ee7f93afe4c307320f2cfee26fbdfca0133bf8cacfea42f5",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "solid",
+    source = ":solid-src",
+    version = "6.9.0",
+    description = "KDE Hardware Integration Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "system//init/eudev:eudev",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # util-linux provides libmount for filesystem operations
+        "core//util-linux:util-linux",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KService - Service framework
+download_source(
+    name = "kservice-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kservice-6.9.0.tar.xz",
+    sha256 = "f4ff574f422b27575f04c7491694162c61c7db4ad923565408fa23b9a7e9675f",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kservice",
+    source = ":kservice-src",
+    version = "6.9.0",
+    description = "KDE Service Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kcoreaddons",
+        ":ki18n",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KBookmarks - Bookmarks framework
+download_source(
+    name = "kbookmarks-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kbookmarks-6.9.0.tar.xz",
+    sha256 = "932234bedbf5a5887f23c610010c8c70b36b5dce4f4c4c5d76f47a92ce8e577a",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kbookmarks",
+    source = ":kbookmarks-src",
+    version = "6.9.0",
+    description = "KDE Bookmarks Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":kconfigwidgets",
+        ":kwidgetsaddons",
+        ":kcodecs",
+        ":kcolorscheme",
+        ":kguiaddons",
+        ":ki18n",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KIO - I/O Framework (core file access)
+download_source(
+    name = "kio-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kio-6.9.0.tar.xz",
+    sha256 = "5360962b0b9bc06d01f86888c896ca591ccd2d0bca79b7f5cc4367a6e31b368b",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kio",
+    source = ":kio-src",
+    version = "6.9.0",
+    description = "KDE I/O Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DKIO_FORK_SLAVES=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+        "-DCMAKE_CXX_STANDARD=20",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":karchive",
+        ":kauth",
+        ":kbookmarks",
+        ":kcodecs",
+        ":kcolorscheme",
+        ":kcompletion",
+        ":kconfig",
+        ":kconfigwidgets",
+        ":kcoreaddons",
+        ":kcrash",
+        ":kdbusaddons",
+        ":kguiaddons",
+        ":ki18n",
+        ":kiconthemes",
+        ":kitemviews",
+        ":kjobwidgets",
+        ":knotifications",
+        ":kservice",
+        ":kwidgetsaddons",
+        ":kwindowsystem",
+        ":solid",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # libmount for kmountpoint.cpp
+        "core//util-linux:util-linux",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        "audio//libraries:libcanberra",
+        # OpenSSL for Qt6Network linking
+        "system//libs/crypto/openssl:openssl",
+        # Transitive deps for libcanberra
+        "system//libs/audio/libvorbis:libvorbis",
+        "system//libs/audio/libogg:libogg",
+        "dev-tools//build-systems/libtool:libtool",
+        # breeze-icons for kiconthemes
+        ":breeze-icons",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Sonnet - Spell checking framework
+download_source(
+    name = "sonnet-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/sonnet-6.9.0.tar.xz",
+    sha256 = "158f38af459676ecf7f5dbbe39014ebf9bfae29557ca149c1d6ff5575a6d600d",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "sonnet",
+    source = ":sonnet-src",
+    version = "6.9.0",
+    description = "KDE Spell Checking Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DSONNET_USE_ASPELL=OFF",
+        "-DSONNET_USE_HUNSPELL=OFF",
+        "-DSONNET_USE_VOIKKO=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KTextWidgets - Text widget framework
+download_source(
+    name = "ktextwidgets-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/ktextwidgets-6.9.0.tar.xz",
+    sha256 = "da966c6e01cfb3125ec31a4d2149372a19d1481441869ece9fcef3b70bb3514d",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "ktextwidgets",
+    source = ":ktextwidgets-src",
+    version = "6.9.0",
+    description = "KDE Text Widget Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_TEXT_TO_SPEECH=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kcompletion",
+        ":ki18n",
+        ":kwidgetsaddons",
+        ":kcolorscheme",
+        ":sonnet",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KXmlGui - XML GUI framework
+download_source(
+    name = "kxmlgui-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kxmlgui-6.9.0.tar.xz",
+    sha256 = "39202592c78fe722903c295c891a0b58dd0411933461412000f5627cbbfa7d88",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kxmlgui",
+    source = ":kxmlgui-src",
+    version = "6.9.0",
+    description = "KDE XML GUI Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcodecs",
+        ":kconfig",
+        ":kconfigwidgets",
+        ":kcolorscheme",
+        ":kcoreaddons",
+        ":kglobalaccel",
+        ":kguiaddons",
+        ":ki18n",
+        ":kiconthemes",
+        ":kitemviews",
+        ":kwidgetsaddons",
+        ":breeze-icons",
+        ":karchive",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Attica - Content sharing framework
+download_source(
+    name = "attica-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/attica-6.9.0.tar.xz",
+    sha256 = "863592ca37d4f97bdf7e34dfb8f9f1208972f9e7dfa3fa260ea472e12cd17c16",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "attica",
+    source = ":attica-src",
+    version = "6.9.0",
+    description = "KDE Attica Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies (Qt6Network)
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KGlobalAccel - Global keyboard shortcuts
+download_source(
+    name = "kglobalaccel-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kglobalaccel-6.9.0.tar.xz",
+    sha256 = "061a506f5ccefe62c5d92a6ed109b4f01e14a4c8bd5d42b622c8c8447f75e1fd",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kglobalaccel",
+    source = ":kglobalaccel-src",
+    version = "6.9.0",
+    description = "KDE Global Accelerators",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        # Disable X11 support - we're targeting Wayland
+        "-DWITH_X11=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":kcrash",
+        ":kdbusaddons",
+        ":kservice",
+        ":kwindowsystem",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KPackage - Package framework
+download_source(
+    name = "kpackage-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kpackage-6.9.0.tar.xz",
+    sha256 = "62a76b896378b4b7a392528fbfb9ff8427f99f727ff27e2a5e06fe5cbef567a9",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kpackage",
+    source = ":kpackage-src",
+    version = "6.9.0",
+    description = "KDE Package Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":karchive",
+        ":kconfig",
+        ":kcoreaddons",
+        ":ki18n",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Kirigami - KDE's lightweight UI framework
+download_source(
+    name = "kirigami-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kirigami-6.9.0.tar.xz",
+    sha256 = "a3429c8bcf40e252d11b0a4c35a43c0433a9835ea1b333580707379b7b5c82c0",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kirigami",
+    source = ":kirigami-src",
+    version = "6.9.0",
+    description = "Kirigami UI Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":ki18n",
+        ":kcolorscheme",
+        ":kguiaddons",
+        ":kiconthemes",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KSvg - SVG rendering
+download_source(
+    name = "ksvg-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/ksvg-6.9.0.tar.xz",
+    sha256 = "ccd736e032a4089e1d1b2f829b55407ffd333a183f8cca1ad41184e68b9ebcd6",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "ksvg",
+    source = ":ksvg-src",
+    version = "6.9.0",
+    description = "KDE SVG Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":karchive",
+        ":kcolorscheme",
+        ":kconfig",
+        ":kcoreaddons",
+        ":kguiaddons",
+        ":kiconthemes",
+        ":ki18n",
+        ":kirigami",
+        ":kconfigwidgets",
+        ":kwidgetsaddons",
+        ":breeze-icons",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KRunner - Krunner framework
+download_source(
+    name = "krunner-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/krunner-6.9.0.tar.xz",
+    sha256 = "eb4a5ee730b8d53641d8b08bdeb8d4bb065b19b6de3fa2ae9250436822f00d8c",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "krunner",
+    source = ":krunner-src",
+    version = "6.9.0",
+    description = "KDE Runner Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kcoreaddons",
+        ":ki18n",
+        ":kitemmodels",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KNewStuff - Get Hot New Stuff
+download_source(
+    name = "knewstuff-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/knewstuff-6.9.0.tar.xz",
+    sha256 = "ae3738515d17ecb56a2b4db17a2a317f1b3676518fc35d461631bcb6fa46c4ea",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "knewstuff",
+    source = ":knewstuff-src",
+    version = "6.9.0",
+    description = "KDE New Stuff Framework",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+        "-DCMAKE_CXX_STANDARD=20",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":attica",
+        ":karchive",
+        ":kconfig",
+        ":kconfigwidgets",
+        ":kcolorscheme",
+        ":kcoreaddons",
+        ":kguiaddons",
+        ":ki18n",
+        ":kiconthemes",
+        ":kpackage",
+        ":kwidgetsaddons",
+        ":breeze-icons",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        # OpenSSL needed for Qt6Network linking
+        "system//libs/crypto/openssl:openssl",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KNotifyConfig - Notification configuration
+download_source(
+    name = "knotifyconfig-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/knotifyconfig-6.9.0.tar.xz",
+    sha256 = "19b030477e609ff576d2d80886733af209b5d0d2384dd1d11877cb9dc380a489",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "knotifyconfig",
+    source = ":knotifyconfig-src",
+    version = "6.9.0",
+    description = "KDE Notification Configuration",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcompletion",
+        ":kconfig",
+        ":ki18n",
+        ":kio",
+        ":knotifications",
+        ":kwidgetsaddons",
+        ":kcodecs",
+        ":kwindowsystem",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        "audio//libraries:libcanberra",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KDocTools - Documentation tools
+download_source(
+    name = "kdoctools-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kdoctools-6.9.0.tar.xz",
+    sha256 = "6cc43f7db6df703cde1c6fbb24debcfb11c3df8f176be101577e21582d0209ca",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kdoctools",
+    source = ":kdoctools-src",
+    version = "6.9.0",
+    description = "KDE Documentation Tools",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        # Skip building documentation generators (needs libxml2/libxslt)
+        "-DBUILD_DOC=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":karchive",
+        ":ki18n",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KCMUtils - KCM utilities
+download_source(
+    name = "kcmutils-src",
+    src_uri = "https://download.kde.org/stable/frameworks/6.9/kcmutils-6.9.0.tar.xz",
+    sha256 = "79bf2a18ab4ea8e1752b14f5964ce44907b51e1c5fc8dcb620c66fd5fdb36a27",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kcmutils",
+    source = ":kcmutils-src",
+    version = "6.9.0",
+    description = "KDE KCM Utilities",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_DESIGNERPLUGIN=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kconfig",
+        ":kconfigwidgets",
+        ":kcolorscheme",
+        ":kcoreaddons",
+        ":kcodecs",
+        ":kguiaddons",
+        ":ki18n",
+        ":kiconthemes",
+        ":kio",
+        ":kitemviews",
+        ":kxmlgui",
+        ":kservice",
+        ":kwidgetsaddons",
+        ":karchive",
+        ":kbookmarks",
+        ":kcompletion",
+        ":kjobwidgets",
+        ":kwindowsystem",
+        ":solid",
+        ":knotifications",
+        ":kcrash",
+        ":kdbusaddons",
+        ":breeze-icons",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        "audio//libraries:libcanberra",
+        # Additional transitive deps
+        ":kglobalaccel",
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/audio/libvorbis:libvorbis",
+        "system//libs/audio/libogg:libogg",
+        "dev-tools//build-systems/libtool:libtool",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# KDE Plasma Desktop Components
+# =============================================================================
+
+# Plasma Desktop
+download_source(
+    name = "plasma-desktop-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/plasma-desktop-6.2.4.tar.xz",
+    sha256 = "81f2ab40cdec332918c90b1b732abb2aa0c0502854e48b8fa06fb82b52924da3",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "plasma-desktop",
+    source = ":plasma-desktop-src",
+    version = "6.2.4",
+    description = "KDE Plasma Desktop",
+    homepage = "https://kde.org/plasma-desktop/",
+    license = "GPL-2.0+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        # KF6 Core
+        ":kcoreaddons",
+        ":kconfig",
+        ":ki18n",
+        # KF6 Addons
+        ":karchive",
+        ":kcodecs",
+        ":kguiaddons",
+        ":kwidgetsaddons",
+        ":kdbusaddons",
+        ":kitemviews",
+        ":kitemmodels",
+        ":kcolorscheme",
+        ":kconfigwidgets",
+        ":kiconthemes",
+        ":breeze-icons",
+        # KF6 Services
+        ":kauth",
+        ":kcrash",
+        ":kwindowsystem",
+        ":knotifications",
+        ":kcompletion",
+        ":kjobwidgets",
+        ":solid",
+        ":kservice",
+        ":kbookmarks",
+        ":kio",
+        # KF6 Extra
+        ":sonnet",
+        ":ktextwidgets",
+        ":kxmlgui",
+        ":attica",
+        ":kglobalaccel",
+        ":kpackage",
+        ":ksvg",
+        ":krunner",
+        ":knewstuff",
+        ":knotifyconfig",
+        ":kdoctools",
+        ":kcmutils",
+        ":plasma-wayland-protocols",
+        # Graphics
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "desktop//libinput:libinput",
+        # Base libs
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "audio//libraries:libcanberra",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KGlobalAccelD - Global Accelerator Daemon (Plasma component)
+download_source(
+    name = "kglobalacceld-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/kglobalacceld-6.2.4.tar.xz",
+    sha256 = "d22904e2c8342dbccf7a8197d260cc0df7f5eca5ae659ab81315573db80d367a",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kglobalacceld",
+    source = ":kglobalacceld-src",
+    version = "6.2.4",
+    description = "KDE Global Accelerator Daemon",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_X11=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":kcrash",
+        ":kdbusaddons",
+        ":kglobalaccel",
+        ":kwindowsystem",
+        ":kservice",
+        ":kio",
+        ":kbookmarks",  # Transitive dep from kio
+        ":kwidgetsaddons",
+        ":kcompletion",
+        ":kjobwidgets",
+        ":kitemviews",
+        ":ki18n",
+        ":kguiaddons",
+        ":kcolorscheme",
+        ":kconfigwidgets",
+        ":kcodecs",
+        ":karchive",
+        ":kiconthemes",
+        ":solid",
+        ":knotifications",
+        ":kauth",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "desktop//mesa:mesa",
+        "system//init/eudev:eudev",
+        "system//libs/image/libpng:libpng",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "desktop//libdrm:libdrm",
+        # Transitive link dependencies for KIO/Qt6Network
+        "core//util-linux:util-linux",  # libmount for KIO
+        "system//libs/crypto/openssl:openssl",  # libssl/libcrypto for Qt6Network
+        "audio//libraries:libcanberra",  # for knotifications
+        "system//libs/audio/libvorbis:libvorbis",  # transitive dep of libcanberra
+        "system//libs/audio/libogg:libogg",  # transitive dep of libvorbis
+        "dev-tools//build-systems/libtool:libtool",  # libltdl for libcanberra
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# KWin Dependencies (Plasma components)
+# =============================================================================
+
+# KWayland - Plasma Wayland integration library
+download_source(
+    name = "kwayland-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/kwayland-6.2.4.tar.xz",
+    sha256 = "f4fe69978f8e9b0c40058019782f13bfdd770cf545d9325a7b378826f0cd34ac",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kwayland",
+    source = ":kwayland-src",
+    version = "6.2.4",
+    description = "Plasma Wayland Client library",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        # Force EGL/GLESv2 found - bypass try_compile in cross-compilation
+        "-DHAVE_EGL=TRUE",
+        "-DHAVE_GLESv2=TRUE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":plasma-wayland-protocols",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",  # For EGL/GLESv2
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/ipc/dbus:dbus",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KDecoration2 - Window decoration library
+download_source(
+    name = "kdecoration-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/kdecoration-6.2.4.tar.xz",
+    sha256 = "ac645b4d582d110258694a9e2ea2bf65fbbd4bd58e9de9f9354786397bc4f71a",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kdecoration2",
+    source = ":kdecoration-src",
+    version = "6.2.4",
+    description = "KDE Decoration library",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DHAVE_EGL=TRUE",
+        "-DHAVE_GLESv2=TRUE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":ki18n",
+        ":kcoreaddons",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//rendering/wayland:wayland",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/ipc/dbus:dbus",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KScreenLocker - Screen locker
+download_source(
+    name = "kscreenlocker-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/kscreenlocker-6.2.4.tar.xz",
+    sha256 = "129d10c3892222168dbbf80cdbda810ad062c26de51f7cbc2590e655f553cb16",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kscreenlocker",
+    source = ":kscreenlocker-src",
+    version = "6.2.4",
+    description = "KDE Screen locker library",
+    homepage = "https://kde.org/",
+    license = "GPL-2.0+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_X11=OFF",
+        "-DHAVE_EGL=TRUE",
+        "-DHAVE_GLESv2=TRUE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":ki18n",
+        ":kwindowsystem",
+        ":kcrash",
+        ":kglobalaccel",
+        ":knotifications",
+        ":kidletime",
+        ":kwayland",
+        ":layer-shell-qt",
+        ":plasma-wayland-protocols",
+        # Additional KF6 components required by kscreenlocker
+        ":kcmutils",
+        ":kio",
+        ":solid",
+        ":kxmlgui",
+        ":ksvg",
+        ":kbookmarks",
+        ":kconfigwidgets",
+        ":kservice",
+        ":kcodecs",
+        ":kcompletion",
+        ":kjobwidgets",
+        ":kitemviews",
+        ":kguiaddons",
+        ":kcolorscheme",
+        ":karchive",
+        ":kiconthemes",
+        ":kwidgetsaddons",
+        ":kauth",
+        ":libplasma",  # For PlasmaQuick
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+        "audio//libraries:libcanberra",
+        "system//libs/audio/libvorbis:libvorbis",
+        "system//libs/audio/libogg:libogg",
+        "dev-tools//build-systems/libtool:libtool",
+        "system//libs/crypto/openssl:openssl",  # For Qt6Network
+        "core//util-linux:util-linux",  # For KIO (libmount)
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Plasma Activities - Activity manager library
+download_source(
+    name = "plasma-activities-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/plasma-activities-6.2.4.tar.xz",
+    sha256 = "7c975d2421e6792e8c3cca5f22611dac55f44e1ec8648df97712f00cbb907ccb",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "plasma-activities",
+    source = ":plasma-activities-src",
+    version = "6.2.4",
+    description = "Plasma Activities library",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DHAVE_EGL=TRUE",
+        "-DHAVE_GLESv2=TRUE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/ipc/dbus:dbus",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+        "system//libs/crypto/openssl:openssl",
+        "dev-libs//boost:boost",  # boost/container/flat_set.hpp for activitymodel
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# libplasma - Core Plasma library (provides PlasmaQuick)
+download_source(
+    name = "libplasma-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/libplasma-6.2.4.tar.xz",
+    sha256 = "66eda145fb57dcc585db97fd7e543f2cdfc745ceb83c16cbe3d080939f5b1b14",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "libplasma",
+    source = ":libplasma-src",
+    version = "6.2.4",
+    description = "Core Plasma library",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        # Build with X11 support (required for KX11Extras etc.)
+        # At runtime we still use Wayland-only
+        "-DHAVE_EGL=TRUE",
+        "-DHAVE_GLESv2=TRUE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        ":kcoreaddons",
+        ":kconfig",
+        ":ki18n",
+        ":kwindowsystem",
+        ":knotifications",
+        ":kpackage",
+        ":kirigami",
+        ":ksvg",
+        ":plasma-activities",
+        ":kglobalaccel",
+        ":kcmutils",
+        ":kio",
+        ":kcolorscheme",
+        ":kservice",
+        ":kbookmarks",
+        ":kcompletion",
+        ":kjobwidgets",
+        ":kitemviews",
+        ":kauth",
+        ":solid",
+        ":kconfigwidgets",
+        ":kguiaddons",
+        ":kwidgetsaddons",
+        ":kiconthemes",
+        ":karchive",
+        ":kcodecs",
+        ":plasma-wayland-protocols",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/ipc/dbus:dbus",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+        "audio//libraries:libcanberra",
+        "system//libs/audio/libvorbis:libvorbis",
+        "system//libs/audio/libogg:libogg",
+        "dev-tools//build-systems/libtool:libtool",
+        "system//libs/crypto/openssl:openssl",
+        "core//util-linux:util-linux",  # For KIO (libmount)
+        # X11 dependencies (libplasma requires X11 support at build time)
+        "graphics//xorg/libX11:libX11",
+        "graphics//xorg/libxcb:libxcb",
+        "graphics//xorg/libXrender:libXrender",
+        "graphics//xorg/libXfixes:libXfixes",
+        "graphics//xorg/libXext:libXext",
+        "graphics//xorg/xorgproto:xorgproto",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Layer Shell Qt - Qt component for Wayland layer shell
+download_source(
+    name = "layer-shell-qt-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/layer-shell-qt-6.2.4.tar.xz",
+    sha256 = "001897a7d4991a9e95be73152d9513662cc7d8a53211702d906d597b73ced872",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "layer-shell-qt",
+    source = ":layer-shell-qt-src",
+    version = "6.2.4",
+    description = "Qt component for Wayland layer-shell protocol",
+    homepage = "https://kde.org/",
+    license = "LGPL-2.1+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DHAVE_EGL=TRUE",
+        "-DHAVE_GLESv2=TRUE",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/ipc/dbus:dbus",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+        "system//libs/crypto/openssl:openssl",  # For Qt6Network
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KWin - Window Manager
+download_source(
+    name = "kwin-src",
+    src_uri = "https://download.kde.org/stable/plasma/6.2.4/kwin-6.2.4.tar.xz",
+    sha256 = "d4b78ebdc9432cb1e224621ac43cfb81b92dbcee034afe90bbeb5b22f218f321",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "kwin",
+    source = ":kwin-src",
+    version = "6.2.4",
+    description = "KWin - KDE Window Manager and Compositor",
+    homepage = "https://kde.org/",
+    license = "GPL-2.0+",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=OFF",
+        "-DKWIN_BUILD_KCMS=OFF",
+        "-DKWIN_BUILD_X11=OFF",
+    ],
+    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
+    src_configure = KDE_HOST_LD_SETUP + KDE_CMAKE_CONFIGURE,
+    src_compile = KDE_HOST_LD_SETUP + "cmake --build \"$S/build\" -j${MAKEOPTS:-$(nproc)}\n",
+    deps = [
+        "desktop//qt:qt6",
+        "desktop//kde/ecm:extra-cmake-modules",
+        # KF6 Core
+        ":kcoreaddons",
+        ":kconfig",
+        ":ki18n",
+        ":kwindowsystem",
+        ":kcrash",
+        ":kdbusaddons",
+        ":kglobalaccel",
+        ":kguiaddons",
+        ":kiconthemes",
+        ":kpackage",
+        ":kservice",
+        ":kcmutils",
+        ":knewstuff",
+        ":knotifications",
+        ":ksvg",
+        ":plasma-wayland-protocols",
+        ":breeze-icons",
+        # Additional KF6 components required by kwin
+        ":kauth",
+        ":kcolorscheme",
+        ":kconfigwidgets",
+        ":kwidgetsaddons",
+        ":kidletime",
+        ":kcodecs",  # Transitive dep for kconfigwidgets
+        ":kglobalacceld",  # Global accelerator daemon
+        # Plasma components for KWin
+        ":kwayland",  # Plasma Wayland client library
+        ":kdecoration2",  # Window decoration library
+        ":kscreenlocker",  # Screen locker
+        ":layer-shell-qt",  # Wayland layer shell support
+        # Graphics/Wayland
+        "graphics//xorg/libxcvt:libxcvt",  # Video timing library
+        "graphics//color:lcms2",  # Color management
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libinput:libinput",
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "graphics//utilities/libdisplay-info:libdisplay-info",  # EDID parsing for displays
+        # Base libs
+        "dev-libs//glib:glib",
+        "system//libs/utility/pcre2:pcre2",
+        "core//zlib:zlib",
+        "dev-libs//double-conversion:double-conversion",
+        # Transitive link dependencies
+        "system//init/eudev:eudev",
+        "system//libs/ipc/dbus:dbus",
+        "system//libs/image/libpng:libpng",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "audio//libraries:libcanberra",
+        # Additional transitive link deps
+        "core//util-linux:util-linux",  # libmount for KIO
+        "system//libs/crypto/openssl:openssl",  # libssl/libcrypto for Qt6Network
+        "system//libs/audio/libvorbis:libvorbis",  # transitive dep of libcanberra
+        "system//libs/audio/libogg:libogg",  # transitive dep of libvorbis
+        "dev-tools//build-systems/libtool:libtool",  # libltdl for libcanberra
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# KDE Plasma meta-package for Live CD (auto-login, no display manager)
+filegroup(
+    name = "kde-plasma",
+    srcs = [
+        ":plasma-desktop",
+        ":kwin",
+        "graphics//rendering/wayland:wayland",
+        "desktop//mesa:mesa",
+        # Audio support
+        "audio//daemons/pipewire:pipewire",
+    ],
+    default_target_platform = "rootroot//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

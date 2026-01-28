@@ -1,0 +1,23 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# kcov - Code coverage tool
+
+cmake_package(
+    name = "kcov",
+    version = "42",
+    src_uri = "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v42.tar.gz",
+    sha256 = "2c47d75397af248bc387f60cdd79180763e1f88f3dd71c94bb52478f8e74a1f8",
+    signature_required = False,
+    description = "Code coverage tool for compiled programs",
+    homepage = "https://github.com/SimonKagstrom/kcov",
+    license = "GPL-2",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    deps = [
+        "dev-tools//dev-utils/elfutils:elfutils",
+        "network//curl:curl",
+    ],
+    visibility = ["PUBLIC"],
+)

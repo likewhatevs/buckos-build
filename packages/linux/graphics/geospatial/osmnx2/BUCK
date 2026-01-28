@@ -1,0 +1,40 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "osmnx2",
+    version = "2.0.5",
+    src_uri = "https://github.com/gboeing/osmnx/archive/v2.0.5.tar.gz",
+    sha256 = "78e0f8c801659b7c4e620d2db2f3d5e72f2994bcc1b79b20322119de6660f4db",
+    deps = [
+        "dev-libs//python/geopandas:geopandas",
+        "dev-libs//python/networkx:networkx",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/requests:requests",
+        "dev-libs//python/shapely:shapely",
+    ],
+    iuse = ["visualization", "entropy", "neighbors", "raster"],
+    use_extras = {
+        "visualization": "visualization",
+        "entropy": "entropy",
+        "neighbors": "neighbors",
+        "raster": "raster",
+    },
+    use_deps = {
+        "visualization": [
+            "dev-libs//python/matplotlib:matplotlib",
+        ],
+        "entropy": [
+            "dev-libs//python/scipy:scipy",
+        ],
+        "neighbors": [
+            "dev-libs//python/scikit-learn:scikit-learn",
+            "dev-libs//python/scipy:scipy",
+        ],
+        "raster": [
+            "dev-libs//python/rasterio:rasterio",
+        ],
+    },
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,71 @@
+# =============================================================================
+# AI/ML Tools - Machine Learning and AI inference packages for Linux
+# =============================================================================
+#
+# This category contains tools for running AI models locally, including:
+# - Large Language Models (LLMs)
+# - Speech recognition
+# - Image generation
+# - Model serving infrastructure
+#
+# =============================================================================
+
+# All AI packages
+filegroup(
+    name = "ai",
+    srcs = [
+        "ai//ollama:ollama",
+        "ai//llama-cpp:llama-cpp",
+        "ai//whisper-cpp:whisper-cpp",
+        "ai//stable-diffusion-cpp:stable-diffusion-cpp",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# LLM inference packages
+filegroup(
+    name = "llm-inference",
+    srcs = [
+        "ai//ollama:ollama",
+        "ai//llama-cpp:llama-cpp",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Multimodal AI packages (speech, image, etc.)
+filegroup(
+    name = "multimodal",
+    srcs = [
+        "ai//whisper-cpp:whisper-cpp",
+        "ai//stable-diffusion-cpp:stable-diffusion-cpp",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Convenience aliases for common packages
+alias(
+    name = "ollama",
+    actual = "ai//ollama:ollama",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "llama-cpp",
+    actual = "ai//llama-cpp:llama-cpp",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "whisper-cpp",
+    actual = "ai//whisper-cpp:whisper-cpp",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "stable-diffusion-cpp",
+    actual = "ai//stable-diffusion-cpp:stable-diffusion-cpp",
+    visibility = ["PUBLIC"],
+)

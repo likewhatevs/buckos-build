@@ -1,0 +1,53 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+meson_package(
+    name = "harfbuzz",
+    version = "10.0.1",
+    src_uri = "https://github.com/harfbuzz/harfbuzz/releases/download/10.0.1/harfbuzz-10.0.1.tar.xz",
+    sha256 = "b2cb13bd351904cb9038f907dc0dee0ae07127061242fe3556b2795c4e9748fc",
+    signature_required = False,
+    description = "OpenType text shaping engine",
+    homepage = "https://harfbuzz.github.io/",
+    license = "MIT",
+    iuse = [
+        "cairo",
+        "debug",
+        "experimental",
+        "glib",
+        "graphite",
+        "icu",
+        "introspection",
+        "static-libs",
+        "truetype",
+    ],
+    use_defaults = ["graphite"],
+    use_meson = {
+        "static-libs": "-Ddefault_library=static",
+        "-static-libs": "-Ddefault_library=shared",
+        "graphite": "-Dgraphite2=enabled",
+        "-graphite": "-Dgraphite2=disabled",
+        "glib": "-Dglib=enabled",
+        "-glib": "-Dglib=disabled",
+        "cairo": "-Dcairo=enabled",
+        "-cairo": "-Dcairo=disabled",
+        "icu": "-Dicu=enabled",
+        "-icu": "-Dicu=disabled",
+    },
+    use_deps = {
+        "graphite": ["system//libs/font/graphite2:graphite2"],
+        "glib": ["dev-libs//glib:glib"],
+        "cairo": ["system//libs/graphics/cairo:cairo"],
+        "icu": ["system//libs/utility/icu:icu"],
+    },
+    meson_args = [
+        "-Dfreetype=enabled",
+        "-Dgobject=disabled",
+        "-Dtests=disabled",
+        "-Ddocs=disabled",
+    ],
+    deps = [
+        "system//libs/font/freetype:freetype",
+    ],
+    visibility = ["PUBLIC"],
+)

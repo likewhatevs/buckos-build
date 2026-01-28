@@ -1,0 +1,14 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "nanoarrow",
+    version = "0.7.0",
+    src_uri = "https://github.com/apache/arrow-nanoarrow/archive/refs/tags/apache-arrow-nanoarrow-0.7.0.tar.gz",
+    sha256 = "bb422ce7ed486abd95eb027a1ac092bbc1b5ed44955e89c098f0a1cb75109d5c",
+    cmake_args = [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DNANOARROW_BUILD_TESTS=OFF",
+    ],
+    deps = [],
+    visibility = ["PUBLIC"],
+)

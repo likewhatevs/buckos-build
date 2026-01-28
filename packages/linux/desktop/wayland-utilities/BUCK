@@ -1,0 +1,275 @@
+# =============================================================================
+# Wayland Utilities - Essential tools for Wayland desktop environments
+# =============================================================================
+# This file aggregates all Wayland utility packages into convenient groups.
+
+# =============================================================================
+# CONVENIENCE GROUPS
+# =============================================================================
+
+# All Wayland utilities
+filegroup(
+    name = "all",
+    srcs = [
+        "desktop//wayland-utilities/wl-clipboard:wl-clipboard",
+        "desktop//wayland-utilities/wl-clip-persist:wl-clip-persist",
+        "desktop//wayland-utilities/cliphist:cliphist",
+        "desktop//wayland-utilities/swaylock:swaylock",
+        "desktop//wayland-utilities/swaylock-effects:swaylock-effects",
+        "desktop//wayland-utilities/swayidle:swayidle",
+        "desktop//wayland-utilities/swaybg:swaybg",
+        "desktop//wayland-utilities/swaync:swaync",
+        "desktop//wayland-utilities/wlr-randr:wlr-randr",
+        "desktop//wayland-utilities/kanshi:kanshi",
+        "desktop//wayland-utilities/wdisplays:wdisplays",
+        "desktop//wayland-utilities/grim:grim",
+        "desktop//wayland-utilities/slurp:slurp",
+        "desktop//wayland-utilities/wf-recorder:wf-recorder",
+        "desktop//wayland-utilities/wl-mirror:wl-mirror",
+        "desktop//wayland-utilities/satty:satty",
+        "desktop//wayland-utilities/swappy:swappy",
+        "desktop//wayland-utilities/mako:mako",
+        "desktop//wayland-utilities/fnott:fnott",
+        "desktop//wayland-utilities/wofi:wofi",
+        "desktop//wayland-utilities/fuzzel:fuzzel",
+        "desktop//wayland-utilities/tofi:tofi",
+        "desktop//wayland-utilities/bemenu:bemenu",
+        "desktop//wayland-utilities/wtype:wtype",
+        "desktop//wayland-utilities/ydotool:ydotool",
+        "desktop//wayland-utilities/wev:wev",
+        "desktop//wayland-utilities/waybar:waybar",
+        "desktop//wayland-utilities/yambar:yambar",
+        "desktop//wayland-utilities/eww:eww",
+        "desktop//wayland-utilities/wlsunset:wlsunset",
+        "desktop//wayland-utilities/gammastep:gammastep",
+        "desktop//wayland-utilities/waypaper:waypaper",
+        "desktop//wayland-utilities/hyprpaper:hyprpaper",
+        "desktop//wayland-utilities/mpvpaper:mpvpaper",
+        "desktop//wayland-utilities/wob:wob",
+        "desktop//wayland-utilities/wshowkeys:wshowkeys",
+        "desktop//wayland-utilities/hyprpicker:hyprpicker",
+        "desktop//wayland-utilities/wlopm:wlopm",
+        "desktop//wayland-utilities/wayland-utils:wayland-utils",
+        # wlprop disabled - repository no longer exists
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Clipboard utilities
+filegroup(
+    name = "clipboard",
+    srcs = [
+        "desktop//wayland-utilities/wl-clipboard:wl-clipboard",
+        "desktop//wayland-utilities/wl-clip-persist:wl-clip-persist",
+        "desktop//wayland-utilities/cliphist:cliphist",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Session management (Sway ecosystem)
+filegroup(
+    name = "session",
+    srcs = [
+        "desktop//wayland-utilities/swaylock:swaylock",
+        "desktop//wayland-utilities/swaylock-effects:swaylock-effects",
+        "desktop//wayland-utilities/swayidle:swayidle",
+        "desktop//wayland-utilities/swaybg:swaybg",
+        "desktop//wayland-utilities/swaync:swaync",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Display configuration
+filegroup(
+    name = "display",
+    srcs = [
+        "desktop//wayland-utilities/wlr-randr:wlr-randr",
+        "desktop//wayland-utilities/kanshi:kanshi",
+        "desktop//wayland-utilities/wdisplays:wdisplays",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Screenshot and screen recording
+filegroup(
+    name = "screenshot",
+    srcs = [
+        "desktop//wayland-utilities/grim:grim",
+        "desktop//wayland-utilities/slurp:slurp",
+        "desktop//wayland-utilities/wf-recorder:wf-recorder",
+        "desktop//wayland-utilities/wl-mirror:wl-mirror",
+        "desktop//wayland-utilities/satty:satty",
+        "desktop//wayland-utilities/swappy:swappy",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Notification daemons
+filegroup(
+    name = "notification",
+    srcs = [
+        "desktop//wayland-utilities/mako:mako",
+        "desktop//wayland-utilities/fnott:fnott",
+        "desktop//wayland-utilities/swaync:swaync",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Application launchers
+filegroup(
+    name = "launchers",
+    srcs = [
+        "desktop//wayland-utilities/wofi:wofi",
+        "desktop//wayland-utilities/fuzzel:fuzzel",
+        "desktop//wayland-utilities/tofi:tofi",
+        "desktop//wayland-utilities/bemenu:bemenu",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Input simulation and event viewing
+filegroup(
+    name = "input",
+    srcs = [
+        "desktop//wayland-utilities/wtype:wtype",
+        "desktop//wayland-utilities/ydotool:ydotool",
+        "desktop//wayland-utilities/wev:wev",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Status bars
+filegroup(
+    name = "wayland-bars",
+    srcs = [
+        "desktop//wayland-utilities/waybar:waybar",
+        "desktop//wayland-utilities/yambar:yambar",
+        "desktop//wayland-utilities/eww:eww",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Blue light filters and color tools
+filegroup(
+    name = "color",
+    srcs = [
+        "desktop//wayland-utilities/wlsunset:wlsunset",
+        "desktop//wayland-utilities/gammastep:gammastep",
+        "desktop//wayland-utilities/hyprpicker:hyprpicker",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Wallpaper tools
+filegroup(
+    name = "wallpaper",
+    srcs = [
+        "desktop//wayland-utilities/swaybg:swaybg",
+        "desktop//wayland-utilities/waypaper:waypaper",
+        "desktop//wayland-utilities/hyprpaper:hyprpaper",
+        "desktop//wayland-utilities/mpvpaper:mpvpaper",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# On-screen display
+filegroup(
+    name = "osd",
+    srcs = [
+        "desktop//wayland-utilities/wob:wob",
+        "desktop//wayland-utilities/wshowkeys:wshowkeys",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential utilities (most commonly used)
+filegroup(
+    name = "essential",
+    srcs = [
+        "desktop//wayland-utilities/wl-clipboard:wl-clipboard",
+        "desktop//wayland-utilities/swaylock:swaylock",
+        "desktop//wayland-utilities/swayidle:swayidle",
+        "desktop//wayland-utilities/swaybg:swaybg",
+        "desktop//wayland-utilities/grim:grim",
+        "desktop//wayland-utilities/slurp:slurp",
+        "desktop//wayland-utilities/mako:mako",
+        "desktop//wayland-utilities/wofi:wofi",
+        "desktop//wayland-utilities/waybar:waybar",
+        "desktop//wayland-utilities/wlr-randr:wlr-randr",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Sway companion utilities
+filegroup(
+    name = "sway-companions",
+    srcs = [
+        "desktop//wayland-utilities/swaylock:swaylock",
+        "desktop//wayland-utilities/swayidle:swayidle",
+        "desktop//wayland-utilities/swaybg:swaybg",
+        "desktop//wayland-utilities/swaync:swaync",
+        "desktop//wayland-utilities/waybar:waybar",
+        "desktop//wayland-utilities/wofi:wofi",
+        "desktop//wayland-utilities/grim:grim",
+        "desktop//wayland-utilities/slurp:slurp",
+        "desktop//wayland-utilities/mako:mako",
+        "desktop//wayland-utilities/wl-clipboard:wl-clipboard",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Hyprland companion utilities
+filegroup(
+    name = "hyprland-companions",
+    srcs = [
+        "desktop//wayland-utilities/hyprpaper:hyprpaper",
+        "desktop//wayland-utilities/hyprpicker:hyprpicker",
+        "desktop//wayland-utilities/waybar:waybar",
+        "desktop//wayland-utilities/wofi:wofi",
+        "desktop//wayland-utilities/grim:grim",
+        "desktop//wayland-utilities/slurp:slurp",
+        "desktop//wayland-utilities/mako:mako",
+        "desktop//wayland-utilities/wl-clipboard:wl-clipboard",
+        "desktop//wayland-utilities/swaylock:swaylock",
+        "desktop//wayland-utilities/swayidle:swayidle",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# System utilities
+filegroup(
+    name = "system",
+    srcs = [
+        "desktop//wayland-utilities/wlopm:wlopm",
+        "desktop//wayland-utilities/wayland-utils:wayland-utils",
+        # wlprop disabled - repository no longer exists
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Lockers
+filegroup(
+    name = "lockers",
+    srcs = [
+        "desktop//wayland-utilities/swaylock:swaylock",
+        "desktop//wayland-utilities/swaylock-effects:swaylock-effects",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

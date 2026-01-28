@@ -1,0 +1,44 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# dvdauthor - Tools for generating DVD files
+
+download_source(
+    name = "dvdauthor-src",
+    src_uri = "https://github.com/ldo/dvdauthor/archive/refs/tags/0.7.2.tar.gz",
+    sha256 = "fd66b92f6c67bd406030ff0f1c3233175768b534df4d341c3f380ecd61de91b5",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "dvdauthor",
+    source = ":dvdauthor-src",
+    iuse = ["graphicsmagick", "imagemagick"],
+    use_configure = {
+        "-graphicsmagick": "--disable-graphicsmagick",
+        "-imagemagick": "--disable-imagemagick",
+        "graphicsmagick": "--enable-graphicsmagick",
+        "imagemagick": "--enable-imagemagick",
+    },
+    version = "0.7.2",
+    description = "Tools for generating DVD files",
+    homepage = "https://github.com/ldo/dvdauthor",
+    license = "GPL-2.0-or-later",
+    configure_args = [
+        "--prefix=/usr",
+    ],
+    make_args = [],
+    post_install = """
+DESTDIR=$OUT make install
+""",
+    deps = [
+        "system//libs/data/libxml2:libxml2",
+        "graphics//utilities/imagemagick:imagemagick",
+        "fonts//libraries/freetype:freetype",
+        "system//libs/font/fribidi:fribidi",
+    ],
+    bdepend = [
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    visibility = ["PUBLIC"],
+)

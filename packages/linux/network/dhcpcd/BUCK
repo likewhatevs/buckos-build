@@ -1,0 +1,57 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# dhcpcd - DHCP client daemon
+# =============================================================================
+
+autotools_package(
+    name = "dhcpcd",
+    # Release tarball already includes configure script
+    version = "10.0.6",
+    src_uri = "https://github.com/NetworkConfiguration/dhcpcd/releases/download/v10.0.6/dhcpcd-10.0.6.tar.xz",
+    sha256 = "779d3ae514e8f24d7449503e1f0a20f5137c773bd04ca98c62386bf81e99f482",
+    signature_sha256 = "b46b79a0b77981079b26c359fe50b27167e4855106cf2256a6d725091e59da27",
+    signature_required = False,
+
+    iuse = [
+        "auth",
+        "debug",
+        "embedded",
+        "ipv6",
+        "privsep",
+        "udev",
+    ],
+    use_defaults = ["ipv6"],
+
+    use_deps = {
+        "udev": ["system//init/eudev:eudev"],
+    },
+
+    use_configure = {
+        "-auth": "--disable-auth",
+        "-debug": "--disable-debug",
+        "-embedded": "--disable-embedded",
+        "-ipv6": "--disable-ipv6",
+        "-privsep": "--disable-privsep",
+        "-udev": "--without-udev",
+        "auth": "--enable-auth",
+        "debug": "--enable-debug",
+        "embedded": "--enable-embedded",
+        "ipv6": "--enable-ipv6",
+        "privsep": "--enable-privsep",
+        "udev": "--with-udev",
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+        "--sbindir=/sbin",
+        "--sysconfdir=/etc",
+        "--rundir=/run",
+    ],
+
+    description = "DHCP/IPv4LL/IPv6RS/DHCPv6 client",
+    homepage = "https://roy.marples.name/projects/dhcpcd",
+    license = "BSD-2-Clause",
+    visibility = ["PUBLIC"],
+)

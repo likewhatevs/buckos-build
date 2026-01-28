@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "kernel_build")
+
+# DEPRECATED: Use kernel//buckos-kernel:buckos-kernel-defconfig instead
+#
+# This package is maintained for backward compatibility.
+# For development/testing with defconfig, use:
+#   kernel//buckos-kernel:buckos-kernel-defconfig
+
+# Kernel with default config (for development/testing)
+kernel_build(
+    name = "linux-defconfig",
+    source = "kernel//src:linux-src",
+    version = "6.12.6",
+    visibility = ["PUBLIC"],
+)

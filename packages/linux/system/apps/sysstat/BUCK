@@ -1,0 +1,64 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# sysstat - System performance monitoring tools
+# USE flags: nls, sensors, debug
+
+autotools_package(
+    name = "sysstat",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-libs//misc/gettext:gettext",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    version = "12.7.5",
+    src_uri = "https://github.com/sysstat/sysstat/archive/refs/tags/v12.7.5.tar.gz",
+    sha256 = "a4d30e37c0c894214b941b51184723e19d492118c946cfdeac74b6d1f0068016",
+    signature_required = False,
+    description = "System performance monitoring tools",
+    homepage = "https://github.com/sysstat/sysstat",
+    license = "GPL-2.0-or-later",
+    iuse = [
+        "dcron",
+        "debug",
+        "lm-sensors",
+        "nls",
+        "selinux",
+        "sensors",
+        "systemd",
+    ],
+    use_defaults = [],
+    use_configure = {
+        "-dcron": "--disable-dcron",
+        "-debug": "--disable-debug",
+        "-lm-sensors": "--disable-lm-sensors",
+        "-nls": "--disable-nls",
+        "-selinux": "--disable-selinux",
+        "-sensors": "--disable-sensors",
+        "-systemd": "--disable-systemd",
+        "dcron": "--enable-dcron",
+        "debug": "--enable-debug",
+        "lm-sensors": "--enable-lm-sensors",
+        "nls": "--enable-nls",
+        "selinux": "--enable-selinux",
+        "sensors": "--enable-sensors",
+        "systemd": "--enable-systemd",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "sa_dir=/var/log/sa",
+        "conf_dir=/etc/sysstat",
+    ],
+    src_install = """
+# Install without group ownership changes (fails in sandbox)
+make DESTDIR="$D" IGNORE_MAN_GROUP=y install
+""",
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)

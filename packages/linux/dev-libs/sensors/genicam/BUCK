@@ -1,0 +1,47 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "gen_pkgconfig")
+
+download_source(
+    name = "genicam-src",
+    src_uri = "https://www.emva.org/wp-content/uploads/GenICam_Package_2022.06.zip",
+    sha256 = "64cc8805b2ec4e0a00ec3b65fd517bda64038bdab14b9bf691769d9a42b54729",
+)
+
+binary_package(
+    name = "genicam",
+    srcs = [":genicam-src"],
+    version = "3.4.0",
+    description = "GenICam reference implementation - standard for machine vision cameras",
+    homepage = "https://www.emva.org/standards-technology/genicam/",
+    license = "GenICam-License",
+    install_script = """
+        cd "$SRCS"
+
+        # Navigate to the package directory
+        cd "GenICam_Package_2022.06/Reference Implementation"
+
+        # Extract runtime libraries (Linux 64-bit x86_64)
+        mkdir -p "$OUT/opt/genicam/lib"
+        tar -xzf GenICam_V3_4_0-Linux64_x64_gcc48-Runtime.tgz -C "$OUT/opt/genicam"
+        mv "$OUT/opt/genicam/bin/Linux64_x64"/*.so* "$OUT/opt/genicam/lib/" 2>/dev/null || true
+        rm -rf "$OUT/opt/genicam/bin"
+
+        # Extract SDK headers
+        tar -xzf GenICam_V3_4_0-Linux64_x64_gcc48-SDK.tgz -C "$OUT/opt/genicam"
+        mkdir -p "$OUT/usr/include/genicam"
+        cp -r "$OUT/opt/genicam/library/CPP/include"/* "$OUT/usr/include/genicam/"
+
+        # Create symlinks in /usr/lib64
+        mkdir -p "$OUT/usr/lib64"
+        for lib in "$OUT/opt/genicam/lib"/*.so*; do
+            if [ -f "$lib" ]; then
+                ln -sf "/opt/genicam/lib/$(basename "$lib")" "$OUT/usr/lib64/"
+            fi
+        done
+    """ + gen_pkgconfig(
+        name = "genicam",
+        description = "GenICam reference implementation for machine vision cameras",
+        libs = "-L/opt/genicam/lib -lGenApi_gcc48_v3_4 -lGCBase_gcc48_v3_4",
+        cflags = "-I${includedir}/genicam",
+    ),
+    visibility = ["PUBLIC"],
+)

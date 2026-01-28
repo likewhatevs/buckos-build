@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# USE flags: doc, bash-completion
+# Default: bash-completion
+
+download_source(
+    name = "ninja-src",
+    src_uri = "https://github.com/ninja-build/ninja/archive/refs/tags/v1.12.1.tar.gz",
+    sha256 = "821bdff48a3f683bc4bb3b6f0b5fe7b2d647cf65d52aeb63328c91a6c6df285a",
+    signature_required = False,
+)
+
+binary_package(
+    name = "ninja",
+    srcs = [":ninja-src"],
+    version = "1.12.1",
+    description = "Small build system with a focus on speed",
+    homepage = "https://ninja-build.org/",
+    license = "Apache-2.0",
+    install_script = """
+        # Source extracts without subdirectory
+        python3 "$SRCS/configure.py" --bootstrap
+        mkdir -p "$OUT/usr/bin"
+        cp ninja "$OUT/usr/bin/"
+    """,
+    visibility = ["PUBLIC"],
+)

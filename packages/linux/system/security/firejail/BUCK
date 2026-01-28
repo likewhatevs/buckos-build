@@ -1,0 +1,72 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "firejail-src",
+    src_uri = "https://github.com/netblue30/firejail/releases/download/0.9.72/firejail-0.9.72.tar.xz",
+    sha256 = "82e177c48cfc87f62b088b55efc53ff4612b9740aab5ea35cbf2395e83efe7f4",
+    signature_sha256 = "112f4cbc6b29dce82b8b8532e717bbd004a8c647b84b3d2e5feb40ea20262aaf",
+    signature_required=False,
+)
+
+autotools_package(
+    name = "firejail",
+    # GitHub release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    source = ":firejail-src",
+    iuse = [
+        "X",
+        "apparmor",
+        "chroot",
+        "contrib",
+        "dbusproxy",
+        "file-transfer",
+        "globalcfg",
+        "network",
+        "private-home",
+        "selinux",
+        "userns",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-apparmor": "--disable-apparmor",
+        "-chroot": "--disable-chroot",
+        "-contrib": "--disable-contrib",
+        "-dbusproxy": "--disable-dbusproxy",
+        "-file-transfer": "--disable-file-transfer",
+        "-globalcfg": "--disable-globalcfg",
+        "-network": "--disable-network",
+        "-private-home": "--disable-private-home",
+        "-selinux": "--disable-selinux",
+        "-userns": "--disable-userns",
+        "X": "--with-x",
+        "apparmor": "--enable-apparmor",
+        "chroot": "--enable-chroot",
+        "contrib": "--enable-contrib",
+        "dbusproxy": "--enable-dbusproxy",
+        "file-transfer": "--enable-file-transfer",
+        "globalcfg": "--enable-globalcfg",
+        "network": "--enable-network",
+        "private-home": "--enable-private-home",
+        "selinux": "--enable-selinux",
+        "userns": "--enable-userns",
+    },
+    version = "0.9.72",
+    description = "Linux namespaces and seccomp-bpf sandbox",
+    homepage = "https://firejail.wordpress.com/",
+    license = "GPL-2.0",
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--enable-apparmor",
+        "--enable-dbusproxy",
+        "--enable-firetunnel",
+        "--enable-private-home",
+        "--enable-x11",
+    ],
+    post_install = """
+        mkdir -p $OUT/etc/firejail
+    """,
+    visibility = ["PUBLIC"],
+)

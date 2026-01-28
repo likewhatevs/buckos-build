@@ -1,0 +1,62 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source")
+
+download_source(
+    name = "proton-wine-src",
+    src_uri = "https://github.com/ValveSoftware/wine/archive/refs/tags/proton-wine-9.0-3.tar.gz",
+    sha256 = "df33e623a864cfd9a48a51dd2979d5dc25a03266729faa35f09388be2fb61523",
+)
+
+autotools_package(
+    name = "proton-wine",
+    source = ":proton-wine-src",
+    version = "9.0-3",
+    description = "Valve's Wine fork for Steam Proton compatibility layer",
+    homepage = "https://github.com/ValveSoftware/wine",
+    license = "LGPL-2.1-or-later",
+
+    # USE flags
+    iuse = ["multilib", "x11", "wayland", "vulkan"],
+    use_defaults = ["x11", "wayland", "vulkan"],
+
+    # Conditional configure args based on USE flags
+    use_configure = {
+        "multilib": "",
+        "-multilib": "--enable-win64",
+        "x11": "--with-x --with-opengl",
+        "-x11": "--without-x --without-opengl",
+        "wayland": "--with-wayland",
+        "-wayland": "--without-wayland",
+        "vulkan": "--with-vulkan",
+        "-vulkan": "--without-vulkan",
+    },
+
+    # Conditional dependencies based on USE flags
+    use_deps = {
+        "x11": [
+            "graphics//xorg:x11-full",
+            "graphics//freetype:freetype",
+            "system//libs/font/fontconfig:fontconfig",
+        ],
+        "wayland": [
+            "graphics//wayland:wayland",
+        ],
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+        "--libdir=/usr/lib",
+        "--with-pthread",
+        "--with-freetype",
+        "--with-fontconfig",
+        "--without-oss",
+        "--disable-tests",
+    ],
+    env = {
+        "CFLAGS": "-O2 -march=x86-64 -pipe",
+        "LDFLAGS": "-Wl,-O1,--as-needed",
+    },
+    deps = [
+        "core//glibc:glibc",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "lmdb-src",
+    src_uri = "https://git.openldap.org/openldap/openldap/-/archive/LMDB_0.9.33/openldap-LMDB_0.9.33.tar.gz",
+    sha256 = "476801f5239c88c7de61c3390502a5d13965ecedef80105b5fb0fcb8373d1e53",
+    signature_required = False,
+)
+
+# LMDB is a makefile-only project in libraries/liblmdb subdirectory
+autotools_package(
+    name = "lmdb",
+    source = ":lmdb-src",
+    iuse = ["static-libs"],
+    use_configure = {
+        "-static-libs": "--disable-static",
+        "static-libs": "--enable-static",
+    },
+    version = "0.9.33",
+    description = "Lightning Memory-Mapped Database",
+    homepage = "https://symas.com/lmdb/",
+    license = "OLDAP-2.8",
+    # No autotools - just Makefile
+    bdepend = [],
+    src_prepare = "",
+    src_configure = "true",
+    src_compile = """
+cd libraries/liblmdb
+make -j$(nproc) prefix=/usr
+""",
+    src_install = """
+cd libraries/liblmdb
+make install DESTDIR="$DESTDIR" prefix=/usr
+""",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,51 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "vpnc",
+    version = "master",
+    src_uri = "https://github.com/streambinder/vpnc/archive/refs/heads/master.tar.gz",
+    sha256 = "ad410d4f918d0b902db81ba85fe4b6e085e5dd6de66e41ee251cede6632eb6f9",
+    signature_required = False,
+
+    iuse = [
+        "gnutls",
+        "hybrid",
+        "resolvconf",
+        "selinux",
+    ],
+    use_defaults = [],
+
+
+    use_configure = {
+        "-gnutls": "--without-gnutls",
+        "-hybrid": "--disable-hybrid",
+        "-resolvconf": "--disable-resolvconf",
+        "-selinux": "--disable-selinux",
+        "gnutls": "--with-gnutls",
+        "hybrid": "--enable-hybrid",
+        "resolvconf": "--enable-resolvconf",
+        "selinux": "--enable-selinux",
+    },
+
+    skip_configure = True,
+
+    make_args = [
+        "PREFIX=/usr",
+        "ETCDIR=/etc/vpnc",
+    ],
+
+    post_install = """
+make DESTDIR=$DESTDIR PREFIX=/usr ETCDIR=/etc/vpnc install
+mkdir -p "$DESTDIR/etc/vpnc"
+""",
+
+    deps = [
+        "system//libs/crypto/libgcrypt:libgcrypt",
+    ],
+
+    description = "Cisco VPN client compatible with vpnc",
+    homepage = "https://github.com/streambinder/vpnc",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

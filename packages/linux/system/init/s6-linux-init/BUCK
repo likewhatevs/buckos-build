@@ -1,0 +1,60 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# -----------------------------------------------------------------------------
+# s6-linux-init - Set of tools to create a s6-based init system
+# -----------------------------------------------------------------------------
+
+download_source(
+    name = "s6-linux-init-src",
+    src_uri = "https://skarnet.org/software/s6-linux-init/s6-linux-init-1.1.2.0.tar.gz",
+    sha256 = "11ae08d0a66210b5e56b6baee0f6b9b1b69fbedb05fda1285b115a31ca46c77f",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "s6-linux-init",
+    source = ":s6-linux-init-src",
+    iuse = ["sysv-utils"],
+    use_configure = {
+        "-sysv-utils": "--disable-sysv-utils",
+        "sysv-utils": "--enable-sysv-utils",
+    },
+    version = "1.1.2.0",
+    description = "Set of tools to create a s6-based init system",
+    homepage = "https://skarnet.org/software/s6-linux-init/",
+    license = "ISC",
+    # skarnet.org uses non-standard configure - custom src_configure phase
+    src_configure = """
+# Find skalibs in dependency directories
+SKALIBS_DIR=""
+for dir in ${DEP_BASE_DIRS//:/ }; do
+    if [ -d "$dir/usr/lib/skalibs/sysdeps" ]; then
+        SKALIBS_DIR="$dir"
+        break
+    fi
+done
+if [ -z "$SKALIBS_DIR" ]; then
+    echo "ERROR: Could not find skalibs sysdeps directory"
+    exit 1
+fi
+echo "Found skalibs at: $SKALIBS_DIR"
+
+./configure \\
+    --prefix=/usr \\
+    --libexecdir=/usr/lib/s6-linux-init \\
+    --skeldir=/etc/s6-linux-init/skel \\
+    --enable-shared \\
+    --disable-static \\
+    --with-sysdeps="$SKALIBS_DIR/usr/lib/skalibs/sysdeps" \\
+    --with-include="$SKALIBS_DIR/usr/include" \\
+    --with-lib="$SKALIBS_DIR/usr/lib"
+""",
+    deps = [
+        "system//init/skalibs:skalibs",
+        "system//init/s6:s6",
+        "system//init/execline:execline",
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)

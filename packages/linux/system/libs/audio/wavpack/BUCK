@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "wavpack-src",
+    src_uri = "https://github.com/dbry/WavPack/releases/download/5.7.0/wavpack-5.7.0.tar.xz",
+    sha256 = "e81510fd9ec5f309f58d5de83e9af6c95e267a13753d7e0bbfe7b91273a88bee",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "wavpack",
+    bdepend = [],
+    src_prepare = "",
+    source = ":wavpack-src",
+    iuse = ["test-full"],
+    use_configure = {
+        "-test-full": "--disable-test-full",
+        "test-full": "--enable-test-full",
+    },
+    version = "5.7.0",
+    description = "Hybrid lossless audio compression",
+    homepage = "https://www.wavpack.com/",
+    license = "BSD-3-Clause",
+    configure_args = [
+        "--prefix=/usr",
+        "--disable-static",
+        "--enable-shared",
+        "--enable-legacy",
+        "--enable-dsd",
+    ],
+    deps = [],
+    visibility = ["PUBLIC"],
+)

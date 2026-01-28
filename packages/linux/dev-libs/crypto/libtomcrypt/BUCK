@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "simple_package")
+
+simple_package(
+    name = "libtomcrypt",
+    version = "1.18.2",
+    iuse = ["gmp", "libtommath", "tomsfastmath"],
+    use_configure = {
+        "-gmp": "--disable-gmp",
+        "-libtommath": "--disable-libtommath",
+        "-tomsfastmath": "--disable-tomsfastmath",
+        "gmp": "--enable-gmp",
+        "libtommath": "--enable-libtommath",
+        "tomsfastmath": "--enable-tomsfastmath",
+    },
+    src_uri = "https://github.com/libtom/libtomcrypt/releases/download/v1.18.2/crypt-1.18.2.tar.xz",
+    sha256 = "96ad4c3b8336050993c5bc2cf6c057484f2b0f9f763448151567fbab5e767b84",
+    description = "Comprehensive, modular and portable cryptographic toolkit",
+    homepage = "https://www.libtom.net/LibTomCrypt/",
+    license = "Unlicense",
+    src_configure = """
+# libtomcrypt uses make, skip configure
+true
+""",
+    src_compile = """
+# Build static library using makefile (not makefile.shared to avoid libtool)
+make -f makefile LIBPATH=/usr/lib INCPATH=/usr/include
+""",
+    # Use makefile instead of makefile.shared to avoid libtool dependency
+    make_args = [],
+    src_install = """
+make -f makefile install DESTDIR="$DESTDIR" LIBPATH=/usr/lib INCPATH=/usr/include
+""",
+    visibility = ["PUBLIC"],
+)

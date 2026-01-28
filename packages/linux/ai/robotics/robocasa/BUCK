@@ -1,0 +1,30 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "robocasa",
+    version = "0.2.0+git20251218",
+    src_uri = "https://github.com/robocasa/robocasa/archive/756598a5be52e052339bb2d957426e39015c2afb.tar.gz",
+    sha256 = "589934abd0c8e8d766fb972b209c9655c1a43dd4cb2b09c9bf1805ff3bb94a6b",
+    deps = [
+        "dev-libs//python/h5py:h5py",
+        "dev-libs//python/hidapi:hidapi",
+        "dev-libs//python/imageio:imageio",
+        "dev-libs//text/lxml:lxml",
+        "ai//physics/mujoco:mujoco",
+        "dev-libs//python/numba:numba",
+        "dev-libs//python/numpy:numpy",
+        "graphics//opencv:opencv",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/pygame:pygame",
+        "dev-libs//python/pynput:pynput",
+        "dev-libs//python/pyyaml:pyyaml",
+        "ai//robotics/robosuite:robosuite",
+        "ai//robotics/robosuite-models:robosuite-models",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/termcolor:termcolor",
+        "ai//ml-frameworks/tianshou:tianshou",
+        "dev-libs//python/tqdm:tqdm",
+        "ai//robotics/robomimic:robomimic",
+    ],
+    maintainers = ["buckos"],
+)

@@ -1,0 +1,17 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "colbert",
+    version = "0.2.22",
+    src_uri = "https://github.com/stanford-futuredata/ColBERT/archive/refs/tags/v0.2.22.tar.gz",
+    sha256 = "c38a09d2392dc4a79363e941cec37d4bb4bfc0d868ffa1d75280134701ffc777",
+    deps = [
+        "dev-libs//python/bitarray:bitarray",
+        "dev-libs//python/flask:flask",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/transformers:transformers",
+        "dev-libs//python/ujson:ujson",
+        "ai//ml-frameworks/pytorch:pytorch",
+    ],
+)

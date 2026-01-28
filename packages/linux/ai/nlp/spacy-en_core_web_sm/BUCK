@@ -1,0 +1,11 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "spacy-en_core_web_sm",
+    version = "3.4.0",
+    src_uri = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.0/en_core_web_sm-3.4.0.tar.gz",
+    sha256 = "e8813936311a536d2ce7df155817674f20e2a3896dd0e875367446049a00e0dd",
+    deps = [
+        "ai//nlp/spacy:spacy",
+    ],
+)

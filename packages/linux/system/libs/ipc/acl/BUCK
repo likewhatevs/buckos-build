@@ -1,0 +1,64 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "acl-src",
+    src_uri = "https://github.com/sailfishos-mirror/acl/archive/refs/tags/v2.3.2.tar.gz",
+    sha256 = "0fc318808c1e91925398cbe41399a33b74dcf788a1c0af4feae8f7a322c6e6fd",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "acl",
+    source = ":acl-src",
+    iuse = ["nls", "static-libs"],
+    use_configure = {
+        "-nls": "--disable-nls",
+        "-static-libs": "--disable-static",
+        "nls": "--enable-nls",
+        "static-libs": "--enable-static",
+    },
+    version = "2.3.2",
+    category = "system/libs/ipc",
+    slot = "0",
+    description = "Access Control List library",
+    homepage = "https://github.com/sailfishos-mirror/acl",
+    license = "LGPL-2.1",
+
+    src_prepare = '''
+# GitHub archive doesn't include pre-generated configure script
+# Remove po directory to avoid NLS build issues
+rm -rf po
+sed -i '/^SUBDIRS/s/po//' Makefile.am
+autoreconf -fiv
+''',
+
+    src_configure = '''
+./configure \\
+    --prefix=/usr \\
+    --build=$(gcc -dumpmachine) \\
+    --host=$(gcc -dumpmachine) \\
+    --disable-static \\
+    --disable-nls
+''',
+
+    src_compile = '''
+make -j$(nproc)
+''',
+
+    src_install = '''
+make DESTDIR="$DESTDIR" install
+''',
+
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-libs//misc/gettext:gettext",
+        "system//libs/ipc/attr:attr",
+    ],
+    rdepend = [
+        "system//libs/ipc/attr:attr",
+    ],
+    visibility = ["PUBLIC"],
+)

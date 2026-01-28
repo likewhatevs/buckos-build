@@ -1,0 +1,43 @@
+# Wireless management packages for laptops (WiFi, Bluetooth)
+
+filegroup(
+    name = "wifi",
+    srcs = [
+        "laptop//wireless/iwd:iwd",
+        "laptop//wireless/wpa_supplicant:wpa_supplicant",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "bluetooth",
+    srcs = [
+        "laptop//wireless/bluez:bluez",
+        "laptop//wireless/blueman:blueman",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "wireless-essential",
+    srcs = [
+        "laptop//wireless/iwd:iwd",
+        "laptop//wireless/bluez:bluez",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-wireless",
+    srcs = [
+        "laptop//wireless/iwd:iwd",
+        "laptop//wireless/wpa_supplicant:wpa_supplicant",
+        "laptop//wireless/bluez:bluez",
+        "laptop//wireless/blueman:blueman",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

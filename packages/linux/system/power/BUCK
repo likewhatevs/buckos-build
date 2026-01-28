@@ -1,0 +1,165 @@
+# System Power Management Packages
+# Comprehensive tools for CPU/GPU power control, monitoring, and optimization
+
+# Intel x86 Power Tools (from kernel tree)
+filegroup(
+    name = "intel-x86-tools",
+    srcs = [
+        "system//power/x86_energy_perf_policy:x86_energy_perf_policy",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# AMD Power Tools
+filegroup(
+    name = "amd-tools",
+    srcs = [
+        "system//power/rapl-read-ryzen:rapl-read-ryzen",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# CPU Frequency and Scaling
+filegroup(
+    name = "cpu-frequency",
+    srcs = [
+        "system//power/cpufrequtils:cpufrequtils",
+        "laptop//power/cpupower:cpupower",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# System Tuning and Optimization
+filegroup(
+    name = "tuning",
+    srcs = [
+        "system//power/tuned:tuned",
+        "system//power/irqbalance:irqbalance",
+        "system//power/power-profiles-daemon:power-profiles-daemon",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Storage Power Management
+filegroup(
+    name = "storage-power",
+    srcs = [
+        "system//power/hdparm:hdparm",
+        "system//power/sdparm:sdparm",
+        "system//power/nvme-cli:nvme-cli",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Power Capping and Limits
+filegroup(
+    name = "power-limits",
+    srcs = [
+        "system//power/powercap:powercap",
+        "system//power/intel-undervolt:intel-undervolt",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# ACPI Tools
+filegroup(
+    name = "acpi-tools",
+    srcs = [
+        "system//power/acpica-tools:acpica-tools",
+        "laptop//power/acpid:acpid",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential Power Management Tools
+filegroup(
+    name = "essential",
+    srcs = [
+        "system//power/cpufrequtils:cpufrequtils",
+        "system//power/hdparm:hdparm",
+        "system//power/irqbalance:irqbalance",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop/Server Power Management
+filegroup(
+    name = "desktop",
+    srcs = [
+        ":essential",
+        ":tuning",
+        ":storage-power",
+        "laptop//monitoring/powertop:powertop",
+        "laptop//monitoring/lm-sensors:lm-sensors",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Intel Platform Complete
+filegroup(
+    name = "intel-complete",
+    srcs = [
+        ":intel-x86-tools",
+        ":cpu-frequency",
+        ":power-limits",
+        ":storage-power",
+        ":tuning",
+        "system//power/intel-undervolt:intel-undervolt",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# AMD Platform Complete
+filegroup(
+    name = "amd-complete",
+    srcs = [
+        ":amd-tools",
+        ":cpu-frequency",
+        ":power-limits",
+        ":storage-power",
+        ":tuning",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Server Power Management
+filegroup(
+    name = "server",
+    srcs = [
+        ":cpu-frequency",
+        ":tuning",
+        ":storage-power",
+        "system//power/irqbalance:irqbalance",
+        "system//power/powercap:powercap",
+        "laptop//monitoring/lm-sensors:lm-sensors",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All Power Management Packages
+filegroup(
+    name = "all",
+    srcs = [
+        ":intel-x86-tools",
+        ":amd-tools",
+        ":cpu-frequency",
+        ":tuning",
+        ":storage-power",
+        ":power-limits",
+        ":acpi-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

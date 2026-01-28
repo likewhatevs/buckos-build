@@ -1,0 +1,70 @@
+# BuckOS Specifications - Buck2 Build File
+#
+# This file defines how specification files are built and exported for
+# installation to /etc/buckos/specs
+
+# Export all specification markdown files
+filegroup(
+    name = "specs-files",
+    srcs = glob([
+        "core/*.md",
+        "bootstrap/*.md",
+        "integration/*.md",
+        "features/*.md",
+        "tooling/*.md",
+    ], exclude = [
+        "INDEX.md",
+        "REGISTRY.json",
+        "README.md",
+        "TEMPLATE.md",
+    ]),
+    visibility = ["PUBLIC"],
+)
+
+# Generate INDEX.md (human-readable spec index)
+genrule(
+    name = "index",
+    out = "INDEX.md",
+    cmd = "/usr/bin/python3 $(location //scripts:generate-spec-index) --format markdown --output $OUT --specs-dir $(location :specs-root)",
+    srcs = glob(["**/*.md"]),
+    visibility = ["PUBLIC"],
+)
+
+# Generate REGISTRY.json (machine-readable spec registry)
+genrule(
+    name = "registry",
+    out = "REGISTRY.json",
+    cmd = "/usr/bin/python3 $(location //scripts:generate-spec-index) --format json --output $OUT --specs-dir $(location :specs-root)",
+    srcs = glob(["**/*.md"]),
+    visibility = ["PUBLIC"],
+)
+
+# Export README.md (usage guide)
+export_file(
+    name = "readme",
+    src = "README.md",
+    visibility = ["PUBLIC"],
+)
+
+# Export TEMPLATE.md (spec template)
+export_file(
+    name = "template",
+    src = "TEMPLATE.md",
+    visibility = ["PUBLIC"],
+)
+
+# Specs root directory reference
+filegroup(
+    name = "specs-root",
+    srcs = ["."],
+    visibility = ["PUBLIC"],
+)
+
+# Validate all specs (for CI/CD)
+genrule(
+    name = "validate-specs",
+    out = "validation-report.txt",
+    cmd = "/usr/bin/python3 $(location //scripts:validate-spec) --all --specs-dir $(location :specs-root) > $OUT 2>&1 || (cat $OUT >&2 && exit 1)",
+    srcs = [":specs-root"],
+    visibility = ["PUBLIC"],
+)

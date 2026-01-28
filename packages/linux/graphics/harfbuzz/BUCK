@@ -1,0 +1,49 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# HarfBuzz - Text shaping library
+
+meson_package(
+    name = "harfbuzz",
+    version = "8.3.0",
+    src_uri = "https://github.com/harfbuzz/harfbuzz/releases/download/8.3.0/harfbuzz-8.3.0.tar.xz",
+    sha256 = "109501eaeb8bde3eadb25fab4164e993fbace29c3d775bcaa1c1e58e2f15f847",
+    description = "OpenType text shaping engine",
+    homepage = "https://harfbuzz.github.io/",
+    license = "MIT",
+    iuse = [
+        "cairo",
+        "debug",
+        "experimental",
+        "glib",
+        "graphite",
+        "graphite2",
+        "icu",
+        "introspection",
+        "truetype",
+    ],
+    use_defaults = ["glib"],
+    deps = [
+        "graphics//freetype:freetype",
+    ],
+    use_deps = {
+        "graphite2": ["graphics//graphite2:graphite2"],
+        "icu": ["dev-libs//misc/icu:icu"],
+        "cairo": ["graphics//cairo:cairo"],
+        "glib": ["core//glib:glib"],
+    },
+    meson_args = [
+        "-Dtests=disabled",
+        "-Ddocs=disabled",
+    ],
+    use_meson = {
+        "graphite2": "-Dgraphite=enabled",
+        "-graphite2": "-Dgraphite=disabled",
+        "icu": "-Dicu=enabled",
+        "-icu": "-Dicu=disabled",
+        "cairo": "-Dcairo=enabled",
+        "-cairo": "-Dcairo=disabled",
+        "glib": "-Dglib=enabled",
+        "-glib": "-Dglib=disabled",
+    },
+    visibility = ["PUBLIC"],
+)

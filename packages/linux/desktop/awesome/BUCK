@@ -1,0 +1,57 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Awesome - Highly configurable tiling window manager
+# =============================================================================
+
+download_source(
+    name = "awesome-src",
+    src_uri = "https://github.com/awesomeWM/awesome/releases/download/v4.3/awesome-4.3.tar.xz",
+    sha256 = "78264d6f012350b371e339127aca485260bc0aa935eff578ba75ce1a00e11753",
+    signature_sha256 = "6afb73289caed82173d56a8e496658fdd338a0dadc436fd074f1261d2cd229fd",
+    signature_required=False,
+)
+
+autotools_package(
+    name = "awesome",
+    source = ":awesome-src",
+    iuse = ["dbus", "gnome"],
+    use_configure = {
+        "-dbus": "--disable-dbus",
+        "-gnome": "--disable-gnome",
+        "dbus": "--enable-dbus",
+        "gnome": "--enable-gnome",
+    },
+    version = "4.3",
+    description = "Awesome - Highly configurable window manager for X",
+    homepage = "https://awesomewm.org/",
+    license = "GPL-2.0",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr \\
+    -DGENERATE_MANPAGES=OFF \\
+    -DGENERATE_DOC=OFF
+""",
+    bdepend = [
+        "graphics//imagemagick:imagemagick",
+        "dev-tools//build-systems/cmake:cmake",
+    ],
+    deps = [
+        "desktop//qt:qt5",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Awesome meta-package
+filegroup(
+    name = "awesome-desktop",
+    srcs = [
+        ":awesome",
+        "desktop//lightdm:lightdm",
+        "desktop//mesa:mesa",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

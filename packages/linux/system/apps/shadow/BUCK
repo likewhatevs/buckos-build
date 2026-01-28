@@ -1,0 +1,116 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# shadow - User and group management utilities
+# USE flags: pam, selinux, audit, acl, attr, nls, tcb, nscd
+
+autotools_package(
+    name = "shadow",
+    version = "4.14.8",
+    src_uri = "https://github.com/shadow-maint/shadow/releases/download/4.14.8/shadow-4.14.8.tar.xz",
+    sha256 = "f09eabcc6972f8689813c4fc6b471dc25de435e50528ea2708a6431ebbed9209",
+    signature_sha256 = "d55c43949deac43a30d99b77f7813ff720ab22a995a642addf6ef8bc5049469f",
+    signature_required = False,
+    description = "User and group management utilities (passwd, useradd, etc.)",
+    homepage = "https://github.com/shadow-maint/shadow",
+    license = "BSD",
+    iuse = [
+        "acl",
+        "attr",
+        "audit",
+        "doc",
+        "nls",
+        "nscd",
+        "pam",
+        "selinux",
+        "skey",
+        "su",
+        "systemd",
+        "tcb",
+        "xattr",
+    ],
+    use_defaults = ["pam"],
+    use_deps = {
+        "pam": ["system//security/auth/pam:pam"],
+        "selinux": ["system//security/selinux:selinux"],
+        "audit": ["system//security/audit:audit"],
+        "acl": ["system//libs/ipc/acl:acl"],
+        "attr": ["system//libs/ipc/attr:attr"],
+    },
+    use_configure = {
+        "-acl": "--without-acl",
+        "-attr": "--without-attr",
+        "-audit": "--without-audit",
+        "-doc": "--disable-man",
+        "-nls": "--disable-nls",
+        "-nscd": "--without-nscd",
+        "-pam": "--without-libpam",
+        "-selinux": "--without-selinux",
+        "-skey": "--disable-skey",
+        "-su": "--disable-su",
+        "-systemd": "--disable-systemd",
+        "-tcb": "--without-tcb",
+        "-xattr": "--disable-xattr",
+        "acl": "--with-acl",
+        "attr": "--with-attr",
+        "audit": "--with-audit",
+        "doc": "--enable-man",
+        "nls": "--enable-nls",
+        "nscd": "--with-nscd",
+        "pam": "--with-libpam",
+        "selinux": "--with-selinux",
+        "skey": "--enable-skey",
+        "su": "--enable-su",
+        "systemd": "--enable-systemd",
+        "tcb": "--with-tcb",
+        "xattr": "--enable-xattr",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+    ],
+    pre_configure = """
+# Remove ALL libtool .la files from sysroot to prevent host path contamination
+# .la files are legacy and cause issues when they reference host system paths
+# Modern systems use pkg-config instead
+echo "Removing all .la files from sysroot..."
+LA_COUNT=$(find "$SYSROOT/usr/lib" "$SYSROOT/usr/lib64" -name "*.la" -type f 2>/dev/null | wc -l)
+if [ "$LA_COUNT" -gt 0 ]; then
+    echo "Found $LA_COUNT .la files to remove"
+    find "$SYSROOT/usr/lib" "$SYSROOT/usr/lib64" -name "*.la" -type f -delete 2>/dev/null || true
+    echo "Done removing .la files"
+fi
+""",
+    deps = [
+        "system//libs/crypto/libxcrypt:libxcrypt",
+        "system//libs/bsd:libbsd",
+        "core//libmd:libmd",
+    ],
+
+    post_install = """
+# Ensure utilities are in expected locations
+mkdir -p "$DESTDIR/usr/bin" "$DESTDIR/usr/sbin"
+
+# Verify critical binaries exist for the installer
+if [ ! -f "$DESTDIR/usr/sbin/chpasswd" ]; then
+    echo "ERROR: chpasswd not found in $DESTDIR/usr/sbin"
+    ls -la "$DESTDIR/usr/bin" || true
+    ls -la "$DESTDIR/usr/sbin" || true
+    exit 1
+fi
+
+if [ ! -f "$DESTDIR/usr/sbin/useradd" ]; then
+    echo "ERROR: useradd not found in $DESTDIR/usr/sbin"
+    ls -la "$DESTDIR/usr/bin" || true
+    ls -la "$DESTDIR/usr/sbin" || true
+    exit 1
+fi
+
+echo "✓ Shadow package installed successfully"
+echo "  - chpasswd: $DESTDIR/usr/sbin/chpasswd"
+echo "  - useradd: $DESTDIR/usr/sbin/useradd"
+echo "  - passwd: $DESTDIR/usr/bin/passwd"
+""",
+
+    visibility = ["PUBLIC"],
+)

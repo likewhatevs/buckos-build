@@ -1,0 +1,97 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "ebuild_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# Container Packages Category
+# This directory contains packages for container runtimes, tools, and orchestration
+
+# =============================================================================
+# Package Groups
+# =============================================================================
+
+# Core container runtime packages
+filegroup(
+    name = "container-runtime",
+    srcs = [
+        "system//containers/runtime:crun",
+        "system//containers/runtime:runc",
+        "system//containers/runtime:conmon",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container networking packages
+filegroup(
+    name = "container-networking",
+    srcs = [
+        "system//containers/network:cni-plugins",
+        "system//containers/network:netavark",
+        "system//containers/network:aardvark-dns",
+        "system//containers/network:slirp4netns",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container storage packages
+filegroup(
+    name = "container-storage",
+    srcs = [
+        "system//containers/storage:fuse-overlayfs",
+        "system//containers/podman:containers-common",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Main container tools (Podman ecosystem)
+filegroup(
+    name = "podman-tools",
+    srcs = [
+        "system//containers/podman:podman",
+        "system//containers/podman:buildah",
+        "system//containers/podman:skopeo",
+        "system//containers/podman:podman-compose",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container utilities and monitoring
+filegroup(
+    name = "container-utilities",
+    srcs = [
+        "system//containers/utils:umoci",
+        "system//containers/utils:dive",
+        "system//containers/utils:ctop",
+        "system//containers/utils:lazydocker",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container security tools
+filegroup(
+    name = "container-security",
+    srcs = [
+        "system//containers/utils:trivy",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Complete container stack
+filegroup(
+    name = "all-containers",
+    srcs = [
+        ":container-runtime",
+        ":container-networking",
+        ":container-storage",
+        ":podman-tools",
+        ":container-utilities",
+        ":container-security",
+        "system//containers/utils:docker-credential-helpers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

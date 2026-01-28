@@ -1,0 +1,57 @@
+load("@root//defs:package_defs.bzl", "cargo_package")
+
+# Rust Hypervisor Firmware
+#
+# A minimal firmware for Cloud Hypervisor PVH boot.
+# This firmware provides a lightweight alternative to full UEFI firmware
+# for booting Linux kernels in Cloud Hypervisor VMs.
+#
+# Features:
+# - Minimal PVH boot support
+# - Direct kernel loading
+# - Low memory footprint
+# - Fast boot times
+#
+# Build output: hypervisor-fw binary
+# Install location: /usr/share/cloud-hypervisor/hypervisor-fw
+
+cargo_package(
+    name = "rust-hypervisor-firmware",
+    version = "0.5.0",
+    src_uri = "https://github.com/cloud-hypervisor/rust-hypervisor-firmware/archive/refs/tags/0.5.0.tar.gz",
+    sha256 = "FIXME",
+    signature_required = False,
+    description = "Minimal PVH firmware for Cloud Hypervisor",
+    homepage = "https://github.com/cloud-hypervisor/rust-hypervisor-firmware",
+    license = "Apache-2.0",
+    # Build the firmware binary
+    cargo_args = [
+        "--release",
+        "--target",
+        "x86_64-unknown-none",
+    ],
+    bins = [
+        "hypervisor-fw",
+    ],
+    # Custom install to place in cloud-hypervisor directory
+    src_install = """
+mkdir -p "$D/usr/share/cloud-hypervisor"
+if [ -f "target/x86_64-unknown-none/release/hypervisor-fw" ]; then
+    install -m 0644 target/x86_64-unknown-none/release/hypervisor-fw "$D/usr/share/cloud-hypervisor/"
+elif [ -f "target/release/hypervisor-fw" ]; then
+    install -m 0644 target/release/hypervisor-fw "$D/usr/share/cloud-hypervisor/"
+fi
+""",
+    deps = [
+        "lang//rust:rust",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Export the firmware file for use in boot scripts
+export_file(
+    name = "hypervisor-fw",
+    src = ":rust-hypervisor-firmware",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

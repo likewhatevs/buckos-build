@@ -1,0 +1,73 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# rsync - Fast incremental file transfer
+# USE flags: lz4, xxhash, zstd, ssl, acl, xattr, iconv
+
+autotools_package(
+    name = "rsync",
+    version = "3.3.0",
+    src_uri = "https://download.samba.org/pub/rsync/src/rsync-3.3.0.tar.gz",
+    sha256 = "7399e9a6708c32d678a72a63219e96f23be0be2336e50fd1348498d07041df90",
+    signature_sha256 = "b36faa73c9b0dafe884300ca7c61f19e96d3bf277569f6d7a0f0217ed8a13384",
+    signature_required=False,
+    description = "Fast incremental file transfer utility",
+    homepage = "https://rsync.samba.org",
+    license = "GPL-3+",
+    iuse = [
+        "acl",
+        "examples",
+        "iconv",
+        "lz4",
+        "rrsync",
+        "ssl",
+        "stunnel",
+        "system-zlib",
+        "xattr",
+        "xxhash",
+        "zstd",
+    ],
+    use_defaults = ["acl", "xattr"],
+    use_deps = {
+        "lz4": ["system//libs/compression/lz4:lz4"],
+        "zstd": ["system//libs/compression/zstd:zstd"],
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "acl": ["system//libs/ipc/acl:acl"],
+    },
+    use_configure = {
+        "-acl": "--disable-acls",
+        "-examples": "--disable-examples",
+        "-iconv": "--disable-iconv",
+        "-lz4": "--disable-lz4",
+        "-rrsync": "--disable-rrsync",
+        "-ssl": "--disable-openssl",
+        "-stunnel": "--disable-stunnel",
+        "-system-zlib": "--disable-system-zlib",
+        "-xattr": "--disable-xattr-support",
+        "-xxhash": "--disable-xxhash",
+        "-zstd": "--disable-zstd",
+        "acl": "--enable-acls",
+        "examples": "--enable-examples",
+        "iconv": "--enable-iconv",
+        "lz4": "--enable-lz4",
+        "rrsync": "--enable-rrsync",
+        "ssl": "--enable-openssl",
+        "stunnel": "--enable-stunnel",
+        "system-zlib": "--enable-system-zlib",
+        "xattr": "--enable-xattr-support",
+        "xxhash": "--enable-xxhash",
+        "zstd": "--enable-zstd",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+    ],
+    # C23 has stricter function pointer type checking
+    env = {
+        "CFLAGS": "-std=gnu17 -O2",
+    },
+    deps = [
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

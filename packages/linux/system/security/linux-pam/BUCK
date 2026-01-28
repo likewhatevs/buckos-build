@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# linux-pam - Pluggable Authentication Modules
+
+autotools_package(
+    name = "linux-pam",
+    version = "1.6.1",
+    # Use release tarball with pre-generated configure
+    src_uri = "https://github.com/linux-pam/linux-pam/releases/download/v1.6.1/Linux-PAM-1.6.1.tar.xz",
+    sha256 = "f8923c740159052d719dbfc2a2f81942d68dd34fcaf61c706a02c9b80feeef8e",
+    signature_required = False,
+    description = "Pluggable Authentication Modules",
+    homepage = "https://github.com/linux-pam/linux-pam",
+    license = "BSD-3-Clause",
+    configure_args = [
+        "--enable-shared",
+        "--disable-doc",
+        "--disable-selinux",
+        "--disable-audit",
+        "--disable-regenerate-docu",
+    ],
+    deps = [
+        "system//libs/crypto/libxcrypt:libxcrypt",
+    ],
+    visibility = ["PUBLIC"],
+)

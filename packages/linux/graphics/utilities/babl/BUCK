@@ -1,0 +1,63 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "babl-src",
+    src_uri = "https://download.gimp.org/babl/0.1/babl-0.1.108.tar.xz",
+    sha256 = "26defe9deaab7ac4d0e076cab49c2a0d6ebd0df0c31fd209925a5f07edee1475",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "babl",
+    source = ":babl-src",
+    iuse = [
+        "cpu_flags_x86_f16c",
+        "cpu_flags_x86_mmx",
+        "cpu_flags_x86_sse",
+        "introspection",
+        "lcms",
+        "vala",
+    ],
+    use_configure = {
+        "-cpu_flags_x86_f16c": "--disable-cpu_flags_x86_f16c",
+        "-cpu_flags_x86_mmx": "--disable-cpu_flags_x86_mmx",
+        "-cpu_flags_x86_sse": "--disable-cpu_flags_x86_sse",
+        "-introspection": "--disable-introspection",
+        "-lcms": "--disable-lcms",
+        "-vala": "--disable-vala",
+        "cpu_flags_x86_f16c": "--enable-cpu_flags_x86_f16c",
+        "cpu_flags_x86_mmx": "--enable-cpu_flags_x86_mmx",
+        "cpu_flags_x86_sse": "--enable-cpu_flags_x86_sse",
+        "introspection": "--enable-introspection",
+        "lcms": "--enable-lcms",
+        "vala": "--enable-vala",
+    },
+    version = "0.1.108",
+    description = "Dynamic pixel format translation library",
+    homepage = "https://gegl.org/babl/",
+    license = "LGPL-3.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+meson setup .. \
+    --prefix=/usr \
+    -Dbuildtype=release \
+    -Dwith-docs=false \
+    -Denable-gir=true
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT meson install
+""",
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/graphics/lcms2:lcms2",
+    ],
+    bdepend = [
+        "lang//vala:vala",
+    ],
+    visibility = ["PUBLIC"],
+)

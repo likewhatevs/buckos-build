@@ -1,0 +1,18 @@
+load("@root//defs:package_defs.bzl", "make_package")
+
+make_package(
+    name = "exiftool",
+    version = "13.36",
+    src_uri = "https://github.com/exiftool/exiftool/archive/refs/tags/13.36.tar.gz",
+    sha256 = "f70ecbcdccc18268d4d3c290faf8cf73b1cf128e3e7f8671e24d6604cae4dc73",
+    description = "Read, write and edit meta information in a wide variety of files",
+    homepage = "https://exiftool.org/",
+    license = "GPL-3.0-or-later",
+    src_configure = "perl Makefile.PL INSTALLDIRS=vendor PREFIX=/usr",
+    src_compile = "make",
+    src_install = "make install DESTDIR=\"$DESTDIR\"",
+    deps = [
+        "lang//perl:perl",
+    ],
+    visibility = ["PUBLIC"],
+)

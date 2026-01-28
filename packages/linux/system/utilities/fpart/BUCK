@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "fpart",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    version = "1.6.0",
+    src_uri = "https://github.com/martymac/fpart/archive/refs/tags/fpart-1.6.0.tar.gz",
+    sha256 = "ed1fac2853fc421071b72e4c5d8455a231bc30e50034db14af8b0485ece6e097",
+)

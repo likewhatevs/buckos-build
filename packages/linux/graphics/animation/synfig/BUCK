@@ -1,0 +1,85 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "synfig-src",
+    src_uri = "https://github.com/synfig/synfig/releases/download/v1.5.1/synfig-1.5.1.tar.gz",
+    sha256 = "aa91593c28a89f269be1be9c8bd9ecca6491f9e6af26744d1c160c6553ee2ced",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "synfig-core",
+    source = ":synfig-src",
+    version = "1.5.1",
+    description = "2D animation rendering backend",
+    homepage = "https://www.synfig.org/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+cd synfig-core
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release
+""",
+    configure_args = [],
+    make_args = ["-C", "synfig-core/build"],
+    post_install = """
+cd synfig-core/build
+DESTDIR=$OUT make install
+""",
+    deps = [
+        # "dev-libs//libsigcpp:libsigcpp",  # TODO: not packaged yet
+        "system//libs/data/libxml2:libxml2",
+        # "dev-libs//mlt:mlt",  # TODO: not packaged yet
+        "graphics//video/ffmpeg:ffmpeg",
+        "graphics//utilities/imagemagick:imagemagick",
+        "dev-libs//boost:boost",
+        "dev-libs//fftw:fftw",
+        "system//libs/graphics/cairo:cairo",
+        "fonts//libraries/pango:pango",
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)
+
+autotools_package(
+    name = "synfig-studio",
+    source = ":synfig-src",
+    version = "1.5.1",
+    description = "2D animation software - GTK+ based GUI",
+    homepage = "https://www.synfig.org/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+cd synfig-studio
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release
+""",
+    configure_args = [],
+    make_args = ["-C", "synfig-studio/build"],
+    post_install = """
+cd synfig-studio/build
+DESTDIR=$OUT make install
+""",
+    deps = [
+        ":synfig-core",
+        "desktop//gtk:gtk3",
+        # "dev-libs//libsigcpp:libsigcpp",  # TODO: not packaged yet
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "synfig",
+    srcs = [
+        ":synfig-core",
+        ":synfig-studio",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

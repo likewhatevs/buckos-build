@@ -1,0 +1,84 @@
+# Wine - Windows compatibility layer
+# Run Windows applications on Linux
+
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "wine-src",
+    src_uri = "https://dl.winehq.org/wine/source/9.x/wine-9.21.tar.xz",
+    sha256 = "4442b47ffd9b2ea457100e36ed5fd4e6f4d829d9db79a25e605175a988ca2fff",
+    signature_sha256 = "1840856805c3be19c6bf8d700a20f6016d39b4605919e934db7937c4ad9d6193",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+autotools_package(
+    name = "wine",
+    source = ":wine-src",
+    version = "9.21",
+    description = "Compatibility layer for running Windows applications",
+    homepage = "https://www.winehq.org/",
+    license = "LGPL-2.1",
+    configure_args = [
+        "--prefix=/usr",
+        "--libdir=/usr/lib",
+        "--with-x",
+        "--with-wayland",
+        "--with-vulkan",
+        "--with-pthread",
+        "--with-freetype",
+        "--with-fontconfig",
+        "--with-opengl",
+        "--without-oss",
+        "--disable-tests",
+    ],
+    env = {
+        "CFLAGS": "-O2 -march=x86-64 -pipe",
+        "LDFLAGS": "-Wl,-O1,--as-needed",
+    },
+    post_install = """
+#!/bin/bash
+set -e
+
+# Create Wine prefix helper script
+mkdir -p "$DESTDIR/usr/bin"
+cat > "$DESTDIR/usr/bin/wine-prefix" << 'EOF'
+#!/bin/bash
+# Create a new Wine prefix
+PREFIX="${1:-$HOME/.wine}"
+ARCH="${2:-win64}"
+export WINEPREFIX="$PREFIX"
+export WINEARCH="$ARCH"
+wineboot --init
+EOF
+chmod +x "$DESTDIR/usr/bin/wine-prefix"
+
+# Install binfmt configuration for Windows executables
+mkdir -p "$DESTDIR/usr/lib/binfmt.d"
+cat > "$DESTDIR/usr/lib/binfmt.d/wine.conf" << 'EOF'
+# Enable Wine to handle Windows executables
+:DOSWin:M::MZ::/usr/bin/wine:
+EOF
+
+# Create desktop files
+mkdir -p "$DESTDIR/usr/share/applications"
+cat > "$DESTDIR/usr/share/applications/wine.desktop" << 'EOF'
+[Desktop Entry]
+Name=Wine Windows Program Loader
+Comment=Run Windows programs on Linux
+Exec=wine start /unix %f
+Icon=wine
+Terminal=false
+Type=Application
+Categories=Utility;
+MimeType=application/x-ms-dos-executable;application/x-msi;application/x-ms-shortcut;
+NoDisplay=true
+EOF
+    """,
+    deps = [
+        "core//glibc:glibc",
+    ],
+    visibility = ["PUBLIC"],
+)

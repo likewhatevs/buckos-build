@@ -1,0 +1,52 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "lame-src",
+    src_uri = "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz",
+    sha256 = "ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "lame",
+    source = ":lame-src",
+    iuse = [
+        "cpu_flags_x86_mmx",
+        "debug",
+        "frontend",
+        "mp3rtp",
+        "sndfile",
+        "static-libs",
+    ],
+    use_configure = {
+        "-cpu_flags_x86_mmx": "--disable-cpu_flags_x86_mmx",
+        "-debug": "--disable-debug",
+        "-frontend": "--disable-frontend",
+        "-mp3rtp": "--disable-mp3rtp",
+        "-sndfile": "--disable-sndfile",
+        "-static-libs": "--disable-static",
+        "cpu_flags_x86_mmx": "--enable-cpu_flags_x86_mmx",
+        "debug": "--enable-debug",
+        "frontend": "--enable-frontend",
+        "mp3rtp": "--enable-mp3rtp",
+        "sndfile": "--enable-sndfile",
+        "static-libs": "--enable-static",
+    },
+    version = "3.100",
+    description = "High quality MPEG Audio Layer III (MP3) encoder",
+    homepage = "https://lame.sourceforge.io/",
+    license = "LGPL-2.0-or-later",
+    configure_args = [
+        "--prefix=/usr",
+        "--disable-static",
+        "--enable-shared",
+        "--enable-nasm",
+        "--enable-mp3rtp",
+        "--with-fileio=lame",
+    ],
+    deps = [
+        "core//ncurses:ncurses",
+    ],
+    visibility = ["PUBLIC"],
+)

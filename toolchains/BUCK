@@ -1,0 +1,21 @@
+load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
+load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+
+# Genrule toolchain for basic build commands
+system_genrule_toolchain(
+    name = "genrule",
+    visibility = ["PUBLIC"],
+)
+
+# System C/C++ toolchain for building packages
+system_cxx_toolchain(
+    name = "cxx",
+    visibility = ["PUBLIC"],
+)
+
+# Export toolchain configuration
+toolchain_alias(
+    name = "cxx_toolchain",
+    actual = ":cxx",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,84 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "hydra",
+    version = "9.5",
+    src_uri = "https://github.com/vanhauser-thc/thc-hydra/archive/refs/tags/v9.5.tar.gz",
+    sha256 = "9dd193b011fdb3c52a17b0da61a38a4148ffcad731557696819d4721d1bee76b",
+    signature_required = False,
+
+    iuse = [
+        "debug",
+        "gcrypt",
+        "gtk",
+        "idn",
+        "libssh",
+        "memcached",
+        "mongodb",
+        "mysql",
+        "ncurses",
+        "oracle",
+        "pcre",
+        "postgres",
+        "rdp",
+        "samba",
+        "ssh",
+        "ssl",
+        "subversion",
+        "zlib",
+    ],
+    use_defaults = ["ssl", "ssh"],
+
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssh": ["system//libs/network/libssh2:libssh2"],
+    },
+
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-gcrypt": "--without-gcrypt",
+        "-gtk": "--disable-gtk",
+        "-idn": "--disable-idn",
+        "-libssh": "--disable-libssh",
+        "-memcached": "--disable-memcached",
+        "-mongodb": "--disable-mongodb",
+        "-mysql": "--disable-mysql",
+        "-ncurses": "--without-ncurses",
+        "-oracle": "--disable-oracle",
+        "-pcre": "--disable-pcre",
+        "-postgres": "--disable-postgres",
+        "-rdp": "--disable-rdp",
+        "-samba": "--disable-samba",
+        "-subversion": "--disable-subversion",
+        "-zlib": "--without-zlib",
+        "debug": "--enable-debug",
+        "gcrypt": "--with-gcrypt",
+        "gtk": "--enable-gtk",
+        "idn": "--enable-idn",
+        "libssh": "--enable-libssh",
+        "memcached": "--enable-memcached",
+        "mongodb": "--enable-mongodb",
+        "mysql": "--enable-mysql",
+        "ncurses": "--with-ncurses",
+        "oracle": "--enable-oracle",
+        "pcre": "--enable-pcre",
+        "postgres": "--enable-postgres",
+        "rdp": "--enable-rdp",
+        "samba": "--enable-samba",
+        "subversion": "--enable-subversion",
+        "zlib": "--with-zlib",
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+    ],
+
+    deps = [
+    ],
+
+    description = "Network logon cracker for authorized security testing",
+    homepage = "https://github.com/vanhauser-thc/thc-hydra",
+    license = "AGPL-3.0",
+    visibility = ["PUBLIC"],
+)

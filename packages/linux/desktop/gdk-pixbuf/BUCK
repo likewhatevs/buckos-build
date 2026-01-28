@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "meson_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# GDK-Pixbuf - Image loading library
+meson_package(
+    name = "gdk-pixbuf",
+    version = "2.42.12",
+    iuse = [
+        "gif",
+        "gtk-doc",
+        "introspection",
+        "jpeg",
+        "tiff",
+    ],
+    use_configure = {
+        "-gif": "-Dgif=disabled",
+        "-gtk-doc": "-Dgtk_doc=false",
+        "-introspection": "-Dintrospection=disabled",
+        "-jpeg": "-Djpeg=disabled",
+        "-tiff": "-Dtiff=disabled",
+        "gif": "-Dgif=enabled",
+        "gtk-doc": "-Dgtk_doc=true",
+        "introspection": "-Dintrospection=enabled",
+        "jpeg": "-Djpeg=enabled",
+        "tiff": "-Dtiff=enabled",
+    },
+    src_uri = "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz",
+    sha256 = "b9505b3445b9a7e48ced34760c3bcb73e966df3ac94c95a148cb669ab748e3c7",
+    signature_required = False,
+    description = "Image loading library for GTK+",
+    homepage = "https://gitlab.gnome.org/GNOME/gdk-pixbuf",
+    license = "LGPL-2.1+",
+    meson_args = [
+        "-Dintrospection=disabled",
+        "-Dinstalled_tests=false",
+        "-Dgtk_doc=false",
+        "-Dman=false",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/image/libpng:libpng",
+        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
+        "system//libs/image/libtiff:libtiff",
+    ],
+    visibility = ["PUBLIC"],
+)

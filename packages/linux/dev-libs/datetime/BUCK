@@ -1,0 +1,13 @@
+# Date/Time Libraries for C++
+#
+# This directory contains various date and time handling libraries for C++:
+#
+# - cctz: Google's C++ library for translating between absolute and civil times
+# - tz: Howard Hinnant's date library based on C++11/14/17 <chrono>
+# - abseil-time: Abseil's time libraries (part of Abseil C++ Common Libraries)
+# - cpp-date: Howard Hinnant's date library (alternative packaging with TZ library enabled)
+#
+# These libraries provide robust timezone handling, date arithmetic, and
+# parsing/formatting of dates and times.
+
+# Note: Individual packages are in subdirectories

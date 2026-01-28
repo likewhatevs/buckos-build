@@ -1,0 +1,71 @@
+# =============================================================================
+# System Initialization Packages
+# =============================================================================
+# This file contains aliases for system initialization (init) systems.
+# Individual package definitions are in their respective subdirectories.
+#
+# NOTE: We use alias() instead of filegroup() because alias passes through
+# the actual target's outputs directly, whereas filegroup creates a wrapper
+# directory. This is important for the rootfs rule which merges package outputs.
+
+# =============================================================================
+# Individual Init Systems (aliases for installer compatibility)
+# =============================================================================
+
+alias(
+    name = "systemd",
+    actual = "system//init/systemd:systemd",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "s6",
+    actual = "system//init/s6:s6",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Package Groups
+# =============================================================================
+
+filegroup(
+    name = "systemd-stack",
+    srcs = [
+        "system//init/systemd:systemd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "s6-stack",
+    srcs = [
+        "system//init/skalibs:skalibs",
+        "system//init/s6:s6",
+        "system//init/s6-linux-init:s6-linux-init",
+        "system//init/s6-rc:s6-rc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "lightweight-inits",
+    srcs = [
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-inits",
+    srcs = [
+        "system//init/systemd:systemd",
+        "system//init/skalibs:skalibs",
+        "system//init/s6:s6",
+        "system//init/s6-linux-init:s6-linux-init",
+        "system//init/s6-rc:s6-rc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

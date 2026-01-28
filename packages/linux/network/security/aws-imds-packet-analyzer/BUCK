@@ -1,0 +1,11 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "aws-imds-packet-analyzer",
+    version = "main",
+    src_uri = "https://mirror.buckos.org/a/aws-imds-packet-analyzer-main.tar.gz",
+    sha256 = "566195f86f1f5650e64fc10d273f7f10b775500a78909e857ef14d51c8fb9d32",
+    deps = [
+        "system//apps/bpf/bcc:bcc",
+    ],
+)

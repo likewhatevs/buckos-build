@@ -1,0 +1,236 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# USE flags for blender (cmake build):
+# - cycles: Cycles render engine (default: enabled)
+# - cuda: CUDA GPU support (default: disabled)
+# - opengl: OpenGL support (default: enabled)
+# - ffmpeg: FFmpeg support (default: enabled)
+# - jack: JACK audio (default: enabled)
+# - pulseaudio: PulseAudio audio (default: enabled)
+# - sdl: SDL support (default: enabled)
+# - python: Python scripting (default: enabled)
+
+download_source(
+    name = "blender-src",
+    src_uri = "https://download.blender.org/source/blender-4.0.2.tar.xz",
+    sha256 = "aaa0e729da7591cfbf45772af76345977daaa7b11a0af35d98f9313e246077a3",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "blender",
+    source = ":blender-src",
+    iuse = [
+        "X",
+        "alembic",
+        "bullet",
+        "color-management",
+        "cuda",
+        "cycles",
+        "cycles-bin-kernels",
+        "debug",
+        "embree",
+        "experimental",
+        "ffmpeg",
+        "fftw",
+        "fluid",
+        "gmp",
+        "gnome",
+        "hip",
+        "hiprt",
+        "jack",
+        "jemalloc",
+        "jpeg2k",
+        "man",
+        "manifold",
+        "nanovdb",
+        "ndof",
+        "nls",
+        "oidn",
+        "openal",
+        "openexr",
+        "opengl",
+        "openpgl",
+        "opensubdiv",
+        "openvdb",
+        "optix",
+        "osl",
+        "pdf",
+        "pipewire",
+        "potrace",
+        "pugixml",
+        "pulseaudio",
+        "renderdoc",
+        "rubberband",
+        "sdl",
+        "sndfile",
+        "tbb",
+        "tiff",
+        "truetype",
+        "valgrind",
+        "vulkan",
+        "wayland",
+        "webp",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-alembic": "--disable-alembic",
+        "-bullet": "--disable-bullet",
+        "-color-management": "--disable-color-management",
+        "-cuda": "--disable-cuda",
+        "-cycles": "--disable-cycles",
+        "-cycles-bin-kernels": "--disable-cycles-bin-kernels",
+        "-debug": "--disable-debug",
+        "-embree": "--disable-embree",
+        "-experimental": "--disable-experimental",
+        "-ffmpeg": "--disable-ffmpeg",
+        "-fftw": "--disable-fftw",
+        "-fluid": "--disable-fluid",
+        "-gmp": "--disable-gmp",
+        "-gnome": "--disable-gnome",
+        "-hip": "--disable-hip",
+        "-hiprt": "--disable-hiprt",
+        "-jack": "--disable-jack",
+        "-jemalloc": "--disable-jemalloc",
+        "-jpeg2k": "--disable-jpeg2k",
+        "-man": "--disable-man",
+        "-manifold": "--disable-manifold",
+        "-nanovdb": "--disable-nanovdb",
+        "-ndof": "--disable-ndof",
+        "-nls": "--disable-nls",
+        "-oidn": "--disable-oidn",
+        "-openal": "--disable-openal",
+        "-openexr": "--disable-openexr",
+        "-opengl": "--disable-opengl",
+        "-openpgl": "--disable-openpgl",
+        "-opensubdiv": "--disable-opensubdiv",
+        "-openvdb": "--disable-openvdb",
+        "-optix": "--disable-optix",
+        "-osl": "--disable-osl",
+        "-pdf": "--disable-pdf",
+        "-pipewire": "--disable-pipewire",
+        "-potrace": "--disable-potrace",
+        "-pugixml": "--disable-pugixml",
+        "-pulseaudio": "--disable-pulseaudio",
+        "-renderdoc": "--disable-renderdoc",
+        "-rubberband": "--disable-rubberband",
+        "-sdl": "--disable-sdl",
+        "-sndfile": "--disable-sndfile",
+        "-tbb": "--disable-tbb",
+        "-tiff": "--without-tiff",
+        "-truetype": "--disable-truetype",
+        "-valgrind": "--disable-valgrind",
+        "-vulkan": "--disable-vulkan",
+        "-wayland": "--disable-wayland",
+        "-webp": "--without-webp",
+        "X": "--with-x",
+        "alembic": "--enable-alembic",
+        "bullet": "--enable-bullet",
+        "color-management": "--enable-color-management",
+        "cuda": "--enable-cuda",
+        "cycles": "--enable-cycles",
+        "cycles-bin-kernels": "--enable-cycles-bin-kernels",
+        "debug": "--enable-debug",
+        "embree": "--enable-embree",
+        "experimental": "--enable-experimental",
+        "ffmpeg": "--enable-ffmpeg",
+        "fftw": "--enable-fftw",
+        "fluid": "--enable-fluid",
+        "gmp": "--enable-gmp",
+        "gnome": "--enable-gnome",
+        "hip": "--enable-hip",
+        "hiprt": "--enable-hiprt",
+        "jack": "--enable-jack",
+        "jemalloc": "--enable-jemalloc",
+        "jpeg2k": "--enable-jpeg2k",
+        "man": "--enable-man",
+        "manifold": "--enable-manifold",
+        "nanovdb": "--enable-nanovdb",
+        "ndof": "--enable-ndof",
+        "nls": "--enable-nls",
+        "oidn": "--enable-oidn",
+        "openal": "--enable-openal",
+        "openexr": "--enable-openexr",
+        "opengl": "--enable-opengl",
+        "openpgl": "--enable-openpgl",
+        "opensubdiv": "--enable-opensubdiv",
+        "openvdb": "--enable-openvdb",
+        "optix": "--enable-optix",
+        "osl": "--enable-osl",
+        "pdf": "--enable-pdf",
+        "pipewire": "--enable-pipewire",
+        "potrace": "--enable-potrace",
+        "pugixml": "--enable-pugixml",
+        "pulseaudio": "--enable-pulseaudio",
+        "renderdoc": "--enable-renderdoc",
+        "rubberband": "--enable-rubberband",
+        "sdl": "--enable-sdl",
+        "sndfile": "--enable-sndfile",
+        "tbb": "--enable-tbb",
+        "tiff": "--with-tiff",
+        "truetype": "--enable-truetype",
+        "valgrind": "--enable-valgrind",
+        "vulkan": "--enable-vulkan",
+        "wayland": "--enable-wayland",
+        "webp": "--with-webp",
+    },
+    version = "4.0.2",
+    description = "3D creation suite for modeling, animation, rendering and more",
+    homepage = "https://www.blender.org/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DWITH_INSTALL_PORTABLE=OFF \
+    -DWITH_PYTHON_INSTALL=OFF \
+    -DWITH_CYCLES=ON \
+    -DWITH_CYCLES_CUDA_BINARIES=OFF \
+    -DWITH_CYCLES_HIP_BINARIES=OFF \
+    -DWITH_CYCLES_ONEAPI_BINARIES=OFF \
+    -DWITH_OPENCOLORIO=ON \
+    -DWITH_OPENIMAGEIO=ON \
+    -DWITH_OPENSUBDIV=ON \
+    -DWITH_OPENVDB=ON \
+    -DWITH_ALEMBIC=ON \
+    -DWITH_CODEC_FFMPEG=ON \
+    -DWITH_CODEC_SNDFILE=ON \
+    -DWITH_FFTW3=ON \
+    -DWITH_SDL=ON \
+    -DWITH_JACK=ON \
+    -DWITH_PULSEAUDIO=ON \
+    -DWITH_MOD_OCEANSIM=ON \
+    -DWITH_LLVM=ON
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT make install
+
+# Install desktop file and icons
+mkdir -p $OUT/usr/share/applications
+mkdir -p $OUT/usr/share/icons/hicolor/scalable/apps
+""",
+    deps = [
+        "lang//python:python",
+        "dev-libs//boost:boost",
+        "desktop//mesa:mesa",
+        "dev-libs//openexr:openexr",
+        "system//libs/image/openjpeg:openjpeg",
+        "graphics//video/ffmpeg:ffmpeg",
+        "dev-libs//fftw:fftw",
+        # "dev-libs//opencolorio:opencolorio",  # TODO: not packaged yet
+        "dev-libs//openimageio:openimageio",
+        "dev-libs//openvdb:openvdb",
+        "dev-libs//alembic:alembic",
+        "system//libs/multimedia/sdl2:sdl2",
+    ],
+    bdepend = [
+        "core//llvm:llvm",
+    ],
+    visibility = ["PUBLIC"],
+)

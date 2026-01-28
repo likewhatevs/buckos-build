@@ -1,0 +1,42 @@
+load("@root//defs:package_defs.bzl", "download_source", "cmake_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# SDDM - Simple Desktop Display Manager (KDE default)
+# =============================================================================
+
+download_source(
+    name = "sddm-src",
+    src_uri = "https://github.com/sddm/sddm/archive/refs/tags/v0.21.0.tar.gz",
+    sha256 = "f895de2683627e969e4849dbfbbb2b500787481ca5ba0de6d6dfdae5f1549abf",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "sddm",
+    source = ":sddm-src",
+    version = "0.21.0",
+    description = "Simple Desktop Display Manager - QML-based",
+    homepage = "https://github.com/sddm/sddm",
+    license = "GPL-2.0",
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DENABLE_JOURNALD=OFF",
+        "-DBUILD_MAN_PAGES=OFF",
+        "-DUID_MIN=1000",
+        "-DUID_MAX=60000",
+        "-DNO_SYSTEMD=ON",
+        "-DUSE_ELOGIND=OFF",
+    ],
+    deps = [
+        "desktop//qt:qt6",
+        "core//libffi:libffi",
+        "graphics//rendering/wayland:wayland",
+        "system//security/linux-pam:linux-pam",
+        "desktop//kde/ecm:extra-cmake-modules",
+        "graphics//xorg/libXau:libXau",
+        "graphics//xorg/libxcb:libxcb",
+        "graphics//xorg/libX11:libX11",
+    ],
+    visibility = ["PUBLIC"],
+)

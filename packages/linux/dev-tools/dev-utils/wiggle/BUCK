@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# wiggle - Uses plain Makefile, not autotools
+autotools_package(
+    name = "wiggle",
+    version = "1.3",
+    src_uri = "https://github.com/neilbrown/wiggle/archive/refs/tags/v1.3.tar.gz",
+    sha256 = "ff92cf0133c1f4dce33563e263cb30e7ddb6f4abdf86d427b1ec1490bec25afa",
+    description = "Tool for applying patches with conflicts",
+    homepage = "https://github.com/neilbrown/wiggle",
+    license = "GPL-2.0-or-later",
+    bdepend = [],
+    src_prepare = "",
+    src_configure = "true",  # No configure script - plain Makefile
+    configure_args = [],
+    src_compile = """
+make CC=cc PREFIX=/usr
+""",
+    src_install = """
+make install DESTDIR="$DESTDIR" PREFIX=/usr
+""",
+    deps = [
+        "core//ncurses:ncurses",
+    ],
+    visibility = ["PUBLIC"],
+)

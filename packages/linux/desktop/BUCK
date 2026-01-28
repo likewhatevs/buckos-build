@@ -1,0 +1,171 @@
+# =============================================================================
+# Desktop Environment Build Targets for BuckOs Linux
+# Similar to CachyOS desktop options
+# =============================================================================
+# This file contains convenience groups that aggregate individual desktop packages.
+# Individual packages are located in their own subdirectories.
+
+# =============================================================================
+# CONVENIENCE GROUPS - Pre-configured desktop selections
+# =============================================================================
+
+# All desktop foundations (required by all desktops)
+filegroup(
+    name = "desktop-foundation",
+    srcs = [
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//mesa:mesa",
+        "desktop//libdrm:libdrm",
+        "desktop//libinput:libinput",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All display managers
+filegroup(
+    name = "display-managers",
+    srcs = [
+        "desktop//gdm:gdm",
+        "desktop//sddm:sddm",
+        "desktop//lightdm:lightdm",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All full desktop environments
+filegroup(
+    name = "all-desktops",
+    srcs = [
+        "desktop//kde:kde-plasma",
+        "desktop//xfce:xfce",
+        "desktop//lxqt:lxqt",
+        "desktop//cinnamon:cinnamon-desktop",
+        "desktop//mate:mate",
+        "desktop//budgie:budgie",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All Wayland compositors
+filegroup(
+    name = "wayland-compositors",
+    srcs = [
+        "desktop//sway:sway-desktop",
+        "desktop//hyprland:hyprland-desktop",
+        "desktop//wayfire:wayfire-desktop",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All X11 window managers
+filegroup(
+    name = "x11-window-managers",
+    srcs = [
+        "desktop//i3:i3-desktop",
+        "desktop//bspwm:bspwm-desktop",
+        "desktop//awesome:awesome-desktop",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Lightweight desktops (good for older hardware)
+filegroup(
+    name = "lightweight-desktops",
+    srcs = [
+        "desktop//xfce:xfce",
+        "desktop//lxqt:lxqt",
+        "desktop//i3:i3-desktop",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Modern Wayland desktops
+filegroup(
+    name = "modern-wayland-desktops",
+    srcs = [
+        "desktop//kde:kde-plasma",
+        "desktop//sway:sway-desktop",
+        "desktop//hyprland:hyprland-desktop",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Tiling window managers (keyboard-driven)
+filegroup(
+    name = "tiling-desktops",
+    srcs = [
+        "desktop//sway:sway-desktop",
+        "desktop//hyprland:hyprland-desktop",
+        "desktop//i3:i3-desktop",
+        "desktop//bspwm:bspwm-desktop",
+        "desktop//awesome:awesome-desktop",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# UTILITY PACKAGES
+# =============================================================================
+
+# All Wayland utilities
+filegroup(
+    name = "wayland-utilities",
+    srcs = [
+        "desktop//wayland-utilities:all",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential Wayland utilities
+filegroup(
+    name = "wayland-utilities-essential",
+    srcs = [
+        "desktop//wayland-utilities:essential",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+
+
+# i3 complete desktop
+filegroup(
+    name = "i3-complete",
+    srcs = [
+        "desktop//i3:i3-desktop",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Sway complete desktop with utilities
+filegroup(
+    name = "sway-complete",
+    srcs = [
+        "desktop//sway:sway-desktop",
+        "desktop//wayland-utilities:sway-companions",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Hyprland complete desktop with utilities
+filegroup(
+    name = "hyprland-complete",
+    srcs = [
+        "desktop//hyprland:hyprland-desktop",
+        "desktop//wayland-utilities:hyprland-companions",
+    ],
+    default_target_platform = "root//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

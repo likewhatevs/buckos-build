@@ -1,0 +1,27 @@
+load("@root//defs:package_defs.bzl", "cargo_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+cargo_package(
+    name = "alacritty",
+    version = "0.13.1",
+    iuse = ["X", "wayland"],
+    use_configure = {
+        "-X": "--without-x",
+        "-wayland": "--disable-wayland",
+        "X": "--with-x",
+        "wayland": "--enable-wayland",
+    },
+    src_uri = "https://github.com/alacritty/alacritty/archive/refs/tags/v0.13.1.tar.gz",
+    sha256 = "38a42e23e1e6faaa9e300347df3f7b58b6182908a701517aac6e296fbdf37451",
+    signature_required = False,
+    description = "A cross-platform, GPU-accelerated terminal emulator",
+    homepage = "https://alacritty.org/",
+    license = "Apache-2.0",
+    cargo_args = [],
+    deps = [
+        "system//libs/font/freetype:freetype",
+        "system//libs/font/fontconfig:fontconfig",
+        "dev-libs//text/expat:expat",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,50 @@
+# Boot loader packages
+filegroup(
+    name = "all-bootloaders",
+    srcs = [
+        "boot//grub:grub",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# EFI bootloaders
+filegroup(
+    name = "efi-bootloaders",
+    srcs = [
+        "boot//grub:grub",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# BIOS bootloaders
+filegroup(
+    name = "bios-bootloaders",
+    srcs = [
+        "boot//grub:grub",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Cloud Hypervisor firmware
+filegroup(
+    name = "cloud-hypervisor-firmware",
+    srcs = [
+        "boot//rust-hypervisor-firmware:rust-hypervisor-firmware",
+        "boot//edk2-cloudhv:edk2-cloudhv",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Cloud Hypervisor boot scripts
+filegroup(
+    name = "cloud-hypervisor-boot",
+    srcs = [
+        "boot//cloud-hypervisor-boot:all",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

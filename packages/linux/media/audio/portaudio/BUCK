@@ -1,0 +1,77 @@
+# =============================================================================
+# PortAudio - Portable cross-platform audio I/O library
+# =============================================================================
+#
+# PortAudio is a free, cross-platform, open-source, audio I/O library.
+# It lets you write simple audio programs in C or C++ that will compile and run
+# on many platforms including Windows, Macintosh OS X, and Unix (OSS/ALSA).
+# It is intended to promote the exchange of audio software between developers on
+# different platforms.
+#
+# Key features:
+# - Cross-platform audio I/O API
+# - Support for multiple audio APIs on each platform:
+#   * Linux: ALSA, OSS, JACK
+#   * Windows: MME, DirectSound, WASAPI, WDMKS
+#   * Mac: CoreAudio
+# - Callback-based and blocking I/O modes
+# - Sample format conversion
+# - Channel mapping
+# - Low latency audio streaming
+# - Multiple simultaneous streams
+# - Easy to use API
+#
+# PortAudio provides a uniform application programming interface (API) across all
+# supported platforms. You can think of PortAudio as a wrapper that converts calls
+# to the PortAudio API into calls to platform-specific native audio APIs.
+#
+# =============================================================================
+
+load("@root//defs:package_defs.bzl", "cmake_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+cmake_package(
+    name = "portaudio",
+    version = "19.7.0",
+    src_uri = "https://github.com/PortAudio/portaudio/archive/refs/tags/v19.7.0.tar.gz",
+    sha256 = "5af29ba58bbdbb7bbcefaaecc77ec8fc413f0db6f4c4e286c40c3e1b83174fa0",
+    signature_required = False,
+    description = "Portable cross-platform audio I/O library",
+    homepage = "http://www.portaudio.com/",
+    license = "MIT",
+    iuse = [
+        "alsa",
+        "cxx",
+        "debug",
+        "examples",
+        "jack",
+        "oss",
+        "static-libs",
+    ],
+    use_defaults = ["alsa"],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DPA_BUILD_SHARED=ON",
+    ],
+    use_cmake = {
+        "-alsa": "-DPA_USE_ALSA=OFF",
+        "-cxx": "-DENABLE_CXX=OFF",
+        "-debug": "-DCMAKE_BUILD_TYPE=Release",
+        "-examples": "-DPA_BUILD_EXAMPLES=OFF",
+        "-jack": "-DPA_USE_JACK=OFF",
+        "-oss": "-DENABLE_OSS=OFF",
+        "-static-libs": "-DPA_BUILD_STATIC=OFF",
+        "alsa": "-DPA_USE_ALSA=ON",
+        "cxx": "-DENABLE_CXX=ON",
+        "debug": "-DCMAKE_BUILD_TYPE=Debug",
+        "examples": "-DPA_BUILD_EXAMPLES=ON",
+        "jack": "-DPA_USE_JACK=ON",
+        "oss": "-DENABLE_OSS=ON",
+        "static-libs": "-DPA_BUILD_STATIC=ON",
+    },
+    use_deps = {
+        "alsa": ["audio//daemons/alsa-lib:alsa-lib"],
+    },
+    deps = [],
+    visibility = ["PUBLIC"],
+)

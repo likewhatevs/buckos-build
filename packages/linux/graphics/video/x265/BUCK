@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# x265 - Free H.265/HEVC encoder
+
+cmake_package(
+    name = "x265",
+    version = "3.6",
+    iuse = [
+        "10bit",
+        "12bit",
+        "cpu_flags_ppc_vsx2",
+        "numa",
+        "vmaf",
+    ],
+    use_cmake = {
+        "-10bit": "-DENABLE_10BIT=OFF",
+        "-12bit": "-DENABLE_12BIT=OFF",
+        "-cpu_flags_ppc_vsx2": "-DENABLE_CPU_FLAGS_PPC_VSX2=OFF",
+        "-numa": "-DENABLE_NUMA=OFF",
+        "-vmaf": "-DENABLE_VMAF=OFF",
+        "10bit": "-DENABLE_10BIT=ON",
+        "12bit": "-DENABLE_12BIT=ON",
+        "cpu_flags_ppc_vsx2": "-DENABLE_CPU_FLAGS_PPC_VSX2=ON",
+        "numa": "-DENABLE_NUMA=ON",
+        "vmaf": "-DENABLE_VMAF=ON",
+    },
+    src_uri = "https://bitbucket.org/multicoreware/x265_git/downloads/x265_3.6.tar.gz",
+    sha256 = "663531f341c5389f460d730e62e10a4fcca3428ca2ca109693867bc5fe2e2807",
+    signature_required = False,
+    description = "Free library for encoding H265/HEVC video streams",
+    homepage = "https://www.x265.org/",
+    license = "GPL-2.0-or-later",
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DENABLE_SHARED=ON",
+        "-DENABLE_PIC=ON",
+        "-DENABLE_CLI=OFF",
+        "-DHIGH_BIT_DEPTH=ON",
+        "-DENABLE_HDR10_PLUS=ON",
+    ],
+    deps = [],
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)

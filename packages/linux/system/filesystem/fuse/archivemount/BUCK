@@ -1,0 +1,33 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "archivemount-src",
+    src_uri = "https://github.com/cybernoid/archivemount/archive/refs/heads/master.tar.gz",
+    sha256 = "01bc88bf1c345f8f626f67a3131bac33b94373884ee15865c980ea3f73f9f070",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "archivemount",
+    source = ":archivemount-src",
+    version = "0.9.1",
+    description = "FUSE filesystem for mounting archive files (tar, zip, etc.)",
+    homepage = "https://www.cybernoia.de/software/archivemount.html",
+    license = "LGPL-2.0",
+    configure_args = [],
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    deps = [
+        "system//filesystem/fuse/fuse3:fuse3",
+        "system//libs/compression/libarchive:libarchive",
+    ],
+    visibility = ["PUBLIC"],
+)

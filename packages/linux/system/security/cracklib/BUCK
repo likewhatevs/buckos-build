@@ -1,0 +1,48 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# cracklib - Password checking library
+download_source(
+    name = "cracklib-src",
+    src_uri = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-2.10.3.tar.xz",
+    sha256 = "1d1b83676b5673051b9373e1ca0db81c1fa88faf9a195a3c1af984fd9c250d66",
+    signature_sha256 = "cb1da630d22e69c91f0684d2f97dbdcaf50031c8a065cd9ce3a02dc2d2288069",
+    signature_required=False,
+)
+
+autotools_package(
+    name = "cracklib",
+    # GitHub release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    source = ":cracklib-src",
+    iuse = [
+        "nls",
+        "python",
+        "static-libs",
+        "zlib",
+    ],
+    use_configure = {
+        "-nls": "--disable-nls",
+        "-python": "--disable-python",
+        "-static-libs": "--disable-static",
+        "-zlib": "--without-zlib",
+        "nls": "--enable-nls",
+        "python": "--enable-python",
+        "static-libs": "--enable-static",
+        "zlib": "--with-zlib",
+    },
+    version = "2.10.3",
+    description = "Library for enforcing strong passwords",
+    homepage = "https://github.com/cracklib/cracklib",
+    license = "LGPL-2.1",
+    configure_args = [
+        "--prefix=/usr",
+        "--with-default-dict=/usr/share/cracklib/pw_dict",
+        "--disable-static",
+    ],
+    deps = [
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,14 @@
+load("@root//defs:package_defs.bzl", "python_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+python_package(
+    name = "flawfinder",
+    version = "2.0.19",
+    src_uri = "https://github.com/david-a-wheeler/flawfinder/archive/refs/tags/2.0.19.tar.gz",
+    sha256 = "33d1d6f3f60516ef41c1d4688e7fb1a1fad8f2cd58a3521790da8cb56a76804b",
+    signature_required = False,
+    description = "Examines C/C++ source code for security flaws",
+    homepage = "https://dwheeler.com/flawfinder/",
+    license = "GPL-2+",
+    visibility = ["PUBLIC"],
+)

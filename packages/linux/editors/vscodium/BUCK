@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "vscodium-src",
+    src_uri = "https://github.com/VSCodium/vscodium/releases/download/1.106.37943/VSCodium-linux-x64-1.106.37943.tar.gz",
+    sha256 = "3fbd5a7885626aa4a83297e0b4a3d902c725b1674122f33d0ef02863c726e4ec",
+    signature_required = False,
+)
+
+binary_package(
+    name = "vscodium",
+    srcs = [":vscodium-src"],
+    version = "1.106.37943",
+    visibility = ["PUBLIC"],
+)

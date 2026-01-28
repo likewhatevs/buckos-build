@@ -1,0 +1,54 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "cairo",
+    version = "1.18.2",
+    src_uri = "https://www.cairographics.org/releases/cairo-1.18.2.tar.xz",
+    sha256 = "a62b9bb42425e844cc3d6ddde043ff39dbabedd1542eba57a2eb79f85889d45a",
+    signature_required = False,
+    description = "2D graphics library with support for multiple output devices",
+    homepage = "https://www.cairographics.org/",
+    license = "LGPL-2.1-or-later",
+    iuse = ["static-libs", "X", "xcb", "png", "svg", "pdf", "glib", "opengl"],
+    use_defaults = ["X", "xcb", "png", "svg", "pdf", "glib"],
+    use_configure = {
+        "static-libs": "-Ddefault_library=static",
+        "-static-libs": "-Ddefault_library=shared",
+        "X": "-Dxlib=enabled",
+        "-X": "-Dxlib=disabled",
+        "xcb": "-Dxcb=enabled",
+        "-xcb": "-Dxcb=disabled",
+        "png": "-Dpng=enabled",
+        "-png": "-Dpng=disabled",
+        "svg": "-Dsvg=enabled",
+        "-svg": "-Dsvg=disabled",
+        "pdf": "-Dpdf=enabled",
+        "-pdf": "-Dpdf=disabled",
+        "glib": "-Dglib=enabled",
+        "-glib": "-Dglib=disabled",
+        "opengl": "-Dgl-backend=gl",
+        "-opengl": "-Dgl-backend=disabled",
+    },
+    use_deps = {
+        "png": ["system//libs/image/libpng:libpng"],
+        "glib": ["dev-libs//glib:glib"],
+        "opengl": ["desktop//mesa:mesa"],
+    },
+    pre_configure = """
+mkdir -p build
+cd build
+# USE flags: static-libs, X, xcb, png, svg, pdf, glib, opengl
+meson setup .. --prefix=/usr \
+    -Dfreetype=enabled \
+    -Dfontconfig=enabled \
+    $CONFIGURE_ARGS
+""",
+    deps = [
+        "system//libs/graphics/pixman:pixman",
+        "system//libs/font/freetype:freetype",
+        "system//libs/font/fontconfig:fontconfig",
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

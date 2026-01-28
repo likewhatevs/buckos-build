@@ -1,0 +1,27 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# Corto - Library for compression and decompression of meshes and point clouds
+
+cmake_package(
+    name = "corto",
+    version = "2025.07",
+    src_uri = "https://mirror.buckos.org/c/corto-v2025.07.tar.gz",
+    sha256 = "8d0c9d80cd8796e733c889c453d95fd99c2bb0b9f2636d7c9108c81d0f1bfe5f",
+    description = "Library for compression and decompression of meshes and point clouds",
+    homepage = "https://github.com/cnr-isti-vclab/corto",
+    license = "LGPL-3.0",
+    iuse = ["codec-unity", "exe"],
+    use_defaults = [],
+    deps = [],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_STANDARD=11",
+    ],
+    use_cmake = {
+        "codec-unity": "-DBUILD_CORTO_CODEC_UNITY=ON",
+        "-codec-unity": "-DBUILD_CORTO_CODEC_UNITY=OFF",
+        "exe": "-DBUILD_CORTO_EXE=ON",
+        "-exe": "-DBUILD_CORTO_EXE=OFF",
+    },
+    visibility = ["PUBLIC"],
+)

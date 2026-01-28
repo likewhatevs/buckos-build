@@ -1,0 +1,144 @@
+load("@root//defs:package_defs.bzl", "ebuild_package")
+
+# System glibc package
+# This repackages the cross-glibc from the bootstrap toolchain for the final system.
+# The cross-glibc is now built with --prefix=/usr so it can be copied directly.
+#
+# When use_host_toolchain = true, we use the host system's glibc instead.
+
+_use_host_toolchain = read_config("buckos", "use_host_toolchain", "false").lower() in ["true", "1", "yes"]
+
+# When using host toolchain, provide a no-op target since we use system glibc
+genrule(
+    name = "glibc",
+    out = "glibc-host-passthrough",
+    cmd = "echo 'Using host system glibc' > $OUT",
+    visibility = ["PUBLIC"],
+) if _use_host_toolchain else ebuild_package(
+    source = "toolchains//bootstrap:glibc-src",
+    iuse = [
+        "audit",
+        "caps",
+        "cet",
+        "clang",
+        "compile-locales",
+        "custom-cflags",
+        "gd",
+        "hash-sysv-compat",
+        "headers-only",
+        "multiarch",
+        "multilib",
+        "multilib-bootstrap",
+        "nscd",
+        "perl",
+        "profile",
+        "selinux",
+        "sframe",
+        "ssp",
+        "stack-realign",
+        "static-libs",
+        "suid",
+        "systemd",
+        "systemtap",
+        "vanilla",
+    ],
+    use_configure = {
+        "-audit": "--disable-audit",
+        "-caps": "--disable-libcap",
+        "-cet": "--disable-cet",
+        "-clang": "--disable-clang",
+        "-compile-locales": "--disable-compile-locales",
+        "-custom-cflags": "--disable-custom-cflags",
+        "-gd": "--disable-gd",
+        "-hash-sysv-compat": "--disable-hash-sysv-compat",
+        "-headers-only": "--disable-headers-only",
+        "-multiarch": "--disable-multiarch",
+        "-multilib": "--disable-multilib",
+        "-multilib-bootstrap": "--disable-multilib-bootstrap",
+        "-nscd": "--disable-nscd",
+        "-perl": "--disable-perl",
+        "-profile": "--disable-profile",
+        "-selinux": "--disable-selinux",
+        "-sframe": "--disable-sframe",
+        "-ssp": "--disable-ssp",
+        "-stack-realign": "--disable-stack-realign",
+        "-static-libs": "--disable-static",
+        "-suid": "--disable-suid",
+        "-systemd": "--disable-systemd",
+        "-systemtap": "--disable-systemtap",
+        "-vanilla": "--disable-vanilla",
+        "audit": "--enable-audit",
+        "caps": "--enable-libcap",
+        "cet": "--enable-cet",
+        "clang": "--enable-clang",
+        "compile-locales": "--enable-compile-locales",
+        "custom-cflags": "--enable-custom-cflags",
+        "gd": "--enable-gd",
+        "hash-sysv-compat": "--enable-hash-sysv-compat",
+        "headers-only": "--enable-headers-only",
+        "multiarch": "--enable-multiarch",
+        "multilib": "--enable-multilib",
+        "multilib-bootstrap": "--enable-multilib-bootstrap",
+        "nscd": "--enable-nscd",
+        "perl": "--enable-perl",
+        "profile": "--enable-profile",
+        "selinux": "--enable-selinux",
+        "sframe": "--enable-sframe",
+        "ssp": "--enable-ssp",
+        "stack-realign": "--enable-stack-realign",
+        "static-libs": "--enable-static",
+        "suid": "--enable-suid",
+        "systemd": "--enable-systemd",
+        "systemtap": "--enable-systemtap",
+        "vanilla": "--enable-vanilla",
+    },
+    name = "glibc",
+    version = "2.42",
+    category = "core",
+    slot = "0",
+    description = "GNU C Library (glibc) - the standard C library for GNU/Linux systems",
+    homepage = "https://www.gnu.org/software/libc/",
+    license = "LGPL-2.1+ GPL-2+",
+
+    # Don't use bootstrap toolchain for this - it just copies files
+    use_bootstrap = False,
+
+    src_configure = "true",
+    src_compile = "true",
+
+    src_install = """
+# Copy glibc from cross-glibc build output
+# The cross-glibc is built with --prefix=/usr so paths are already correct
+
+# TOOLCHAIN_ROOT is set by the build system from bdepend directories
+CROSS_GLIBC="${TOOLCHAIN_ROOT%%:*}"  # Get first path from colon-separated list
+
+# Convert relative path to absolute
+if [[ "$CROSS_GLIBC" != /* ]]; then
+    PROJECT_ROOT="${S%/buck-out/*}"
+    CROSS_GLIBC="$PROJECT_ROOT/$CROSS_GLIBC"
+fi
+
+if [ -z "$CROSS_GLIBC" ] || [ ! -d "$CROSS_GLIBC" ]; then
+    echo "ERROR: Could not find cross-glibc." >&2
+    echo "  TOOLCHAIN_ROOT=$TOOLCHAIN_ROOT" >&2
+    echo "  CROSS_GLIBC=$CROSS_GLIBC" >&2
+    echo "  S=$S" >&2
+    exit 1
+fi
+
+echo "Copying glibc from: $CROSS_GLIBC"
+
+# Copy the entire structure - glibc is now built with --prefix=/usr
+# so usr/, lib64/, and etc/ directories exist with correct paths
+cp -a "$CROSS_GLIBC"/* "$DESTDIR/" 2>/dev/null || true
+
+echo "glibc installation complete"
+ls -la "$DESTDIR/usr/lib64/"*.so* 2>/dev/null | head -10 || ls -la "$DESTDIR/lib64/"*.so* 2>/dev/null | head -10 || true
+""",
+
+    # Depend on cross-glibc from bootstrap to get the pre-built glibc
+    bdepend = ["toolchains//bootstrap:cross-glibc"],
+    depend = [],
+    visibility = ["PUBLIC"],
+)

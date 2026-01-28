@@ -1,0 +1,95 @@
+load("@root//defs:package_defs.bzl", "download_source", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# PulseAudio - A sound server for POSIX and Win32 systems
+# USE flags: alsa, bluetooth, dbus, gstreamer, jack, X, gtk, ssl, systemd, doc
+
+meson_package(
+    name = "pulseaudio",
+    version = "17.0",
+    src_uri = "https://freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz",
+    sha256 = "053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5",
+    signature_required = False,
+    description = "A sound server for POSIX and Win32 systems",
+    homepage = "https://www.freedesktop.org/wiki/Software/PulseAudio/",
+    license = "LGPL-2.1",
+
+    # USE flags this package supports
+    iuse = [
+        "alsa",
+        "bluetooth",
+        "dbus",
+        "gstreamer",
+        "jack",
+        "X",
+        "gtk",
+        "ssl",
+        "systemd",
+        "doc",
+        "webrtc-aec",
+        "fftw",
+        "orc",
+        "soxr",
+        "speex",
+    ],
+
+    # Default enabled flags
+    use_defaults = ["alsa", "dbus"],
+
+    # Conditional dependencies based on USE flags
+    use_deps = {
+        "alsa": ["audio//daemons/alsa-lib:alsa-lib"],
+        "bluetooth": ["system//bluetooth/bluez:bluez"],
+        "dbus": ["system//libs/ipc/dbus:dbus"],
+        "gstreamer": ["graphics//video/gstreamer:gstreamer"],
+        "jack": ["audio//daemons/jack:jack"],
+        "X": ["desktop//xorg:xorg-libs"],
+        "gtk": ["desktop//gtk:gtk3"],
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "systemd": ["system//init/systemd:systemd"],
+    },
+
+    # Meson options based on USE flags
+    # Format: {"flag": "meson_option"} - will generate -Dmeson_option=enabled/disabled
+    use_options = {
+        "alsa": "alsa",
+        "bluetooth": "bluez5",
+        "dbus": "dbus",
+        "gstreamer": "gstreamer",
+        "jack": "jack",
+        "X": "x11",
+        "gtk": "gtk",
+        "ssl": "openssl",
+        "systemd": "systemd",
+        "webrtc-aec": "webrtc-aec",
+        "fftw": "fftw",
+        "orc": "orc",
+        "soxr": "soxr",
+        "speex": "speex-aec",
+        "doc": "man",
+    },
+
+    # Base Meson arguments (always applied)
+    meson_args = [
+        "-Ddaemon=true",
+        "-Dclient=true",
+        "-Ddoxygen=false",
+        "-Dgcov=false",
+        "-Dtests=false",
+        "-Ddatabase=simple",
+        "-Dudev=auto",
+        "-Dhal-compat=false",
+        "-Dasyncns=auto",
+        "-Davahi=auto",
+        "-Dbluez5-gstreamer=auto",
+        "-Dbluez5-native-headset=false",
+        "-Dbluez5-ofono-headset=false",
+        "-Dlirc=auto",
+    ],
+
+    # Base dependencies (always required)
+    deps = [
+    ],
+
+    visibility = ["PUBLIC"],
+)

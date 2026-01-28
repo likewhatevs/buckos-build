@@ -1,0 +1,54 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "cifs-utils-src",
+    src_uri = "https://download.samba.org/pub/linux-cifs/cifs-utils/cifs-utils-7.0.tar.bz2",
+    sha256 = "0defaab85bd3ea46ffc45ab41fb0d0ad54d05ae2cfaa7e503de86d4f12bc8161",
+    signature_sha256 = "d05dcc274b3c637dfc7a2636510e7ac8a2c73a22e36a9b6d63d353728617f92a",
+)
+
+autotools_package(
+    name = "cifs-utils",
+    source = ":cifs-utils-src",
+    iuse = [
+        "acl",
+        "ads",
+        "caps",
+        "creds",
+        "pam",
+        "python",
+        "systemd",
+    ],
+    use_configure = {
+        "-acl": "--disable-acl",
+        "-ads": "--disable-ads",
+        "-caps": "--disable-libcap",
+        "-creds": "--disable-creds",
+        "-pam": "--disable-pam",
+        "-python": "--disable-python",
+        "-systemd": "--disable-systemd",
+        "acl": "--enable-acl",
+        "ads": "--enable-ads",
+        "caps": "--enable-libcap",
+        "creds": "--enable-creds",
+        "pam": "--enable-pam",
+        "python": "--enable-python",
+        "systemd": "--enable-systemd",
+    },
+    version = "7.0",
+    description = "CIFS/SMB filesystem utilities (mount.cifs, cifs.upcall, etc.)",
+    homepage = "https://wiki.samba.org/index.php/LinuxCIFS_utils",
+    license = "GPL-3.0",
+    configure_args = [
+        "--disable-pam",
+        "--disable-systemd",
+        "--without-libcap-ng",
+        "--disable-man",
+    ],
+    deps = [
+        "core//util-linux:util-linux",
+        "system//libs/talloc:talloc",
+    ],
+    visibility = ["PUBLIC"],
+)

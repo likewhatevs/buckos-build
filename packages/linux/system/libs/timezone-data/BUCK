@@ -1,0 +1,64 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# timezone-data - Timezone database and utilities
+# NOTE: tzdata tarball extracts files directly (no subdirectory)
+# Use ebuild_package for better control over the build process
+download_source(
+    name = "timezone-data-src",
+    src_uri = "https://data.iana.org/time-zones/releases/tzdata2024a.tar.gz",
+    sha256 = "0d0434459acbd2059a7a8da1f3304a84a86591f6ed69c6248fffa502b6edffe3",
+    signature_sha256 = "f64725f9f65419e7b009e3b95b75ea9516382d0be64aef63d78654d9c569ed0d",
+    signature_required = False,
+    # tzdata extracts files directly without a subdirectory
+    strip_components = 0,
+)
+
+# timezone-data is just data files - install them directly
+ebuild_package(
+    name = "timezone-data",
+    source = ":timezone-data-src",
+    iuse = ["leaps-timezone", "nls", "zic-slim"],
+    use_configure = {
+        "-leaps-timezone": "--disable-leaps-timezone",
+        "-nls": "--disable-nls",
+        "-zic-slim": "--disable-zic-slim",
+        "leaps-timezone": "--enable-leaps-timezone",
+        "nls": "--enable-nls",
+        "zic-slim": "--enable-zic-slim",
+    },
+    version = "2024a",
+    description = "Timezone database and utilities",
+    homepage = "https://www.iana.org/time-zones",
+    license = "public-domain",
+    src_configure = "true",
+    src_compile = "true",
+    src_install = """
+# Create target directory
+install -dm755 "$DESTDIR/usr/share/zoneinfo"
+
+# Debug: Show source location
+echo "S=$S"
+echo "WORKDIR=$WORKDIR"
+ls -la "$S" || echo "S not found"
+ls -la "$WORKDIR" || echo "WORKDIR not found"
+
+# tzdata files are directly in the extraction directory
+# Copy all timezone data files (text files defining timezones)
+cd "$S"
+for f in africa antarctica asia australasia europe northamerica southamerica etcetera backward factory; do
+    if [ -f "$f" ]; then
+        install -Dm644 "$f" "$DESTDIR/usr/share/zoneinfo/source/$f"
+    fi
+done
+
+# Also copy other important files
+for f in iso3166.tab zone.tab zone1970.tab leap-seconds.list leapseconds; do
+    if [ -f "$f" ]; then
+        install -Dm644 "$f" "$DESTDIR/usr/share/zoneinfo/$f"
+    fi
+done
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

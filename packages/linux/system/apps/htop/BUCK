@@ -1,0 +1,68 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# htop - Interactive process viewer
+# USE flags: unicode, hwloc, sensors, caps
+
+autotools_package(
+    name = "htop",
+    version = "3.4.1",
+    src_uri = "https://github.com/htop-dev/htop/releases/download/3.4.1/htop-3.4.1.tar.xz",
+    sha256 = "904f7d4580fc11cffc7e0f06895a4789e0c1c054435752c151e812fead9f6220",
+    signature_required = False,
+    description = "Interactive process viewer for Unix systems",
+    homepage = "https://htop.dev",
+    license = "GPL-2",
+    # Fix NCURSES_BOOL conflicts with C23 bool type
+    env = {"CFLAGS": "-std=gnu17 -O2"},
+    iuse = [
+        "caps",
+        "debug",
+        "delayacct",
+        "hwloc",
+        "llvm-libunwind",
+        "lm-sensors",
+        "openvz",
+        "sensors",
+        "unicode",
+        "unwind",
+        "vserver",
+    ],
+    use_defaults = ["unicode"],
+    use_deps = {
+        "hwloc": ["system//hardware/hwloc:hwloc"],
+        "caps": ["system//libs/ipc/libcap:libcap"],
+    },
+    use_configure = {
+        "-caps": "--disable-capabilities",
+        "-debug": "--disable-debug",
+        "-delayacct": "--disable-delayacct",
+        "-hwloc": "--disable-hwloc",
+        "-llvm-libunwind": "--disable-llvm-libunwind",
+        "-lm-sensors": "--disable-lm-sensors",
+        "-openvz": "--disable-openvz",
+        "-sensors": "--disable-sensors",
+        "-unicode": "--disable-unicode",
+        "-unwind": "--disable-unwind",
+        "-vserver": "--disable-vserver",
+        "caps": "--enable-capabilities",
+        "debug": "--enable-debug",
+        "delayacct": "--enable-delayacct",
+        "hwloc": "--enable-hwloc",
+        "llvm-libunwind": "--enable-llvm-libunwind",
+        "lm-sensors": "--enable-lm-sensors",
+        "openvz": "--enable-openvz",
+        "sensors": "--enable-sensors",
+        "unicode": "--enable-unicode",
+        "unwind": "--enable-unwind",
+        "vserver": "--enable-vserver",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+    ],
+    deps = [
+        "core//ncurses:ncurses",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,13 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "duo_log_sync",
+    version = "2.4.1",
+    src_uri = "https://mirror.buckos.org/d/duo_log_sync-2.4.1.tar.gz",
+    sha256 = "16eb6d24a777a6bcca5152be2732d0b672b6ae10acb309cd2a9bb03e5e35abe2",
+    deps = [
+        "dev-libs//python/pyyaml:pyyaml",
+        "dev-libs//python/cerberus:cerberus",
+        "dev-libs//python/six:six",
+    ],
+)

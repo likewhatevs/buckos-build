@@ -1,0 +1,30 @@
+# Audio players and music clients
+
+filegroup(
+    name = "console-players",
+    srcs = [
+        "audio//players/cmus:cmus",
+        "audio//players/moc:moc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "daemon-players",
+    srcs = [
+        "audio//players/mpd:mpd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-players",
+    srcs = [
+        ":console-players",
+        ":daemon-players",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

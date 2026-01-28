@@ -1,0 +1,345 @@
+# Editor package aliases
+
+# =============================================================================
+# Editor aliases - Map subdirectory targets to this package
+# =============================================================================
+
+alias(
+    name = "vim",
+    actual = "editors//vim:vim",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "vim-minimal",
+    actual = "editors//vim-minimal:vim-minimal",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "neovim",
+    actual = "editors//neovim:neovim",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "emacs",
+    actual = "editors//emacs:emacs",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "emacs-nox",
+    actual = "editors//emacs-nox:emacs-nox",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "vscodium",
+    actual = "editors//vscodium:vscodium",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "ed",
+    actual = "editors//ed:ed",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Text utility aliases
+# =============================================================================
+
+alias(
+    name = "sed",
+    actual = "editors//sed:sed",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "gawk",
+    actual = "editors//gawk:gawk",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "grep",
+    actual = "editors//grep:grep",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "diffutils",
+    actual = "editors//diffutils:diffutils",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "patch",
+    actual = "editors//patch:patch",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "jq",
+    actual = "editors//jq:jq",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "yq",
+    actual = "editors//yq:yq",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "xmlstarlet",
+    actual = "editors//xmlstarlet:xmlstarlet",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "ripgrep",
+    actual = "editors//ripgrep:ripgrep",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "bat",
+    actual = "editors//bat:bat",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "fzf",
+    actual = "editors//fzf:fzf",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "pandoc",
+    actual = "editors//pandoc:pandoc",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "entr",
+    actual = "editors//entr:entr",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "delta",
+    actual = "editors//delta:delta",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "sd",
+    actual = "editors//sd:sd",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "hunspell",
+    actual = "editors//hunspell:hunspell",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "aspell",
+    actual = "editors//aspell:aspell",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "enchant",
+    actual = "editors//enchant:enchant",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Editor filegroups
+# =============================================================================
+
+filegroup(
+    name = "all-editors",
+    srcs = [
+        ":vim",
+        ":vim-minimal",
+        ":neovim",
+        ":emacs",
+        ":emacs-nox",
+        ":vscodium",
+        ":ed",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "gui-editors",
+    srcs = [
+        ":emacs",
+        ":vscodium",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "vim-editors",
+    srcs = [
+        ":vim",
+        ":vim-minimal",
+        ":neovim",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "minimal-editors",
+    srcs = [
+        ":vim-minimal",
+        ":emacs-nox",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Text utility filegroups
+# =============================================================================
+
+filegroup(
+    name = "all-text-utils",
+    srcs = [
+        ":sed",
+        ":gawk",
+        ":grep",
+        ":diffutils",
+        ":patch",
+        ":jq",
+        ":yq",
+        ":xmlstarlet",
+        ":ripgrep",
+        ":bat",
+        ":fzf",
+        ":pandoc",
+        ":entr",
+        ":delta",
+        ":sd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "gnu-text-utils",
+    srcs = [
+        ":sed",
+        ":gawk",
+        ":grep",
+        ":diffutils",
+        ":patch",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "data-processors",
+    srcs = [
+        ":jq",
+        ":yq",
+        ":xmlstarlet",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "modern-text-utils",
+    srcs = [
+        ":ripgrep",
+        ":bat",
+        ":delta",
+        ":sd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "search-tools",
+    srcs = [
+        ":grep",
+        ":ripgrep",
+        ":fzf",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "diff-tools",
+    srcs = [
+        ":diffutils",
+        ":patch",
+        ":delta",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "stream-editors",
+    srcs = [
+        ":sed",
+        ":gawk",
+        ":sd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "document-converters",
+    srcs = [
+        ":pandoc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "file-watchers",
+    srcs = [
+        ":entr",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "spell-check",
+    srcs = [
+        ":hunspell",
+        ":aspell",
+        ":enchant",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-editors-and-utils",
+    srcs = [
+        ":all-editors",
+        ":all-text-utils",
+        ":spell-check",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

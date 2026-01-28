@@ -1,0 +1,106 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# links - Text and graphics mode web browser
+#
+# USE flags:
+#   ssl        - Enable SSL/TLS support with OpenSSL
+#   zlib       - Enable zlib compression
+#   bzip2      - Enable bzip2 compression
+#   lzma       - Enable LZMA compression
+#   X          - Enable X11 graphics support
+#   fb         - Enable framebuffer graphics support
+#   javascript - Enable JavaScript support
+
+autotools_package(
+    name = "links",
+    version = "2.29",
+    src_uri = "https://links.twibright.com/download/links-2.29.tar.bz2",
+    sha256 = "22aa96c0b38e1a6f8f7ed9d7a4167a47fc37246097759ef6059ecf8f9ead7998",
+    signature_required = False,
+    description = "Text and graphics mode web browser with JavaScript support",
+    homepage = "https://links.twibright.com/",
+    license = "GPL-2.0",
+    iuse = [
+        "X",
+        "avif",
+        "brotli",
+        "bzip2",
+        "fb",
+        "fbcon",
+        "freetype",
+        "gpm",
+        "javascript",
+        "jpeg",
+        "libevent",
+        "livecd",
+        "lzip",
+        "lzma",
+        "selinux",
+        "ssl",
+        "suid",
+        "tiff",
+        "webp",
+        "zlib",
+        "zstd",
+    ],
+    use_defaults = ["ssl", "zlib", "bzip2", "lzma", "X", "fb", "javascript"],
+    deps = [
+        "core//ncurses:ncurses",
+    ],
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "zlib": ["core//zlib:zlib"],
+        "bzip2": ["system//libs/compression/bzip2:bzip2"],
+        "lzma": ["system//libs/compression/xz:xz"],
+        "X": ["system//libs/image/libpng:libpng", "system//libs/image/libjpeg-turbo:libjpeg-turbo"],
+    },
+    configure_args = [
+        "--enable-graphics",
+    ],
+    use_configure = {
+        "-X": "--without-x",
+        "-avif": "--disable-avif",
+        "-brotli": "--without-brotli",
+        "-bzip2": "--without-bzip2",
+        "-fb": "--without-fb",
+        "-fbcon": "--disable-fbcon",
+        "-freetype": "--disable-freetype",
+        "-gpm": "--disable-gpm",
+        "-javascript": "--disable-javascript",
+        "-jpeg": "--without-jpeg",
+        "-libevent": "--disable-libevent",
+        "-livecd": "--disable-livecd",
+        "-lzip": "--disable-lzip",
+        "-lzma": "--without-lzma",
+        "-selinux": "--disable-selinux",
+        "-ssl": "--without-ssl",
+        "-suid": "--disable-suid",
+        "-tiff": "--without-tiff",
+        "-webp": "--without-webp",
+        "-zlib": "--without-zlib",
+        "-zstd": "--without-zstd",
+        "X": "--with-x",
+        "avif": "--enable-avif",
+        "brotli": "--with-brotli",
+        "bzip2": "--with-bzip2",
+        "fb": "--with-fb",
+        "fbcon": "--enable-fbcon",
+        "freetype": "--enable-freetype",
+        "gpm": "--enable-gpm",
+        "javascript": "--enable-javascript",
+        "jpeg": "--with-jpeg",
+        "libevent": "--enable-libevent",
+        "livecd": "--enable-livecd",
+        "lzip": "--enable-lzip",
+        "lzma": "--with-lzma",
+        "selinux": "--enable-selinux",
+        "ssl": "--with-ssl",
+        "suid": "--enable-suid",
+        "tiff": "--with-tiff",
+        "webp": "--with-webp",
+        "zlib": "--with-zlib",
+        "zstd": "--with-zstd",
+    },
+    visibility = ["PUBLIC"],
+)

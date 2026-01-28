@@ -1,0 +1,59 @@
+load("@root//defs:package_defs.bzl", "meson_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# libsecret - GObject library for accessing Secret Service API
+# USE flags: introspection, vala, gtk-doc
+# Default: none
+
+meson_package(
+    name = "libsecret",
+    version = "0.21.4",
+    iuse = [
+        "crypt",
+        "gcrypt",
+        "gnutls",
+        "gtk-doc",
+        "introspection",
+        "pam",
+        "test-rust",
+        "tpm",
+        "vala",
+    ],
+    use_configure = {
+        "-crypt": "--disable-crypt",
+        "-gcrypt": "--without-gcrypt",
+        "-gnutls": "--without-gnutls",
+        "-gtk-doc": "--disable-gtk-doc",
+        "-introspection": "--disable-introspection",
+        "-pam": "--disable-pam",
+        "-test-rust": "--disable-test-rust",
+        "-tpm": "--disable-tpm",
+        "-vala": "--disable-vala",
+        "crypt": "--enable-crypt",
+        "gcrypt": "--with-gcrypt",
+        "gnutls": "--with-gnutls",
+        "gtk-doc": "--enable-gtk-doc",
+        "introspection": "--enable-introspection",
+        "pam": "--enable-pam",
+        "test-rust": "--enable-test-rust",
+        "tpm": "--enable-tpm",
+        "vala": "--enable-vala",
+    },
+    src_uri = "https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.4.tar.xz",
+    sha256 = "163d08d783be6d4ab9a979ceb5a4fecbc1d9660d3c34168c581301cd53912b20",
+    signature_required = False,
+    description = "GObject based library for accessing the Secret Service API",
+    homepage = "https://wiki.gnome.org/Projects/Libsecret",
+    license = "LGPL-2.1+",
+    meson_args = [
+        "-Dmanpage=false",
+        "-Dvapi=false",
+        "-Dgtk_doc=false",
+        "-Dintrospection=false",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+        "dev-libs//libgcrypt:libgcrypt",
+    ],
+    visibility = ["PUBLIC"],
+)

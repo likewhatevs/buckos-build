@@ -1,0 +1,91 @@
+# =============================================================================
+# iptables - Legacy Linux packet filtering administration
+# =============================================================================
+
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "iptables",
+    version = "1.8.10",
+    src_uri = "https://www.netfilter.org/projects/iptables/files/iptables-1.8.10.tar.xz",
+    sha256 = "5cc255c189356e317d070755ce9371eb63a1b783c34498fb8c30264f3cc59c9c",
+    signature_sha256 = "b73295a18ab65070cb5e6c31ec11dcfc13a50b1f67888976cc0b708cd7fc5151",
+    signature_required=False,
+
+    iuse = [
+        "bpf",
+        "connlabel",
+        "conntrack",
+        "ipv6",
+        "netlink",
+        "nfsynproxy",
+        "nftables",
+        "pcap",
+        "static-libs",
+    ],
+    use_defaults = ["ipv6", "bpf", "nfsynproxy"],
+
+
+    use_configure = {
+        "-bpf": "--disable-bpf-compiler",
+        "-connlabel": "--disable-connlabel",
+        "-conntrack": "--disable-conntrack",
+        "-ipv6": "--disable-ipv6",
+        "-netlink": "--disable-netlink",
+        "-nfsynproxy": "--disable-nfsynproxy",
+        "-nftables": "--disable-nftables",
+        "-pcap": "--disable-pcap",
+        "-static-libs": "--disable-static",
+        "bpf": "--enable-bpf-compiler",
+        "connlabel": "--enable-connlabel",
+        "conntrack": "--enable-conntrack",
+        "ipv6": "--enable-ipv6",
+        "netlink": "--enable-netlink",
+        "nfsynproxy": "--enable-nfsynproxy",
+        "nftables": "--enable-nftables",
+        "pcap": "--enable-pcap",
+        "static-libs": "--enable-static",
+    },
+
+    configure_args = [
+        "--prefix=/usr",
+        "--sbindir=/sbin",
+        "--sysconfdir=/etc",
+        "--localstatedir=/var",
+        "--libexecdir=/lib",
+        "--enable-libipq",
+        "--with-xtlibdir=/lib/xtables",
+    ],
+
+    post_install = """
+# Create iptables configuration directories
+mkdir -p "$DESTDIR/etc/iptables"
+mkdir -p "$DESTDIR/var/lib/iptables"
+
+# Create symlinks for legacy compatibility
+mkdir -p "$DESTDIR/usr/sbin"
+for cmd in iptables iptables-save iptables-restore ip6tables ip6tables-save ip6tables-restore; do
+    ln -sf /sbin/xtables-nft-multi "$DESTDIR/usr/sbin/$cmd" 2>/dev/null || true
+done
+
+# Create default empty rules files
+touch "$DESTDIR/etc/iptables/rules.v4"
+touch "$DESTDIR/etc/iptables/rules.v6"
+chmod 600 "$DESTDIR/etc/iptables/rules.v4"
+chmod 600 "$DESTDIR/etc/iptables/rules.v6"
+""",
+
+    deps = [
+        "core//libnl:libnl",
+        "network//libpcap:libpcap",
+        # TODO: Add these libraries when available:
+        # "system//libs/network/libmnl:libmnl",
+        # "system//libs/network/libnftnl:libnftnl",
+    ],
+
+    description = "Linux kernel packet filtering administration tools",
+    homepage = "https://netfilter.org/projects/iptables/",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

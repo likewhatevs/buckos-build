@@ -1,0 +1,46 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# findutils - GNU find utilities
+# USE flags: nls, selinux
+
+autotools_package(
+    name = "findutils",
+    # GNU release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "4.9.0",
+    src_uri = "https://mirrors.kernel.org/gnu/findutils/findutils-4.9.0.tar.xz",
+    sha256 = "a2bfb8c09d436770edc59f50fa483e785b161a3b7b9d547573cb08065fd462fe",
+    signature_sha256 = "924c3719d066eda1b3e47175f8b83e90e9a23f0a639ebe7445621917b283c385",
+    signature_required=False,
+    description = "GNU find, xargs, and locate utilities",
+    homepage = "https://www.gnu.org/software/findutils",
+    license = "GPL-3+",
+    iuse = [
+        "nls",
+        "selinux",
+        "static",
+        "test-full",
+    ],
+    use_defaults = [],
+    use_deps = {
+        "selinux": ["system//security/selinux:selinux"],
+    },
+    use_configure = {
+        "-nls": "--disable-nls",
+        "-selinux": "--without-selinux",
+        "-static": "--disable-static",
+        "-test-full": "--disable-test-full",
+        "nls": "--enable-nls",
+        "selinux": "--with-selinux",
+        "static": "--enable-static",
+        "test-full": "--enable-test-full",
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--localstatedir=/var/lib/locate",
+    ],
+    deps = [],
+    visibility = ["PUBLIC"],
+)

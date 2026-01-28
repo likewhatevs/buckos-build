@@ -1,0 +1,27 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# wayland - Wayland display protocol libraries and scanner tool
+# Following Gentoo's approach: disable dtd_validation to avoid libxml2 runtime dependency
+
+meson_package(
+    name = "wayland",
+    version = "1.23.1",
+    src_uri = "https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.23.1/downloads/wayland-1.23.1.tar.xz",
+    sha256 = "864fb2a8399e2d0ec39d56e9d9b753c093775beadc6022ce81f441929a81e5ed",
+    description = "Wayland display protocol libraries and scanner",
+    homepage = "https://gitlab.freedesktop.org/wayland/wayland",
+    license = "MIT",
+    deps = [
+        "core//libffi:libffi",
+        "core//expat:expat",
+    ],
+    meson_args = [
+        "-Ddocumentation=false",
+        "-Dtests=false",
+        # Disable DTD validation - this removes the libxml2 dependency from wayland-scanner
+        # wayland-scanner is used as a build tool by other packages (Qt6, etc.)
+        # Without this, wayland-scanner would need libxml2.so.2 at runtime
+        "-Ddtd_validation=false",
+    ],
+    visibility = ["PUBLIC"],
+)

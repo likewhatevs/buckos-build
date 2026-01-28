@@ -1,0 +1,52 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "kdenlive-src",
+    src_uri = "https://github.com/KDE/kdenlive/archive/refs/tags/v24.02.0.tar.gz",
+    sha256 = "b810a9ea91b95151fbe8cb078709c5bcf6a2295973f65f20daebc18b64b2636a",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "kdenlive",
+    source = ":kdenlive-src",
+    iuse = ["gles2-only", "semantic-desktop"],
+    use_configure = {
+        "-gles2-only": "--disable-gles2-only",
+        "-semantic-desktop": "--disable-semantic-desktop",
+        "gles2-only": "--enable-gles2-only",
+        "semantic-desktop": "--enable-semantic-desktop",
+    },
+    version = "24.02.0",
+    description = "KDE non-linear video editor",
+    homepage = "https://kdenlive.org/",
+    license = "GPL-3.0-or-later",
+    pre_configure = """
+mkdir -p build
+cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF \
+    -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+    -DRELEASE_BUILD=ON
+""",
+    configure_args = [],
+    make_args = ["-C", "build"],
+    post_install = """
+cd build
+DESTDIR=$OUT make install
+""",
+    deps = [
+        "desktop//kde:kf5",
+        "desktop//qt:qt5",
+        # "dev-libs//mlt:mlt",  # TODO: not packaged yet
+        "graphics//video/ffmpeg:ffmpeg",
+        # "core//frei0r:frei0r",  # TODO: not packaged yet,
+        "graphics//video/v4l-utils:v4l-utils",
+        # "core//rttr:rttr",  # TODO: not packaged yet,
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)

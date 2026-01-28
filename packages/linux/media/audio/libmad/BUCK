@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# MAD - MPEG Audio Decoder
+
+autotools_package(
+    name = "libmad",
+    # SourceForge release tarball includes pre-generated configure script
+    version = "0.15.1b",
+    iuse = ["debug", "static-libs"],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-static-libs": "--disable-static",
+        "debug": "--enable-debug",
+        "static-libs": "--enable-static",
+    },
+    src_uri = "https://downloads.sourceforge.net/mad/libmad-0.15.1b.tar.gz",
+    sha256 = "bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690",
+    description = "MPEG Audio Decoder library",
+    homepage = "https://www.underbit.com/products/mad/",
+    license = "GPL-2.0",
+    deps = [],
+    configure_args = [
+        "--prefix=${PREFIX}",
+        "--enable-shared",
+        "--disable-static",
+    ],
+    visibility = ["PUBLIC"],
+)

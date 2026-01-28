@@ -1,0 +1,29 @@
+# DISABLED: wlprop repository no longer exists
+# The original wayland-tools/wlprop repository is gone
+# Consider using hyprprop or other alternatives for Wayland window property inspection
+
+# load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+# load("@root//defs:use_flags.bzl", "set_use_flags")
+#
+# download_source(
+#     name = "wlprop-src",
+#     src_uri = "https://github.com/wayland-tools/wlprop/archive/v1.0.0.tar.gz",
+#     sha256 = "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5",
+#     signature_required = False,
+# )
+#
+# autotools_package(
+#     name = "wlprop",
+#     source = ":wlprop-src",
+#     version = "1.0.0",
+#     description = "xprop clone for Wayland",
+#     homepage = "https://github.com/wayland-tools/wlprop",
+#     license = "MIT",
+#     pre_configure = """
+# # Simple shell script, copy to /usr/bin
+# """,
+#     deps = [
+#         "core//libffi:libffi",
+#     ],
+#     visibility = ["PUBLIC"],
+# )

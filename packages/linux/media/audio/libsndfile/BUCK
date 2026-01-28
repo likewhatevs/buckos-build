@@ -1,0 +1,89 @@
+# =============================================================================
+# libsndfile - Audio file I/O library
+# =============================================================================
+#
+# libsndfile is a C library for reading and writing files containing sampled audio data.
+# It was designed to handle both little-endian (such as WAV and AIFF) and
+# big-endian (such as AIFF) data, and to compile and run correctly on both
+# little-endian (such as Intel and DEC/Compaq Alpha) and big-endian processor systems
+# (such as Motorola 68k, Power PC, MIPS and SPARC).
+#
+# Supported formats include:
+# - WAV (Microsoft)
+# - AIFF (Apple/SGI)
+# - AU (Sun/NeXT)
+# - RAW (header-less)
+# - PAF (Ensoniq PARIS)
+# - SVX (Amiga IFF/SVX8/SV16)
+# - NIST (Sphere)
+# - VOC (Creative Labs)
+# - IRCAM (old CSound format)
+# - W64 (SoundFoundry WAVE 64)
+# - MAT4 (GNU Octave 2.0 / Matlab 4.2)
+# - MAT5 (GNU Octave 2.1 / Matlab 5.0)
+# - PVF (Portable Voice Format)
+# - XI (FastTracker 2)
+# - HTK (HMM Tool Kit)
+# - SDS (Midi Sample Dump Standard)
+# - AVR (Audio Visual Research)
+# - WAVEX (Microsoft)
+# - SD2 (Sound Designer II)
+# - FLAC (Free Lossless Audio Codec)
+# - CAF (Apple Core Audio File)
+# - WVE (Psion Series 3)
+# - OGG (Xiph.Org)
+# - MPC (Akai MPC 2k)
+# - RF64 (RIFF 64)
+#
+# =============================================================================
+
+load("@root//defs:package_defs.bzl", "cmake_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+cmake_package(
+    name = "libsndfile",
+    version = "1.2.2",
+    src_uri = "https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz",
+    sha256 = "3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e",
+    signature_required = False,
+    description = "C library for reading and writing files containing sampled audio data",
+    homepage = "https://libsndfile.github.io/libsndfile/",
+    license = "LGPL-2.1-or-later",
+    iuse = [
+        "alsa",
+        "examples",
+        "external-libs",
+        "minimal",
+        "mpeg",
+        "sqlite",
+    ],
+    use_defaults = ["external-libs", "mpeg"],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+    ],
+    use_cmake = {
+        "-alsa": "-DENABLE_ALSA=OFF",
+        "-examples": "-DBUILD_EXAMPLES=OFF",
+        "-external-libs": "-DENABLE_EXTERNAL_LIBS=OFF",
+        "-minimal": "-DENABLE_MINIMAL=OFF",
+        "-mpeg": "-DENABLE_MPEG=OFF",
+        "-sqlite": "-DENABLE_SQLITE=OFF",
+        "alsa": "-DENABLE_ALSA=ON",
+        "examples": "-DBUILD_EXAMPLES=ON",
+        "external-libs": "-DENABLE_EXTERNAL_LIBS=ON",
+        "minimal": "-DENABLE_MINIMAL=ON",
+        "mpeg": "-DENABLE_MPEG=ON",
+        "sqlite": "-DENABLE_SQLITE=ON",
+    },
+    use_deps = {
+        "external-libs": [
+            "media//audio/ogg:ogg",
+            "media//audio/vorbis:vorbis",
+            "media//audio/opus:opus",
+        ],
+    },
+    deps = [],
+    visibility = ["PUBLIC"],
+)

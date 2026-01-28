@@ -1,0 +1,69 @@
+load("@root//defs:package_defs.bzl", "meson_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# systemd-utils - Standalone systemd utilities
+# USE flags: (meson build system with many options)
+
+meson_package(
+    name = "systemd-utils",
+    version = "255",
+    iuse = [
+        "acl",
+        "boot",
+        "kernel-install",
+        "kmod",
+        "selinux",
+        "sysusers",
+        "tmpfiles",
+        "udev",
+        "ukify",
+    ],
+    src_uri = "https://github.com/systemd/systemd/archive/refs/tags/v255.tar.gz",
+    sha256 = "28854ffb2cb5f9e07fcbdbaf1e03a80b3462a12edeef84893ca2f37b22e4491e",
+    signature_required = False,
+    description = "Standalone systemd utilities (udevd, tmpfiles, etc.)",
+    homepage = "https://systemd.io",
+    license = "LGPL-2.1+",
+
+    # Exclude files with escaped characters that Buck2 can't handle
+    exclude_patterns = ["*/units/system-systemd*", "*/test/fuzz/fuzz-unit-file/*"],
+
+    # Note: Don't include -Dprefix as it's set automatically by meson_package
+    meson_args = [
+        "-Dsysconfdir=/etc",
+        "-Dlocalstatedir=/var",
+        "-Dmode=release",
+        "-Dstatic-libsystemd=false",
+        "-Dstandalone-binaries=true",
+        "-Dsplit-usr=false",
+        "-Dsplit-bin=true",
+        "-Drootprefix=/usr",
+        "-Drootlibdir=/usr/lib",
+        "-Dsysvrcnd-path=/etc",
+        "-Dlink-udev-shared=false",
+        "-Dlink-systemctl-shared=false",
+    ],
+    use_meson = {
+        "acl": "-Dacl=enabled",
+        "-acl": "-Dacl=disabled",
+        "boot": "-Dgnu-efi=enabled",
+        "-boot": "-Dgnu-efi=disabled",
+        "kernel-install": "-Dkernel-install=true",
+        "-kernel-install": "-Dkernel-install=false",
+        "kmod": "-Dkmod=enabled",
+        "-kmod": "-Dkmod=disabled",
+        "selinux": "-Dselinux=enabled",
+        "-selinux": "-Dselinux=disabled",
+        "tmpfiles": "-Dtmpfiles=true",
+        "-tmpfiles": "-Dtmpfiles=false",
+        "sysusers": "-Dsysusers=true",
+        "-sysusers": "-Dsysusers=false",
+        "ukify": "-Dukify=enabled",
+        "-ukify": "-Dukify=disabled",
+    },
+    deps = [
+        "system//libs/ipc/libcap:libcap",
+        "system//libs/ipc/libseccomp:libseccomp",
+    ],
+    visibility = ["PUBLIC"],
+)

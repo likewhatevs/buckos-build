@@ -1,0 +1,49 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# zip - Info-ZIP compression utility
+
+download_source(
+    name = "zip-src",
+    src_uri = "https://downloads.sourceforge.net/infozip/zip30.tar.gz",
+    sha256 = "f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "zip",
+    source = ":zip-src",
+    iuse = [
+        "bzip2",
+        "crypt",
+        "natspec",
+        "unicode",
+    ],
+    use_configure = {
+        "-bzip2": "--without-bzip2",
+        "-crypt": "--disable-crypt",
+        "-natspec": "--disable-natspec",
+        "-unicode": "--disable-unicode",
+        "bzip2": "--with-bzip2",
+        "crypt": "--enable-crypt",
+        "natspec": "--enable-natspec",
+        "unicode": "--enable-unicode",
+    },
+    version = "3.0",
+    description = "Info-ZIP compression utility",
+    homepage = "https://infozip.sourceforge.net/Zip.html",
+    license = "Info-ZIP",
+    src_configure = "true",  # Makefile-only build, no configure script
+    configure_args = [],
+    src_compile = """
+make -f unix/Makefile generic CC="${CC:-gcc}" CPP="${CC:-gcc} -E" LOCAL_ZIP="-DLARGE_FILE_SUPPORT"
+""",
+    src_install = """
+mkdir -p "$DESTDIR/usr/bin"
+install -m755 zip zipcloak zipnote zipsplit "$DESTDIR/usr/bin/"
+""",
+    deps = [
+        "system//libs/compression/bzip2:bzip2",
+    ],
+    visibility = ["PUBLIC"],
+)

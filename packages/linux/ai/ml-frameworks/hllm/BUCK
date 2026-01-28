@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "hllm",
+    version = "0.1.0",
+    src_uri = "https://github.com/bytedance/HLLM/archive/refs/heads/main.tar.gz",
+    sha256 = "88e5980db80c0975ba67591019e5e4dc3238b683ca21b0bd0038156c13ba89a7",
+    deps = [
+        "dev-libs//python/accelerate:accelerate",
+        "dev-libs//python/colorama:colorama",
+        "dev-libs//python/colorlog:colorlog",
+        "dev-libs//python/deepspeed:deepspeed",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/polars:polars",
+        "dev-libs//python/pyarrow:pyarrow",
+        "dev-libs//python/pytz:pytz",
+        "dev-libs//python/pyyaml:pyyaml",
+        "dev-libs//python/scikit-learn:scikit-learn",
+        "dev-libs//python/sentencepiece:sentencepiece",
+        "dev-libs//python/tensorboardx:tensorboardx",
+        "dev-libs//python/torch-geometric:torch-geometric",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/transformers:transformers",
+        "dev-libs//python/wandb:wandb",
+        "dev-libs//python/xformers:xformers",
+    ],
+)

@@ -1,0 +1,177 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "util-linux",
+    version = "2.39",
+    src_uri = "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/util-linux-2.39.tar.xz",
+    sha256 = "32b30a336cda903182ed61feb3e9b908b762a5e66fe14e43efb88d37162075cb",
+    signature_required = False,
+    description = "Miscellaneous system utilities for Linux",
+    homepage = "https://github.com/util-linux/util-linux",
+    license = "GPL-2.0",
+
+    # USE flags this package supports
+    iuse = [
+        "audit",
+        "build",
+        "caps",
+        "cramfs",
+        "cryptsetup",
+        "fdformat",
+        "hardlink",
+        "kill",
+        "logger",
+        "magic",
+        "ncurses",
+        "nls",
+        "pam",
+        "python",
+        "readline",
+        "rtas",
+        "selinux",
+        "slang",
+        "static-libs",
+        "su",
+        "suid",
+        "systemd",
+        "tty-helpers",
+        "udev",
+        "unicode",
+        "uuidd",
+    ],
+
+    # Default USE flags (disable by default for minimal build)
+    use_defaults = [],
+
+    # Conditional dependencies
+    use_deps = {
+        "ncurses": ["core//ncurses:ncurses"],
+        "systemd": ["system//init:systemd"],
+        "udev": ["system//init/eudev:eudev"],
+    },
+
+    # Conditional configure arguments
+    use_configure = {
+        "-audit": "--disable-audit",
+        "-build": "--disable-build",
+        "-caps": "--without-libcap-ng",
+        "-cramfs": "--disable-cramfs",
+        "-cryptsetup": "--disable-cryptsetup",
+        "-fdformat": "--disable-fdformat",
+        "-hardlink": "--disable-hardlink",
+        "-kill": "--disable-kill",
+        "-logger": "--disable-logger",
+        "-magic": "--disable-magic",
+        "-ncurses": "--without-ncursesw --without-ncurses --without-tinfo",
+        "-nls": "--disable-nls",
+        "-pam": "--without-pam",
+        "-python": "--disable-python",
+        "-readline": "--without-readline",
+        "-rtas": "--disable-rtas",
+        "-selinux": "--without-selinux",
+        "-slang": "--disable-slang",
+        "-static-libs": "--disable-static",
+        "-su": "--disable-su",
+        "-suid": "--disable-suid",
+        "-systemd": "--without-systemd",
+        "-tty-helpers": "--disable-tty-helpers",
+        "-udev": "--without-udev",
+        "-unicode": "--disable-unicode",
+        "-uuidd": "--disable-uuidd",
+        "audit": "--enable-audit",
+        "build": "--enable-build",
+        "caps": "--with-libcap-ng",
+        "cramfs": "--enable-cramfs",
+        "cryptsetup": "--enable-cryptsetup",
+        "fdformat": "--enable-fdformat",
+        "hardlink": "--enable-hardlink",
+        "kill": "--enable-kill",
+        "logger": "--enable-logger",
+        "magic": "--enable-magic",
+        "ncurses": "--with-ncursesw --with-tinfo",
+        "nls": "--enable-nls",
+        "pam": "--with-pam",
+        "python": "--enable-python",
+        "readline": "--with-readline",
+        "rtas": "--enable-rtas",
+        "selinux": "--with-selinux",
+        "slang": "--enable-slang",
+        "static-libs": "--enable-static",
+        "su": "--enable-su",
+        "suid": "--enable-suid",
+        "systemd": "--with-systemd",
+        "tty-helpers": "--enable-tty-helpers",
+        "udev": "--with-udev",
+        "unicode": "--enable-unicode",
+        "uuidd": "--enable-uuidd",
+    },
+
+    # Base configure arguments
+    # Based on Gentoo ebuild - we don't use --disable-all-programs for native builds
+    # because it prevents some utilities like getopt from building properly
+    configure_args = [
+        # Common args (from Gentoo commonargs)
+        "--localstatedir=/var",
+        "--runstatedir=/run",
+        "--enable-fs-paths-extra=/usr/sbin:/bin:/usr/bin",
+
+        # Without dependencies we don't have (or controlled by USE flags)
+        "--without-python",
+        "--without-systemdsystemunitdir",  # systemd itself is USE flag controlled
+        "--without-readline",
+        "--without-slang",
+        "--without-libmagic",
+        "--without-audit",
+        "--without-econf",
+        "--without-cryptsetup",
+
+        # Disable features/programs we don't need (from Gentoo native build)
+        "--disable-chfn-chsh",
+        "--disable-login",
+        "--disable-newgrp",
+        "--enable-nologin",  # Required by dracut
+        "--enable-sulogin",  # Required by dracut for emergency shell
+        "--disable-pylibmount",
+        "--disable-raw",
+        "--disable-vipw",
+        "--disable-liblastlog2",
+        "--disable-pam-lastlog2",
+        "--disable-asciidoc",
+        "--disable-makeinstall-chown",
+        "--disable-makeinstall-setuid",
+
+        # Enable libraries we need
+        "--enable-libsmartcols",
+        "--enable-libfdisk",
+        "--enable-libmount",
+        "--enable-libblkid",
+        "--enable-libuuid",
+
+        # Enable programs we need
+        "--enable-mount",
+        "--enable-losetup",
+        "--enable-fsck",
+        "--enable-blkid",
+        "--enable-getopt",       # Required by dracut
+        "--enable-findmnt",
+        "--enable-lsblk",
+    ],
+
+    # Post-install script to verify getopt installation
+    post_install = """
+# Verify that getopt was installed
+if [ -f "$DESTDIR/usr/bin/getopt" ]; then
+    echo "✓ getopt installed successfully at $DESTDIR/usr/bin/getopt"
+else
+    echo "✗ Warning: getopt not found at $DESTDIR/usr/bin/getopt"
+    echo "  Checking alternate locations..."
+    find "$DESTDIR" -name "getopt" -type f 2>/dev/null || echo "  getopt not found anywhere in package"
+fi
+""",
+
+    deps = [
+        "system//libs/crypto/libxcrypt:libxcrypt",
+    ],
+    visibility = ["PUBLIC"],
+)

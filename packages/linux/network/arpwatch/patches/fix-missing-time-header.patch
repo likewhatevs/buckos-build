@@ -1,0 +1,10 @@
+--- a/report.c
++++ b/report.c
+@@ -61,9 +61,7 @@
+ #include <syslog.h>
+-#ifdef TIME_WITH_SYS_TIME
+ #include <time.h>
+-#endif
+ #include <unistd.h>
+
+ #include "gnuc.h"

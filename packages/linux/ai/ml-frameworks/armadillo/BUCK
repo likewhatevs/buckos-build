@@ -1,0 +1,35 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "armadillo",
+    version = "14.2.2",
+    iuse = [
+        "arpack",
+        "blas",
+        "examples",
+        "lapack",
+        "mkl",
+        "superlu",
+    ],
+    use_cmake = {
+        "-arpack": "-DENABLE_ARPACK=OFF",
+        "-blas": "-DENABLE_BLAS=OFF",
+        "-examples": "-DBUILD_EXAMPLES=OFF",
+        "-lapack": "-DENABLE_LAPACK=OFF",
+        "-mkl": "-DENABLE_MKL=OFF",
+        "-superlu": "-DENABLE_SUPERLU=OFF",
+        "arpack": "-DENABLE_ARPACK=ON",
+        "blas": "-DENABLE_BLAS=ON",
+        "examples": "-DBUILD_EXAMPLES=ON",
+        "lapack": "-DENABLE_LAPACK=ON",
+        "mkl": "-DENABLE_MKL=ON",
+        "superlu": "-DENABLE_SUPERLU=ON",
+    },
+    src_uri = "https://mirror.buckos.org/a/armadillo-14.2.2.tar.xz",
+    sha256 = "3054c8e63db3abdf1a5c8f9fdb7e6b4ad833f9bcfb58324c0ff86de0784c70e0",
+    deps = [],
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    visibility = ["PUBLIC"],
+)

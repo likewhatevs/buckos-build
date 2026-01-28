@@ -1,0 +1,30 @@
+load("@root//defs:package_defs.bzl", "cmake_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# cgal - Computational Geometry Algorithms Library
+cmake_package(
+    name = "cgal",
+    version = "5.6.1",
+    iuse = ["examples"],
+    use_cmake = {
+        "-examples": "-DBUILD_EXAMPLES=OFF",
+        "examples": "-DBUILD_EXAMPLES=ON",
+    },
+    src_uri = "https://github.com/CGAL/cgal/releases/download/v5.6.1/CGAL-5.6.1.tar.xz",
+    sha256 = "cdb15e7ee31e0663589d3107a79988a37b7b1719df3d24f2058545d1bcdd5837",
+    signature_required = False,
+    description = "Computational Geometry Algorithms Library",
+    homepage = "https://www.cgal.org/",
+    license = "GPL-3.0-or-later OR LGPL-3.0-or-later",
+    cmake_args = [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DWITH_CGAL_Qt5=OFF",
+    ],
+    deps = [
+        "dev-libs//boost:boost",
+        "dev-libs//gmp:gmp",
+        "dev-libs//mpfr:mpfr",
+    ],
+    visibility = ["PUBLIC"],
+)

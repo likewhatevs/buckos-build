@@ -1,0 +1,55 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+meson_package(
+    name = "pango",
+    version = "1.52.2",
+    src_uri = "https://download.gnome.org/sources/pango/1.52/pango-1.52.2.tar.xz",
+    sha256 = "d0076afe01082814b853deec99f9349ece5f2ce83908b8e58ff736b41f78a96b",
+    signature_required = False,
+    description = "Library for layout and rendering of text",
+    homepage = "https://pango.gnome.org/",
+    license = "LGPL-2.0-or-later",
+    iuse = ["static-libs", "introspection", "cairo", "X", "doc"],
+    use_defaults = ["cairo"],
+    meson_args = [
+        "-Dintrospection=disabled",
+        "-Dxft=disabled",
+        "-Dgtk_doc=false",
+        "-Dinstall-tests=false",
+        "-Dlibthai=disabled",
+        "-Dsysprof=disabled",
+    ],
+    use_meson = {
+        "static-libs": "-Ddefault_library=static",
+        "-static-libs": "-Ddefault_library=shared",
+        "introspection": "-Dintrospection=enabled",
+        "-introspection": "-Dintrospection=disabled",
+        "cairo": "-Dcairo=enabled",
+        "-cairo": "-Dcairo=disabled",
+        "X": "-Dxft=enabled",
+        "-X": "-Dxft=disabled",
+        "doc": "-Dgtk_doc=true",
+        "-doc": "-Dgtk_doc=false",
+    },
+    use_deps = {
+        "cairo": ["desktop//cairo:cairo"],
+    },
+    deps = [
+        "dev-libs//glib:glib",
+        # pcre2 is needed for glib's pkg-config (Requires.private: libpcre2-8)
+        "system//libs/utility/pcre2:pcre2",
+        "core//libffi:libffi",
+        "core//zlib:zlib",
+        # harfbuzz/fontconfig/cairo transitive deps needed for pkg-config
+        "core//expat:expat",
+        "system//libs/image/libpng:libpng",
+        "system//libs/compression/brotli:brotli",
+        "system//libs/graphics/pixman:pixman",
+        "system//libs/font/fribidi:fribidi",
+        "fonts//libraries/freetype:freetype",
+        "fonts//libraries/fontconfig:fontconfig",
+        "fonts//libraries/harfbuzz:harfbuzz",
+    ],
+    visibility = ["PUBLIC"],
+)

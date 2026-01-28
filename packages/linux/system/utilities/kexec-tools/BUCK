@@ -1,0 +1,41 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "kexec-tools",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+    ],
+    src_prepare = """
+autoreconf -fi
+""",
+    version = "2.0.32",
+    iuse = [
+        "booke",
+        "lzma",
+        "selinux",
+        "xen",
+        "zlib",
+        "zstd",
+    ],
+    use_configure = {
+        "-booke": "--disable-booke",
+        "-lzma": "--without-lzma",
+        "-selinux": "--disable-selinux",
+        "-xen": "--disable-xen",
+        "-zlib": "--without-zlib",
+        "-zstd": "--without-zstd",
+        "booke": "--enable-booke",
+        "lzma": "--with-lzma",
+        "selinux": "--enable-selinux",
+        "xen": "--enable-xen",
+        "zlib": "--with-zlib",
+        "zstd": "--with-zstd",
+    },
+    src_uri = "https://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git/snapshot/kexec-tools-2.0.32.tar.gz",
+    sha256 = "34fbc52c3e5bcc5c1b26de37e3e5c164e633e02ccd3b0cede8a923eb5cd909df",
+    configure_args = [
+        "--prefix=/usr",
+    ],
+)

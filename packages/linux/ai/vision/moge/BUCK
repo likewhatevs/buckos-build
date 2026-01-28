@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "moge",
+    version = "2.0.0+git20251102",
+    src_uri = "https://github.com/microsoft/MoGe/archive/07444410f1e33f402353b99d6ccd26bd31e469e8.tar.gz",
+    sha256 = "08e5fcbaa4421a0e3e284ac7e3196965904677bb479c29b19c95ead47407f734",
+    deps = [
+        "dev-libs//python/click:click",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/opencv-python:opencv-python",
+        "dev-libs//python/huggingface-hub:huggingface-hub",
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//ml-frameworks/torchvision:torchvision",
+        "dev-libs//python/gradio:gradio",
+        "dev-libs//python/trimesh:trimesh",
+    ],
+)

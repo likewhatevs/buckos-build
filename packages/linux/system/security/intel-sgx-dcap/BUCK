@@ -1,0 +1,20 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "intel-sgx-dcap",
+    version = "1.15",
+    src_uri = "https://github.com/intel/SGXDataCenterAttestationPrimitives/archive/refs/tags/DCAP_1.15.tar.gz",
+    sha256 = "400ec866b53934d42aceb0ec78bca7a835db91942a0a837279ed86217b6478b7",
+    source_subdir = "SGXDataCenterAttestationPrimitives-DCAP_1.15/QuoteVerification/QVL/Src",
+    cmake_args = [
+        "-DBUILD_TESTS=OFF",
+        "-DBUILD_DOCS=OFF",
+        "-DBUILD_ENCLAVE=OFF",
+        "-DBUILD_ATTESTATION_APP=ON",
+    ],
+    deps = [
+        "system//libs/crypto/openssl:openssl",
+        "dev-libs//json/rapidjson:rapidjson",
+    ],
+    visibility = ["PUBLIC"],
+)

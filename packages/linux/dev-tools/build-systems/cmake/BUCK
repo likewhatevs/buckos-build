@@ -1,0 +1,64 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# CMake - Cross-platform build system
+# =============================================================================
+# NOTE: cmake uses its own bootstrap script, not autotools.
+# We use custom src_configure/src_compile/src_install phases.
+
+autotools_package(
+    name = "cmake",
+    version = "4.2.0",
+    iuse = ["dap", "gui", "ncurses"],
+    use_configure = {
+        "-dap": "--disable-dap",
+        "-gui": "--disable-gui",
+        "-ncurses": "--without-ncurses",
+        "dap": "--enable-dap",
+        "gui": "--enable-gui",
+        "ncurses": "--with-ncurses",
+    },
+    src_uri = "https://github.com/Kitware/CMake/releases/download/v4.2.0/cmake-4.2.0.tar.gz",
+    sha256 = "4104e94657d247c811cb29985405a360b78130b5d51e7f6daceb2447830bd579",
+    signature_required = False,
+    description = "Cross-platform, open-source build system",
+    homepage = "https://cmake.org/",
+    license = "BSD-3-Clause",
+
+    # CMAKE uses its own bootstrap script, not autotools configure
+    # NOTE: --no-system-cppdap avoids needing to build cppdap separately
+    # NOTE: Disable ccmake (curses GUI) to avoid NCURSES_BOOL/std::function conflict with GCC 15
+    src_configure = """
+echo "=== Configuring cmake with bootstrap ==="
+./bootstrap \\
+    --prefix=/usr \\
+    --system-curl \\
+    --system-zlib \\
+    --system-expat \\
+    --parallel=$(nproc) \\
+    --no-qt-gui \\
+    -- -DCMAKE_USE_OPENSSL=ON \\
+       -DBUILD_CursesDialog=OFF
+""",
+
+    src_compile = """
+echo "=== Building cmake ==="
+make -j$(nproc)
+""",
+
+    src_install = """
+echo "=== Installing cmake ==="
+make install DESTDIR="$DESTDIR"
+""",
+
+    deps = [
+        "core//zlib:zlib",
+        "core//expat:expat",
+        "network//curl:curl",
+        "system//libs/crypto/openssl:openssl",
+        # nghttp2 is needed because curl links against it for HTTP/2 support
+        "network//nghttp2:nghttp2",
+    ],
+    visibility = ["PUBLIC"],
+)

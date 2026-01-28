@@ -1,0 +1,18 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "remasker",
+    version = "0.1.0",
+    src_uri = "https://github.com/alps-lab/remasker/archive/refs/heads/main.tar.gz",
+    sha256 = "65bd9a92636c86f6f4f724eb9f5e702e4c39c7802f438ca8ee460aa96bb3eec7",
+    description = "Imputing tabular data with masked autoencoding (ICLR 2024)",
+    homepage = "https://github.com/alps-lab/remasker",
+    license = "MIT",
+    deps = [
+        "lang//python:python",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/scikit-learn:scikit-learn",
+    ],
+    visibility = ["PUBLIC"],
+)

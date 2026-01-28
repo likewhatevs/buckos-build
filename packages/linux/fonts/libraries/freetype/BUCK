@@ -1,0 +1,102 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "freetype",
+    version = "2.13.2",
+    # Use official release tarball (not git archive) to avoid submodule issues
+    src_uri = "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.xz",
+    sha256 = "12991c4e55c506dd7f9b765933e62fd2be2e06d421505d7950a132e4f1bb484d",
+    signature_required = False,
+    description = "High-quality font rendering engine",
+    homepage = "https://www.freetype.org/",
+    license = "FTL GPL-2.0",
+    iuse = [
+        "X",
+        "adobe-cff",
+        "brotli",
+        "bzip2",
+        "cleartype-hinting",
+        "debug",
+        "fontforge",
+        "harfbuzz",
+        "png",
+        "static-libs",
+        "svg",
+        "utils",
+        "zlib",
+    ],
+    use_defaults = ["bzip2", "png", "brotli", "zlib"],
+    use_configure = {
+        "-X": "--without-x",
+        "-adobe-cff": "--disable-adobe-cff",
+        "-brotli": "--with-brotli=no",
+        "-bzip2": "--with-bzip2=no",
+        "-cleartype-hinting": "--disable-cleartype-hinting",
+        "-debug": "--disable-debug",
+        "-fontforge": "--disable-fontforge",
+        "-harfbuzz": "--with-harfbuzz=no",
+        "-png": "--with-png=no",
+        "-static-libs": "--disable-static",
+        "-svg": "--disable-svg",
+        "-utils": "--disable-utils",
+        "-zlib": "--with-zlib=no",
+        "X": "--with-x",
+        "adobe-cff": "--enable-adobe-cff",
+        "brotli": "--with-brotli=yes",
+        "bzip2": "--with-bzip2=yes",
+        "cleartype-hinting": "--enable-cleartype-hinting",
+        "debug": "--enable-debug",
+        "fontforge": "--enable-fontforge",
+        "harfbuzz": "--with-harfbuzz=yes",
+        "png": "--with-png=yes",
+        "static-libs": "--enable-static",
+        "svg": "--enable-svg",
+        "utils": "--enable-utils",
+        "zlib": "--with-zlib=yes",
+    },
+    use_deps = {
+        "bzip2": ["system//libs/compression/bzip2:bzip2"],
+        "png": ["system//libs/image/libpng:libpng"],
+        "harfbuzz": ["fonts//libraries/harfbuzz:harfbuzz"],
+        "brotli": ["system//libs/compression/brotli:brotli"],
+        "zlib": ["core//zlib:zlib"],
+    },
+    # GCC 14+ emits -Wdangling-pointer warnings which cause build failures
+    # CC_BUILD is set globally in ebuild.sh for cross-compilation
+    # --build and --host tell configure we're cross-compiling
+    src_configure = """
+export CFLAGS="$CFLAGS -Wno-dangling-pointer"
+export CXXFLAGS="$CXXFLAGS -Wno-dangling-pointer"
+./configure \\
+    --build=x86_64-pc-linux-gnu \\
+    --host=x86_64-buckos-linux-gnu \\
+    --prefix=/usr \\
+    --libdir=/usr/lib64 \\
+    --enable-freetype-config \\
+    --with-bzip2=yes \\
+    --with-png=yes \\
+    --with-brotli=yes \\
+    --with-zlib=yes \\
+    --without-x \\
+    --with-harfbuzz=no
+""",
+    # Fix .pc files to use relocatable paths with ${pcfiledir}
+    src_install = """
+        make DESTDIR="$DESTDIR" install
+
+        for pc_file in "$DESTDIR"/usr/lib64/pkgconfig/*.pc; do
+            if [ -f "$pc_file" ]; then
+                sed -i \\
+                    -e 's|^prefix=/usr$|prefix=${pcfiledir}/../..|' \\
+                    -e 's|^exec_prefix=.*|exec_prefix=${prefix}|' \\
+                    -e 's|^libdir=.*|libdir=${prefix}/lib64|' \\
+                    -e 's|^includedir=.*|includedir=${prefix}/include|' \\
+                    -e 's|-L/usr/lib64|-L${libdir}|g' \\
+                    "$pc_file"
+            fi
+        done
+    """,
+    deps = [],
+    visibility = ["PUBLIC"],
+)

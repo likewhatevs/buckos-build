@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+download_source(
+    name = "tau-bench-src",
+    src_uri = "https://github.com/sierra-research/tau-bench/archive/refs/heads/main.tar.gz",
+    sha256 = "831f7850609f44f0f6905a467dd38c1507773b4818398354015f76d5fd4815ee",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "tau-bench",
+    source = ":tau-bench-src",
+    version = "0.1.0",
+    description = "A benchmark for evaluating tool-augmented agents on realistic tasks",
+    homepage = "https://github.com/sierra-research/tau-bench",
+    license = "MIT",
+    src_compile = """
+        python3 -m pip install --no-deps --target="$S/install" .
+    """,
+    src_install = """
+        mkdir -p "$DESTDIR/usr/lib/python3.12/site-packages"
+        cp -r "$S/install"/* "$DESTDIR/usr/lib/python3.12/site-packages/"
+    """,
+    bdepend = [
+        "lang//python:python",
+    ],
+    rdepend = [
+        "dev-libs//python/anthropic:anthropic",
+        "dev-libs//python/litellm:litellm",
+        "dev-libs//python/mistralai:mistralai",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/openai:openai",
+        "dev-libs//python/tenacity:tenacity",
+        "dev-libs//python/termcolor:termcolor",
+    ],
+    visibility = ["PUBLIC"],
+)

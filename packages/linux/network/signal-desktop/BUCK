@@ -1,0 +1,72 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package")
+
+download_source(
+    name = "signal-desktop-src",
+    src_uri = "https://updates.signal.org/desktop/apt/pool/s/signal-desktop/signal-desktop_7.36.0_amd64.deb",
+    sha256 = "7b14d1c7d47e9bea92a5cc3d536d1ab805cb4d22e2acf6896b5ae8be84b04047",
+    signature_required = False,
+)
+
+binary_package(
+    name = "signal-desktop",
+    srcs = [":signal-desktop-src"],
+    version = "7.36.0",
+    description = "Private messenger for desktop - encrypted messaging, voice, and video calls",
+    homepage = "https://signal.org/",
+    license = "AGPL-3.0",
+    install_script = """
+        # Extract deb package
+        mkdir -p extract
+        cd extract
+        ar x $SRCS/signal-desktop_7.36.0_amd64.deb
+        tar xf data.tar.xz
+
+        # Install to destination
+        mkdir -p "$OUT/opt"
+        mkdir -p "$OUT/usr/bin"
+        mkdir -p "$OUT/usr/share/applications"
+        mkdir -p "$OUT/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$OUT/usr/share/icons/hicolor/512x512/apps"
+
+        # Copy Signal Desktop application
+        cp -r opt/Signal "$OUT/opt/"
+
+        # Create wrapper script
+        cat > "$OUT/usr/bin/signal-desktop" << 'WRAPPER'
+#!/bin/sh
+exec /opt/Signal/signal-desktop "$@"
+WRAPPER
+        chmod +x "$OUT/usr/bin/signal-desktop"
+
+        # Copy icons if present
+        if [ -d "usr/share/icons" ]; then
+            cp -r usr/share/icons/* "$OUT/usr/share/icons/"
+        fi
+
+        # Create desktop entry
+        cat > "$OUT/usr/share/applications/signal-desktop.desktop" << 'DESKTOP'
+[Desktop Entry]
+Name=Signal
+Comment=Private Messenger
+Exec=/opt/Signal/signal-desktop %U
+Icon=signal-desktop
+Terminal=false
+Type=Application
+Categories=Network;InstantMessaging;Chat;
+MimeType=x-scheme-handler/sgnl;x-scheme-handler/signalcaptcha;
+StartupWMClass=Signal
+Keywords=signal;chat;messaging;private;secure;encrypted;
+DESKTOP
+
+        # Set permissions
+        chmod +x "$OUT/opt/Signal/signal-desktop"
+        chmod 4755 "$OUT/opt/Signal/chrome-sandbox" 2>/dev/null || true
+    """,
+    deps = [
+        "dev-libs//glib:glib",
+        "system//security/auth/biometric:nss",
+        "system//security/auth/biometric:nspr",
+        "audio//daemons/pulseaudio:pulseaudio",
+    ],
+    visibility = ["PUBLIC"],
+)

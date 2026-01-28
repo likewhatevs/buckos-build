@@ -1,0 +1,11 @@
+load("@root//defs:package_defs.bzl", "simple_binary_package")
+
+# nvidia-nsight-systems - DISABLED
+# NVIDIA download URLs change frequently. Re-enable when URL is verified.
+# Download from: https://developer.nvidia.com/nsight-systems
+
+filegroup(
+    name = "nvidia-nsight-systems",
+    srcs = [],
+    visibility = ["PUBLIC"],
+)

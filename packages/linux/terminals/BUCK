@@ -1,0 +1,22 @@
+# Filegroup for lightweight terminals
+filegroup(
+    name = "lightweight-terminals",
+    srcs = [
+        "terminals//foot:foot",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Filegroup for all terminals
+filegroup(
+    name = "all-terminals",
+    srcs = [
+        "terminals//alacritty:alacritty",
+        "terminals//foot:foot",
+        "terminals//xterm:xterm",
+        "terminals//rxvt-unicode:rxvt-unicode",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

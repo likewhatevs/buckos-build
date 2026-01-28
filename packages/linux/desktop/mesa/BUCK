@@ -1,0 +1,76 @@
+load("@root//defs:package_defs.bzl", "download_source", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Mesa - OpenGL and Vulkan implementation
+# =============================================================================
+
+meson_package(
+    name = "mesa",
+    version = "24.0.1",
+    src_uri = "https://archive.mesa3d.org/mesa-24.0.1.tar.xz",
+    sha256 = "f387192b08c471c545590dd12230a2a343244804b5fe866fec6aea02eab57613",
+    signature_sha256 = "e2bfe7507058ab0737293a335d29f9e9478cc2b5715c741b2b6a57e511a6cf4f",
+    signature_required = False,
+    description = "Mesa 3D Graphics Library - OpenGL and Vulkan",
+    homepage = "https://www.mesa3d.org/",
+    license = "MIT",
+    meson_args = [
+        # Wayland-only build (no X11)
+        "-Dplatforms=wayland",
+        "-Dglx=disabled",
+        # Gallium drivers for common GPUs (swrast is software, radeonsi removed because it requires LLVM)
+        # llvmpipe disabled due to LLVM 20 incompatibility
+        "-Dgallium-drivers=nouveau,iris,swrast",
+        # Vulkan disabled (requires glslang)
+        "-Dvulkan-drivers=",
+        # LLVM disabled (incompatible with LLVM 20)
+        "-Dllvm=disabled",
+        # Core features
+        "-Degl=enabled",
+        "-Dgbm=enabled",
+        "-Dgles1=disabled",
+        "-Dgles2=enabled",
+        # Disable optional features
+        "-Dgallium-va=disabled",
+        "-Dgallium-vdpau=disabled",
+        "-Dgallium-opencl=disabled",
+        "-Dosmesa=false",
+    ],
+    deps = [
+        "desktop//libinput:libinput",
+        "desktop//libdrm:libdrm",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "core//zlib:zlib",
+        "system//libs/compression/zstd:zstd",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# virglrenderer - Virtual 3D GPU for QEMU
+# =============================================================================
+
+meson_package(
+    name = "virglrenderer",
+    version = "1.2.0",
+    src_uri = "https://gitlab.freedesktop.org/virgl/virglrenderer/-/archive/virglrenderer-1.2.0/virglrenderer-virglrenderer-1.2.0.tar.bz2",
+    sha256 = "47a64189492a754685a430c713ac6700f4b1c3e7b871e87889ddb96e4d65e8ab",
+    signature_required = False,
+    description = "Library to implement a virtual 3D GPU used by qemu",
+    homepage = "https://virgil3d.github.io/",
+    license = "MIT",
+    meson_args = [
+        "-Dplatforms=egl",
+        "-Dvulkan=false",
+        "-Dtests=false",
+    ],
+    deps = [
+        "desktop//libdrm:libdrm",
+        ":mesa",
+    ],
+    visibility = ["PUBLIC"],
+)

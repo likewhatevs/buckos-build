@@ -1,0 +1,194 @@
+load("@root//defs:package_defs.bzl", "kernel_config")
+
+# Export individual config fragments
+export_file(
+    name = "base",
+    src = "base.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "filesystem",
+    src = "filesystem.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "network",
+    src = "network.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "hardware",
+    src = "hardware.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "virtualization",
+    src = "virtualization.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "security",
+    src = "security.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Pre-built merged configs for common use cases
+
+# Full BuckOS default configuration
+# Includes all fragments for maximum hardware compatibility
+kernel_config(
+    name = "buckos-default",
+    fragments = [
+        "base.config",
+        "filesystem.config",
+        "network.config",
+        "hardware.config",
+        "virtualization.config",
+        "security.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Minimal configuration
+# Only base + filesystem + essential hardware
+kernel_config(
+    name = "buckos-minimal",
+    fragments = [
+        "base.config",
+        "filesystem.config",
+        "hardware.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Server configuration
+# Full config without desktop graphics
+kernel_config(
+    name = "buckos-server",
+    fragments = [
+        "base.config",
+        "filesystem.config",
+        "network.config",
+        "hardware.config",
+        "virtualization.config",
+        "security.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Virtual machine guest configuration
+kernel_config(
+    name = "buckos-vm-guest",
+    fragments = [
+        "base.config",
+        "filesystem.config",
+        "network.config",
+        "virtualization.config",
+        "security.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Live CD/USB configuration
+# Full config with graphics drivers (i915, amdgpu, nouveau) for desktop use
+export_file(
+    name = "live",
+    src = "live.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+kernel_config(
+    name = "buckos-live",
+    fragments = [
+        "live.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Cloud Hypervisor guest configuration
+export_file(
+    name = "cloud-hypervisor",
+    src = "cloud-hypervisor.config",
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Cloud Hypervisor optimized guest kernel configuration
+# Combines base system configs with Cloud Hypervisor-specific optimizations
+kernel_config(
+    name = "buckos-ch-guest",
+    fragments = [
+        "base.config",
+        "filesystem.config",
+        "network.config",
+        "virtualization.config",
+        "security.config",
+        "cloud-hypervisor.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ARM64 (aarch64) Kernel Configurations
+# =============================================================================
+
+export_file(
+    name = "aarch64-base",
+    src = "aarch64-base.config",
+    default_target_platform = "//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "aarch64-cloud",
+    src = "aarch64-cloud.config",
+    default_target_platform = "//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# Default ARM64 configuration (for VMs and general use)
+kernel_config(
+    name = "buckos-aarch64-default",
+    fragments = [
+        "aarch64-base.config",
+        "filesystem.config",
+        "network.config",
+        "security.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Cloud configuration (AWS Graviton, Azure Ampere, etc.)
+kernel_config(
+    name = "buckos-aarch64-cloud",
+    fragments = [
+        "aarch64-base.config",
+        "aarch64-cloud.config",
+        "filesystem.config",
+        "network.config",
+        "security.config",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Minimal configuration (QEMU testing)
+kernel_config(
+    name = "buckos-aarch64-minimal",
+    fragments = [
+        "aarch64-base.config",
+        "filesystem.config",
+    ],
+    visibility = ["PUBLIC"],
+)

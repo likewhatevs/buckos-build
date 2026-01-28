@@ -1,0 +1,92 @@
+# Email Servers
+# Mail transfer agents, IMAP/POP3 servers, and all-in-one mail servers
+
+# All email servers
+filegroup(
+    name = "all-email-servers",
+    srcs = [
+        "communication//email-servers/dovecot:dovecot",
+        "communication//email-servers/exim:exim",
+        "communication//email-servers/maddy:maddy",
+        "communication//email-servers/opensmtpd:opensmtpd",
+        "communication//email-servers/postfix:postfix",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Modern all-in-one mail servers (SMTP + IMAP + more)
+filegroup(
+    name = "all-in-one",
+    srcs = [
+        "communication//email-servers/maddy:maddy",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Mail Transfer Agents (MTAs) - SMTP servers
+filegroup(
+    name = "mta",
+    srcs = [
+        "communication//email-servers/exim:exim",
+        "communication//email-servers/opensmtpd:opensmtpd",
+        "communication//email-servers/postfix:postfix",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# IMAP/POP3 servers
+filegroup(
+    name = "imap-servers",
+    srcs = [
+        "communication//email-servers/dovecot:dovecot",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Traditional mail server stack (postfix + dovecot)
+filegroup(
+    name = "traditional-stack",
+    srcs = [
+        "communication//email-servers/dovecot:dovecot",
+        "communication//email-servers/postfix:postfix",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Lightweight/simple mail servers
+filegroup(
+    name = "lightweight",
+    srcs = [
+        "communication//email-servers/maddy:maddy",
+        "communication//email-servers/opensmtpd:opensmtpd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Modern Rust/Go mail servers
+filegroup(
+    name = "modern",
+    srcs = [
+        "communication//email-servers/maddy:maddy",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Enterprise-grade mail servers
+filegroup(
+    name = "enterprise",
+    srcs = [
+        "communication//email-servers/dovecot:dovecot",
+        "communication//email-servers/exim:exim",
+        "communication//email-servers/postfix:postfix",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

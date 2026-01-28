@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libunistring - Unicode string library
+
+autotools_package(
+    name = "libunistring",
+    # GNU release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    version = "1.2",
+    iuse = ["static-libs"],
+    use_configure = {
+        "-static-libs": "--disable-static",
+        "static-libs": "--enable-static",
+    },
+    src_uri = "https://ftp.gnu.org/gnu/libunistring/libunistring-1.2.tar.xz",
+    sha256 = "632bd65ed74a881ca8a0309a1001c428bd1cbd5cd7ddbf8cedcd2e65f4dcdc44",
+    description = "Unicode string library",
+    homepage = "https://www.gnu.org/software/libunistring/",
+    license = "LGPL-3.0",
+    deps = [],
+    configure_args = [
+        "--prefix=${PREFIX}",
+        "--enable-shared",
+        "--disable-static",
+    ],
+    visibility = ["PUBLIC"],
+)

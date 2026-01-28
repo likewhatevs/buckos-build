@@ -1,0 +1,54 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "ctags",
+    bdepend = [],
+    src_prepare = "",
+    version = "6.1.0",
+    src_uri = "https://github.com/universal-ctags/ctags/releases/download/v6.1.0/universal-ctags-6.1.0.tar.gz",
+    sha256 = "fa3bafbd0dab0373c0c1788c79451bad4eed2095ad292a8dd46cc1ae6997b2c5",
+    signature_required = False,
+    description = "Universal Ctags - generates tag files for source code",
+    homepage = "https://ctags.io/",
+    license = "GPL-2+",
+
+    # USE flags this package supports
+    iuse = [
+        "json",
+        "pcre",
+        "pcre2",
+        "seccomp",
+        "xml",
+        "yaml",
+    ],
+
+    # Default USE flags
+    use_defaults = [],
+
+    # Conditional dependencies
+    use_deps = {
+        "json": ["dev-libs//data/jansson:jansson"],
+        "yaml": ["dev-libs//data/libyaml:libyaml"],
+        "xml": ["dev-libs//text/libxml2:libxml2"],
+        "pcre2": ["dev-libs//text/pcre2:pcre2"],
+    },
+
+    # Conditional configure arguments
+    use_configure = {
+        "-json": "--disable-json",
+        "-pcre": "--disable-pcre",
+        "-pcre2": "--disable-pcre2",
+        "-seccomp": "--disable-seccomp",
+        "-xml": "--disable-xml",
+        "-yaml": "--disable-yaml",
+        "json": "--enable-json",
+        "pcre": "--enable-pcre",
+        "pcre2": "--enable-pcre2",
+        "seccomp": "--enable-seccomp",
+        "xml": "--enable-xml",
+        "yaml": "--enable-yaml",
+    },
+
+    visibility = ["PUBLIC"],
+)

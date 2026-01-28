@@ -1,0 +1,289 @@
+# Development Libraries - Comprehensive aggregator for dev-libs
+# Inspired by Gentoo's dev-libs category
+# This provides convenient groups for common development library dependencies
+
+# =============================================================================
+# Memory Allocators - High-performance memory allocation libraries
+# =============================================================================
+
+filegroup(
+    name = "allocator-libs",
+    srcs = [
+        "dev-libs//allocators/jemalloc:jemalloc",
+        "dev-libs//allocators/mimalloc:mimalloc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Boost Libraries - Comprehensive C++ library collection
+# =============================================================================
+
+filegroup(
+    name = "boost-libs",
+    srcs = [
+        "dev-libs//boost:boost",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# GLib - GNOME low-level libraries
+# =============================================================================
+
+filegroup(
+    name = "glib-libs",
+    srcs = [
+        "dev-libs//glib:glib",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Serialization Libraries - Protocol buffers, FlatBuffers, MessagePack, etc.
+# =============================================================================
+
+filegroup(
+    name = "serialization-libs",
+    srcs = [
+        "dev-libs//serialization/protobuf:protobuf",
+        "dev-libs//serialization/flatbuffers:flatbuffers",
+        "dev-libs//serialization/msgpack:msgpack",
+        "dev-libs//serialization/capnproto:capnproto",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Text Processing Libraries - Unicode, regex, string handling
+# =============================================================================
+
+filegroup(
+    name = "text-libs",
+    srcs = [
+        "dev-libs//text/oniguruma:oniguruma",
+        "dev-libs//text/re2:re2",
+        "dev-libs//text/libunistring:libunistring",
+        "dev-libs//text/utf8proc:utf8proc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# JSON Libraries - Additional JSON parsers beyond json-c/jansson
+# =============================================================================
+
+filegroup(
+    name = "json-libs",
+    srcs = [
+        "dev-libs//json/rapidjson:rapidjson",
+        "dev-libs//json/simdjson:simdjson",
+        "dev-libs//misc/cjson:cjson",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Testing Frameworks - Unit testing and mocking libraries
+# =============================================================================
+
+filegroup(
+    name = "testing-libs",
+    srcs = [
+        "dev-libs//testing/check:check",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Configuration Libraries - Config file parsing
+# =============================================================================
+
+filegroup(
+    name = "config-libs",
+    srcs = [
+        "dev-libs//config/libconfig:libconfig",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Google Libraries - gflags, glog, abseil
+# =============================================================================
+
+filegroup(
+    name = "google-libs",
+    srcs = [
+        "dev-libs//google/gflags:gflags",
+        "dev-libs//google/glog:glog",
+        "dev-libs//google/abseil-cpp:abseil-cpp",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Database Libraries - Key-value stores and embedded databases
+# =============================================================================
+
+filegroup(
+    name = "database-libs",
+    srcs = [
+        "dev-libs//database/leveldb:leveldb",
+        "dev-libs//database/rocksdb:rocksdb",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Event Loop Libraries - Async I/O and event handling
+# =============================================================================
+
+filegroup(
+    name = "event-libs",
+    srcs = [
+        "dev-libs//misc/libev:libev",
+        "system//libs/utility/libevent:libevent",
+        "system//libs/utility/libuv:libuv",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# C++ Utility Libraries - Modern C++ helpers
+# =============================================================================
+
+filegroup(
+    name = "cpp-utility-libs",
+    srcs = [
+        "dev-libs//misc/fmt:fmt",
+        "dev-libs//misc/spdlog:spdlog",
+        "dev-libs//misc/double-conversion:double-conversion",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# GC and Memory Libraries - Garbage collection and atomic operations
+# =============================================================================
+
+filegroup(
+    name = "gc-libs",
+    srcs = [
+        "dev-libs//misc/boehm-gc:boehm-gc",
+        "dev-libs//misc/libatomic_ops:libatomic_ops",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Miscellaneous Libraries - Various useful development libraries
+# =============================================================================
+
+filegroup(
+    name = "misc-libs",
+    srcs = [
+        "dev-libs//misc/xxhash:xxhash",
+        "dev-libs//misc/libmicrohttpd:libmicrohttpd",
+        "dev-libs//misc/tree-sitter:tree-sitter",
+        "dev-libs//misc/libedit:libedit",
+        "dev-libs//misc/c-blosc:c-blosc",
+        "dev-libs//misc/libgit2:libgit2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Convenience Groups
+# =============================================================================
+
+# Essential Development Libraries - Core libraries for most projects
+filegroup(
+    name = "essential",
+    srcs = [
+        ":boost-libs",
+        ":glib-libs",
+        "dev-libs//google/abseil-cpp:abseil-cpp",
+        "dev-libs//misc/fmt:fmt",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# C++ Development - Complete C++ development library stack
+filegroup(
+    name = "cpp-dev",
+    srcs = [
+        ":boost-libs",
+        ":google-libs",
+        ":cpp-utility-libs",
+        "dev-libs//text/re2:re2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Systems Programming - Libraries for low-level systems work
+filegroup(
+    name = "systems-dev",
+    srcs = [
+        ":allocator-libs",
+        ":event-libs",
+        ":gc-libs",
+        "dev-libs//misc/xxhash:xxhash",
+        "dev-libs//misc/libatomic_ops:libatomic_ops",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Data Processing - Serialization, JSON, and database libraries
+filegroup(
+    name = "data-processing",
+    srcs = [
+        ":serialization-libs",
+        ":json-libs",
+        ":database-libs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# All Development Libraries
+# =============================================================================
+
+filegroup(
+    name = "all",
+    srcs = [
+        ":allocator-libs",
+        ":boost-libs",
+        ":glib-libs",
+        ":serialization-libs",
+        ":text-libs",
+        ":json-libs",
+        ":testing-libs",
+        ":config-libs",
+        ":google-libs",
+        ":database-libs",
+        ":event-libs",
+        ":cpp-utility-libs",
+        ":gc-libs",
+        ":misc-libs",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

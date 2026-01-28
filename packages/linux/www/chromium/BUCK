@@ -1,0 +1,90 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# chromium - Open-source web browser from Google
+#
+# USE flags:
+#   pulseaudio  - Enable PulseAudio support
+#   cups        - Enable printing support
+#   vaapi       - Enable hardware video acceleration
+#   wayland     - Enable Wayland support
+#   X           - Enable X11 support
+
+download_source(
+    name = "chromium-src",
+    src_uri = "https://commondatastorage.googleapis.com/chromium-browser-official/chromium-126.0.6478.126.tar.xz",
+    sha256 = "5d5206637e659f03e006cd8b6b269c49c0c2c697d10517e14dbcea851831e143",
+    signature_required = False,
+)
+
+binary_package(
+    name = "chromium",
+    srcs = [":chromium-src"],
+    version = "126.0.6478.126",
+    description = "Open-source web browser from Google - fast, secure, and customizable",
+    homepage = "https://www.chromium.org/",
+    license = "BSD-3-Clause",
+    install_script = """
+        cd $SRCS
+
+        # Configure GN build
+        mkdir -p out/Release
+        cat > out/Release/args.gn << 'GNARGS'
+is_official_build=true
+is_debug=false
+symbol_level=0
+enable_nacl=false
+blink_symbol_level=0
+v8_symbol_level=0
+treat_warnings_as_errors=false
+use_custom_libcxx=true
+use_sysroot=false
+use_gnome_keyring=false
+use_pulseaudio=true
+use_cups=true
+use_kerberos=false
+use_vaapi=true
+proprietary_codecs=true
+ffmpeg_branding="Chrome"
+GNARGS
+
+        # Generate build files
+        gn gen out/Release
+
+        # Build chromium
+        ninja -C out/Release chrome chrome_sandbox chromedriver
+
+        # Install
+        mkdir -p "$OUT/usr/lib/chromium"
+        mkdir -p "$OUT/usr/bin"
+
+        cp out/Release/chrome "$OUT/usr/lib/chromium/"
+        cp out/Release/chrome_sandbox "$OUT/usr/lib/chromium/"
+        cp out/Release/chromedriver "$OUT/usr/lib/chromium/"
+        cp out/Release/*.pak "$OUT/usr/lib/chromium/"
+        cp out/Release/*.bin "$OUT/usr/lib/chromium/" 2>/dev/null || true
+        cp -r out/Release/locales "$OUT/usr/lib/chromium/"
+        cp -r out/Release/resources "$OUT/usr/lib/chromium/" 2>/dev/null || true
+
+        # Create wrapper script
+        cat > "$OUT/usr/bin/chromium" << 'WRAPPER'
+#!/bin/sh
+exec /usr/lib/chromium/chrome "$@"
+WRAPPER
+        chmod +x "$OUT/usr/bin/chromium"
+    """,
+    deps = use_dep(
+        {
+            "glib": ["dev-libs//glib:glib"],
+            "gtk": ["desktop//gtk:gtk3"],
+            # TODO: nss and nspr packages need to be created
+            # "nss": ["network//nss:nss"],
+            # "nspr": ["network//nspr:nspr"],
+            "python": ["lang//python:python"],
+            "nodejs": ["lang//nodejs:nodejs"],
+            "gn": ["dev-tools//build-systems/gn:gn"],
+        },
+        ["glib", "gtk", "python", "nodejs", "gn"],
+    ),
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,47 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "osmnx",
+    version = "1.3.0",
+    src_uri = "https://github.com/gboeing/osmnx/archive/v1.3.0.tar.gz",
+    sha256 = "9203bb381fcaba7a373596a10f39fff74090b0263c811c9eb495afb632a6cc07",
+    description = "Retrieve, model, analyze, and visualize OpenStreetMap street networks and other spatial data",
+    homepage = "https://github.com/gboeing/osmnx",
+    license = "MIT",
+    deps = [
+        "dev-libs//python/geopandas:geopandas",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/networkx:networkx",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/pyproj:pyproj",
+        "dev-libs//python/python-dateutil:python-dateutil",
+        "dev-libs//python/requests:requests",
+        "dev-libs//python/shapely:shapely",
+    ],
+    iuse = ["entropy", "neighbors", "raster", "web_map"],
+    use_extras = {
+        "entropy": "entropy",
+        "neighbors": "nearest_neighbor",
+        "raster": "raster",
+        "web_map": "web_map",
+    },
+    use_deps = {
+        "entropy": [
+            "dev-libs//python/scipy:scipy",
+        ],
+        "neighbors": [
+            "dev-libs//python/scikit-learn:scikit-learn",
+            "dev-libs//python/scipy:scipy",
+        ],
+        "raster": [
+            "graphics//geospatial/gdal:gdal",
+            "dev-libs//python/rasterio:rasterio",
+        ],
+        "web_map": [
+            "dev-libs//python/folium:folium",
+        ],
+    },
+    maintainers = ["buckos"],
+    visibility = ["PUBLIC"],
+)

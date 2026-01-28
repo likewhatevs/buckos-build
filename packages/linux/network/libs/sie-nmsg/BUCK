@@ -1,0 +1,14 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "sie-nmsg",
+    version = "1.2.0",
+    src_uri = "https://mirror.buckos.org/s/sie-nmsg-main.tar.gz",
+    sha256 = "724dd4e64d4f88de88a95c42343248e53a93401bf274c67580a30842f7fe1fba",
+    configure_args = [],
+    deps = [
+        "network//libs/nmsg:nmsg",
+        # TODO: Add wdns dependency when available: network//libs/wdns:wdns
+        # TODO: Add protobuf-c dependency when available: dev-libs//serialization/protobuf-c:protobuf-c
+    ],
+)

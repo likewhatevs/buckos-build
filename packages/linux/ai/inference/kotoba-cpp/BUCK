@@ -1,0 +1,10 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# kotoba-cpp - DISABLED
+# Original GitHub repository (kotoba-tech/kotoba-ios-tts) no longer exists.
+
+filegroup(
+    name = "kotoba-cpp",
+    srcs = [],
+    visibility = ["PUBLIC"],
+)

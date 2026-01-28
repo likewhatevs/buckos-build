@@ -1,0 +1,29 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "vlm2vec",
+    version = "2.0.1",
+    src_uri = "https://mirror.buckos.org/v/vlm2vec-main.tar.gz",
+    sha256 = "6aac43158d8f23e22390b938b39222cef03090f5e3c1f75e0056df00fb6b0d03",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//vision/torchvision:torchvision",
+        "dev-libs//python/transformers:transformers",
+        "dev-libs//python/huggingface-hub:huggingface-hub",
+        "dev-libs//python/peft:peft",
+        "dev-libs//python/accelerate:accelerate",
+        "dev-libs//python/datasets:datasets",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/tqdm:tqdm",
+        "dev-libs//python/wandb:wandb",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/scikit-learn:scikit-learn",
+        "dev-libs//python/scikit-image:scikit-image",
+        "dev-libs//python/timm:timm",
+        "dev-libs//python/einops:einops",
+        "ai//ml-frameworks/flash-attention:flash-attention",
+        "ai//vector-search/hnswlib:hnswlib",
+    ],
+    maintainers = ["buckos"],
+)

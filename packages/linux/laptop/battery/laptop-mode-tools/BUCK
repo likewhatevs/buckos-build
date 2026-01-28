@@ -1,0 +1,48 @@
+# laptop-mode-tools - Laptop power saving tools
+# Reduce power consumption through various kernel and hardware settings
+
+load("@root//defs:package_defs.bzl", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "laptop-mode-tools-src",
+    src_uri = "https://github.com/rickysarraf/laptop-mode-tools/archive/refs/tags/1.74.tar.gz",
+    sha256 = "df269e9449fdfab61ec11d6c009dc9a46a0ccf79b6d97fc886cc789cadac9867",
+    signature_required = False,
+)
+
+# USE flags: See use_flags.bzl for available flags
+
+make_package(
+    name = "laptop-mode-tools",
+    source = ":laptop-mode-tools-src",
+    iuse = ["acpi", "apm"],
+    version = "1.74",
+    description = "Power saving tools for laptops",
+    homepage = "https://github.com/rickysarraf/laptop-mode-tools",
+    license = "GPL-2.0",
+    # laptop-mode-tools has no build phase, only install
+    src_compile = ":",
+    # Use custom install to avoid ownership issues in the install script
+    src_install = """
+        # Set install parameters
+        export DESTDIR="$OUT"
+        export INIT_D=none
+        export MAN_D=/usr/share/man
+        export LIB_D=/usr/lib
+
+        # Run make install, ignoring ownership errors
+        make install DESTDIR="$OUT" INIT_D=none MAN_D=/usr/share/man LIB_D=/usr/lib || true
+
+        # The install script fails on chown/chmod, but files are copied
+        # Verify essential files were installed
+        if [ ! -d "$OUT/usr/sbin" ] || [ ! -f "$OUT/etc/laptop-mode/laptop-mode.conf" ]; then
+            echo "ERROR: Installation failed - critical files missing"
+            exit 1
+        fi
+    """,
+    deps = [
+        "core//bash:bash",
+    ],
+    visibility = ["PUBLIC"],
+)

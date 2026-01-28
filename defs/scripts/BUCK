@@ -1,0 +1,80 @@
+# Build system scripts - changes to these will invalidate cached builds
+# These are tracked by Buck2 for proper cache invalidation when scripts change.
+
+export_file(
+    name = "download",
+    src = "download.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "pkg-config-wrapper",
+    src = "pkg-config-wrapper.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "ebuild",
+    src = "ebuild.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "ebuild-bootstrap-stage1",
+    src = "ebuild-bootstrap-stage1.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "ebuild-bootstrap-stage2",
+    src = "ebuild-bootstrap-stage2.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "ebuild-bootstrap-stage3",
+    src = "ebuild-bootstrap-stage3.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "install-binary",
+    src = "install_binary.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "install-precompiled",
+    src = "install_precompiled.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "extract-source",
+    src = "extract_source.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "download-signature",
+    src = "download_signature.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "generate-live-init-scripts",
+    src = "generate-live-init-scripts.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "create-live-iso",
+    src = "create-live-iso.sh",
+    visibility = ["PUBLIC"],
+)
+
+export_file(
+    name = "live-init",
+    src = "live-init",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "libimobiledevice",
+    version = "1.3.0",
+    iuse = ["gnutls", "readline", "static-libs"],
+    use_configure = {
+        "-gnutls": "--without-gnutls",
+        "-readline": "--without-readline",
+        "-static-libs": "--disable-static",
+        "gnutls": "--with-gnutls",
+        "readline": "--with-readline",
+        "static-libs": "--enable-static",
+    },
+    src_uri = "https://github.com/libimobiledevice/libimobiledevice/releases/download/1.3.0/libimobiledevice-1.3.0.tar.bz2",
+    sha256 = "53f2640c6365cd9f302a6248f531822dc94a6cced3f17128d4479a77bd75b0f6",
+    configure_args = [
+        "--disable-static",
+        "--with-openssl",
+    ],
+    deps = [
+        "dev-libs//libimobiledevice-glue:libimobiledevice-glue",
+        "dev-libs//libplist:libplist",
+        "system//libs/crypto/openssl:openssl",
+    ],
+)

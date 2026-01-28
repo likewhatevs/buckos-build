@@ -1,0 +1,96 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "gdb",
+    version = "14.1",
+    src_uri = "https://mirrors.kernel.org/gnu/gdb/gdb-14.1.tar.xz",
+    sha256 = "d66df51276143451fcbff464cc8723d68f1e9df45a6a2d5635a54e71643edb80",
+    signature_required = False,
+    description = "GNU Debugger",
+    homepage = "https://www.gnu.org/software/gdb/",
+    license = "GPL-3+",
+
+    # USE flags this package supports
+    iuse = [
+        "babeltrace",
+        "cet",
+        "debuginfod",
+        "guile",
+        "lzma",
+        "multitarget",
+        "ncurses",
+        "nls",
+        "python",
+        "readline",
+        "rocm",
+        "server",
+        "sim",
+        "source-highlight",
+        "vanilla",
+        "xml",
+        "xxhash",
+        "zstd",
+    ],
+
+    # Default USE flags
+    use_defaults = ["python", "readline", "ncurses"],
+
+    # Conditional dependencies
+    use_deps = {
+        "readline": ["core//readline:readline"],
+        "ncurses": ["core//ncurses:ncurses"],
+        "python": ["lang//python:python"],
+    },
+
+    # Conditional configure arguments
+    use_configure = {
+        "-babeltrace": "--disable-babeltrace",
+        "-cet": "--disable-cet",
+        "-debuginfod": "--disable-debuginfod",
+        "-guile": "--disable-guile",
+        "-lzma": "--without-lzma",
+        "-multitarget": "--disable-multitarget",
+        "-ncurses": "--disable-tui --without-curses",
+        "-nls": "--disable-nls",
+        "-python": "--without-python",
+        "-readline": "--without-system-readline",
+        "-rocm": "--disable-rocm",
+        "-server": "--disable-server",
+        "-sim": "--disable-sim",
+        "-source-highlight": "--disable-source-highlight",
+        "-vanilla": "--disable-vanilla",
+        "-xml": "--without-expat",
+        "-xxhash": "--disable-xxhash",
+        "-zstd": "--without-zstd",
+        "babeltrace": "--enable-babeltrace",
+        "cet": "--enable-cet",
+        "debuginfod": "--enable-debuginfod",
+        "guile": "--enable-guile",
+        "lzma": "--with-lzma",
+        "multitarget": "--enable-multitarget",
+        "ncurses": "--enable-tui --with-curses",
+        "nls": "--enable-nls",
+        "python": "--with-python=/usr/bin/python3",
+        "readline": "--with-system-readline",
+        "rocm": "--enable-rocm",
+        "server": "--enable-server",
+        "sim": "--enable-sim",
+        "source-highlight": "--enable-source-highlight",
+        "vanilla": "--enable-vanilla",
+        "xml": "--with-expat",
+        "xxhash": "--enable-xxhash",
+        "zstd": "--with-zstd",
+    },
+
+    # Base configure arguments (always applied)
+    configure_args = [
+        "--with-system-zlib",
+        "--disable-werror",
+    ],
+
+    deps = [
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

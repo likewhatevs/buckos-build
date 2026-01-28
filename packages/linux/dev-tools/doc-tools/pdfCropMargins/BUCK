@@ -1,0 +1,15 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "pdfCropMargins",
+    version = "2.2.1",
+    src_uri = "https://github.com/abarker/pdfCropMargins/archive/refs/tags/release_2.2.1.tar.gz",
+    sha256 = "53e56228359c484fac45f63b441e669cfee4264524d0414a69c36513e1967a86",
+    description = "A command-line program to crop the margins of PDF files",
+    homepage = "https://github.com/abarker/pdfCropMargins",
+    license = "GPL-3.0",
+    deps = [
+        "lang//python:python",
+    ],
+    visibility = ["PUBLIC"],
+)

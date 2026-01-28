@@ -1,0 +1,85 @@
+# =============================================================================
+# FIREWALL - Linux Firewall and Packet Filtering Tools
+# =============================================================================
+
+# Modern netfilter-based firewalls (nftables ecosystem)
+filegroup(
+    name = "modern-firewalls",
+    srcs = [
+        # # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available  # TODO: Uncomment when nftables package is enabled
+        "network//firewall/firewalld:firewalld",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Legacy netfilter-based firewalls (iptables ecosystem)
+filegroup(
+    name = "legacy-firewalls",
+    srcs = [
+        "network//firewall/iptables:iptables",
+        "network//firewall/ipset:ipset",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# User-friendly firewall frontends
+filegroup(
+    name = "firewall-frontends",
+    srcs = [
+        "network//firewall/ufw:ufw",
+        "network//firewall/firewalld:firewalld",
+        "network//firewall/ferm:ferm",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Rule generation and configuration tools
+filegroup(
+    name = "firewall-tools",
+    srcs = [
+        "network//firewall/ferm:ferm",
+        "network//firewall/ipset:ipset",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Core netfilter stack (both modern and legacy)
+filegroup(
+    name = "netfilter-core",
+    srcs = [
+        # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available
+        "network//firewall/iptables:iptables",
+        "network//firewall/ipset:ipset",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Minimal firewall setup (recommended)
+filegroup(
+    name = "minimal-firewall",
+    srcs = [
+        # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Complete firewall toolkit
+filegroup(
+    name = "all-firewalls",
+    srcs = [
+        # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available
+        "network//firewall/iptables:iptables",
+        "network//firewall/firewalld:firewalld",
+        "network//firewall/ufw:ufw",
+        "network//firewall/ipset:ipset",
+        "network//firewall/ferm:ferm",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

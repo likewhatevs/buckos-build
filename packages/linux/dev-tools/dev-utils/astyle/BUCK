@@ -1,0 +1,36 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# Artistic Style - source code indenter, formatter, and beautifier
+# Makefile-only project (no configure script)
+autotools_package(
+    name = "astyle",
+    version = "3.4.13",
+    iuse = ["java", "static-libs"],
+    use_configure = {
+        "-java": "--disable-java",
+        "-static-libs": "--disable-static",
+        "java": "--enable-java",
+        "static-libs": "--enable-static",
+    },
+    src_uri = "https://sourceforge.net/projects/astyle/files/astyle/astyle%203.4/astyle-3.4.13.tar.bz2",
+    sha256 = "78a610abd39e94e0f913e9ee5cda1e85bb62cd633553decb9e00d3d9201019ce",
+    signature_required = False,
+    description = "Artistic Style - source code indenter, formatter, and beautifier",
+    homepage = "https://astyle.sourceforge.net/",
+    license = "MIT",
+    src_configure = "true",
+    src_compile = """
+cd build/gcc
+make -j$(nproc)
+""",
+    src_install = """
+cd build/gcc
+install -Dm755 bin/astyle "$DESTDIR/usr/bin/astyle"
+# Install man page if it exists
+if [ -f ../../doc/astyle.1 ]; then
+    install -Dm644 ../../doc/astyle.1 "$DESTDIR/usr/share/man/man1/astyle.1"
+fi
+""",
+    visibility = ["PUBLIC"],
+)

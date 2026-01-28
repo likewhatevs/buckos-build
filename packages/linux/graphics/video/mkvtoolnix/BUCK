@@ -1,0 +1,63 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# MKVToolNix - Set of tools to create, alter and inspect Matroska files
+
+autotools_package(
+    name = "mkvtoolnix",
+    version = "86.0",
+    src_uri = "https://mkvtoolnix.download/sources/mkvtoolnix-86.0.tar.xz",
+    sha256 = "29a9155fbba99f9074de2abcfbdc4e966ea38c16d9f6f547cf2d8d9a48152c97",
+    signature_sha256 = "0f69d4343ec83d8b63bd872ffacf808928dc6e634247b9c2aee93932b532c921",
+    signature_required = False,
+    description = "Set of tools to create, alter and inspect Matroska files",
+    homepage = "https://mkvtoolnix.download/",
+    license = "GPL-2.0-only",
+    iuse = [
+        "dbus",
+        "debug",
+        "dvd",
+        "gui",
+        "nls",
+        "pch",
+    ],
+    use_defaults = ["gui"],
+    use_configure = {
+        "-dbus": "--disable-dbus",
+        "-debug": "--enable-optimization --disable-debug",
+        "-dvd": "--disable-dvd",
+        "-gui": "--disable-gui",
+        "-nls": "--disable-nls",
+        "-pch": "--disable-pch",
+        "dbus": "--enable-dbus",
+        "debug": "--disable-optimization --enable-debug",
+        "dvd": "--enable-dvd",
+        "gui": "--enable-gui --with-qt6",
+        "nls": "--enable-nls",
+        "pch": "--enable-pch",
+    },
+    use_deps = {
+        "gui": ["desktop//qt:qt5"],
+    },
+    configure_args = [
+        "--prefix=/usr",
+        "--with-boost=/usr",
+    ],
+    make_args = [],
+    post_install = """
+DESTDIR=$OUT rake install
+""",
+    deps = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "dev-libs//boost:boost",
+        "core//zlib:zlib",
+        "dev-libs//pugixml:pugixml",
+        "system//libs/audio/flac:flac",
+        "system//libs/audio/libvorbis:libvorbis",
+    ],
+    bdepend = [
+        "dev-tools//build-systems/pkg-config:pkg-config",
+        "lang//ruby:ruby",
+    ],
+    visibility = ["PUBLIC"],
+)

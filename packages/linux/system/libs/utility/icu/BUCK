@@ -1,0 +1,51 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+# ICU - International Components for Unicode
+# ICU has its own configure system, not autotools
+download_source(
+    name = "icu-src",
+    src_uri = "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-src.tgz",
+    sha256 = "cb968df3e4d2e87e8b11c49a5d01c787bd13b9545280fc6642f826527618caef",
+    signature_sha256 = "c6cd1e5a18b0ab624a6133c35c8043e852935895ea60ad330014de29a3ec7941",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "icu",
+    # No autotools bdepend - ICU has its own configure
+    bdepend = [],
+    # No autoreconf - ICU uses its own configure system
+    src_prepare = "",
+    source = ":icu-src",
+    iuse = ["debug", "examples", "static-libs"],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-examples": "--disable-examples",
+        "-static-libs": "--disable-static",
+        "debug": "--enable-debug",
+        "examples": "--enable-examples",
+        "static-libs": "--enable-static",
+    },
+    version = "75.1",
+    description = "International Components for Unicode library",
+    homepage = "https://icu.unicode.org/",
+    license = "Unicode-3.0",
+    # ICU configure is in source/ subdirectory
+    src_configure = """
+cd source
+./configure \\
+    --prefix=/usr \\
+    --libdir=/usr/lib64 \\
+    --disable-samples \\
+    --disable-tests
+""",
+    src_compile = """
+cd source
+make -j$(nproc)
+""",
+    src_install = """
+cd source
+make DESTDIR="$DESTDIR" install
+""",
+    visibility = ["PUBLIC"],
+)

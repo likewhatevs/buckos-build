@@ -1,0 +1,31 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# socat - Multipurpose relay for bidirectional data transfer
+# =============================================================================
+
+autotools_package(
+    name = "socat",
+    version = "1.8.0.0",
+    src_uri = "http://www.dest-unreach.org/socat/download/socat-1.8.0.0.tar.bz2",
+    sha256 = "e1de683dd22ee0e3a6c6bbff269abe18ab0c9d7eb650204f125155b9005faca7",
+    signature_required = False,
+
+    use_defaults = ["ssl", "ipv6"],
+
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "readline": ["core//readline:readline"],
+        "tcpwrap": ["network//tcp-wrappers:tcp-wrappers"],
+    },
+
+
+    deps = [
+    ],
+
+    description = "Multipurpose relay for bidirectional data transfer",
+    homepage = "http://www.dest-unreach.org/socat/",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

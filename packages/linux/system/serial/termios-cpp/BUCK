@@ -1,0 +1,9 @@
+# termios-cpp - DISABLED
+# Original GitHub repository (madduci/termios-cpp) has been deleted.
+# Consider using: https://github.com/fedetft/serial-port as an alternative
+
+filegroup(
+    name = "termios-cpp",
+    srcs = [],
+    visibility = ["PUBLIC"],
+)

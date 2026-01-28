@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# =============================================================================
+# Swift - Apple's systems programming language
+# =============================================================================
+
+download_source(
+    name = "swift-src",
+    src_uri = "https://download.swift.org/swift-5.9.2-release/ubuntu2204/swift-5.9.2-RELEASE/swift-5.9.2-RELEASE-ubuntu22.04.tar.gz",
+    sha256 = "6407e39eed7eaefcf7837d192d71765fb0f7cf8bf282c35b021171e8b15617c1",
+    signature_sha256 = "325657c10c0a917cb0126aaf2ce0fe1c72bb9bf14657a89f82330839003959ed",
+    signature_required = False,
+)
+
+binary_package(
+    name = "swift",
+    srcs = [":swift-src"],
+    version = "5.9.2",
+    description = "Swift is a powerful and intuitive programming language for all Apple platforms and beyond",
+    homepage = "https://www.swift.org/",
+    license = "Apache-2.0",
+    install_script = """
+        # Source is already extracted to $SRCS
+        mkdir -p $OUT/usr/local/swift
+        cp -r $SRCS/* $OUT/usr/local/swift/
+        mkdir -p $OUT/usr/bin
+        ln -s /usr/local/swift/usr/bin/swift $OUT/usr/bin/swift
+        ln -s /usr/local/swift/usr/bin/swiftc $OUT/usr/bin/swiftc
+    """,
+    visibility = ["PUBLIC"],
+)

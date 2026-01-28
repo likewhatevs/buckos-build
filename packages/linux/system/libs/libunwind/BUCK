@@ -1,0 +1,51 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# libunwind - Portable C API for determining call-chain of a program
+download_source(
+    name = "libunwind-src",
+    src_uri = "https://github.com/libunwind/libunwind/releases/download/v1.8.3/libunwind-1.8.3.tar.gz",
+    sha256 = "be30d910e67f58d82e753231f1357f326a1a088acf126b21ff77e60aab19b90b",
+    signature_sha256 = "189592f7b3d1ceabf5a6bf548b02e5ce39a3d5a5e36afbe622abeff2a72dc6f4",
+    signature_required=False,
+)
+
+autotools_package(
+    name = "libunwind",
+    source = ":libunwind-src",
+    iuse = [
+        "debug",
+        "debug-frame",
+        "libatomic",
+        "lzma",
+        "static-libs",
+        "zlib",
+    ],
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-debug-frame": "--disable-debug-frame",
+        "-libatomic": "--disable-libatomic",
+        "-lzma": "--without-lzma",
+        "-static-libs": "--disable-static",
+        "-zlib": "--without-zlib",
+        "debug": "--enable-debug",
+        "debug-frame": "--enable-debug-frame",
+        "libatomic": "--enable-libatomic",
+        "lzma": "--with-lzma",
+        "static-libs": "--enable-static",
+        "zlib": "--with-zlib",
+    },
+    version = "1.8.3",
+    description = "Portable C API for determining the call-chain of a program",
+    homepage = "https://www.nongnu.org/libunwind/",
+    license = "MIT",
+    configure_args = [
+        "--prefix=/usr",
+        "--disable-documentation",
+        "--enable-minidebuginfo",
+    ],
+    deps = [
+        "system//libs/compression/xz:xz",
+    ],
+    visibility = ["PUBLIC"],
+)

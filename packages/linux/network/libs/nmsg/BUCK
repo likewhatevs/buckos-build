@@ -1,0 +1,17 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "nmsg",
+    version = "1.1.0",
+    src_uri = "https://mirror.buckos.org/n/nmsg-main.tar.gz",
+    sha256 = "f6e00885259f63152ffa5a884bf1f8967ff1a4ba226a938caa4b1877dc4962bb",
+    configure_args = [
+        "--with-yajl",
+        "--without-libzmq",
+    ],
+    deps = [
+        "core//zlib:zlib",
+        "network//libs/libpcap:libpcap",
+        "system//libs/data/yajl:yajl",
+    ],
+)

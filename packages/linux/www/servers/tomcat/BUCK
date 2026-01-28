@@ -1,0 +1,39 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# tomcat - Java servlet container
+#
+# USE flags:
+#   This is a pre-built Java application, USE flags control runtime features
+#   java     - Java runtime (always required)
+
+download_source(
+    name = "tomcat-src",
+    src_uri = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.19/bin/apache-tomcat-10.1.19.tar.gz",
+    sha256 = "c3ea69d92bcfc3ed792a8d80794acdb856f1c05d8a045e17a71a2588a0c750b7",
+    signature_sha256 = "1e34e6d9fb031961755cb86d47d5288df9d495c15f8c9f34fbd671466a2e8911",
+    signature_required = False,
+)
+
+binary_package(
+    name = "tomcat",
+    srcs = [":tomcat-src"],
+    version = "10.1.19",
+    description = "Java servlet and JSP container",
+    homepage = "https://tomcat.apache.org",
+    license = "Apache-2.0",
+    install_script = """
+        cd $SRCS
+        mkdir -p "$OUT/usr/share/tomcat"
+        cp -r * "$OUT/usr/share/tomcat/"
+        mkdir -p "$OUT/usr/bin"
+        ln -s /usr/share/tomcat/bin/catalina.sh "$OUT/usr/bin/catalina"
+    """,
+    # deps = use_dep(
+    #     {
+    #         "java": ["lang//openjdk:openjdk"],  # TODO: not packaged yet
+    #     },
+    #     ["java"],
+    # ),
+    visibility = ["PUBLIC"],
+)

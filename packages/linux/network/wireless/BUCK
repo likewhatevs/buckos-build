@@ -1,0 +1,71 @@
+# Wireless networking tools and utilities
+# Includes WiFi, Bluetooth, and software-defined radio tools
+
+# WiFi configuration and authentication tools
+filegroup(
+    name = "wifi-tools",
+    srcs = [
+        "network//wireless/wpa-supplicant:wpa-supplicant",
+        "network//wireless/hostapd:hostapd",
+        "network//wireless/iw:iw",
+        "network//wireless/wireless-tools:wireless-tools",
+        "network//wireless/wireless-regdb:wireless-regdb",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Bluetooth protocol stack and utilities
+filegroup(
+    name = "bluetooth-tools",
+    srcs = [
+        "network//wireless/bluez:bluez",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Wireless security and analysis tools
+filegroup(
+    name = "wireless-security",
+    srcs = [
+        "network//wireless/aircrack-ng:aircrack-ng",
+        "network//wireless/kismet:kismet",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Wireless monitoring tools
+filegroup(
+    name = "wireless-monitoring",
+    srcs = [
+        "network//wireless/wavemon:wavemon",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Software-defined radio tools
+filegroup(
+    name = "sdr-tools",
+    srcs = [
+        "network//wireless/rtl-sdr:rtl-sdr",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All wireless tools combined
+filegroup(
+    name = "all",
+    srcs = [
+        ":wifi-tools",
+        ":bluetooth-tools",
+        ":wireless-security",
+        ":wireless-monitoring",
+        ":sdr-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,33 @@
+# Email Clients
+# Comprehensive collection of email clients for all use cases
+
+# All email clients
+filegroup(
+    name = "all-email-clients",
+    srcs = [
+        "communication//email-clients/cli:cli-email-clients",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# CLI email clients only
+filegroup(
+    name = "cli-clients",
+    srcs = [
+        "communication//email-clients/cli:cli-email-clients",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Lightweight email client collection
+filegroup(
+    name = "lightweight",
+    srcs = [
+        "communication//email-clients/cli/aerc:aerc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+

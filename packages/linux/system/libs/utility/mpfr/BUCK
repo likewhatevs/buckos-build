@@ -1,0 +1,35 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "mpfr-src",
+    src_uri = "https://mirror.buckos.org/m/mpfr-4.2.1.tar.xz",
+    sha256 = "277807353a6726978996945af13e52829e3abd7a9a5b7fb2793894e18f1fcbb2",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "mpfr",
+    source = ":mpfr-src",
+    iuse = ["static-libs"],
+    use_configure = {
+        "-static-libs": "--disable-static",
+        "static-libs": "--enable-static",
+    },
+    version = "4.2.1",
+    description = "GNU Multiple Precision Floating-Point Reliable Library",
+    homepage = "https://www.mpfr.org/",
+    license = "LGPL-3.0",
+    configure_args = [
+        "--disable-static",
+        "--enable-thread-safe",
+    ],
+    deps = [
+        "system//libs/utility/gmp:gmp",
+    ],
+    # Remove .la files - they contain hardcoded paths that break cross-package builds
+    post_install = '''
+find "$DESTDIR" -name "*.la" -delete
+''',
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,23 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "recognize-anything",
+    version = "0.0.1",
+    src_uri = "https://github.com/xinyu1205/recognize-anything/archive/fd2ab877e245e8e571af7b2d6048d1a9d40a6408.tar.gz",
+    sha256 = "f201b4ae01a44f720d8ace0a69058f7f1596c2246e2e5802ce38a4dab24cdee9",
+    description = "Recognize Anything Model and Tag2Text Model",
+    homepage = "https://github.com/xinyu1205/recognize-anything",
+    license = "Apache-2.0",
+    deps = [
+        "lang//python:python",
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//ml-frameworks/torchvision:torchvision",
+        "dev-libs//python/pillow:pillow",
+        "dev-libs//python/scipy:scipy",
+        "ai//ml-frameworks/timm:timm",
+        "ai//ml-frameworks/transformers:transformers",
+        "ai//ml-frameworks/fairscale:fairscale",
+        "dev-libs//python/pycocoevalcap:pycocoevalcap",
+    ],
+    visibility = ["PUBLIC"],
+)

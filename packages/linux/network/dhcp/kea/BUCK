@@ -1,0 +1,57 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "kea",
+    version = "2.6.1",
+    src_uri = "https://ftp.isc.org/isc/kea/2.6.1/kea-2.6.1.tar.gz",
+    sha256 = "d2ce14a91c2e248ad2876e29152d647bcc5e433bc68dafad0ee96ec166fcfad1",
+
+    iuse = [
+        "debug",
+        "kerberos",
+        "mysql",
+        "openssl",
+        "postgres",
+        "postgresql",
+        "shell",
+    ],
+    use_defaults = ["openssl"],
+
+    use_deps = {
+        "openssl": ["system//libs/crypto/openssl:openssl"],
+        "mysql": ["databases//mysql:mysql"],
+        "postgresql": ["databases//postgresql:postgresql"],
+    },
+
+    use_configure = {
+        "-debug": "--disable-debug",
+        "-kerberos": "--disable-kerberos",
+        "-mysql": "--without-mysql",
+        "-openssl": "--without-openssl",
+        "-postgres": "--disable-postgres",
+        "-postgresql": "--without-pgsql",
+        "-shell": "--disable-shell",
+        "debug": "--enable-debug",
+        "kerberos": "--enable-kerberos",
+        "mysql": "--with-mysql",
+        "openssl": "--with-openssl",
+        "postgres": "--enable-postgres",
+        "postgresql": "--with-pgsql",
+        "shell": "--enable-shell",
+    },
+
+    configure_args = [
+        "--enable-shell",
+        "--disable-static",
+    ],
+
+    deps = [
+        "dev-libs//boost:boost",
+        "system//libs/logging/log4cplus:log4cplus",
+    ],
+
+    description = "Modern, open source DHCPv4 and DHCPv6 server",
+    homepage = "https://kea.isc.org/",
+    license = "MPL-2.0",
+    visibility = ["PUBLIC"],
+)

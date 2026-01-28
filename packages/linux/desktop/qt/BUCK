@@ -1,0 +1,407 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package", "cmake_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Qt6 - Cross-platform application framework (required for KDE Plasma 6)
+# =============================================================================
+#
+# USE flags:
+#   X         - Enable X11/XCB support
+#   wayland   - Enable Wayland support
+#   opengl    - Enable OpenGL support
+#   eglfs     - Enable EGL fullscreen platform
+#   dbus      - Enable D-Bus support
+#   widgets   - Enable Qt Widgets
+#   cups      - Enable printing support
+#   ssl       - Enable OpenSSL support
+#   sqlite    - Enable SQLite support
+#   vulkan    - Enable Vulkan support
+
+download_source(
+    name = "qt6-src",
+    src_uri = "https://download.qt.io/official_releases/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz",
+    sha256 = "cdd3a69967208276bb01af7ace7dba0ba53e679f886a4cbe624225c60fb73f2c",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "qt6",
+    source = ":qt6-src",
+    version = "6.8.3",
+    description = "Qt6 - Cross-platform application framework",
+    homepage = "https://www.qt.io/",
+    license = "LGPL-3.0-or-later OR GPL-3.0-or-later",
+
+    # src_prepare: Patch Qt's CMakeLists.txt to define EGL and GLESv2 targets for cross-compilation
+    src_prepare = """
+# Find mesa library path from CMAKE_PREFIX_PATH (already set before src_prepare runs)
+MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa)
+if [ -n "$MESA_PATH" ]; then
+    EGL_LIB="$MESA_PATH/lib64/libEGL.so"
+    GLESV2_LIB="$MESA_PATH/lib64/libGLESv2.so"
+    EGL_INCLUDE="$MESA_PATH/include"
+
+    echo "=== EGL/GLESv2 Configuration ==="
+    echo "MESA_PATH=$MESA_PATH"
+    echo "EGL_LIB=$EGL_LIB"
+    echo "GLESV2_LIB=$GLESV2_LIB"
+    echo "EGL_INCLUDE=$EGL_INCLUDE"
+    ls -la "$EGL_LIB" "$GLESV2_LIB" 2>/dev/null || echo "Warning: Some libs not found"
+
+    # Patch Qt's main CMakeLists.txt to add EGL and GLESv2 target definitions at the very beginning
+    # This ensures the targets exist globally before any find_package calls
+    cat > /tmp/egl_targets.cmake << EOF
+# EGL and GLESv2 targets for cross-compilation (auto-injected)
+if(NOT TARGET EGL::EGL)
+    add_library(EGL::EGL SHARED IMPORTED GLOBAL)
+    set_target_properties(EGL::EGL PROPERTIES
+        IMPORTED_LOCATION "$EGL_LIB"
+        INTERFACE_INCLUDE_DIRECTORIES "$EGL_INCLUDE"
+    )
+endif()
+
+if(NOT TARGET GLESv2::GLESv2)
+    add_library(GLESv2::GLESv2 SHARED IMPORTED GLOBAL)
+    set_target_properties(GLESv2::GLESv2 PROPERTIES
+        IMPORTED_LOCATION "$GLESV2_LIB"
+        INTERFACE_INCLUDE_DIRECTORIES "$EGL_INCLUDE"
+    )
+endif()
+
+set(EGL_FOUND TRUE CACHE BOOL "EGL found")
+set(EGL_INCLUDE_DIR "$EGL_INCLUDE" CACHE PATH "EGL include dir")
+set(EGL_LIBRARY "$EGL_LIB" CACHE FILEPATH "EGL library")
+set(GLESv2_FOUND TRUE CACHE BOOL "GLESv2 found")
+set(GLESv2_INCLUDE_DIR "$EGL_INCLUDE" CACHE PATH "GLESv2 include dir")
+set(GLESv2_LIBRARY "$GLESV2_LIB" CACHE FILEPATH "GLESv2 library")
+EOF
+
+    # Insert the EGL targets after the first cmake_minimum_required line in Qt's main CMakeLists.txt
+    if [ -f "$S/CMakeLists.txt" ]; then
+        # Create backup
+        cp "$S/CMakeLists.txt" "$S/CMakeLists.txt.orig"
+        # Insert our target definitions after cmake_minimum_required (sed 'a' adds on next line)
+        sed -i '/^cmake_minimum_required/a include(/tmp/egl_targets.cmake)' "$S/CMakeLists.txt"
+        echo "Patched CMakeLists.txt to include EGL/GLESv2 targets"
+        head -15 "$S/CMakeLists.txt"
+    fi
+fi
+
+# Disable qdoc (Qt documentation generator) - it requires LLVM/libclang which
+# may have incompatible C++ library (libc++ vs libstdc++) on the host system.
+# We only need qttools for UiTools/designer, not for documentation generation.
+if [ -f "$S/qttools/src/CMakeLists.txt" ]; then
+    echo "Patching qttools to disable qdoc..."
+    # Comment out add_subdirectory(qdoc)
+    sed -i 's|add_subdirectory(qdoc)|# add_subdirectory(qdoc) # Disabled - requires libclang|g' "$S/qttools/src/CMakeLists.txt"
+    echo "qdoc disabled in qttools"
+    grep -n "qdoc" "$S/qttools/src/CMakeLists.txt" || true
+fi
+""",
+
+    # Custom src_compile: Qt6 builds host tools (rcc, moc, etc.) that need to find
+    # shared libraries from our dependencies at runtime. Set LD_LIBRARY_PATH from
+    # LIBRARY_PATH so host tools can find libraries like libdouble-conversion.
+    src_compile = """
+# Set LD_LIBRARY_PATH for host tools built during Qt6 compilation
+# LIBRARY_PATH contains dependency library paths, filter out cross-compiled glibc paths
+if [ -n "${LIBRARY_PATH:-}" ]; then
+    HOST_LD_PATH=""
+    IFS=':' read -ra LIBPATHS <<< "$LIBRARY_PATH"
+    for lpath in "${LIBPATHS[@]}"; do
+        # Skip paths with cross-compiled glibc (would break host tools)
+        if ls "$lpath"/libc.so* >/dev/null 2>&1; then
+            continue
+        fi
+        # Skip bootstrap toolchain paths
+        if [[ "$lpath" == */tools/lib* ]]; then
+            continue
+        fi
+        HOST_LD_PATH="${HOST_LD_PATH:+$HOST_LD_PATH:}$lpath"
+    done
+    if [ -n "$HOST_LD_PATH" ]; then
+        export LD_LIBRARY_PATH="$HOST_LD_PATH"
+        echo "Set LD_LIBRARY_PATH for Qt6 host tools: $LD_LIBRARY_PATH"
+    fi
+fi
+
+cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
+""",
+
+    # USE flags this package supports
+    iuse = [
+        "X",
+        "wayland",
+        "opengl",
+        "eglfs",
+        "dbus",
+        "widgets",
+        "cups",
+        "ssl",
+        "sqlite",
+        "vulkan",
+    ],
+
+    # Default USE flags - Wayland-focused, no X11
+    # OpenGL enabled via EGL+GLES2 for Wayland (Mesa)
+    # dbus is required for KDE Frameworks
+    use_defaults = ["wayland", "widgets", "ssl", "sqlite", "dbus", "opengl"],
+
+    cmake_args = [
+        "-DCMAKE_INSTALL_PREFIX=/usr",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DINSTALL_BINDIR=lib64/qt6/bin",
+        "-DINSTALL_INCLUDEDIR=include/qt6",
+        "-DINSTALL_LIBDIR=lib64",
+        "-DINSTALL_ARCHDATADIR=lib64/qt6",
+        "-DINSTALL_DATADIR=share/qt6",
+        "-DINSTALL_DOCDIR=share/doc/qt6",
+        "-DINSTALL_EXAMPLESDIR=share/doc/qt6/examples",
+        "-DINSTALL_MKSPECSDIR=lib64/qt6/mkspecs",
+        "-DINSTALL_PLUGINSDIR=lib64/qt6/plugins",
+        "-DINSTALL_QMLDIR=lib64/qt6/qml",
+        "-DINSTALL_SYSCONFDIR=/etc/xdg",
+        "-DINSTALL_TRANSLATIONSDIR=share/qt6/translations",
+        # Force system libraries
+        "-DQT_FEATURE_relocatable=OFF",
+        # Disable system font libraries to avoid pkg-config sysroot path issues
+        # Qt6 will use its bundled versions of these libraries
+        "-DQT_FEATURE_harfbuzz=ON",
+        "-DQT_FEATURE_system_harfbuzz=OFF",
+        "-DQT_FEATURE_system_freetype=OFF",
+        "-DQT_FEATURE_fontconfig=OFF",
+        # Explicitly disable finding system harfbuzz/freetype via CMake
+        "-DCMAKE_DISABLE_FIND_PACKAGE_harfbuzz=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_Freetype=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_Fontconfig=ON",
+        # Core modules always built
+        "-DQT_FEATURE_concurrent=ON",
+        "-DQT_FEATURE_gui=ON",
+        "-DQT_FEATURE_network=ON",
+        "-DQT_FEATURE_testlib=ON",
+        "-DQT_FEATURE_xml=ON",
+        # OpenGL configured via USE flags (opengl -> EGL+GLES2)
+        # Disable features we don't need
+        "-DQT_FEATURE_journald=OFF",
+        "-DQT_FEATURE_syslog=OFF",
+        "-DQT_FEATURE_icu=OFF",
+        "-DQT_FEATURE_zstd=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DQT_BUILD_EXAMPLES=OFF",
+        "-DQT_BUILD_TESTS=OFF",
+        "-DBUILD_qttools=ON",
+        # Disable clang-based tools (lupdate-pro, qdoc clang integration) to avoid
+        # linking against host LLVM/libclang which may be built with libc++
+        "-DQT_FEATURE_clang=OFF",
+        # Explicitly disable qdoc - it requires libclang/LLVM and we don't need docs
+        "-DQT_BUILD_STANDALONE_TESTS=OFF",
+        "-DQT_FORCE_FIND_TOOLS=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_Clang=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_LLVM=ON",
+        "-DBUILD_qtdoc=OFF",
+        "-DBUILD_qttranslations=OFF",
+        # Disable qtimageformats (tiff, webp, etc.) - requires complex dependencies
+        "-DBUILD_qtimageformats=OFF",
+        # Disable QtWebEngine and QtWebView - not needed for KDE, requires chromium dependencies
+        "-DBUILD_qtwebengine=OFF",
+        "-DBUILD_qtwebview=OFF",
+        # Disable Qt Multimedia - requires PulseAudio which we don't have yet
+        "-DBUILD_qtmultimedia=OFF",
+        # qtspeech depends on qtmultimedia
+        "-DBUILD_qtspeech=OFF",
+    ],
+
+    # USE-conditional cmake args
+    use_cmake = {
+        "X": [
+            "-DQT_FEATURE_xcb=ON",
+            "-DQT_FEATURE_system_xcb_xinput=ON",
+            "-DQT_FEATURE_xkbcommon_x11=ON",
+        ],
+        "-X": [
+            "-DQT_FEATURE_xcb=OFF",
+            "-DQT_FEATURE_system_xcb_xinput=OFF",
+            "-DQT_FEATURE_xkbcommon_x11=OFF",
+            "-DQT_FEATURE_xlib=OFF",
+        ],
+        "wayland": [
+            "-DQT_FEATURE_wayland=ON",
+            "-DBUILD_qtwayland=ON",
+        ],
+        "-wayland": [
+            "-DQT_FEATURE_wayland=OFF",
+            "-DBUILD_qtwayland=OFF",
+        ],
+        "opengl": [
+            # Use OpenGL ES 2 + EGL for Wayland (our mesa is Wayland-only, no GLX)
+            "-DINPUT_opengl=es2",
+            "-DQT_FEATURE_egl=ON",
+            "-DQT_FEATURE_opengles2=ON",
+            "-DQT_FEATURE_opengl=ON",
+            # Help CMake find EGL/GLES from Mesa by checking system paths
+            "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH",
+            "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH",
+            "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH",
+            # Ensure pkg-config is used for EGL detection
+            "-DCMAKE_DISABLE_FIND_PACKAGE_EGL=OFF",
+        ],
+        "-opengl": [
+            "-DINPUT_opengl=no",
+            "-DQT_FEATURE_opengl=OFF",
+            "-DQT_FEATURE_egl=OFF",
+        ],
+        "eglfs": [
+            "-DQT_FEATURE_eglfs=ON",
+        ],
+        "-eglfs": [
+            "-DQT_FEATURE_eglfs=OFF",
+        ],
+        "dbus": [
+            "-DQT_FEATURE_dbus=ON",
+        ],
+        "-dbus": [
+            "-DQT_FEATURE_dbus=OFF",
+        ],
+        "widgets": [
+            "-DQT_FEATURE_widgets=ON",
+        ],
+        "-widgets": [
+            "-DQT_FEATURE_widgets=OFF",
+        ],
+        "cups": [
+            "-DQT_FEATURE_cups=ON",
+        ],
+        "-cups": [
+            "-DQT_FEATURE_cups=OFF",
+        ],
+        "ssl": [
+            "-DQT_FEATURE_openssl=ON",
+            "-DQT_FEATURE_openssl_linked=ON",
+        ],
+        "-ssl": [
+            "-DQT_FEATURE_openssl=OFF",
+        ],
+        "sqlite": [
+            "-DQT_FEATURE_sql=ON",
+            "-DQT_FEATURE_sql_sqlite=ON",
+            "-DQT_FEATURE_system_sqlite=ON",
+        ],
+        "-sqlite": [
+            "-DQT_FEATURE_sql_sqlite=OFF",
+        ],
+        "vulkan": [
+            "-DQT_FEATURE_vulkan=ON",
+        ],
+        "-vulkan": [
+            "-DQT_FEATURE_vulkan=OFF",
+        ],
+    },
+
+    # Base dependencies (always needed)
+    # NOTE: fontconfig/freetype/harfbuzz removed - Qt6 will use bundled versions
+    # to avoid pkg-config sysroot path issues during cross-compilation
+    deps = [
+        "core//zlib:zlib",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+        "system//libs/utility/pcre2:pcre2",
+        # GUI deps (using Qt's bundled freetype/harfbuzz)
+        "system//libs/image/libpng:libpng",
+        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
+        "desktop//libdrm:libdrm",
+        "graphics//xorg/libxkbcommon:libxkbcommon",
+        # Transitive dependencies needed for linking:
+        # - expat: needed by Mesa's libEGL
+        # - libffi: needed by wayland
+        # - openssl: needed by Qt6Network for SSL/TLS
+        "core//expat:expat",
+        "core//libffi:libffi",
+        "system//libs/crypto/openssl:openssl",
+    ],
+
+    # USE-conditional dependencies
+    use_deps = {
+        "X": [
+            "graphics//xorg/libX11:libX11",
+            "graphics//xorg/libxcb:libxcb",
+            "graphics//xorg/xcb-util-cursor:xcb-util-cursor",
+            "graphics//xorg/xcb-util-image:xcb-util-image",
+            "graphics//xorg/xcb-util-keysyms:xcb-util-keysyms",
+            "graphics//xorg/xcb-util-renderutil:xcb-util-renderutil",
+            "graphics//xorg/xcb-util-wm:xcb-util-wm",
+            "graphics//xorg/libICE:libICE",
+            "graphics//xorg/libSM:libSM",
+        ],
+        "wayland": [
+            "graphics//rendering/wayland:wayland",
+            "graphics//rendering/wayland-protocols:wayland-protocols",
+        ],
+        "opengl": [
+            "desktop//mesa:mesa",
+        ],
+        "ssl": [
+            "system//libs/crypto/openssl:openssl",
+        ],
+        "sqlite": [
+            "databases//sqlite:sqlite",
+        ],
+        "dbus": [
+            "system//libs/ipc/dbus:dbus",
+        ],
+    },
+
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Qt5 - Cross-platform application framework (legacy)
+# =============================================================================
+
+download_source(
+    name = "qt5-src",
+    src_uri = "https://download.qt.io/archive/qt/5.15/5.15.12/single/qt-everywhere-opensource-src-5.15.12.tar.xz",
+    sha256 = "93f2c0889ee2e9cdf30c170d353c3f829de5f29ba21c119167dee5995e48ccce",
+    signature_required = False,
+)
+
+binary_package(
+    name = "qt5",
+    srcs = [":qt5-src"],
+    version = "5.15.12",
+    description = "Cross-platform application framework",
+    homepage = "https://www.qt.io/",
+    license = "LGPL-3.0-or-later OR GPL-3.0-or-later",
+    install_script = """
+        # Find the Qt source directory (name varies between releases)
+        QT_DIR=$(ls -d qt-everywhere-* 2>/dev/null | head -1)
+        if [ -z "$QT_DIR" ]; then
+            echo "ERROR: Cannot find Qt source directory"
+            ls -la
+            exit 1
+        fi
+        echo "Using Qt source directory: $QT_DIR"
+        cd "$QT_DIR"
+        ./configure \
+            -prefix $PREFIX \
+            -opensource \
+            -confirm-license \
+            -release \
+            -shared \
+            -nomake examples \
+            -nomake tests \
+            -no-separate-debug-info \
+            -no-pch \
+            -no-use-gold-linker
+        make -j$(nproc)
+        make install
+    """,
+    deps = [
+        "desktop//libdrm:libdrm",
+        "fonts//libraries/fontconfig:fontconfig",
+        "fonts//libraries/freetype:freetype",
+        "fonts//libraries/harfbuzz:harfbuzz",
+        "dev-libs//glib:glib",
+        "dev-libs//double-conversion:double-conversion",
+    ],
+    visibility = ["PUBLIC"],
+)

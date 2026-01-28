@@ -1,0 +1,190 @@
+# Emulation and Virtualization packages
+#
+# This category contains software for:
+# - System emulation (QEMU, Xen)
+# - Desktop virtualization (VirtualBox, libvirt, virt-manager)
+# - Container runtimes (Docker, Podman, containerd)
+# - Lightweight virtualization (Firecracker, Cloud Hypervisor, crosvm)
+# - Kernel development tools (virtme-ng, kvmtool)
+# - VM utilities (SPICE, virtiofsd)
+
+# Hypervisors
+filegroup(
+    name = "hypervisors",
+    srcs = [
+        "emulation//hypervisors:all-hypervisors",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Virtualization management tools
+filegroup(
+    name = "virtualization",
+    srcs = [
+        "emulation//virtualization:all-virtualization",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container runtimes
+filegroup(
+    name = "containers",
+    srcs = [
+        "emulation//containers:all-containers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Kernel virtualization tools
+filegroup(
+    name = "kernel-tools",
+    srcs = [
+        "emulation//kernel:all-kernel-tools",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Utilities
+filegroup(
+    name = "utilities",
+    srcs = [
+        "emulation//utilities:all-utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential emulation packages (QEMU + libvirt)
+filegroup(
+    name = "essential",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu",
+        "emulation//virtualization/libvirt:libvirt",
+        "emulation//virtualization/virt-manager:virt-manager",
+        "emulation//utilities/spice:spice-server",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Server virtualization (headless)
+filegroup(
+    name = "server",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu",
+        "emulation//virtualization/libvirt:libvirt",
+        "emulation//containers:docker-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop virtualization (with GUI)
+filegroup(
+    name = "desktop",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu",
+        "emulation//virtualization/libvirt:libvirt",
+        "emulation//virtualization:virt-manager-full",
+        "emulation//utilities/spice:spice-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Cloud/microVM hypervisors
+filegroup(
+    name = "cloud",
+    srcs = [
+        "emulation//utilities/firecracker:firecracker",
+        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
+        "emulation//utilities/crosvm:crosvm",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Development tools for kernel testing
+filegroup(
+    name = "development",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu",
+        "emulation//kernel:all-kernel-tools",
+        "emulation//utilities/virtiofsd:virtiofsd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Guest additions and agents (for VMs)
+filegroup(
+    name = "guest-tools",
+    srcs = [
+        "emulation//hypervisors/qemu:qemu-guest-agent",
+        "emulation//utilities/spice:spice-vdagent",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Docker ecosystem
+filegroup(
+    name = "docker",
+    srcs = [
+        "emulation//containers:docker-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Podman ecosystem
+filegroup(
+    name = "podman",
+    srcs = [
+        "emulation//containers:podman-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Cloud Hypervisor full stack (CH + virtiofsd + firmware)
+filegroup(
+    name = "cloud-hypervisor-full",
+    srcs = [
+        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
+        "emulation//utilities/virtiofsd:virtiofsd",
+        "boot//rust-hypervisor-firmware:rust-hypervisor-firmware",
+        "boot//edk2-cloudhv:edk2-cloudhv",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Cloud Hypervisor minimal (CH + virtiofsd only)
+filegroup(
+    name = "cloud-hypervisor-minimal",
+    srcs = [
+        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
+        "emulation//utilities/virtiofsd:virtiofsd",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All emulation packages
+filegroup(
+    name = "all",
+    srcs = [
+        ":hypervisors",
+        ":virtualization",
+        ":containers",
+        ":kernel-tools",
+        ":utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

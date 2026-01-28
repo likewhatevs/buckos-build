@@ -1,0 +1,185 @@
+# Video packages aggregator
+# This file provides convenient groups for video-related packages
+
+# Core Video Libraries - Essential video encoding/decoding libraries
+filegroup(
+    name = "libraries",
+    srcs = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "graphics//video/x264:x264",
+        "graphics//video/x265:x265",
+        "graphics//video/libvpx:libvpx",
+        "media//video/dav1d:dav1d",
+        "graphics//video/aom:aom",
+        "graphics//video/gstreamer:gstreamer",
+        "graphics//video/gstreamer:gst-plugins-base",
+        "graphics//video/gstreamer:gst-plugins-good",
+        "graphics//video/gstreamer:gst-plugins-bad",
+        "graphics//video/gstreamer:gst-plugins-ugly",
+        "graphics//video/gstreamer:gst-libav",
+        "graphics//video/libva:libva",
+        "graphics//video/libva:libva-utils",
+        "graphics//video/libva:intel-media-driver",
+        "graphics//video/vdpau:vdpau",
+        "graphics//video/vdpau:libvdpau-va-gl",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Players - Media playback applications
+filegroup(
+    name = "players",
+    srcs = [
+        "graphics//video/vlc:vlc",
+        "graphics//video/mpv:mpv",
+        "graphics//video/mplayer:mplayer",
+        "graphics//video/smplayer:smplayer",
+        "graphics//video/celluloid:celluloid",
+        "graphics//video/kodi:kodi",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Editors - Video editing and production applications
+filegroup(
+    name = "editors",
+    srcs = [
+        "graphics//video/kdenlive:kdenlive",
+        "graphics//video/openshot:openshot",
+        "graphics//video/obs-studio:obs-studio",
+        "graphics//video/shotcut:shotcut",
+        "graphics//video/pitivi:pitivi",
+        "graphics//video/flowblade:flowblade",
+        "graphics//video/avidemux:avidemux",
+        "graphics//video/lives:lives",
+        "graphics//video/natron:natron",
+        "graphics//video/olive:olive",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Utilities - Video conversion, analysis, and manipulation tools
+filegroup(
+    name = "utilities",
+    srcs = [
+        "graphics//video/handbrake:handbrake",
+        "graphics//video/yt-dlp:yt-dlp",
+        "graphics//video/mkvtoolnix:mkvtoolnix",
+        "graphics//video/v4l-utils:v4l-utils",
+        "graphics//video/dvdauthor:dvdauthor",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Screen Recording - Screen capture and recording tools
+filegroup(
+    name = "recording",
+    srcs = [
+        "graphics//video/obs-studio:obs-studio",
+        "graphics//video/simplescreenrecorder:simplescreenrecorder",
+        "graphics//video/peek:peek",
+        "graphics//video/vokoscreen:vokoscreen",
+        "graphics//video/kazam:kazam",
+        "graphics//video/gpu-screen-recorder:gpu-screen-recorder",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential Codecs - Basic codec support for video playback
+filegroup(
+    name = "essential-codecs",
+    srcs = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "graphics//video/x264:x264",
+        "graphics//video/x265:x265",
+        "graphics//video/libvpx:libvpx",
+        "media//video/dav1d:dav1d",
+        "graphics//video/aom:aom",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Hardware Acceleration - Video acceleration libraries
+filegroup(
+    name = "hw-accel",
+    srcs = [
+        "graphics//video/libva:libva",
+        "graphics//video/libva:libva-utils",
+        "graphics//video/libva:intel-media-driver",
+        "graphics//video/vdpau:vdpau",
+        "graphics//video/vdpau:libvdpau-va-gl",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Minimal Video - Lightweight video support
+filegroup(
+    name = "minimal",
+    srcs = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "graphics//video/mpv:mpv",
+        "graphics//video/yt-dlp:yt-dlp",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop Video - Complete desktop video experience
+filegroup(
+    name = "desktop",
+    srcs = [
+        ":libraries",
+        ":players",
+        ":utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Professional Video - Tools for professional video work
+filegroup(
+    name = "professional",
+    srcs = [
+        "graphics//video/kdenlive:kdenlive",
+        "graphics//video/obs-studio:obs-studio",
+        "graphics//video/natron:natron",
+        "graphics//video/handbrake:handbrake",
+        "graphics//video/mkvtoolnix:mkvtoolnix",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Streaming Suite - Tools for live streaming
+filegroup(
+    name = "streaming",
+    srcs = [
+        "graphics//video/obs-studio:obs-studio",
+        "graphics//video/ffmpeg:ffmpeg",
+        "graphics//video/gstreamer:gstreamer",
+        "graphics//video/v4l-utils:v4l-utils",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All Video - Complete video package collection
+filegroup(
+    name = "all",
+    srcs = [
+        ":libraries",
+        ":players",
+        ":editors",
+        ":utilities",
+        ":recording",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

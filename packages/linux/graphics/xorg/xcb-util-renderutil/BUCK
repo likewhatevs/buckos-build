@@ -1,0 +1,26 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# xcb-util-renderutil - XCB render utilities
+autotools_package(
+    name = "xcb-util-renderutil",
+    version = "0.3.10",
+    src_uri = "https://xcb.freedesktop.org/dist/xcb-util-renderutil-0.3.10.tar.xz",
+    sha256 = "3e15d4f0e22d8ddbfbb9f5d77db43eacd7a304029bf25a6166cc63caa96d04ba",
+    description = "XCB render utilities",
+    homepage = "https://xcb.freedesktop.org/",
+    license = "MIT",
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--libdir=/usr/lib64",
+    ],
+    # Remove .la files that cause libtool path issues
+    src_install = "make DESTDIR=\"$DESTDIR\" install && find \"$DESTDIR\" -name '*.la' -delete",
+    deps = [
+        "graphics//xorg/libxcb:libxcb",
+        "graphics//xorg/libXau:libXau",
+        "graphics//xorg/libXdmcp:libXdmcp",
+        "graphics//xorg/xorgproto:xorgproto",
+    ],
+    visibility = ["PUBLIC"],
+)

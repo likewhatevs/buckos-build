@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "log4cplus",
+    version = "2.1.2",
+    iuse = [
+        "explicit-initialization",
+        "iconv",
+        "qt6",
+        "server",
+        "threads",
+    ],
+    use_cmake = {
+        "-explicit-initialization": "-DENABLE_EXPLICIT_INITIALIZATION=OFF",
+        "-iconv": "-DENABLE_ICONV=OFF",
+        "-qt6": "-DENABLE_QT6=OFF",
+        "-server": "-DENABLE_SERVER=OFF",
+        "-threads": "-DENABLE_THREADS=OFF",
+        "explicit-initialization": "-DENABLE_EXPLICIT_INITIALIZATION=ON",
+        "iconv": "-DENABLE_ICONV=ON",
+        "qt6": "-DENABLE_QT6=ON",
+        "server": "-DENABLE_SERVER=ON",
+        "threads": "-DENABLE_THREADS=ON",
+    },
+    src_uri = "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_2/log4cplus-2.1.2.tar.gz",
+    sha256 = "e2673815ea34886f29b2213fff19cc1a6707a7e65099927a19ea49b4eb018822",
+    cmake_args = [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DLOG4CPLUS_BUILD_TESTING=OFF",
+        "-DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF",
+        "-DLOG4CPLUS_ENABLE_THREAD_POOL=ON",
+        "-DWITH_UNIT_TESTS=OFF",
+    ],
+)

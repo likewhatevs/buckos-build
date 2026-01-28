@@ -1,0 +1,23 @@
+load("@root//defs:package_defs.bzl", "make_package")
+
+make_package(
+    name = "feh",
+    version = "3.10.2",
+    src_uri = "https://feh.finalrewind.org/feh-3.10.2.tar.bz2",
+    sha256 = "5f94a77de25c5398876f0cf431612d782b842f4db154d2139b778c8f196e8969",
+    signature_sha256 = "e29957b4e34144b351c43f8ff5fb9df18d3863dd60ecad48304d24ca28ea1e23",
+    description = "Fast and light imlib2-based image viewer",
+    homepage = "https://feh.finalrewind.org/",
+    license = "MIT",
+    src_configure = "true",
+    src_compile = "make PREFIX=/usr exif=1 inotify=1 magic=1",
+    src_install = "make PREFIX=/usr DESTDIR=$DESTDIR install",
+    deps = [
+        "system//libs/image/libpng:libpng",
+        "core//file:file",
+        "network//curl:curl",
+        "graphics//xorg:x11-extended",
+        "graphics//xorg/libXinerama:libXinerama",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,73 @@
+load("@root//defs:package_defs.bzl", "download_source", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "maddy-src",
+    src_uri = "https://github.com/foxcpp/maddy/archive/v0.7.1.tar.gz",
+    sha256 = "541288477afb040a04a5cf17a1c3e3b7a81b287dc3a81c844b2d6ad66688c29e",
+    signature_required = False,
+)
+
+binary_package(
+    name = "maddy",
+    srcs = [":maddy-src"],
+    version = "0.7.1",
+    description = "Composable all-in-one mail server",
+    homepage = "https://maddy.email/",
+    license = "GPL-3.0",
+    install_script = """
+        cd $SRCS
+
+        export CGO_ENABLED=1
+        export GOFLAGS="-buildmode=pie -trimpath"
+        export LDFLAGS="-X github.com/foxcpp/maddy.Version=0.7.1"
+
+        # Build maddy - maddyctl is in the same cmd/maddy package
+        go build -ldflags "$LDFLAGS" -o maddy ./cmd/maddy
+
+        # maddyctl may be in a different location or built differently
+        if [ -d "./cmd/maddyctl" ]; then
+            go build -ldflags "$LDFLAGS" -o maddyctl ./cmd/maddyctl
+        else
+            # In newer versions, maddyctl might be part of maddy binary
+            ln -sf maddy maddyctl
+        fi
+
+        # Install binaries
+        install -Dm755 maddy "$OUT/usr/bin/maddy"
+        install -Dm755 maddyctl "$OUT/usr/bin/maddyctl"
+
+        # Create directories
+        mkdir -p "$OUT/etc/maddy"
+        mkdir -p "$OUT/var/lib/maddy"
+        mkdir -p "$OUT/var/log/maddy"
+        mkdir -p "$OUT/run/maddy"
+
+        # Install default config
+        install -Dm644 maddy.conf "$OUT/etc/maddy/maddy.conf"
+
+        # Install systemd service
+        mkdir -p "$OUT/usr/lib/systemd/system"
+        cat > "$OUT/usr/lib/systemd/system/maddy.service" << 'SERVICE'
+[Unit]
+Description=Maddy Mail Server
+After=network.target
+
+[Service]
+Type=notify
+User=maddy
+Group=maddy
+ExecStart=/usr/bin/maddy -config /etc/maddy/maddy.conf
+ExecReload=/bin/kill -USR1 $MAINPID
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+    """,
+    deps = [
+        "lang//go:go",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "groundingdino",
+    version = "0.1.0",
+    src_uri = "https://github.com/IDEA-Research/GroundingDINO/archive/refs/tags/v0.1.0-alpha2.tar.gz",
+    sha256 = "4d2ce7d9340e5d88a6c867cdbf4afd9f9b121499b06a5ac28392e9f608634ad1",
+    deps = [
+        "ai//ml-frameworks/pytorch:pytorch",
+        "ai//vision/torchvision:torchvision",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/opencv-python:opencv-python",
+        "ai//nlp/transformers:transformers",
+        "dev-libs//python/timm:timm",
+        "dev-libs//python/addict:addict",
+        "dev-libs//python/yapf:yapf",
+        "dev-libs//python/supervision:supervision",
+        "dev-libs//python/pycocotools:pycocotools",
+    ],
+    maintainers = ["buckos"],
+)

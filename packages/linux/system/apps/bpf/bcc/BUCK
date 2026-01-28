@@ -1,0 +1,49 @@
+load("@root//defs:package_defs.bzl", "download_source", "cmake_package")
+
+download_source(
+    name = "bcc-src",
+    src_uri = "https://github.com/iovisor/bcc/releases/download/v0.35.0/bcc-src-with-submodule.tar.gz",
+    sha256 = "a77c8dda4d0c0d93b5cad7b9c8539a7a180005b49ecfb0fbc3d902b5adb03ca2",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "bcc",
+    source = ":bcc-src",
+    iuse = [
+        "debuginfod",
+        "lua",
+        "lzma",
+        "python",
+        "static-libs",
+    ],
+    use_cmake = {
+        "-debuginfod": "-DENABLE_DEBUGINFOD=OFF",
+        "-lua": "-DENABLE_LUA=OFF",
+        "-lzma": "-DENABLE_LZMA=OFF",
+        "-python": "-DENABLE_PYTHON=OFF",
+        "-static-libs": "-DBUILD_STATIC_LIBS=OFF",
+        "debuginfod": "-DENABLE_DEBUGINFOD=ON",
+        "lua": "-DENABLE_LUA=ON",
+        "lzma": "-DENABLE_LZMA=ON",
+        "python": "-DENABLE_PYTHON=ON",
+        "static-libs": "-DBUILD_STATIC_LIBS=ON",
+    },
+    version = "0.35.0",
+    description = "BPF Compiler Collection - tools for BPF-based Linux tracing",
+    homepage = "https://github.com/iovisor/bcc",
+    license = "Apache-2.0",
+    cmake_args = [
+        "-DENABLE_LLVM_SHARED=ON",
+        "-DENABLE_EXAMPLES=OFF",
+        "-DENABLE_TESTS=OFF",
+        "-DENABLE_MAN=OFF",
+        "-DPYTHON_CMD=python3",
+    ],
+    deps = [
+        "system//libs/bpf/libbpf:libbpf",
+        "dev-tools//dev-utils/elfutils:elfutils",
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

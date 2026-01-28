@@ -1,0 +1,31 @@
+# Font rendering and text shaping libraries
+
+filegroup(
+    name = "rendering-libraries",
+    srcs = [
+        "fonts//libraries/freetype:freetype",
+        "fonts//libraries/fontconfig:fontconfig",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "text-shaping-libraries",
+    srcs = [
+        "fonts//libraries/harfbuzz:harfbuzz",
+        "fonts//libraries/pango:pango",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-libraries",
+    srcs = [
+        ":rendering-libraries",
+        ":text-shaping-libraries",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

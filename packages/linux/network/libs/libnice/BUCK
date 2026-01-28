@@ -1,0 +1,37 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+meson_package(
+    name = "libnice",
+    version = "0.1.19",
+    iuse = [
+        "gnutls",
+        "gtk-doc",
+        "introspection",
+        "upnp",
+    ],
+    use_configure = {
+        "-gnutls": "--without-gnutls",
+        "-gtk-doc": "--disable-gtk-doc",
+        "-introspection": "--disable-introspection",
+        "-upnp": "--disable-upnp",
+        "gnutls": "--with-gnutls",
+        "gtk-doc": "--enable-gtk-doc",
+        "introspection": "--enable-introspection",
+        "upnp": "--enable-upnp",
+    },
+    src_uri = "https://libnice.freedesktop.org/releases/libnice-0.1.19.tar.gz",
+    sha256 = "6747af710998cf708a2e8ceef51cccd181373d94201dd4b8d40797a070ed47cc",
+    meson_args = [
+        "-Dgstreamer=disabled",
+        "-Dgupnp=disabled",
+        "-Dgtk_doc=disabled",
+        "-Dintrospection=disabled",
+        "-Dtests=disabled",
+        "-Dexamples=disabled",
+        "-Dcrypto-library=openssl",
+    ],
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/crypto/openssl:openssl",
+    ],
+)

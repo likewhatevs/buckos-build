@@ -1,0 +1,101 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep", "use_configure_args", "GLOBAL_USE_FLAGS")
+
+# =============================================================================
+# LLVM - Low Level Virtual Machine
+# =============================================================================
+#
+# USE flags this package supports:
+# - zlib: Enable zlib compression support
+# - zstd: Enable zstd compression support
+# - ffi: Enable libffi support
+# - doc: Build documentation
+# - examples: Build examples
+# - test: Build test suite
+# - benchmarks: Build benchmarks
+# - debug: Debug build type
+#
+# Default USE flags: zlib, ffi
+
+# USE flag configuration
+LLVM_IUSE = ["zlib", "zstd", "ffi", "doc", "examples", "test", "benchmarks", "debug"]
+LLVM_USE_DEFAULTS = ["zlib", "ffi"]
+
+# Resolve USE-based dependencies
+LLVM_USE_DEPS = {
+    "zlib": ["core//zlib:zlib"],
+    "ffi": ["core//libffi:libffi"],
+}
+
+# Get current global USE flags (can be overridden per-build)
+_global_use = set_use_flags(LLVM_USE_DEFAULTS)
+_effective_use = LLVM_USE_DEFAULTS
+
+# Common CMake arguments for all LLVM versions
+LLVM_CMAKE_ARGS = [
+    # Build type - USE flag: debug
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DLLVM_ENABLE_PROJECTS=",
+    "-DLLVM_ENABLE_RUNTIMES=",
+    "-DLLVM_BUILD_LLVM_DYLIB=ON",
+    "-DLLVM_LINK_LLVM_DYLIB=ON",
+    "-DLLVM_ENABLE_RTTI=ON",
+    # USE flag: ffi
+    "-DLLVM_ENABLE_FFI=ON",
+    # USE flag: zlib
+    "-DLLVM_ENABLE_ZLIB=ON",
+    # USE flag: zstd
+    "-DLLVM_ENABLE_ZSTD=OFF",
+    # USE flag: benchmarks
+    "-DLLVM_INCLUDE_BENCHMARKS=OFF",
+    # USE flag: examples
+    "-DLLVM_INCLUDE_EXAMPLES=OFF",
+    # USE flag: test
+    "-DLLVM_INCLUDE_TESTS=OFF",
+    # USE flag: doc
+    "-DLLVM_INCLUDE_DOCS=OFF",
+    "-DLLVM_TARGETS_TO_BUILD=X86;AArch64;ARM;WebAssembly",
+    "-DLLVM_INSTALL_UTILS=ON",
+]
+
+# Custom configure that handles llvm/ subdirectory
+LLVM_SRC_CONFIGURE = """
+# LLVM has CMakeLists.txt in llvm/ subdirectory
+mkdir -p "$S/build"
+cmake \\
+    -S "$S/llvm" \\
+    -B "$S/build" \\
+    -DCMAKE_INSTALL_PREFIX="${EPREFIX:-/usr}" \\
+    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}" \\
+    -DCMAKE_INSTALL_LIBDIR="${LIBDIR:-lib64}" \\
+    -DCMAKE_C_FLAGS="${CFLAGS:-}" \\
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS:-}" \\
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \\
+    ${CMAKE_EXTRA_ARGS:-}
+"""
+
+# =============================================================================
+# LLVM 21.1.6 (Latest - Default)
+# =============================================================================
+cmake_package(
+    name = "llvm",
+    version = "21.1.6",
+    iuse = ["debug"],
+    use_cmake = {
+        "-debug": "-DCMAKE_BUILD_TYPE=Release",
+        "debug": "-DCMAKE_BUILD_TYPE=Debug",
+    },
+    src_uri = "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.6/llvm-project-21.1.6.src.tar.xz",
+    sha256 = "ae67086eb04bed7ca11ab880349b5f1ab6f50e1b88cda376eaf8a845b935762b",
+    signature_required = False,
+    description = "Low Level Virtual Machine - compiler infrastructure",
+    homepage = "https://llvm.org/",
+    license = "Apache-2.0 WITH LLVM-exception",
+    src_configure = LLVM_SRC_CONFIGURE,
+    cmake_args = LLVM_CMAKE_ARGS,
+    deps = use_dep(LLVM_USE_DEPS, _effective_use) + [
+        "core//ncurses:ncurses",
+    ],
+    visibility = ["PUBLIC"],
+)
+

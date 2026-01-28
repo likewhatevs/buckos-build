@@ -1,0 +1,23 @@
+load("@root//defs:package_defs.bzl", "cargo_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# starship - Cross-shell prompt with customizable features
+cargo_package(
+    name = "starship",
+    version = "1.21.1",
+    src_uri = "https://github.com/starship/starship/archive/refs/tags/v1.21.1.tar.gz",
+    sha256 = "f543dfa3229441ca2a55b8a625ce4bad5756a896378b019f4d0f0e00cf34dcc8",
+    signature_required = False,
+    description = "Cross-shell prompt with customizable features",
+    homepage = "https://starship.rs/",
+    license = "ISC",
+    cargo_args = [],
+    deps = [
+        "system//libs/crypto/openssl:openssl",
+        "core//zlib:zlib",
+    ],
+    env = {
+        "ZLIB_STATIC": "0",
+    },
+    visibility = ["PUBLIC"],
+)

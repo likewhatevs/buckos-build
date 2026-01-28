@@ -1,0 +1,1095 @@
+load("@root//defs:package_defs.bzl", "binary_package", "rootfs", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+load("@root//defs:package_defs.bzl", "binary_package", "rootfs", "initramfs", "qemu_boot_script", "iso_image", "stage3_tarball", "autotools_package")
+
+# =============================================================================
+# Base system files - Essential configuration and scripts
+# Init script for BusyBox init
+genrule(
+    name = "init-scripts-gen",
+    out = "init-scripts",
+    cmd = """
+mkdir -p $OUT/etc/init.d
+mkdir -p $OUT/etc/rc.d
+# Create inittab for busybox init
+cat > $OUT/etc/inittab << 'INITTAB'
+# /etc/inittab - BusyBox init configuration
+# System initialization
+::sysinit:/etc/init.d/rcS
+# Start a shell on the console
+::respawn:/bin/sh
+# What to do when restarting the init process
+::restart:/sbin/init
+# What to do before rebooting
+::ctrlaltdel:/sbin/reboot
+::shutdown:/bin/umount -a -r
+::shutdown:/sbin/swapoff -a
+INITTAB
+# Create rcS startup script
+cat > $OUT/etc/init.d/rcS << 'RCS'
+#!/bin/sh
+# System initialization script
+echo "BuckOs Linux - Booting..."
+# Mount essential filesystems
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev || mount -t tmpfs tmpfs /dev
+# Create essential device nodes if devtmpfs failed
+if [ ! -c /dev/null ]; then
+    mknod -m 666 /dev/null c 1 3
+    mknod -m 666 /dev/zero c 1 5
+    mknod -m 666 /dev/random c 1 8
+    mknod -m 666 /dev/urandom c 1 9
+    mknod -m 600 /dev/console c 5 1
+    mknod -m 666 /dev/tty c 5 0
+    mknod -m 660 /dev/ttyS0 c 4 64
+fi
+# Mount /dev/pts for pseudo-terminals
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+# Mount /run
+mount -t tmpfs tmpfs /run
+# Set hostname
+hostname buckos
+# Configure loopback
+ip link set lo up
+echo "System initialization complete."
+RCS
+chmod +x $OUT/etc/init.d/rcS
+# Create fstab
+cat > $OUT/etc/fstab << 'FSTAB'
+# /etc/fstab - Static file system information
+# <file system>  <mount point>  <type>  <options>         <dump>  <pass>
+proc             /proc          proc    defaults          0       0
+sysfs            /sys           sysfs   defaults          0       0
+devtmpfs         /dev           devtmpfs defaults         0       0
+tmpfs            /tmp           tmpfs   defaults,nodev    0       0
+tmpfs            /run           tmpfs   defaults,nodev    0       0
+FSTAB
+# Create passwd
+cat > $OUT/etc/passwd << 'PASSWD'
+root:x:0:0:root:/root:/bin/sh
+nobody:x:65534:65534:Nobody:/:/bin/false
+PASSWD
+# Create group
+cat > $OUT/etc/group << 'GROUP'
+root:x:0:
+wheel:x:10:root
+nobody:x:65534:
+GROUP
+# Create shadow (empty password for root - LOGIN REQUIRES SETTING PASSWORD)
+cat > $OUT/etc/shadow << 'SHADOW'
+root::0:0:99999:7:::
+nobody:!:0:0:99999:7:::
+SHADOW
+chmod 640 $OUT/etc/shadow
+# Create shells
+cat > $OUT/etc/shells << 'SHELLS'
+/bin/sh
+/bin/ash
+/bin/bash
+/usr/bin/bash
+SHELLS
+# Create hostname
+echo "buckos" > $OUT/etc/hostname
+# Create hosts
+cat > $OUT/etc/hosts << 'HOSTS'
+127.0.0.1   localhost
+127.0.1.1   buckos
+::1         localhost ip6-localhost ip6-loopback
+HOSTS
+# Create resolv.conf
+cat > $OUT/etc/resolv.conf << 'RESOLV'
+# DNS configuration
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+RESOLV
+# Create os-release
+cat > $OUT/etc/os-release << 'OSRELEASE'
+NAME="BuckOs Linux"
+VERSION="0.1"
+ID=buckos
+ID_LIKE=gentoo
+PRETTY_NAME="BuckOs Linux 0.1"
+HOME_URL="https://github.com/hodgesds/buckos-build"
+OSRELEASE
+# Create profile
+cat > $OUT/etc/profile << 'PROFILE'
+# /etc/profile - System-wide shell profile
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PS1='\\u@\\h:\\w\\$ '
+export TERM=linux
+# Set up home directory
+cd ~
+PROFILE
+# Create issue (login banner)
+cat > $OUT/etc/issue << 'ISSUE'
+BuckOs Linux 0.1
+Kernel \\r on \\m
+ISSUE
+""",
+    visibility = ["PUBLIC"],
+)
+# Package the init scripts
+filegroup(
+    name = "init-scripts",
+    srcs = [":init-scripts-gen"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Baselayout - Core filesystem layout
+genrule(
+    name = "baselayout-gen",
+    out = "baselayout",
+    cmd = """
+mkdir -p $OUT
+# Create FHS directory structure
+mkdir -p $OUT/bin
+mkdir -p $OUT/sbin
+mkdir -p $OUT/lib
+mkdir -p $OUT/lib64
+mkdir -p $OUT/usr/bin
+mkdir -p $OUT/usr/sbin
+mkdir -p $OUT/usr/lib
+mkdir -p $OUT/usr/lib64
+mkdir -p $OUT/usr/share
+mkdir -p $OUT/usr/include
+mkdir -p $OUT/usr/local/bin
+mkdir -p $OUT/usr/local/sbin
+mkdir -p $OUT/usr/local/lib
+mkdir -p $OUT/etc
+mkdir -p $OUT/var/log
+mkdir -p $OUT/var/tmp
+mkdir -p $OUT/var/run
+mkdir -p $OUT/var/lock
+mkdir -p $OUT/tmp
+mkdir -p $OUT/proc
+mkdir -p $OUT/sys
+mkdir -p $OUT/dev
+mkdir -p $OUT/run
+mkdir -p $OUT/root
+mkdir -p $OUT/home
+mkdir -p $OUT/mnt
+mkdir -p $OUT/opt
+mkdir -p $OUT/boot
+# Set permissions
+chmod 1777 $OUT/tmp
+chmod 1777 $OUT/var/tmp
+chmod 700 $OUT/root
+""",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "baselayout",
+    srcs = [":baselayout-gen"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Root filesystem assembly
+rootfs(
+    name = "buckos-rootfs",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-gen",
+        # Core system
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "core//zlib:zlib",
+        # Shell and terminal
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+        "core//bash:bash",
+        "core//less:less",
+        # Compression
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        # System utilities
+        "core//procps-ng:procps-ng",
+        "core//file:file",
+        # User management (REQUIRED for installer)
+        "system//apps/shadow:shadow",
+        # Networking
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//openssh:openssh",
+        "network//iproute2:iproute2",
+        "network//dhcpcd:dhcpcd",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Initramfs images for QEMU testing
+# =============================================================================
+
+# Minimal initramfs for QEMU testing
+initramfs(
+    name = "buckos-initramfs",
+    rootfs = ":buckos-rootfs",
+    compression = "gz",
+    init = "/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# Initramfs with xz compression (smaller but slower)
+initramfs(
+    name = "buckos-initramfs-xz",
+    rootfs = ":buckos-rootfs",
+    compression = "xz",
+    init = "/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# Bootable initramfs with full system - commented out until buckos-bootable is defined
+# initramfs(
+#     name = "buckos-bootable-initramfs",
+#     rootfs = ":buckos-bootable",
+#     compression = "gz",
+#     init = "/sbin/init",
+#     visibility = ["PUBLIC"],
+# )
+
+# =============================================================================
+# QEMU boot scripts for testing
+# =============================================================================
+
+# Basic QEMU boot script for testing
+qemu_boot_script(
+    name = "qemu-boot",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    arch = "x86_64",
+    memory = "512M",
+    cpus = "2",
+    kernel_args = "console=ttyS0 init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# QEMU boot with more memory for development
+qemu_boot_script(
+    name = "qemu-boot-dev",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    arch = "x86_64",
+    memory = "2G",
+    cpus = "4",
+    kernel_args = "console=ttyS0 init=/sbin/init loglevel=7",
+    extra_args = ["-enable-kvm"],
+    visibility = ["PUBLIC"],
+)
+
+# QEMU boot with full bootable system - commented out until buckos-bootable is defined
+# qemu_boot_script(
+#     name = "qemu-boot-full",
+#     kernel = "kernel//buckos-kernel:buckos-kernel",
+#     initramfs = ":buckos-bootable-initramfs",
+#     arch = "x86_64",
+#     memory = "1G",
+#     cpus = "2",
+#     kernel_args = "console=ttyS0 init=/sbin/init",
+#     visibility = ["PUBLIC"],
+# )
+
+# QEMU boot with networking
+qemu_boot_script(
+    name = "qemu-boot-net",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    arch = "x86_64",
+    memory = "512M",
+    cpus = "2",
+    kernel_args = "console=ttyS0 init=/sbin/init",
+    extra_args = [
+        "-netdev user,id=net0,hostfwd=tcp::2222-:22",
+        "-device virtio-net-pci,netdev=net0",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ISO images for distribution
+# =============================================================================
+
+# Minimal bootable ISO image
+iso_image(
+    name = "buckos-iso",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    boot_mode = "hybrid",
+    volume_label = "BUCKOS",
+    kernel_args = "quiet init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# ISO with BIOS-only boot (for older systems)
+iso_image(
+    name = "buckos-iso-bios",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    boot_mode = "bios",
+    volume_label = "BUCKOS",
+    kernel_args = "quiet init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# ISO with EFI-only boot (for modern systems)
+iso_image(
+    name = "buckos-iso-efi",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    boot_mode = "efi",
+    volume_label = "BUCKOS",
+    kernel_args = "quiet init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# Live ISO with full rootfs (squashfs compressed)
+iso_image(
+    name = "buckos-live-iso",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    rootfs = ":buckos-rootfs",
+    boot_mode = "hybrid",
+    volume_label = "BUCKOS_LIVE",
+    kernel_args = "quiet init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# Full bootable ISO with dracut initramfs - commented out until buckos-bootable is defined
+# iso_image(
+#     name = "buckos-full-iso",
+#     kernel = "kernel//buckos-kernel:buckos-kernel",
+#     initramfs = ":buckos-bootable-initramfs",
+#     rootfs = ":buckos-bootable",
+#     boot_mode = "hybrid",
+#     volume_label = "BUCKOS_FULL",
+#     kernel_args = "quiet init=/sbin/init",
+#     visibility = ["PUBLIC"],
+# )
+
+# Development ISO with verbose boot
+iso_image(
+    name = "buckos-iso-dev",
+    kernel = "kernel//buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-initramfs",
+    boot_mode = "hybrid",
+    volume_label = "BUCKOS_DEV",
+    kernel_args = "init=/sbin/init loglevel=7 debug",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Stage3 Tarballs for Distribution
+# =============================================================================
+# Stage3 tarballs for bootstrapping new BuckOS installations.
+# Users download a stage3, extract it, chroot in, and build additional packages.
+
+# Stage3 minimal rootfs - core system only (no toolchain)
+rootfs(
+    name = "stage3-minimal-rootfs",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-gen",
+        # Core system
+        "core//glibc:glibc",
+        "system//apps/coreutils:coreutils",
+        "core//util-linux:util-linux",
+        "core//procps-ng:procps-ng",
+        "system//apps/shadow:shadow",
+        "core//file:file",
+        # Shell and terminal
+        "core//bash:bash",
+        "core//readline:readline",
+        "core//ncurses:ncurses",
+        "core//less:less",
+        # Compression
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "system//libs/compression/gzip:gzip",
+        "system//apps/tar:tar",
+        # Basic libraries
+        "core//zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Stage3 base rootfs - includes GCC toolchain for building packages
+rootfs(
+    name = "stage3-base-rootfs",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-gen",
+        # Everything from minimal
+        "core//glibc:glibc",
+        "system//apps/coreutils:coreutils",
+        "core//util-linux:util-linux",
+        "core//procps-ng:procps-ng",
+        "system//apps/shadow:shadow",
+        "core//file:file",
+        "core//bash:bash",
+        "core//readline:readline",
+        "core//ncurses:ncurses",
+        "core//less:less",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "system//libs/compression/gzip:gzip",
+        "system//apps/tar:tar",
+        "core//zlib:zlib",
+        # Additional libraries
+        "core//libffi:libffi",
+        "core//expat:expat",
+        # Networking basics
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//iproute2:iproute2",
+        # Build essentials
+        "system//apps/patch:patch",
+        "system//apps/sed:sed",
+        "system//apps/gawk:gawk",
+        "system//apps/grep:grep",
+        "system//apps/diffutils:diffutils",
+        "system//apps/findutils:findutils",
+        # Build systems
+        "dev-tools//build-systems/make:make",
+        # Note: Additional toolchain packages (gcc, binutils, etc.) would be added
+        # once those packages are available in the build system
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Stage3 developer rootfs - modern build systems and dev tools
+rootfs(
+    name = "stage3-developer-rootfs",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-gen",
+        # Everything from base
+        "core//glibc:glibc",
+        "system//apps/coreutils:coreutils",
+        "core//util-linux:util-linux",
+        "core//procps-ng:procps-ng",
+        "system//apps/shadow:shadow",
+        "core//file:file",
+        "core//bash:bash",
+        "core//readline:readline",
+        "core//ncurses:ncurses",
+        "core//less:less",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "system//libs/compression/gzip:gzip",
+        "system//apps/tar:tar",
+        "core//zlib:zlib",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//iproute2:iproute2",
+        "system//apps/patch:patch",
+        "system//apps/sed:sed",
+        "system//apps/gawk:gawk",
+        "system//apps/grep:grep",
+        "system//apps/diffutils:diffutils",
+        "system//apps/findutils:findutils",
+        "dev-tools//build-systems/make:make",
+        # Modern build systems
+        "dev-tools//build-systems/cmake:cmake",
+        # VCS
+        "dev-tools//vcs/git:git",
+        # Editors
+        "editors//vim:vim",
+        # SSH for remote development
+        "network//openssh:openssh",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Stage3 Tarballs
+# =============================================================================
+
+# Minimal stage3 tarball
+stage3_tarball(
+    name = "stage3-minimal",
+    rootfs = ":stage3-minimal-rootfs",
+    variant = "minimal",
+    arch = "amd64",
+    libc = "glibc",
+    compression = "xz",
+    visibility = ["PUBLIC"],
+)
+
+# Base stage3 tarball (with toolchain)
+stage3_tarball(
+    name = "stage3-base",
+    rootfs = ":stage3-base-rootfs",
+    variant = "base",
+    arch = "amd64",
+    libc = "glibc",
+    compression = "xz",
+    visibility = ["PUBLIC"],
+)
+
+# Developer stage3 tarball
+stage3_tarball(
+    name = "stage3-developer",
+    rootfs = ":stage3-developer-rootfs",
+    variant = "developer",
+    arch = "amd64",
+    libc = "glibc",
+    compression = "xz",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Live CD/USB System - KDE Plasma Desktop with Installer
+# =============================================================================
+# This section defines the components needed for a bootable live system
+# that can run from CD/USB and install BuckOS to disk.
+
+# Live system init scripts - specialized for live boot environment
+# Uses external script to generate all config files
+genrule(
+    name = "live-init-scripts-gen",
+    out = "live-init-scripts",
+    cmd = "bash $(location @root//defs/scripts:generate-live-init-scripts) $OUT",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "live-init-scripts",
+    srcs = [":live-init-scripts-gen"],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Live Root Filesystem - Full desktop environment
+# =============================================================================
+
+# Live rootfs with KDE Plasma desktop
+rootfs(
+    name = "buckos-live-kde-rootfs",
+    packages = [
+        ":live-init-scripts-gen",
+        ":baselayout-gen",
+        # Core system (from buckos-rootfs)
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "core//zlib:zlib",
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+        "core//bash:bash",
+        "core//less:less",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "core//procps-ng:procps-ng",
+        "core//file:file",
+        "system//apps/shadow:shadow",
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//openssh:openssh",
+        "network//iproute2:iproute2",
+        "network//dhcpcd:dhcpcd",
+        # Graphics stack
+        "desktop//mesa:mesa",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//libinput:libinput",
+        "desktop//libdrm:libdrm",
+        # KDE Plasma Desktop
+        "desktop//kde:kde-plasma",
+        "desktop//kde/apps:konsole",
+        "desktop//kde/apps:dolphin",
+        "desktop//kde/apps:kate",
+        # Display Manager
+        "desktop//sddm:sddm",
+        # Development tools (for post-install)
+        "dev-tools//vcs/git:git",
+        "editors//vim:vim",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Minimal live rootfs with Sway (lighter alternative)
+rootfs(
+    name = "buckos-live-sway-rootfs",
+    packages = [
+        ":live-init-scripts-gen",
+        ":baselayout-gen",
+        # Core system
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "core//zlib:zlib",
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+        "core//bash:bash",
+        "core//less:less",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "core//procps-ng:procps-ng",
+        "core//file:file",
+        "system//apps/shadow:shadow",
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//openssh:openssh",
+        "network//iproute2:iproute2",
+        "network//dhcpcd:dhcpcd",
+        # Graphics stack
+        "desktop//mesa:mesa",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//libinput:libinput",
+        "desktop//libdrm:libdrm",
+        # Sway compositor
+        "desktop//sway:sway-desktop",
+        # Terminal
+        "terminals//foot:foot",
+        # Development tools
+        "dev-tools//vcs/git:git",
+        "editors//vim:vim",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Live Initramfs - Specialized for live boot
+# =============================================================================
+
+# Initramfs for live system (includes live-init)
+initramfs(
+    name = "buckos-live-initramfs",
+    rootfs = ":buckos-rootfs",  # Base system for initramfs tools
+    compression = "gz",
+    init = "/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Live Installer ISO Images
+# =============================================================================
+
+# Live ISO with KDE Plasma desktop
+iso_image(
+    name = "buckos-live-installer-kde-iso",
+    kernel = "kernel//buckos-kernel:buckos-kernel-live",
+    initramfs = ":buckos-live-initramfs",
+    rootfs = ":buckos-live-kde-rootfs",
+    boot_mode = "hybrid",
+    volume_label = "BUCKOS_LIVE",
+    kernel_args = "quiet splash init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# Live ISO with Sway (lighter alternative)
+iso_image(
+    name = "buckos-live-installer-sway-iso",
+    kernel = "kernel//buckos-kernel:buckos-kernel-live",
+    initramfs = ":buckos-live-initramfs",
+    rootfs = ":buckos-live-sway-rootfs",
+    boot_mode = "hybrid",
+    volume_label = "BUCKOS_LIVE",
+    kernel_args = "quiet splash init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# Main live installer ISO (defaults to KDE)
+alias(
+    name = "buckos-live-installer-iso",
+    actual = ":buckos-live-installer-kde-iso",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# QEMU Test Scripts for Live System
+# =============================================================================
+
+qemu_boot_script(
+    name = "qemu-boot-live-kde",
+    kernel = "kernel//buckos-kernel:buckos-kernel-live",
+    initramfs = ":buckos-live-initramfs",
+    arch = "x86_64",
+    memory = "4G",
+    cpus = "4",
+    kernel_args = "console=ttyS0 init=/sbin/init",
+    extra_args = [
+        "-enable-kvm",
+        "-vga virtio",
+        "-display gtk",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+qemu_boot_script(
+    name = "qemu-boot-live-sway",
+    kernel = "kernel//buckos-kernel:buckos-kernel-live",
+    initramfs = ":buckos-live-initramfs",
+    arch = "x86_64",
+    memory = "2G",
+    cpus = "2",
+    kernel_args = "console=ttyS0 init=/sbin/init",
+    extra_args = [
+        "-enable-kvm",
+        "-vga virtio",
+        "-display gtk",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ARM64 (aarch64) System Targets
+# =============================================================================
+# Cross-compiled system images for ARM64 architecture.
+# Build with: buck2 build //packages/linux/system:buckos-rootfs-aarch64 \
+#             --target-platforms //platforms:linux-aarch64-target
+#
+# These targets produce ARM64 binaries that can run on:
+# - QEMU aarch64 VMs
+# - AWS Graviton instances
+# - Azure Ampere instances
+# - Raspberry Pi 4 and similar ARM64 SBCs
+# =============================================================================
+
+# ARM64 baselayout - Core filesystem layout for aarch64
+# Note: ARM64 uses 'lib' instead of 'lib64'
+genrule(
+    name = "baselayout-aarch64-gen",
+    out = "baselayout-aarch64",
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    cmd = """
+mkdir -p $OUT
+# Create FHS directory structure for ARM64
+mkdir -p $OUT/bin
+mkdir -p $OUT/sbin
+mkdir -p $OUT/lib
+mkdir -p $OUT/usr/bin
+mkdir -p $OUT/usr/sbin
+mkdir -p $OUT/usr/lib
+mkdir -p $OUT/usr/share
+mkdir -p $OUT/usr/include
+mkdir -p $OUT/usr/local/bin
+mkdir -p $OUT/usr/local/sbin
+mkdir -p $OUT/usr/local/lib
+mkdir -p $OUT/etc
+mkdir -p $OUT/var/log
+mkdir -p $OUT/var/tmp
+mkdir -p $OUT/var/run
+mkdir -p $OUT/var/lock
+mkdir -p $OUT/tmp
+mkdir -p $OUT/proc
+mkdir -p $OUT/sys
+mkdir -p $OUT/dev
+mkdir -p $OUT/run
+mkdir -p $OUT/root
+mkdir -p $OUT/home
+mkdir -p $OUT/mnt
+mkdir -p $OUT/opt
+mkdir -p $OUT/boot
+# Set permissions
+chmod 1777 $OUT/tmp
+chmod 1777 $OUT/var/tmp
+chmod 700 $OUT/root
+""",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "baselayout-aarch64",
+    srcs = [":baselayout-aarch64-gen"],
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Minimal rootfs
+rootfs(
+    name = "buckos-rootfs-aarch64",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-aarch64-gen",
+        # Core system
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "core//zlib:zlib",
+        # Shell and terminal
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+        "core//bash:bash",
+        "core//less:less",
+        # Compression
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        # System utilities
+        "core//procps-ng:procps-ng",
+        "core//file:file",
+        # User management
+        "system//apps/shadow:shadow",
+        # Networking
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//openssh:openssh",
+        "network//iproute2:iproute2",
+        "network//dhcpcd:dhcpcd",
+    ],
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 initramfs
+initramfs(
+    name = "buckos-initramfs-aarch64",
+    rootfs = ":buckos-rootfs-aarch64",
+    compression = "gz",
+    init = "/sbin/init",
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 QEMU boot script
+qemu_boot_script(
+    name = "qemu-boot-aarch64",
+    kernel = "kernel//buckos-kernel:buckos-kernel-aarch64",
+    initramfs = ":buckos-initramfs-aarch64",
+    arch = "aarch64",
+    memory = "1G",
+    cpus = "2",
+    kernel_args = "console=ttyAMA0 init=/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 QEMU boot with more resources
+qemu_boot_script(
+    name = "qemu-boot-aarch64-dev",
+    kernel = "kernel//buckos-kernel:buckos-kernel-aarch64",
+    initramfs = ":buckos-initramfs-aarch64",
+    arch = "aarch64",
+    memory = "4G",
+    cpus = "4",
+    kernel_args = "console=ttyAMA0 init=/sbin/init loglevel=7",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ARM64 Stage3 Tarballs
+# =============================================================================
+
+# ARM64 Stage3 minimal rootfs
+rootfs(
+    name = "stage3-minimal-rootfs-aarch64",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-aarch64-gen",
+        # Core system
+        "core//glibc:glibc",
+        "system//apps/coreutils:coreutils",
+        "core//util-linux:util-linux",
+        "core//procps-ng:procps-ng",
+        "system//apps/shadow:shadow",
+        "core//file:file",
+        # Shell and terminal
+        "core//bash:bash",
+        "core//readline:readline",
+        "core//ncurses:ncurses",
+        "core//less:less",
+        # Compression
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "system//libs/compression/gzip:gzip",
+        "system//apps/tar:tar",
+        # Basic libraries
+        "core//zlib:zlib",
+    ],
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 minimal stage3 tarball
+stage3_tarball(
+    name = "stage3-arm64-minimal",
+    rootfs = ":stage3-minimal-rootfs-aarch64",
+    variant = "minimal",
+    arch = "arm64",
+    libc = "glibc",
+    compression = "xz",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Stage3 base rootfs (with build tools)
+rootfs(
+    name = "stage3-base-rootfs-aarch64",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-aarch64-gen",
+        # Core system
+        "core//glibc:glibc",
+        "system//apps/coreutils:coreutils",
+        "core//util-linux:util-linux",
+        "core//procps-ng:procps-ng",
+        "system//apps/shadow:shadow",
+        "core//file:file",
+        "core//bash:bash",
+        "core//readline:readline",
+        "core//ncurses:ncurses",
+        "core//less:less",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "system//libs/compression/gzip:gzip",
+        "system//apps/tar:tar",
+        "core//zlib:zlib",
+        "core//libffi:libffi",
+        "core//expat:expat",
+        # Networking
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//iproute2:iproute2",
+        # Build essentials
+        "system//apps/patch:patch",
+        "system//apps/sed:sed",
+        "system//apps/gawk:gawk",
+        "system//apps/grep:grep",
+        "system//apps/diffutils:diffutils",
+        "system//apps/findutils:findutils",
+        "dev-tools//build-systems/make:make",
+    ],
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 base stage3 tarball
+stage3_tarball(
+    name = "stage3-arm64-base",
+    rootfs = ":stage3-base-rootfs-aarch64",
+    variant = "base",
+    arch = "arm64",
+    libc = "glibc",
+    compression = "xz",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ARM64 Live CD/USB System
+# =============================================================================
+# Live system for ARM64 with Sway desktop (lightweight, works well on ARM)
+# Boots via UEFI on ARM64 hardware and QEMU
+
+# ARM64 Live init scripts
+filegroup(
+    name = "live-init-scripts-aarch64",
+    srcs = [":live-init-scripts-gen"],
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Live rootfs with Sway desktop
+rootfs(
+    name = "buckos-live-sway-rootfs-aarch64",
+    packages = [
+        ":live-init-scripts-gen",
+        ":baselayout-aarch64-gen",
+        # Core system
+        "core//cpio:cpio",
+        "core//util-linux:util-linux",
+        "core//zlib:zlib",
+        "core//ncurses:ncurses",
+        "core//readline:readline",
+        "core//bash:bash",
+        "core//less:less",
+        "system//libs/compression/bzip2:bzip2",
+        "system//libs/compression/xz:xz",
+        "core//procps-ng:procps-ng",
+        "core//file:file",
+        "system//apps/shadow:shadow",
+        "system//libs/crypto/openssl:openssl",
+        "system//libs/network/curl:curl",
+        "network//openssh:openssh",
+        "network//iproute2:iproute2",
+        "network//dhcpcd:dhcpcd",
+        # Graphics stack
+        "desktop//mesa:mesa",
+        "graphics//rendering/wayland:wayland",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "desktop//libinput:libinput",
+        "desktop//libdrm:libdrm",
+        # Sway compositor (lightweight, good for ARM)
+        "desktop//sway:sway-desktop",
+        # Terminal
+        "terminals//foot:foot",
+        # Development tools
+        "dev-tools//vcs/git:git",
+        "editors//vim:vim",
+    ],
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Live initramfs
+initramfs(
+    name = "buckos-live-initramfs-aarch64",
+    rootfs = ":buckos-rootfs-aarch64",
+    compression = "gz",
+    init = "/sbin/init",
+    default_target_platform = "root//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Live ISO with Sway
+# Uses EFI boot mode (standard for ARM64)
+iso_image(
+    name = "buckos-live-installer-aarch64-iso",
+    kernel = "kernel//buckos-kernel:buckos-kernel-aarch64",
+    initramfs = ":buckos-live-initramfs-aarch64",
+    rootfs = ":buckos-live-sway-rootfs-aarch64",
+    boot_mode = "efi",  # ARM64 uses UEFI
+    volume_label = "BUCKOS_ARM64",
+    kernel_args = "quiet splash init=/sbin/init",
+    arch = "aarch64",
+    visibility = ["PUBLIC"],
+)
+
+# ARM64 Live ISO (alias)
+alias(
+    name = "buckos-live-iso-aarch64",
+    actual = ":buckos-live-installer-aarch64-iso",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ARM64 QEMU Test Scripts for Live System
+# =============================================================================
+
+# QEMU boot for ARM64 live system with graphics
+qemu_boot_script(
+    name = "qemu-boot-live-aarch64",
+    kernel = "kernel//buckos-kernel:buckos-kernel-aarch64",
+    initramfs = ":buckos-live-initramfs-aarch64",
+    arch = "aarch64",
+    memory = "2G",
+    cpus = "4",
+    kernel_args = "console=ttyAMA0 init=/sbin/init",
+    extra_args = [
+        "-device virtio-gpu-pci",
+        "-display gtk",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# QEMU boot for ARM64 live with full desktop (needs more RAM)
+qemu_boot_script(
+    name = "qemu-boot-live-aarch64-desktop",
+    kernel = "kernel//buckos-kernel:buckos-kernel-aarch64",
+    initramfs = ":buckos-live-initramfs-aarch64",
+    arch = "aarch64",
+    memory = "4G",
+    cpus = "4",
+    kernel_args = "console=ttyAMA0 init=/sbin/init",
+    extra_args = [
+        "-device virtio-gpu-pci",
+        "-device usb-ehci",
+        "-device usb-kbd",
+        "-device usb-mouse",
+        "-display gtk",
+    ],
+    visibility = ["PUBLIC"],
+)
+

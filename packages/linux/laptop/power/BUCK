@@ -1,0 +1,172 @@
+# Power management packages for laptops
+# Includes laptop-specific tools and references to system-wide power tools
+
+# Laptop-specific power profile managers
+filegroup(
+    name = "power-profiles",
+    srcs = [
+        "laptop//power/tlp:tlp",
+        "laptop//power/auto-cpufreq:auto-cpufreq",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# ACPI tools for laptops
+filegroup(
+    name = "acpi-tools",
+    srcs = [
+        "laptop//power/acpid:acpid",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Thermal management
+filegroup(
+    name = "thermal-management",
+    srcs = [
+        "laptop//power/thermald:thermald",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# CPU frequency scaling
+filegroup(
+    name = "cpu-scaling",
+    srcs = [
+        "laptop//power/cpupower:cpupower",
+        "laptop//power/auto-cpufreq:auto-cpufreq",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Intel laptop tools (includes undervolting, speed select)
+filegroup(
+    name = "intel-laptop",
+    srcs = [
+        "system//power/x86_energy_perf_policy:x86_energy_perf_policy",
+        "system//power/intel-undervolt:intel-undervolt",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# AMD laptop tools
+filegroup(
+    name = "amd-laptop",
+    srcs = [
+        "system//power/rapl-read-ryzen:rapl-read-ryzen",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Storage power management for laptops
+filegroup(
+    name = "storage-power",
+    srcs = [
+        "system//power/hdparm:hdparm",
+        "system//power/nvme-cli:nvme-cli",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# System tuning daemons
+filegroup(
+    name = "tuning-daemons",
+    srcs = [
+        "system//power/tuned:tuned",
+        "system//power/power-profiles-daemon:power-profiles-daemon",
+        "system//power/irqbalance:irqbalance",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Essential laptop power tools
+filegroup(
+    name = "power-essential",
+    srcs = [
+        "laptop//power/tlp:tlp",
+        "laptop//power/acpid:acpid",
+        "laptop//power/cpupower:cpupower",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Console-only laptop power tools (no GUI dependencies)
+filegroup(
+    name = "console",
+    srcs = [
+        ":power-essential",
+        "system//power/hdparm:hdparm",
+        "laptop//monitoring/powertop:powertop",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Maximum battery life configuration
+filegroup(
+    name = "max-battery",
+    srcs = [
+        "laptop//power/tlp:tlp",
+        "laptop//power/auto-cpufreq:auto-cpufreq",
+        "laptop//power/thermald:thermald",
+        "system//power/power-profiles-daemon:power-profiles-daemon",
+        "laptop//monitoring/powertop:powertop",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Intel laptop complete setup
+filegroup(
+    name = "intel-complete",
+    srcs = [
+        ":power-essential",
+        ":intel-laptop",
+        ":thermal-management",
+        ":storage-power",
+        ":tuning-daemons",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# AMD laptop complete setup
+filegroup(
+    name = "amd-complete",
+    srcs = [
+        ":power-essential",
+        ":amd-laptop",
+        ":thermal-management",
+        ":storage-power",
+        ":tuning-daemons",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All laptop power management packages
+filegroup(
+    name = "all-power",
+    srcs = [
+        "laptop//power/tlp:tlp",
+        "laptop//power/acpid:acpid",
+        "laptop//power/thermald:thermald",
+        "laptop//power/cpupower:cpupower",
+        "laptop//power/auto-cpufreq:auto-cpufreq",
+        ":intel-laptop",
+        ":amd-laptop",
+        ":storage-power",
+        ":tuning-daemons",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

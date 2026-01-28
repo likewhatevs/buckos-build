@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "cargo_package")
+
+# atuin - Magical shell history (Rust-based)
+cargo_package(
+    name = "atuin",
+    version = "18.4.0",
+    iuse = [
+        "client",
+        "daemon",
+        "server",
+        "sync",
+        "system-sqlite",
+    ],
+    use_configure = {
+        "-client": "--disable-client",
+        "-daemon": "--disable-daemon",
+        "-server": "--disable-server",
+        "-sync": "--disable-sync",
+        "-system-sqlite": "--disable-system-sqlite",
+        "client": "--enable-client",
+        "daemon": "--enable-daemon",
+        "server": "--enable-server",
+        "sync": "--enable-sync",
+        "system-sqlite": "--enable-system-sqlite",
+    },
+    src_uri = "https://github.com/atuinsh/atuin/archive/refs/tags/v18.4.0.tar.gz",
+    sha256 = "de6d2bcf10de4d757916c7e92a70f15929fc1dea75abc4df09b0baedf26a53b2",
+    signature_required = False,
+    description = "Magical shell history - sync, search and backup",
+    homepage = "https://atuin.sh/",
+    license = "MIT",
+    bins = ["atuin"],
+    visibility = ["PUBLIC"],
+)

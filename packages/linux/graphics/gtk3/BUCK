@@ -1,0 +1,58 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# GTK 3 - GIMP Toolkit
+
+meson_package(
+    name = "gtk3",
+    version = "3.24.41",
+    src_uri = "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.41.tar.xz",
+    sha256 = "47da61487af3087a94bc49296fd025ca0bc02f96ef06c556e7c8988bd651b6fa",
+    description = "The GIMP Toolkit - version 3",
+    homepage = "https://www.gtk.org/",
+    license = "LGPL-2.1",
+    iuse = ["x11", "wayland", "broadway", "cups", "introspection"],
+    # Note: introspection disabled - gobject-introspection package not available yet
+    # wayland instead of x11 for Wayland-native apps like swaync
+    use_defaults = ["wayland"],
+    deps = [
+        "core//glib:glib",
+        "graphics//cairo:cairo",
+        "graphics//pango:pango",
+        "dev-libs//misc/gdk-pixbuf:gdk-pixbuf",
+        "dev-libs//misc/atk:atk",
+        "dev-libs//misc/at-spi2-atk:at-spi2-atk",
+        "dev-libs//misc/epoxy:epoxy",
+    ],
+    use_deps = {
+        "x11": [
+            "graphics//x11-libs/libx11:libx11",
+            "graphics//x11-libs/libxi:libxi",
+        ],
+        "wayland": [
+            "graphics//rendering/wayland:wayland",
+            "graphics//rendering/wayland-protocols:wayland-protocols",
+        ],
+        "cups": ["network//printing/cups:cups"],
+        "introspection": ["dev-libs//misc/gobject-introspection:gobject-introspection"],
+    },
+    meson_args = [
+        "-Dgtk_doc=false",
+        "-Dman=false",
+        "-Dtests=false",
+        "-Dexamples=false",
+        "-Ddemos=false",
+    ],
+    use_meson = {
+        "x11": "-Dx11_backend=true",
+        "-x11": "-Dx11_backend=false",
+        "wayland": "-Dwayland_backend=true",
+        "-wayland": "-Dwayland_backend=false",
+        "broadway": "-Dbroadway_backend=true",
+        "-broadway": "-Dbroadway_backend=false",
+        "cups": "-Dprint_backends=cups",
+        "-cups": "-Dprint_backends=file",
+        "introspection": "-Dintrospection=true",
+        "-introspection": "-Dintrospection=false",
+    },
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,66 @@
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# fftw - Fast Fourier Transform library
+download_source(
+    name = "fftw-src",
+    src_uri = "https://www.fftw.org/fftw-3.3.10.tar.gz",
+    sha256 = "56c932549852cddcfafdab3820b0200c7742675be92179e59e6215b340e26467",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "fftw",
+    source = ":fftw-src",
+    iuse = [
+        "cpu_flags_arm_neon",
+        "cpu_flags_ppc_altivec",
+        "cpu_flags_x86_fma3",
+        "cpu_flags_x86_fma4",
+        "cpu_flags_x86_sse",
+        "fortran",
+        "mpi",
+        "openmp",
+        "threads",
+        "zbus",
+    ],
+    use_configure = {
+        "-cpu_flags_arm_neon": "--disable-cpu_flags_arm_neon",
+        "-cpu_flags_ppc_altivec": "--disable-cpu_flags_ppc_altivec",
+        "-cpu_flags_x86_fma3": "--disable-cpu_flags_x86_fma3",
+        "-cpu_flags_x86_fma4": "--disable-cpu_flags_x86_fma4",
+        "-cpu_flags_x86_sse": "--disable-cpu_flags_x86_sse",
+        "-fortran": "--disable-fortran",
+        "-mpi": "--disable-mpi",
+        "-openmp": "--disable-openmp",
+        "-threads": "--disable-threads",
+        "-zbus": "--disable-zbus",
+        "cpu_flags_arm_neon": "--enable-cpu_flags_arm_neon",
+        "cpu_flags_ppc_altivec": "--enable-cpu_flags_ppc_altivec",
+        "cpu_flags_x86_fma3": "--enable-cpu_flags_x86_fma3",
+        "cpu_flags_x86_fma4": "--enable-cpu_flags_x86_fma4",
+        "cpu_flags_x86_sse": "--enable-cpu_flags_x86_sse",
+        "fortran": "--enable-fortran",
+        "mpi": "--enable-mpi",
+        "openmp": "--enable-openmp",
+        "threads": "--enable-threads",
+        "zbus": "--enable-zbus",
+    },
+    version = "3.3.10",
+    description = "Fast Fourier Transform library",
+    homepage = "https://www.fftw.org/",
+    license = "GPL-2.0-or-later",
+    # Official release tarball includes pre-generated configure script
+    bdepend = [],
+    src_prepare = "",
+    src_configure = """
+./configure --prefix=/usr --enable-shared --enable-threads --enable-sse2
+""",
+    src_compile = """
+make
+""",
+    src_install = """
+make install DESTDIR="$DESTDIR"
+""",
+    visibility = ["PUBLIC"],
+)

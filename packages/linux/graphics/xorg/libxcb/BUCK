@@ -1,0 +1,39 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# libxcb - X C Bindings library
+# Low-level X11 protocol library, modern replacement for Xlib protocol handling
+autotools_package(
+    name = "libxcb",
+    version = "1.16",
+    iuse = ["selinux", "xkb"],
+    use_configure = {
+        "-selinux": "--disable-selinux",
+        "-xkb": "--disable-xkb",
+        "selinux": "--enable-selinux",
+        "xkb": "--enable-xkb",
+    },
+    src_uri = "https://xorg.freedesktop.org/archive/individual/lib/libxcb-1.16.tar.xz",
+    sha256 = "4348566aa0fbf196db5e0a576321c65966189210cb51328ea2bb2be39c711d71",
+    description = "X C Bindings library",
+    homepage = "https://xcb.freedesktop.org/",
+    license = "MIT",
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--libdir=/usr/lib64",
+        "--enable-xinput",
+        "--enable-xkb",
+    ],
+    # Remove .la files that cause libtool path issues
+    src_install = "make DESTDIR=\"$DESTDIR\" install && find \"$DESTDIR\" -name '*.la' -delete",
+    deps = [
+        "graphics//xorg/xorgproto:xorgproto",
+        "graphics//xorg/libXau:libXau",
+        "graphics//xorg/libXdmcp:libXdmcp",
+        "graphics//xorg/xcb-proto:xcb-proto",
+    ],
+    bdepend = [
+        "lang//python:python",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,38 @@
+load("@root//defs:package_defs.bzl","autotools_package", "download_source", "make_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "hdparm-src",
+    src_uri = "https://sourceforge.net/projects/hdparm/files/hdparm/hdparm-9.65.tar.gz",
+    sha256 = "d14929f910d060932e717e9382425d47c2e7144235a53713d55a94f7de535a4b",
+    signature_required = False,
+)
+
+make_package(
+    name = "hdparm",
+    source = ":hdparm-src",
+    iuse = ["static"],
+    use_configure = {
+        "-static": "--disable-static",
+        "static": "--enable-static",
+    },
+    version = "9.65",
+    description = "Get/set hard disk parameters",
+    homepage = "https://sourceforge.net/projects/hdparm/",
+    license = "BSD-2-Clause",
+    src_compile = """
+# hdparm build - use make but specify compiler flags
+# Some versions might not have all files, so we compile what's available
+make CC=gcc CFLAGS="-O2 -W -Wall -D_BSD_SOURCE" LDFLAGS="" || {
+    # If make fails, try compiling core files directly
+    echo "Standard make failed, trying direct compilation..."
+    gcc -O2 -W -Wall -D_DEFAULT_SOURCE $(ls *.c 2>/dev/null | grep -v 'wiper\|blkioctls' || true) -o hdparm
+}
+""",
+    src_install = """
+install -Dm755 hdparm "$DESTDIR/usr/sbin/hdparm"
+install -Dm644 hdparm.8 "$DESTDIR/usr/share/man/man8/hdparm.8"
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

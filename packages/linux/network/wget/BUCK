@@ -1,0 +1,33 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package", "binary_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# wget - Network downloader
+# =============================================================================
+
+autotools_package(
+    name = "wget",
+    version = "1.21.4",
+    src_uri = "https://mirrors.kernel.org/gnu/wget/wget-1.21.4.tar.gz",
+    sha256 = "81542f5cefb8faacc39bbbc6c82ded80e3e4a88505ae72ea51df27525bcde04c",
+    signature_sha256 = "fb1ce21577dee962be8bf95cbf86f806815778264622a5d756324ff8dd3bfc57",
+    signature_required=False,
+
+    use_defaults = ["ssl", "ipv6"],
+
+    use_deps = {
+        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
+        "pcre": ["system//libs/utility/pcre2:pcre2"],
+    },
+
+
+    deps = [
+        "network//ca-certificates:ca-certificates",
+    ],
+
+    description = "Network utility to retrieve files from the web",
+    homepage = "https://www.gnu.org/software/wget/",
+    license = "GPL-3.0",
+    visibility = ["PUBLIC"],
+)

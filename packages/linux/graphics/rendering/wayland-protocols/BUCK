@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "meson_package")
+
+# wayland-protocols - Package from third-party
+
+meson_package(
+    name = "wayland-protocols",
+    version = "1.41",
+    src_uri = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.41/downloads/wayland-protocols-1.41.tar.xz",
+    sha256 = "2786b6b1b79965e313f2c289c12075b9ed700d41844810c51afda10ee329576b",
+    description = "wayland-protocols package",
+    homepage = "https://gitlab.freedesktop.org/wayland/wayland-protocols",
+    license = "MIT",
+    deps = [
+        "graphics//rendering/wayland:wayland",
+        "core//libffi:libffi",
+    ],
+    meson_args = [
+        "-Dtests=false",
+    ],
+    visibility = ["PUBLIC"],
+)

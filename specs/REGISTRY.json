@@ -1,0 +1,283 @@
+{
+  "version": "1.0.0",
+  "generated": "2025-12-27T13:31:23.272526",
+  "total_specs": 5,
+  "specs": [
+    {
+      "id": "SPEC-001",
+      "title": "Package Manager Integration",
+      "status": "approved",
+      "version": "1.0.0",
+      "category": "core",
+      "path": "core/SPEC-001-package-manager-integration.md",
+      "created": "2025-11-20",
+      "updated": "2025-12-27",
+      "authors": [
+        {
+          "name": "BuckOS Team",
+          "email": "team@buckos.org"
+        }
+      ],
+      "maintainers": [
+        "team@buckos.org"
+      ],
+      "tags": [
+        "package-manager",
+        "buck2",
+        "build-system",
+        "integration"
+      ],
+      "related": [
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005"
+      ],
+      "implementation": {
+        "status": "complete",
+        "completeness": 95
+      },
+      "compatibility": {
+        "buck2_version": ">=2024.11.01",
+        "buckos_version": ">=1.0.0",
+        "breaking_changes": false
+      },
+      "description": "This specification defines how package managers should interact with the BuckOS Buck2 build system. It provides a complete specification for implementing package manager tooling that integrates wit..."
+    },
+    {
+      "id": "SPEC-002",
+      "title": "USE Flag System",
+      "status": "approved",
+      "version": "1.0.0",
+      "category": "core",
+      "path": "core/SPEC-002-use-flags.md",
+      "created": "2025-11-20",
+      "updated": "2025-11-27",
+      "authors": [
+        {
+          "name": "BuckOS Team",
+          "email": "team@buckos.org"
+        }
+      ],
+      "maintainers": [
+        "team@buckos.org"
+      ],
+      "tags": [
+        "use-flags",
+        "configuration",
+        "features",
+        "build-system"
+      ],
+      "related": [
+        "SPEC-001",
+        "SPEC-004"
+      ],
+      "implementation": {
+        "status": "complete",
+        "completeness": 90
+      },
+      "compatibility": {
+        "buck2_version": ">=2024.11.01",
+        "buckos_version": ">=1.0.0",
+        "breaking_changes": false
+      },
+      "description": "The USE flag system provides fine-grained control over package features, dependencies, and build configuration in BuckOS. Similar to Gentoo's USE flags but implemented for Buck2, this system enable..."
+    },
+    {
+      "id": "SPEC-003",
+      "title": "Package Versioning and Slot System",
+      "status": "approved",
+      "version": "1.0.0",
+      "category": "core",
+      "path": "core/SPEC-003-versioning.md",
+      "created": "2025-11-19",
+      "updated": "2025-11-19",
+      "authors": [
+        {
+          "name": "BuckOS Team",
+          "email": "team@buckos.org"
+        }
+      ],
+      "maintainers": [
+        "team@buckos.org"
+      ],
+      "tags": [
+        "versioning",
+        "slots",
+        "subslots",
+        "multi-version",
+        "abi-tracking"
+      ],
+      "related": [
+        "SPEC-001"
+      ],
+      "implementation": {
+        "status": "complete",
+        "completeness": 85
+      },
+      "compatibility": {
+        "buck2_version": ">=2024.11.01",
+        "buckos_version": ">=1.0.0",
+        "breaking_changes": false
+      },
+      "description": "This specification defines the versioning, slot, and subslot system for BuckOS packages. It enables parallel installation of multiple versions, ABI compatibility tracking, and automated dependency ..."
+    },
+    {
+      "id": "SPEC-004",
+      "title": "Package Sets and System Profiles",
+      "status": "approved",
+      "version": "1.0.0",
+      "category": "core",
+      "path": "core/SPEC-004-package-sets.md",
+      "created": "2025-11-20",
+      "updated": "2025-11-20",
+      "authors": [
+        {
+          "name": "BuckOS Team",
+          "email": "team@buckos.org"
+        }
+      ],
+      "maintainers": [
+        "team@buckos.org"
+      ],
+      "tags": [
+        "package-sets",
+        "profiles",
+        "system-sets",
+        "collections"
+      ],
+      "related": [
+        "SPEC-001",
+        "SPEC-002"
+      ],
+      "implementation": {
+        "status": "complete",
+        "completeness": 80
+      },
+      "compatibility": {
+        "buck2_version": ">=2024.11.01",
+        "buckos_version": ">=1.0.0",
+        "breaking_changes": false
+      },
+      "description": "This specification defines the package set system for BuckOS, which organizes packages into logical collections for different use cases. Package sets enable building complete systems (minimal, serv..."
+    },
+    {
+      "id": "SPEC-005",
+      "title": "Patch System",
+      "status": "approved",
+      "version": "1.0.0",
+      "category": "core",
+      "path": "core/SPEC-005-patches.md",
+      "created": "2025-11-20",
+      "updated": "2025-11-20",
+      "authors": [
+        {
+          "name": "BuckOS Team",
+          "email": "team@buckos.org"
+        }
+      ],
+      "maintainers": [
+        "team@buckos.org"
+      ],
+      "tags": [
+        "patches",
+        "customization",
+        "build-system",
+        "source-modification"
+      ],
+      "related": [
+        "SPEC-001",
+        "SPEC-002"
+      ],
+      "implementation": {
+        "status": "complete",
+        "completeness": 75
+      },
+      "compatibility": {
+        "buck2_version": ">=2024.11.01",
+        "buckos_version": ">=1.0.0",
+        "breaking_changes": false
+      },
+      "description": "This specification defines the patch system for BuckOS, which allows users and distributions to customize package builds through multiple patch sources with clear precedence ordering. The system su..."
+    }
+  ],
+  "by_category": {
+    "core": [
+      "SPEC-001",
+      "SPEC-002",
+      "SPEC-003",
+      "SPEC-004",
+      "SPEC-005"
+    ]
+  },
+  "by_status": {
+    "approved": [
+      "SPEC-001",
+      "SPEC-002",
+      "SPEC-003",
+      "SPEC-004",
+      "SPEC-005"
+    ]
+  },
+  "by_tag": {
+    "package-manager": [
+      "SPEC-001"
+    ],
+    "buck2": [
+      "SPEC-001"
+    ],
+    "build-system": [
+      "SPEC-001",
+      "SPEC-002",
+      "SPEC-005"
+    ],
+    "integration": [
+      "SPEC-001"
+    ],
+    "use-flags": [
+      "SPEC-002"
+    ],
+    "configuration": [
+      "SPEC-002"
+    ],
+    "features": [
+      "SPEC-002"
+    ],
+    "versioning": [
+      "SPEC-003"
+    ],
+    "slots": [
+      "SPEC-003"
+    ],
+    "subslots": [
+      "SPEC-003"
+    ],
+    "multi-version": [
+      "SPEC-003"
+    ],
+    "abi-tracking": [
+      "SPEC-003"
+    ],
+    "package-sets": [
+      "SPEC-004"
+    ],
+    "profiles": [
+      "SPEC-004"
+    ],
+    "system-sets": [
+      "SPEC-004"
+    ],
+    "collections": [
+      "SPEC-004"
+    ],
+    "patches": [
+      "SPEC-005"
+    ],
+    "customization": [
+      "SPEC-005"
+    ],
+    "source-modification": [
+      "SPEC-005"
+    ]
+  }
+}

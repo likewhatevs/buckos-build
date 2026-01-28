@@ -1,0 +1,28 @@
+load("@root//defs:package_defs.bzl", "cargo_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+cargo_package(
+    name = "cloud-hypervisor",
+    version = "41.0",
+    src_uri = "https://github.com/cloud-hypervisor/cloud-hypervisor/archive/refs/tags/v41.0.tar.gz",
+    sha256 = "6b25fea566f8deba48000292423bb6fab32c0bed7f6a37e6456e9a1fab0c0c00",
+    signature_required = False,
+    description = "Modern cloud workload-focused virtual machine monitor",
+    homepage = "https://www.cloudhypervisor.org/",
+    license = "Apache-2.0 AND BSD-3-Clause",
+    cargo_args = [
+        "--workspace",
+        "--bin",
+        "cloud-hypervisor",
+        "--bin",
+        "ch-remote",
+    ],
+    bins = [
+        "cloud-hypervisor",
+        "ch-remote",
+    ],
+    deps = [
+        "lang//rust:rust",
+    ],
+    visibility = ["PUBLIC"],
+)

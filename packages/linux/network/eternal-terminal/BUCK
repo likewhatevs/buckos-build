@@ -1,0 +1,21 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "eternal-terminal",
+    version = "6.2.11",
+    src_uri = "https://github.com/MisterTea/EternalTerminal/archive/refs/tags/et-v6.2.11.tar.gz",
+    sha256 = "e8e80800babc026be610d50d402a8ecbdfbd39e130d1cfeb51fb102c1ad63b0f",
+    cmake_args = [
+        "-DDISABLE_VCPKG=ON",
+        "-DDISABLE_SENTRY=ON",
+        "-DDISABLE_TELEMETRY=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DCMAKE_BUILD_TYPE=Release",
+    ],
+    deps = [
+        "core//zlib:zlib",
+        "system//libs/crypto/openssl:openssl",
+        "dev-libs//serialization/protobuf:protobuf",
+        "dev-libs//misc/libsodium:libsodium",
+    ],
+)

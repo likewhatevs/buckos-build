@@ -1,0 +1,34 @@
+load("@root//defs:package_defs.bzl", "download_source", "meson_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+download_source(
+    name = "foot-src",
+    src_uri = "https://codeberg.org/dnkl/foot/archive/1.16.2.tar.gz",
+    sha256 = "0e02af376e5f4a96eeb90470b7ad2e79a1d660db2a7d1aa772be43c7db00e475",
+    signature_required = False,
+)
+
+meson_package(
+    name = "foot",
+    source = ":foot-src",
+    iuse = ["grapheme-clustering"],
+    version = "1.16.2",
+    description = "Fast, lightweight and minimalistic Wayland terminal emulator",
+    homepage = "https://codeberg.org/dnkl/foot",
+    license = "MIT",
+    meson_args = [
+        "-Ddocs=disabled",
+        "-Dterminfo=disabled",
+    ],
+    use_meson = {
+        "grapheme-clustering": "-Dgrapheme-clustering=enabled",
+        "-grapheme-clustering": "-Dgrapheme-clustering=disabled",
+    },
+    deps = [
+        "core//libffi:libffi",
+        "system//libs/graphics/pixman:pixman",
+        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "graphics//rendering/wayland:wayland",
+    ],
+    visibility = ["PUBLIC"],
+)

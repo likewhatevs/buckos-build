@@ -1,0 +1,20 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "semgrep",
+    version = "1.128.0",
+    src_uri = "https://github.com/semgrep/semgrep/archive/refs/tags/v1.128.0.tar.gz",
+    sha256 = "98431c43c3bee3494049f27d3c44ea8fcd15f852edf45b046e4c8e137ac47ba6",
+    description = "Lightweight static analysis for many languages",
+    homepage = "https://semgrep.dev",
+    license = "LGPL-2.1",
+    deps = [
+        "dev-libs//python/attrs:attrs",
+        "dev-libs//python/click:click",
+        "dev-libs//python/colorama:colorama",
+        "dev-libs//python/requests:requests",
+        "dev-libs//python/rich:rich",
+        "dev-libs//python/ruamel-yaml:ruamel-yaml",
+    ],
+    visibility = ["PUBLIC"],
+)

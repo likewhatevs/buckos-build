@@ -1,0 +1,63 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "ipxe",
+    version = "1.21.1",
+    iuse = [
+        "binary",
+        "ipv6",
+        "iso",
+        "lkrn",
+        "qemu",
+        "uefi32",
+        "uefi64",
+        "undi",
+        "usb",
+        "vmware",
+    ],
+    use_configure = {
+        "-binary": "--disable-binary",
+        "-ipv6": "--disable-ipv6",
+        "-iso": "--disable-iso",
+        "-lkrn": "--disable-lkrn",
+        "-qemu": "--disable-qemu",
+        "-uefi32": "--disable-uefi32",
+        "-uefi64": "--disable-uefi64",
+        "-undi": "--disable-undi",
+        "-usb": "--disable-usb",
+        "-vmware": "--disable-vmware",
+        "binary": "--enable-binary",
+        "ipv6": "--enable-ipv6",
+        "iso": "--enable-iso",
+        "lkrn": "--enable-lkrn",
+        "qemu": "--enable-qemu",
+        "uefi32": "--enable-uefi32",
+        "uefi64": "--enable-uefi64",
+        "undi": "--enable-undi",
+        "usb": "--enable-usb",
+        "vmware": "--enable-vmware",
+    },
+    src_uri = "https://github.com/ipxe/ipxe/archive/refs/tags/v1.21.1.tar.gz",
+    sha256 = "16e8d51c48d8a120332cf0dc32b473acc5d179e3975ced208eb21caf3b6528dc",
+    description = "Open source network boot firmware (PXE)",
+    homepage = "https://ipxe.org/",
+    license = "GPL-2.0",
+    src_configure = "true",
+    src_compile = """
+cd src
+# Disable -Werror since some warnings are treated as errors
+make -j$(nproc) NO_WERROR=1 bin-x86_64-efi/ipxe.efi bin-x86_64-efi/snponly.efi
+make -j$(nproc) NO_WERROR=1 bin/ipxe.iso bin/ipxe.usb bin/undionly.kpxe
+""",
+    src_install = """
+mkdir -p "$DESTDIR/usr/share/ipxe"
+cp -v src/bin-x86_64-efi/*.efi "$DESTDIR/usr/share/ipxe/" 2>/dev/null || true
+cp -v src/bin/*.iso "$DESTDIR/usr/share/ipxe/" 2>/dev/null || true
+cp -v src/bin/*.usb "$DESTDIR/usr/share/ipxe/" 2>/dev/null || true
+cp -v src/bin/*.kpxe "$DESTDIR/usr/share/ipxe/" 2>/dev/null || true
+mkdir -p "$DESTDIR/usr/share/doc/ipxe"
+cp -v README COPYING* "$DESTDIR/usr/share/doc/ipxe/" 2>/dev/null || true
+""",
+    deps = [],
+    visibility = ["PUBLIC"],
+)

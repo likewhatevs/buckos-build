@@ -1,0 +1,83 @@
+# Privilege escalation packages
+# PolicyKit and related authorization tools
+
+load("@root//defs:package_defs.bzl", "download_source", "ebuild_package", "gen_pkgconfig", "meson_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# PolicyKit - Authorization framework
+meson_package(
+    name = "polkit",
+    version = "124",
+    iuse = [
+        "examples",
+        "gtk",
+        "introspection",
+        "kde",
+        "nls",
+        "pam",
+        "selinux",
+        "systemd",
+    ],
+    src_uri = "https://github.com/polkit-org/polkit/archive/refs/tags/124/polkit-124.tar.gz",
+    sha256 = "72457d96a0538fd03a3ca96a6bf9b7faf82184d4d67c793eb759168e4fd49e20",
+    signature_required = False,
+    description = "Application-level authorization toolkit",
+    homepage = "https://github.com/polkit-org/polkit",
+    license = "LGPL-2.0+",
+    meson_args = [
+        "-Dsystemdsystemunitdir=/usr/lib/systemd/system",
+        "-Djs_engine=duktape",
+        "-Dpam_module_dir=/lib/security",
+        "-Dpam_include=system-auth",
+        "-Dman=false",
+        "-Dtests=false",
+    ],
+    use_meson = {
+        "examples": "-Dexamples=true",
+        "-examples": "-Dexamples=false",
+        "gtk": "-Dgtk_doc=true",
+        "-gtk": "-Dgtk_doc=false",
+        "introspection": "-Dintrospection=true",
+        "-introspection": "-Dintrospection=false",
+        "systemd": "-Dsession_tracking=libsystemd-login",
+        "-systemd": "-Dsession_tracking=ConsoleKit",
+    },
+    deps = [
+        "system//libs/ipc/dbus:dbus",
+        "dev-libs//glib:glib",
+        "system//security/encryption:linux-pam",
+        ":duktape",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Duktape - Embeddable JavaScript engine (for polkit)
+download_source(
+    name = "duktape-src",
+    src_uri = "https://duktape.org/duktape-2.7.0.tar.xz",
+    sha256 = "90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890",
+    signature_required = False,
+)
+
+ebuild_package(
+    name = "duktape",
+    source = ":duktape-src",
+    version = "2.7.0",
+    description = "Embeddable JavaScript engine",
+    homepage = "https://duktape.org/",
+    license = "MIT",
+    src_compile = """
+make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr
+""",
+    src_install = """
+mkdir -p "$DESTDIR/usr/lib" "$DESTDIR/usr/include"
+cp libduktape.so* "$DESTDIR/usr/lib/"
+cp src/duktape.h src/duk_config.h "$DESTDIR/usr/include/"
+""" + gen_pkgconfig(
+        name = "duktape",
+        description = "Embeddable JavaScript engine",
+        destvar = "DESTDIR",
+        libdir = "lib",
+    ),
+    visibility = ["PUBLIC"],
+)

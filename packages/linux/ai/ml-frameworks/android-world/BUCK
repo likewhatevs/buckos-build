@@ -1,0 +1,16 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "android_world",
+    version = "0.1.0",
+    src_uri = "https://github.com/google-research/android_world/archive/refs/heads/main.tar.gz",
+    sha256 = "fc17d9f0b6fbbf6fec10bcf29ff3bb4faffd06f148a6df50390e8f79ddb7634a",
+    deps = [
+        "dev-libs//python/absl-py:absl-py",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/requests:requests",
+        "dev-libs//python/protobuf:protobuf",
+        "dev-libs//python/grpcio-tools:grpcio-tools",
+    ],
+)

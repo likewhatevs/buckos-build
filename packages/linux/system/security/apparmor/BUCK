@@ -1,0 +1,58 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "apparmor-src",
+    src_uri = "https://gitlab.com/apparmor/apparmor/-/archive/v3.1.6/apparmor-v3.1.6.tar.gz",
+    sha256 = "a7899f1529ad7f1e33fb07109075be3827edf43997040ecdec601590748f1039",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "apparmor",
+    source = ":apparmor-src",
+    version = "3.1.6",
+    description = "AppArmor userspace utilities and profiles",
+    homepage = "https://apparmor.net/",
+    license = "GPL-2.0",
+    pre_configure = """
+        # AppArmor builds in subdirectories
+        cd libraries/libapparmor
+        sh ./autogen.sh
+    """,
+    configure_args = [
+        "--prefix=/usr",
+        "--sysconfdir=/etc",
+        "--with-perl",
+        "--with-python",
+    ],
+    make_args = ["-C", "libraries/libapparmor"],
+    post_install = """
+        # Install libapparmor
+        cd libraries/libapparmor
+        make DESTDIR=$OUT install
+        cd ../..
+
+        # Install parser
+        cd parser
+        make DESTDIR=$OUT install
+        cd ..
+
+        # Install utilities
+        cd utils
+        make DESTDIR=$OUT install
+        cd ..
+
+        # Install profiles
+        cd profiles
+        make DESTDIR=$OUT install
+        cd ..
+
+        mkdir -p $OUT/etc/apparmor.d
+        mkdir -p $OUT/var/lib/apparmor
+    """,
+    deps = [
+        "lang//python:python",
+    ],
+    visibility = ["PUBLIC"],
+)

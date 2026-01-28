@@ -1,0 +1,51 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "libmypaint-src",
+    src_uri = "https://github.com/mypaint/libmypaint/releases/download/v1.6.1/libmypaint-1.6.1.tar.xz",
+    sha256 = "741754f293f6b7668f941506da07cd7725629a793108bb31633fb6c3eae5315f",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "libmypaint",
+    source = ":libmypaint-src",
+    iuse = [
+        "gegl",
+        "introspection",
+        "nls",
+        "openmp",
+    ],
+    use_configure = {
+        "-gegl": "--disable-gegl",
+        "-introspection": "--disable-introspection",
+        "-nls": "--disable-nls",
+        "-openmp": "--disable-openmp",
+        "gegl": "--enable-gegl",
+        "introspection": "--enable-introspection",
+        "nls": "--enable-nls",
+        "openmp": "--enable-openmp",
+    },
+    version = "1.6.1",
+    description = "Library for making brushstrokes for MyPaint",
+    homepage = "https://github.com/mypaint/libmypaint",
+    license = "ISC",
+    configure_args = [
+        "--prefix=/usr",
+        "--enable-gegl",
+        "--enable-introspection",
+    ],
+    make_args = [],
+    post_install = """
+make DESTDIR=$OUT install
+""",
+    deps = [
+        "dev-libs//glib:glib",
+        "system//libs/data/json-c:json-c",
+        "graphics//utilities/gegl:gegl",
+    ],
+    bdepend = [
+    ],
+    visibility = ["PUBLIC"],
+)

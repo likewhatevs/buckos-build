@@ -1,0 +1,53 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "libraw",
+    version = "0.21.2",
+    src_uri = "https://github.com/LibRaw/LibRaw/archive/0.21.2.tar.gz",
+    sha256 = "7ac056e0d9e814d808f6973a950bbf45e71b53283eed07a7ea87117a6c0ced96",
+    description = "Library for reading RAW files from digital cameras",
+    homepage = "https://www.libraw.org/",
+    license = "LGPL-2.1",
+    bdepend = [
+        "dev-tools//build-systems/autoconf:autoconf",
+        "dev-tools//build-systems/automake:automake",
+        "dev-tools//build-systems/libtool:libtool",
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    iuse = [
+        "examples",
+        "hardened",
+        "jpeg",
+        "lcms",
+        "lcms2",
+        "openmp",
+        "zlib",
+    ],
+    use_defaults = ["jpeg", "zlib"],
+    configure_args = [
+        "--disable-examples",
+    ],
+    use_configure = {
+        "-examples": "--disable-examples",
+        "-hardened": "--disable-hardening",
+        "-jpeg": "--disable-jpeg",
+        "-lcms": "--disable-lcms",
+        "-lcms2": "--disable-lcms",
+        "-openmp": "--disable-openmp",
+        "-zlib": "--disable-zlib",
+        "examples": "--enable-examples",
+        "hardened": "--enable-hardening",
+        "jpeg": "--enable-jpeg",
+        "lcms": "--enable-lcms",
+        "lcms2": "--enable-lcms",
+        "openmp": "--enable-openmp",
+        "zlib": "--enable-zlib",
+    },
+    deps = [],
+    use_deps = {
+        "jpeg": ["media//image/libjpeg-turbo:libjpeg-turbo"],
+        "zlib": ["core//zlib:zlib"],
+        "lcms2": ["graphics//utilities/lcms:lcms"],
+    },
+    visibility = ["PUBLIC"],
+)

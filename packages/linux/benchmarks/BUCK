@@ -1,0 +1,66 @@
+# Package group for all benchmarks
+filegroup(
+    name = "all-benchmarks",
+    srcs = [
+        "benchmarks//stress-ng:stress-ng",
+        "benchmarks//fio:fio",
+        "benchmarks//iperf3:iperf3",
+        "benchmarks//hackbench:hackbench",
+        "benchmarks//memtester:memtester",
+        "benchmarks//bonnie:bonnie",
+        "benchmarks//iozone:iozone",
+        "benchmarks//stream:stream",
+        "benchmarks//netperf:netperf",
+        "benchmarks//dbench:dbench",
+        "benchmarks//perf:perf",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# CPU and memory benchmarks
+filegroup(
+    name = "cpu-memory-benchmarks",
+    srcs = [
+        "benchmarks//stress-ng:stress-ng",
+        "benchmarks//memtester:memtester",
+        "benchmarks//stream:stream",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Storage and I/O benchmarks
+filegroup(
+    name = "storage-benchmarks",
+    srcs = [
+        "benchmarks//fio:fio",
+        "benchmarks//bonnie:bonnie",
+        "benchmarks//iozone:iozone",
+        "benchmarks//dbench:dbench",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Network benchmarks
+filegroup(
+    name = "network-benchmarks",
+    srcs = [
+        "benchmarks//iperf3:iperf3",
+        "benchmarks//netperf:netperf",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Scheduler and latency benchmarks
+filegroup(
+    name = "latency-benchmarks",
+    srcs = [
+        "benchmarks//hackbench:hackbench",
+        "benchmarks//perf:perf",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

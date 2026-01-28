@@ -1,0 +1,81 @@
+# Container runtime packages aggregator
+
+filegroup(
+    name = "runtimes",
+    srcs = [
+        "emulation//containers/runc:runc",
+        "emulation//containers/crun:crun",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "docker-full",
+    srcs = [
+        "emulation//containers/containerd:containerd",
+        "emulation//containers/docker:docker-cli",
+        "emulation//containers/docker:docker-engine",
+        "emulation//containers/docker:docker-compose",
+        "emulation//containers/docker:docker-buildx",
+        "emulation//containers/runc:runc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "docker-minimal",
+    srcs = [
+        "emulation//containers/containerd:containerd",
+        "emulation//containers/docker:docker-cli",
+        "emulation//containers/docker:docker-engine",
+        "emulation//containers/runc:runc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "podman-full",
+    srcs = [
+        "emulation//containers/podman:podman",
+        "emulation//containers/podman:buildah",
+        "emulation//containers/podman:skopeo",
+        "emulation//containers/podman:conmon",
+        "emulation//containers/crun:crun",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "podman-minimal",
+    srcs = [
+        "emulation//containers/podman:podman",
+        "emulation//containers/podman:conmon",
+        "emulation//containers/crun:crun",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "containerd-full",
+    srcs = [
+        "emulation//containers/containerd:containerd",
+        "emulation//containers/runc:runc",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+filegroup(
+    name = "all-containers",
+    srcs = [
+        ":docker-full",
+        ":podman-full",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

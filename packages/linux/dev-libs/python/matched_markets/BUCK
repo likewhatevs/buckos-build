@@ -1,0 +1,19 @@
+load("@root//defs:package_defs.bzl", "python_package")
+
+python_package(
+    name = "matched_markets",
+    version = "1.0.0",
+    src_uri = "https://github.com/google/matched_markets/archive/5e3cd957d9e3945b0446c94763f2f88b21f03ca5.tar.gz",
+    sha256 = "644d781a477334e9b0762c75c69fac8d9ac02d4c7f83d97919223e15c9cf773a",
+    deps = [
+        "dev-libs//python/absl-py:absl-py",
+        "dev-libs//python/altair:altair",
+        "dev-libs//python/matplotlib:matplotlib",
+        "dev-libs//python/numpy:numpy",
+        "dev-libs//python/pandas:pandas",
+        "dev-libs//python/scipy:scipy",
+        "dev-libs//python/seaborn:seaborn",
+        "dev-libs//python/six:six",
+        "dev-libs//python/statsmodels:statsmodels",
+    ],
+)

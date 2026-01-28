@@ -1,0 +1,53 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source")
+
+# -----------------------------------------------------------------------------
+# execline - Small scripting language for s6
+# -----------------------------------------------------------------------------
+
+download_source(
+    name = "execline-src",
+    src_uri = "https://skarnet.org/software/execline/execline-2.9.5.1.tar.gz",
+    sha256 = "df750035d0fb21c7265bffb7ed7e1b661de1e842944a2252bdcddc32d0d97217",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "execline",
+    source = ":execline-src",
+    version = "2.9.5.1",
+    description = "Small scripting language for s6",
+    homepage = "https://skarnet.org/software/execline/",
+    license = "ISC",
+    # skarnet.org uses non-standard configure - custom src_configure phase
+    src_configure = """
+# Find skalibs in dependency directories
+SKALIBS_DIR=""
+for dir in ${DEP_BASE_DIRS//:/ }; do
+    if [ -d "$dir/usr/lib/skalibs/sysdeps" ]; then
+        SKALIBS_DIR="$dir"
+        break
+    fi
+done
+if [ -z "$SKALIBS_DIR" ]; then
+    echo "ERROR: Could not find skalibs sysdeps directory"
+    echo "DEP_BASE_DIRS: $DEP_BASE_DIRS"
+    exit 1
+fi
+echo "Found skalibs at: $SKALIBS_DIR"
+
+./configure \\
+    --prefix=/usr \\
+    --libexecdir=/usr/lib/execline \\
+    --libdir=/usr/lib \\
+    --enable-shared \\
+    --disable-static \\
+    --with-sysdeps="$SKALIBS_DIR/usr/lib/skalibs/sysdeps" \\
+    --with-include="$SKALIBS_DIR/usr/include" \\
+    --with-lib="$SKALIBS_DIR/usr/lib"
+""",
+    deps = [
+        "system//init/skalibs:skalibs",
+    ],
+    bdepend = [],
+    visibility = ["PUBLIC"],
+)

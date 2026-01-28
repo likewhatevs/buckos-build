@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+download_source(
+    name = "f2fs-tools-src",
+    src_uri = "https://git.kernel.org/pub/scm/linux/kernel/git/jaegeuk/f2fs-tools.git/snapshot/f2fs-tools-1.16.0.tar.gz",
+    sha256 = "208c7a07e95383fbd7b466b5681590789dcb41f41bf197369c41a95383b57c5e",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "f2fs-tools",
+    source = ":f2fs-tools-src",
+    iuse = ["lz4", "lzo", "selinux"],
+    use_configure = {
+        "-lz4": "--without-lz4",
+        "-lzo": "--disable-lzo",
+        "-selinux": "--disable-selinux",
+        "lz4": "--with-lz4",
+        "lzo": "--enable-lzo",
+        "selinux": "--enable-selinux",
+    },
+    version = "1.16.0",
+    description = "F2FS filesystem utilities for flash-based storage",
+    homepage = "https://f2fs.wiki.kernel.org/",
+    license = "GPL-2.0",
+    configure_args = [],
+    deps = [
+        "core//util-linux:util-linux",
+    ],
+    visibility = ["PUBLIC"],
+)

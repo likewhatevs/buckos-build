@@ -1,0 +1,10 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+# piLibsFork - DISABLED
+# Original GitHub repository (iniqo/piLibs) no longer exists.
+
+filegroup(
+    name = "piLibsFork",
+    srcs = [],
+    visibility = ["PUBLIC"],
+)

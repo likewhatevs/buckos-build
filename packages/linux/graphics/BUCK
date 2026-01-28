@@ -1,0 +1,217 @@
+# Graphics packages aggregator
+# This file provides convenient groups for graphics-related packages
+
+# Image Editors - Full-featured image manipulation applications
+filegroup(
+    name = "editors",
+    srcs = [
+        "graphics//editors/gimp:gimp",
+        "graphics//editors/krita:krita",
+        "graphics//editors/inkscape:inkscape",
+        "graphics//editors/darktable:darktable",
+        "graphics//editors/rawtherapee:rawtherapee",
+        "graphics//editors/mypaint:mypaint",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# 3D Modeling - 3D creation and CAD applications
+filegroup(
+    name = "3d",
+    srcs = [
+        "graphics//3d/blender:blender",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Image Viewers - Lightweight image viewing applications
+filegroup(
+    name = "viewers",
+    srcs = [
+        "graphics//viewers/feh:feh",
+        "graphics//viewers/imv:imv",
+        "graphics//viewers/geeqie:geeqie",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Screenshot Tools - Screen capture utilities
+filegroup(
+    name = "screenshot",
+    srcs = [
+        "graphics//screenshot/flameshot:flameshot",
+        "graphics//screenshot/scrot:scrot",
+        "graphics//screenshot/grim:grim",
+        "graphics//screenshot/maim:maim",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Editing - Video production and streaming tools
+filegroup(
+    name = "video",
+    srcs = [
+        "graphics//video:all",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Libraries - Core video encoding/decoding libraries
+filegroup(
+    name = "video-libraries",
+    srcs = [
+        "graphics//video:libraries",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Players - Media playback applications
+filegroup(
+    name = "video-players",
+    srcs = [
+        "graphics//video:players",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Editors - Video editing applications
+filegroup(
+    name = "video-editors",
+    srcs = [
+        "graphics//video:editors",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Utilities - Video conversion and analysis tools
+filegroup(
+    name = "video-utilities",
+    srcs = [
+        "graphics//video:utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Screen Recording - Screen capture tools
+filegroup(
+    name = "video-recording",
+    srcs = [
+        "graphics//video:recording",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Video Streaming - Live streaming tools
+filegroup(
+    name = "video-streaming",
+    srcs = [
+        "graphics//video:streaming",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Animation - 2D animation software
+filegroup(
+    name = "animation",
+    srcs = [
+        "graphics//animation/synfig:synfig",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Utilities - Graphics libraries and command-line tools
+filegroup(
+    name = "utilities",
+    srcs = [
+        "graphics//utilities/imagemagick:imagemagick",
+        "graphics//utilities/graphicsmagick:graphicsmagick",
+        "graphics//utilities/gpick:gpick",
+        "graphics//utilities/dia:dia",
+        "graphics//utilities/babl:babl",
+        "graphics//utilities/gegl:gegl",
+        "graphics//utilities/libmypaint:libmypaint",
+        "graphics//utilities/slop:slop",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Professional Graphics Suite - Essential tools for professional graphics work
+filegroup(
+    name = "professional",
+    srcs = [
+        "graphics//editors/gimp:gimp",
+        "graphics//editors/inkscape:inkscape",
+        "graphics//editors/krita:krita",
+        "graphics//3d/blender:blender",
+        "graphics//video/kdenlive:kdenlive",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Photography Suite - Tools for photographers
+filegroup(
+    name = "photography",
+    srcs = [
+        "graphics//editors/gimp:gimp",
+        "graphics//editors/darktable:darktable",
+        "graphics//editors/rawtherapee:rawtherapee",
+        "graphics//viewers/geeqie:geeqie",
+        "graphics//utilities/imagemagick:imagemagick",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Minimal Graphics - Lightweight tools for basic graphics needs
+filegroup(
+    name = "minimal",
+    srcs = [
+        "graphics//viewers/feh:feh",
+        "graphics//screenshot/scrot:scrot",
+        "graphics//utilities/imagemagick:imagemagick",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Wayland Graphics - Wayland-compatible graphics tools
+filegroup(
+    name = "wayland",
+    srcs = [
+        "graphics//viewers/imv:imv",
+        "graphics//screenshot/grim:grim",
+        "graphics//screenshot/flameshot:flameshot",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All Graphics - Complete graphics package collection
+filegroup(
+    name = "all",
+    srcs = [
+        ":editors",
+        ":3d",
+        ":viewers",
+        ":screenshot",
+        ":video",
+        ":animation",
+        ":utilities",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

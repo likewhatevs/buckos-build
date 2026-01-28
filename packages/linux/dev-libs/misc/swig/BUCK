@@ -1,0 +1,32 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+# SWIG - Simplified Wrapper and Interface Generator
+# Uses official release tarball with pre-generated configure script
+
+autotools_package(
+    name = "swig",
+    version = "4.2.0",
+    iuse = ["ccache", "pcre"],
+    use_configure = {
+        "-ccache": "--disable-ccache",
+        "-pcre": "--disable-pcre",
+        "ccache": "--enable-ccache",
+        "pcre": "--enable-pcre",
+    },
+    src_uri = "https://mirror.buckos.org/s/swig-4.2.0.tar.gz",
+    sha256 = "261ca2d7589e260762817b912c075831572b72ff2717942f75b3e51244829c97",
+    description = "Simplified Wrapper and Interface Generator",
+    homepage = "https://www.swig.org/",
+    license = "GPL-3.0",
+    bdepend = [
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    deps = [
+        "system//libs/utility/pcre2:pcre2",
+    ],
+    src_prepare = "",
+    configure_args = [
+        "--prefix=${PREFIX}",
+    ],
+    visibility = ["PUBLIC"],
+)

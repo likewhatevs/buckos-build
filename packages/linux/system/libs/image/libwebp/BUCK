@@ -1,0 +1,83 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+autotools_package(
+    name = "libwebp",
+    version = "1.4.0",
+    src_uri = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0.tar.gz",
+    sha256 = "61f873ec69e3be1b99535634340d5bde750b2e4447caa1db9f61be3fd49ab1e5",
+    signature_sha256 = "9a25a1f6c2bec4a4ec05ece3bd6938f0e9b47e432d58067d3877dba4fbcf6214",
+    signature_required = False,
+    description = "Library to encode and decode images in WebP format",
+    homepage = "https://developers.google.com/speed/webp/",
+    license = "BSD-3-Clause",
+
+    # USE flags this package supports
+    iuse = [
+        "cpu_flags_arm_neon",
+        "gif",
+        "jpeg",
+        "libwebpdecoder",
+        "libwebpdemux",
+        "libwebpmux",
+        "near-lossless",
+        "opengl",
+        "png",
+        "static-libs",
+        "swap-16bit",
+        "swap-16bit-csp",
+        "threads",
+        "tiff",
+    ],
+
+    # Default USE flags
+    use_defaults = ["png", "jpeg", "tiff", "gif", "threads", "libwebpmux", "libwebpdemux", "libwebpdecoder"],
+
+    # Conditional configure arguments
+    use_configure = {
+        "-cpu_flags_arm_neon": "--disable-cpu_flags_arm_neon",
+        "-gif": "--disable-gif",
+        "-jpeg": "--disable-jpeg",
+        "-libwebpdecoder": "--disable-libwebpdecoder",
+        "-libwebpdemux": "--disable-libwebpdemux",
+        "-libwebpmux": "--disable-libwebpmux",
+        "-near-lossless": "--disable-near-lossless",
+        "-opengl": "--disable-opengl",
+        "-png": "--disable-png",
+        "-static-libs": "--disable-static",
+        "-swap-16bit": "--disable-swap-16bit-csp",
+        "-swap-16bit-csp": "--disable-swap-16bit-csp",
+        "-threads": "--disable-threading",
+        "-tiff": "--disable-tiff",
+        "cpu_flags_arm_neon": "--enable-cpu_flags_arm_neon",
+        "gif": "--enable-gif",
+        "jpeg": "--enable-jpeg",
+        "libwebpdecoder": "--enable-libwebpdecoder",
+        "libwebpdemux": "--enable-libwebpdemux",
+        "libwebpmux": "--enable-libwebpmux",
+        "near-lossless": "--enable-near-lossless",
+        "opengl": "--enable-opengl",
+        "png": "--enable-png",
+        "static-libs": "--enable-static",
+        "swap-16bit": "--enable-swap-16bit-csp",
+        "swap-16bit-csp": "--enable-swap-16bit-csp",
+        "threads": "--enable-threading",
+        "tiff": "--enable-tiff",
+    },
+
+    use_deps = {
+        "png": ["system//libs/image/libpng:libpng"],
+        "jpeg": ["system//libs/image/libjpeg-turbo:libjpeg-turbo"],
+        "tiff": ["system//libs/image/libtiff:libtiff"],
+        "gif": ["system//libs/image/giflib:giflib"],
+    },
+
+    configure_args = ["--prefix=/usr"],
+    deps = [],
+
+    pre_configure = """
+# USE flags: static-libs, png, jpeg, tiff, gif, threads, swap-16bit, near-lossless, libwebpmux, libwebpdemux, libwebpdecoder
+""",
+
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,20 @@
+load("@root//defs:package_defs.bzl", "autotools_package")
+
+autotools_package(
+    name = "libopusenc",
+    version = "0.2.1",
+    src_uri = "https://github.com/xiph/libopusenc/archive/refs/tags/v0.2.1.tar.gz",
+    sha256 = "56952a926ff962c62a468b43cc8506c069bda767cade4dc92824b74edd570d68",
+    description = "Library for encoding .opus files",
+    homepage = "https://github.com/xiph/libopusenc",
+    license = "BSD-3-Clause",
+    configure_args = [
+        "--prefix=/usr",
+        "--disable-doc",
+    ],
+    deps = [
+        "system//libs/audio/opus:opus",
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    visibility = ["PUBLIC"],
+)

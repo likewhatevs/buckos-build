@@ -1,0 +1,42 @@
+load("@root//defs:package_defs.bzl", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# Natron - Open-source compositing software (node-based)
+
+download_source(
+    name = "natron-src",
+    src_uri = "https://github.com/NatronGitHub/Natron/archive/refs/tags/v2.5.0.tar.gz",
+    sha256 = "013c75b9b443cb22eafea4a18ea06d4fefe4c4985a2801ab402251cbf88cc384",
+    signature_required = False,
+)
+
+autotools_package(
+    name = "natron",
+    source = ":natron-src",
+    version = "2.5.0",
+    description = "Open-source compositing software for VFX and motion graphics",
+    homepage = "https://natrongithub.github.io/",
+    license = "GPL-2.0-only",
+    pre_configure = """
+qmake -r CONFIG+=release \
+    CONFIG+=enforce-gcc8 \
+    DEFINES+=QT_NO_DEBUG_OUTPUT \
+    PREFIX=/usr
+""",
+    configure_args = [],
+    make_args = [],
+    post_install = """
+INSTALL_ROOT=$OUT make install
+""",
+    deps = [
+        "graphics//video/ffmpeg:ffmpeg",
+        "desktop//qt:qt5",
+        "graphics//utilities/imagemagick:imagemagick",
+        "dev-libs//boost:boost",
+        "system//libs/graphics/cairo:cairo",
+    ],
+    bdepend = [
+        "dev-tools//build-systems/pkg-config:pkg-config",
+    ],
+    visibility = ["PUBLIC"],
+)

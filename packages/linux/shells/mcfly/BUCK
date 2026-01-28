@@ -1,0 +1,19 @@
+load("@root//defs:package_defs.bzl", "cargo_package", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags", "use_dep")
+
+# mcfly - Fly through your shell history
+cargo_package(
+    name = "mcfly",
+    version = "0.9.2",
+    src_uri = "https://github.com/cantino/mcfly/archive/refs/tags/v0.9.2.tar.gz",
+    sha256 = "bfb6ca73c6a03047e3c61edf2b3c770e24ddbb0720e2a7dad3ea13a759572bb6",
+    signature_required = False,
+    description = "Fly through your shell history",
+    homepage = "https://github.com/cantino/mcfly",
+    license = "MIT",
+    cargo_args = [],
+    deps = [
+        "system//libs/database/sqlite:sqlite",
+    ],
+    visibility = ["PUBLIC"],
+)

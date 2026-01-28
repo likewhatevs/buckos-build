@@ -1,0 +1,114 @@
+# Gaming packages for Linux
+# Includes game launchers, utilities, compatibility layers, emulators, and libraries
+
+load("@root//defs:package_defs.bzl", "autotools_package", "download_source", "autotools_package")
+load("@root//defs:use_flags.bzl", "set_use_flags")
+
+# =============================================================================
+# Game Launchers
+# =============================================================================
+# Digital distribution platforms and game library managers
+
+filegroup(
+    name = "launchers",
+    srcs = [
+        "gaming//launchers/steam:steam",
+        "gaming//launchers/lutris:lutris",
+        "gaming//launchers/heroic:heroic",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Gaming Utilities
+# =============================================================================
+# Performance monitoring, optimization, and display tools
+
+filegroup(
+    name = "utilities",
+    srcs = [
+        "gaming//utilities/mangohud:mangohud",
+        "gaming//utilities/gamemode:gamemode",
+        "gaming//utilities/gamescope:gamescope",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Compatibility Layers
+# =============================================================================
+# Wine, DirectX translation, and Windows compatibility
+
+filegroup(
+    name = "compatibility",
+    srcs = [
+        "gaming//compatibility/wine:wine",
+        "gaming//compatibility/dxvk:dxvk",
+        "gaming//compatibility/vkd3d-proton:vkd3d-proton",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Emulators
+# =============================================================================
+# Console and retro gaming emulators
+
+filegroup(
+    name = "emulators",
+    srcs = [
+        "gaming//emulators/retroarch:retroarch",
+        "gaming//emulators/dolphin:dolphin",
+        "gaming//emulators/pcsx2:pcsx2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Gaming Libraries
+# =============================================================================
+# Core libraries and tools for game development and runtime
+
+filegroup(
+    name = "libraries",
+    srcs = [
+        "system//libs/multimedia/sdl2:sdl2",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Complete Gaming Stack
+# =============================================================================
+
+filegroup(
+    name = "gaming",
+    srcs = [
+        ":launchers",
+        ":utilities",
+        ":compatibility",
+        ":emulators",
+        ":libraries",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Minimal gaming setup (Steam + essential utilities)
+filegroup(
+    name = "gaming-minimal",
+    srcs = [
+        "gaming//launchers/steam:steam",
+        "gaming//utilities/mangohud:mangohud",
+        "gaming//utilities/gamemode:gamemode",
+        "gaming//compatibility/wine:wine",
+        "gaming//compatibility/dxvk:dxvk",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)

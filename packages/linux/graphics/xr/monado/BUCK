@@ -1,0 +1,31 @@
+load("@root//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "monado",
+    version = "24.0.0",
+    src_uri = "https://gitlab.freedesktop.org/monado/monado/-/archive/v24.0.0/monado-v24.0.0.tar.gz",
+    sha256 = "96d2c4761ea86c8e6c832297a92e8479a560e601712d9f25ede36ade533ddc22",
+    cmake_args = [
+        "-DXRT_HAVE_VULKAN=ON",
+        "-DXRT_HAVE_OPENGL=ON",
+        "-DXRT_HAVE_EGL=ON",
+        "-DXRT_HAVE_OPENCV=ON",
+        "-DXRT_HAVE_LIBUDEV=ON",
+        "-DXRT_HAVE_LIBUSB=ON",
+        "-DXRT_FEATURE_OPENXR=ON",
+        "-DXRT_MODULE_COMPOSITOR=ON",
+        "-DXRT_MODULE_COMPOSITOR_MAIN=ON",
+        "-DBUILD_TESTING=OFF",
+    ],
+    deps = [
+        "dev-libs//misc/eigen:eigen",
+        "graphics//vulkan:vulkan",
+        "desktop//mesa:mesa",
+        "ai//vision/opencv:opencv",
+        "system//libs/libudev:libudev",
+        "system//libs/libusb:libusb",
+        "dev-libs//json/cJSON:cJSON",
+        "dev-libs//compression/zlib:zlib",
+    ],
+    visibility = ["PUBLIC"],
+)

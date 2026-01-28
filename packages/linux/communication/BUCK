@@ -1,0 +1,94 @@
+# Communication Packages
+# Email clients, email servers, messaging, and communication tools
+
+# All communication packages
+filegroup(
+    name = "communication-packages",
+    srcs = [
+        "communication//email-clients:all-email-clients",
+        "communication//email-servers:all-email-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Email clients - all
+filegroup(
+    name = "email-clients",
+    srcs = [
+        "communication//email-clients:all-email-clients",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# CLI email clients
+filegroup(
+    name = "cli-email",
+    srcs = [
+        "communication//email-clients:cli-clients",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Email servers - all
+filegroup(
+    name = "email-servers",
+    srcs = [
+        "communication//email-servers:all-email-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# All-in-one mail servers
+filegroup(
+    name = "all-in-one-servers",
+    srcs = [
+        "communication//email-servers:all-in-one",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Mail Transfer Agents
+filegroup(
+    name = "mta",
+    srcs = [
+        "communication//email-servers:mta",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# IMAP/POP3 servers
+filegroup(
+    name = "imap-servers",
+    srcs = [
+        "communication//email-servers:imap-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Traditional mail server stack
+filegroup(
+    name = "traditional-mail-stack",
+    srcs = [
+        "communication//email-servers:traditional-stack",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Complete email infrastructure (clients + servers)
+filegroup(
+    name = "complete-email",
+    srcs = [
+        "communication//email-clients:all-email-clients",
+        "communication//email-servers:all-email-servers",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
