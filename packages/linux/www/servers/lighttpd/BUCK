@@ -24,19 +24,19 @@ autotools_package(
     iuse = ["ssl", "pcre2", "zlib", "bzip2", "mysql", "ldap"],
     use_defaults = ["ssl", "pcre2", "zlib", "bzip2"],
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     deps = [
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "zlib": ["core//zlib:zlib"],
-        "bzip2": ["system//libs/compression/bzip2:bzip2"],
-        "pcre2": ["system//libs/utility/pcre2:pcre2"],
-        "ldap": ["network//openldap:openldap"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "bzip2": ["//packages/linux/system/libs/compression/bzip2:bzip2"],
+        "pcre2": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
+        "ldap": ["//packages/linux/network/openldap:openldap"],
     },
     configure_args = [
         "--prefix=/usr",

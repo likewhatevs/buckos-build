@@ -20,10 +20,10 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "system//libs/font/freetype:freetype",
-        "core//zlib:zlib",
-        "system//libs/image/libpng:libpng",
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )

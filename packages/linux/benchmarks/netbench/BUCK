@@ -15,8 +15,8 @@ binary_package(
     homepage = "https://github.com/dylanza/netbench",
     license = "N/A",
     deps = [
-        "dev-libs//boost:boost",
-        "system//libs/liburing:liburing",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/system/libs/liburing:liburing",
     ],
     install_script = """
         cd $SRCS

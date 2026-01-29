@@ -7,7 +7,7 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "doas",
     bdepend = [
-        "dev-tools//dev-utils/bison:bison",  # Provides yacc for parse.y
+        "//packages/linux/dev-tools/dev-utils/bison:bison",  # Provides yacc for parse.y
     ],
     src_prepare = "",
     src_configure = "./configure --prefix=/usr",
@@ -21,7 +21,7 @@ autotools_package(
     iuse = ["pam", "persist", "static-libs"],
     use_defaults = [],
     use_deps = {
-        "pam": ["system//security/auth/pam:pam"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
     },
     use_configure = {
         "pam": "--with-pam",

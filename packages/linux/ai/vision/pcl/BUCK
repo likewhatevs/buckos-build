@@ -46,7 +46,7 @@ cmake_package(
     src_uri = "https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.10.1.tar.gz",
     sha256 = "61ec734ec7c786c628491844b46f9624958c360012c173bbc993c5ff88b4900e",
     deps = [
-        "ai//ml-frameworks/eigen3:eigen3",
+        "//packages/linux/ai/ml-frameworks/eigen3:eigen3",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

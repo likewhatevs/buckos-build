@@ -90,11 +90,11 @@ EOF
 mkdir -p $OUT/usr/share/genkernel/defaults
 """,
     deps = [
-        "system//libs/kmod:kmod",
-        "core//bash:bash",
-        "system//apps/coreutils:coreutils",
-        "core//util-linux:util-linux",
-        "system//libs/compression/xz:xz",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/libs/compression/xz:xz",
     ],
     visibility = ["PUBLIC"],
 )
@@ -122,9 +122,9 @@ make DESTDIR=$OUT PREFIX=/usr install
 mkdir -p $OUT/etc/genkernel.d
 """,
     deps = [
-        "system//libs/kmod:kmod",
-        "core//bash:bash",
-        "system//apps/coreutils:coreutils",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/system/apps/coreutils:coreutils",
     ],
     visibility = ["PUBLIC"],
 )

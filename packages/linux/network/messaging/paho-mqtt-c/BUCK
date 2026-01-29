@@ -21,6 +21,6 @@ cmake_package(
         "-DPAHO_ENABLE_TESTING=OFF",
     ],
     deps = [
-        "dev-libs//crypto/openssl:openssl",
+        "//packages/linux/dev-libs/crypto/openssl:openssl",
     ],
 )

@@ -21,8 +21,8 @@ binary_package(
         cp create_pcap psp_encrypt psp_decrypt $OUT/usr/bin/
     """,
     deps = [
-        "network//libpcap:libpcap",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

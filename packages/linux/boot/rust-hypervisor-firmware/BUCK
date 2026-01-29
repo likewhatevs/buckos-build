@@ -43,7 +43,7 @@ elif [ -f "target/release/hypervisor-fw" ]; then
 fi
 """,
     deps = [
-        "lang//rust:rust",
+        "//packages/linux/lang/rust:rust",
     ],
     visibility = ["PUBLIC"],
 )

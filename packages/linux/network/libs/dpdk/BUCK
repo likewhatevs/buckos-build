@@ -30,12 +30,12 @@ meson_package(
     ],
 
     deps = [
-        "system//libs/numactl:numactl",
-        "network//libpcap:libpcap",
-        "system//libs/crypto/openssl:openssl",
-        "core//zlib:zlib",
-        "dev-libs//json/json-c:json-c",
-        "system//libs/libelf:libelf",
+        "//packages/linux/system/libs/numactl:numactl",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/json/json-c:json-c",
+        "//packages/linux/system/libs/libelf:libelf",
     ],
 
     iuse = ["examples", "tests", "kmods"],

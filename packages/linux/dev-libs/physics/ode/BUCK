@@ -32,6 +32,6 @@ cmake_package(
         "-DODE_WITH_TESTS=OFF",
     ],
     deps = [
-        "dev-libs//physics/libccd:libccd",
+        "//packages/linux/dev-libs/physics/libccd:libccd",
     ],
 )

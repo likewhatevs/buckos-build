@@ -11,9 +11,9 @@ cmake_package(
     homepage = "https://gitlab.com/VladyslavUsenko/basalt-headers",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//eigen:eigen",
-        "robotics//sophus:sophus",
-        "dev-libs//serialization/cereal:cereal",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/robotics/sophus:sophus",
+        "//packages/linux/dev-libs/serialization/cereal:cereal",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

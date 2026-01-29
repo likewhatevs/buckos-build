@@ -28,13 +28,13 @@ install -m755 wev "$DESTDIR/usr/bin/wev"
 install -m644 wev.1 "$DESTDIR/usr/share/man/man1/wev.1"
 """,
     rdepend = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
     ],
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
-        "dev-tools//build-systems/scdoc:scdoc",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/scdoc:scdoc",
     ],
     visibility = ["PUBLIC"],
 )

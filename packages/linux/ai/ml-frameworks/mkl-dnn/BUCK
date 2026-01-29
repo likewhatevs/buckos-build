@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/uxlfoundation/oneDNN",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//parallel/openmp:openmp",
+        "//packages/linux/dev-libs/parallel/openmp:openmp",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

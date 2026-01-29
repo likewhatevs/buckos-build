@@ -18,8 +18,8 @@ cmake_package(
         "-DHALIDE_ENABLE_RTTI=ON",
     ],
     deps = [
-        "dev-tools//compilers/llvm:llvm",
-        "core//zlib:zlib",
+        "//packages/linux/dev-tools/compilers/llvm:llvm",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

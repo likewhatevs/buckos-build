@@ -177,25 +177,25 @@ autotools_package(
 make DESTDIR=$OUT install
 """,
     deps = [
-        "system//libs/image/libpng:libpng",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/image/libtiff:libtiff",
-        "system//libs/image/libwebp:libwebp",
-        # "core//libheif:libheif",  # TODO: not packaged yet
-        # "core//libraw:libraw",  # TODO: not packaged yet
-        "dev-libs//openexr:openexr",
-        "system//libs/image/openjpeg:openjpeg",
-        "system//libs/graphics/lcms2:lcms2",
-        "system//libs/font/fontconfig:fontconfig",
-        "fonts//libraries/freetype:freetype",
-        "fonts//libraries/pango:pango",
-        # "core//librsvg:librsvg",  # TODO: not packaged yet
-        "dev-libs//fftw:fftw",
-        "system//libs/data/libxml2:libxml2",
-        "core//zlib:zlib",
-        "system//libs/compression/zstd:zstd",
-        "system//libs/compression/xz:xz",
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
+        "//packages/linux/system/libs/image/libwebp:libwebp",
+        # "//packages/linux/core/libheif:libheif",  # TODO: not packaged yet
+        # "//packages/linux/core/libraw:libraw",  # TODO: not packaged yet
+        "//packages/linux/dev-libs/openexr:openexr",
+        "//packages/linux/system/libs/image/openjpeg:openjpeg",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/pango:pango",
+        # "//packages/linux/core/librsvg:librsvg",  # TODO: not packaged yet
+        "//packages/linux/dev-libs/fftw:fftw",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/zstd:zstd",
+        "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )

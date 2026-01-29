@@ -289,16 +289,16 @@ autotools_package(
         "--target-list=x86_64-softmmu,x86_64-linux-user,i386-softmmu,i386-linux-user,aarch64-softmmu,aarch64-linux-user,arm-softmmu,arm-linux-user,riscv64-softmmu,riscv64-linux-user,riscv32-softmmu,riscv32-linux-user,ppc64-softmmu,ppc64-linux-user,s390x-softmmu,s390x-linux-user,mips64el-softmmu,mips64el-linux-user",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/graphics/pixman:pixman",
-        "core//zlib:zlib",
-        "system//libs/compression/zstd:zstd",
-        "system//libs/compression/lzo:lzo",
-        "system//libs/compression/snappy:snappy",
-        "system//libs/compression/bzip2:bzip2",
-        "system//libs/crypto/gnutls:gnutls",
-        "system//libs/crypto/nettle:nettle",
-        "emulation//utilities/spice:spice-server",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/zstd:zstd",
+        "//packages/linux/system/libs/compression/lzo:lzo",
+        "//packages/linux/system/libs/compression/snappy:snappy",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/crypto/gnutls:gnutls",
+        "//packages/linux/system/libs/crypto/nettle:nettle",
+        "//packages/linux/emulation/utilities/spice:spice-server",
     ],
     visibility = ["PUBLIC"],
 )
@@ -322,7 +322,7 @@ autotools_package(
         "--enable-guest-agent",
     ],
     deps = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )
@@ -346,8 +346,8 @@ autotools_package(
         "--target-list=x86_64-linux-user,i386-linux-user,aarch64-linux-user,arm-linux-user,riscv64-linux-user,riscv32-linux-user,ppc64-linux-user,s390x-linux-user,mips64el-linux-user",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )
@@ -370,9 +370,9 @@ autotools_package(
         "--enable-tools",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "core//zlib:zlib",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

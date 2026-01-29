@@ -6,8 +6,8 @@ python_package(
     src_uri = "https://github.com/modelscope/diffsynth-studio/archive/refs/tags/v1.1.8.tar.gz",
     sha256 = "178ac041138e476e38ace75b8f8a8478a76b251116dfebfbefaf0b1bd1a71299",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//ml-frameworks/torchvision:torchvision",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
     ],
     maintainers = ["buckos"],
 )

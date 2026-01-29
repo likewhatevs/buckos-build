@@ -18,7 +18,7 @@ autotools_package(
         "-nls": "--disable-nls",
     },
     use_deps = {
-        "nls": ["dev-libs//misc/gettext:gettext"],
+        "nls": ["//packages/linux/dev-libs/misc/gettext:gettext"],
     },
     configure_args = [
         "--prefix=/usr",
@@ -30,7 +30,7 @@ autotools_package(
 # --enable-nls/--disable-nls controls internationalization support
 """,
     deps = [
-        "system//libs/compression/lzo:lzo",
+        "//packages/linux/system/libs/compression/lzo:lzo",
     ],
     visibility = ["PUBLIC"],
 )

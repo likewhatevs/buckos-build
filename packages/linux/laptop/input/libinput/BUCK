@@ -35,9 +35,9 @@ autotools_package(
         "-Ddocumentation=false",
     ],
     deps = [
-        "laptop//input/libevdev:libevdev",
-        "laptop//input/mtdev:mtdev",
-        "system//init/systemd:systemd",
+        "//packages/linux/laptop/input/libevdev:libevdev",
+        "//packages/linux/laptop/input/mtdev:mtdev",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )

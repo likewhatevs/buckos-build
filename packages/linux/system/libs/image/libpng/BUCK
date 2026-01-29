@@ -4,9 +4,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "libpng",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -38,7 +38,7 @@ autoreconf -fi
     use_deps = {},
     configure_args = ["--prefix=/usr"],
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     pre_configure = """

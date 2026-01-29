@@ -12,7 +12,7 @@
 filegroup(
     name = "hypervisors",
     srcs = [
-        "emulation//hypervisors:all-hypervisors",
+        "//packages/linux/emulation/hypervisors:all-hypervisors",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -22,7 +22,7 @@ filegroup(
 filegroup(
     name = "virtualization",
     srcs = [
-        "emulation//virtualization:all-virtualization",
+        "//packages/linux/emulation/virtualization:all-virtualization",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -32,7 +32,7 @@ filegroup(
 filegroup(
     name = "containers",
     srcs = [
-        "emulation//containers:all-containers",
+        "//packages/linux/emulation/containers:all-containers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -42,7 +42,7 @@ filegroup(
 filegroup(
     name = "kernel-tools",
     srcs = [
-        "emulation//kernel:all-kernel-tools",
+        "//packages/linux/emulation/kernel:all-kernel-tools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -52,7 +52,7 @@ filegroup(
 filegroup(
     name = "utilities",
     srcs = [
-        "emulation//utilities:all-utilities",
+        "//packages/linux/emulation/utilities:all-utilities",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -62,10 +62,10 @@ filegroup(
 filegroup(
     name = "essential",
     srcs = [
-        "emulation//hypervisors/qemu:qemu",
-        "emulation//virtualization/libvirt:libvirt",
-        "emulation//virtualization/virt-manager:virt-manager",
-        "emulation//utilities/spice:spice-server",
+        "//packages/linux/emulation/hypervisors/qemu:qemu",
+        "//packages/linux/emulation/virtualization/libvirt:libvirt",
+        "//packages/linux/emulation/virtualization/virt-manager:virt-manager",
+        "//packages/linux/emulation/utilities/spice:spice-server",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -75,9 +75,9 @@ filegroup(
 filegroup(
     name = "server",
     srcs = [
-        "emulation//hypervisors/qemu:qemu",
-        "emulation//virtualization/libvirt:libvirt",
-        "emulation//containers:docker-full",
+        "//packages/linux/emulation/hypervisors/qemu:qemu",
+        "//packages/linux/emulation/virtualization/libvirt:libvirt",
+        "//packages/linux/emulation/containers:docker-full",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -87,10 +87,10 @@ filegroup(
 filegroup(
     name = "desktop",
     srcs = [
-        "emulation//hypervisors/qemu:qemu",
-        "emulation//virtualization/libvirt:libvirt",
-        "emulation//virtualization:virt-manager-full",
-        "emulation//utilities/spice:spice-full",
+        "//packages/linux/emulation/hypervisors/qemu:qemu",
+        "//packages/linux/emulation/virtualization/libvirt:libvirt",
+        "//packages/linux/emulation/virtualization:virt-manager-full",
+        "//packages/linux/emulation/utilities/spice:spice-full",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -100,9 +100,9 @@ filegroup(
 filegroup(
     name = "cloud",
     srcs = [
-        "emulation//utilities/firecracker:firecracker",
-        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
-        "emulation//utilities/crosvm:crosvm",
+        "//packages/linux/emulation/utilities/firecracker:firecracker",
+        "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
+        "//packages/linux/emulation/utilities/crosvm:crosvm",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -112,9 +112,9 @@ filegroup(
 filegroup(
     name = "development",
     srcs = [
-        "emulation//hypervisors/qemu:qemu",
-        "emulation//kernel:all-kernel-tools",
-        "emulation//utilities/virtiofsd:virtiofsd",
+        "//packages/linux/emulation/hypervisors/qemu:qemu",
+        "//packages/linux/emulation/kernel:all-kernel-tools",
+        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -124,8 +124,8 @@ filegroup(
 filegroup(
     name = "guest-tools",
     srcs = [
-        "emulation//hypervisors/qemu:qemu-guest-agent",
-        "emulation//utilities/spice:spice-vdagent",
+        "//packages/linux/emulation/hypervisors/qemu:qemu-guest-agent",
+        "//packages/linux/emulation/utilities/spice:spice-vdagent",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -135,7 +135,7 @@ filegroup(
 filegroup(
     name = "docker",
     srcs = [
-        "emulation//containers:docker-full",
+        "//packages/linux/emulation/containers:docker-full",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -145,7 +145,7 @@ filegroup(
 filegroup(
     name = "podman",
     srcs = [
-        "emulation//containers:podman-full",
+        "//packages/linux/emulation/containers:podman-full",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -155,10 +155,10 @@ filegroup(
 filegroup(
     name = "cloud-hypervisor-full",
     srcs = [
-        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
-        "emulation//utilities/virtiofsd:virtiofsd",
-        "boot//rust-hypervisor-firmware:rust-hypervisor-firmware",
-        "boot//edk2-cloudhv:edk2-cloudhv",
+        "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
+        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
+        "//packages/linux/boot/rust-hypervisor-firmware:rust-hypervisor-firmware",
+        "//packages/linux/boot/edk2-cloudhv:edk2-cloudhv",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -168,8 +168,8 @@ filegroup(
 filegroup(
     name = "cloud-hypervisor-minimal",
     srcs = [
-        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
-        "emulation//utilities/virtiofsd:virtiofsd",
+        "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
+        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

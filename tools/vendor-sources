@@ -1,0 +1,209 @@
+#!/bin/bash
+# vendor-sources - Wrapper script for vendoring source archives
+#
+# This script wraps the BXL command and handles the actual file operations
+# (downloading, manifest management) that BXL cannot perform directly.
+#
+# Each package's .vendor/ directory contains its own MANIFEST.json
+#
+# Usage:
+#   ./tools/vendor-sources --target //packages/linux/core:bash
+#   ./tools/vendor-sources --target //packages/linux/core:bash --dry-run
+#   ./tools/vendor-sources --verify
+#   ./tools/vendor-sources --clean
+#   ./tools/vendor-sources --list
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Convert arguments for BXL CLI format
+ARGS=()
+for arg in "$@"; do
+    if [[ "$arg" == --dry-run ]]; then
+        ARGS+=("--dry_run" "true")
+    elif [[ "$arg" == --verify ]]; then
+        ARGS+=("--verify" "true")
+    elif [[ "$arg" == --clean ]]; then
+        ARGS+=("--clean" "true")
+    elif [[ "$arg" == --list ]]; then
+        ARGS+=("--list" "true")
+    else
+        ARGS+=("$arg")
+    fi
+done
+
+# Run the BXL script and capture output
+BXL_OUTPUT=$(buck2 bxl //defs:vendor_sources.bxl:vendor_sources -- "${ARGS[@]}" 2>&1)
+
+# Parse the BXL output (include digits for SOURCE_0_*, etc.)
+eval "$(echo "$BXL_OUTPUT" | grep -E '^[A-Z][A-Z0-9_]*=' | head -200)"
+
+# Handle different actions
+case "$VENDOR_ACTION" in
+    clean)
+        echo "Cleaning all vendored sources..."
+        find "$REPO_ROOT/packages" -type d -name ".vendor" 2>/dev/null | while read -r vendor_dir; do
+            if [[ -d "$vendor_dir" ]]; then
+                echo "  Removing: ${vendor_dir#$REPO_ROOT/}"
+                rm -rf "$vendor_dir"
+            fi
+        done
+        echo "Done."
+        ;;
+
+    list)
+        echo "Vendored sources:"
+        find "$REPO_ROOT/packages" -type d -name ".vendor" 2>/dev/null | sort | while read -r vendor_dir; do
+            manifest="$vendor_dir/MANIFEST.json"
+            if [[ -f "$manifest" ]] && command -v jq &> /dev/null; then
+                jq -r '.sources[] | "  \(.target) -> \(.filename)"' "$manifest" 2>/dev/null
+            else
+                # List files if no manifest
+                for f in "$vendor_dir"/*; do
+                    if [[ -f "$f" && "$(basename "$f")" != "MANIFEST.json" ]]; then
+                        echo "  ${vendor_dir#$REPO_ROOT/}/$(basename "$f")"
+                    fi
+                done
+            fi
+        done
+        ;;
+
+    verify)
+        echo "Verifying vendored sources..."
+        errors=0
+        find "$REPO_ROOT/packages" -type d -name ".vendor" 2>/dev/null | sort | while read -r vendor_dir; do
+            manifest="$vendor_dir/MANIFEST.json"
+            if [[ -f "$manifest" ]] && command -v jq &> /dev/null; then
+                while IFS='|' read -r filename sha256; do
+                    full_path="$vendor_dir/$filename"
+                    if [[ -f "$full_path" ]]; then
+                        actual_sha256=$(sha256sum "$full_path" | cut -d' ' -f1)
+                        if [[ "$actual_sha256" == "$sha256" ]]; then
+                            echo "  OK: ${vendor_dir#$REPO_ROOT/}/$filename"
+                        else
+                            echo "  MISMATCH: ${vendor_dir#$REPO_ROOT/}/$filename"
+                            echo "    Expected: $sha256"
+                            echo "    Actual:   $actual_sha256"
+                            ((errors++)) || true
+                        fi
+                    else
+                        echo "  MISSING: ${vendor_dir#$REPO_ROOT/}/$filename"
+                        ((errors++)) || true
+                    fi
+                done < <(jq -r '.sources[] | "\(.filename)|\(.sha256)"' "$manifest" 2>/dev/null)
+            fi
+        done
+
+        if [[ $errors -eq 0 ]]; then
+            echo "All vendored sources verified successfully."
+        else
+            echo "Verification failed: $errors error(s)"
+            exit 1
+        fi
+        ;;
+
+    download)
+        echo "Vendoring $SOURCES_COUNT source(s)..."
+
+        # Process each source
+        for ((i=0; i<SOURCES_COUNT; i++)); do
+            eval "TARGET=\$SOURCE_${i}_TARGET"
+            eval "PACKAGE_PATH=\$SOURCE_${i}_PACKAGE_PATH"
+            eval "SRC_URI=\$SOURCE_${i}_SRC_URI"
+            eval "SHA256=\$SOURCE_${i}_SHA256"
+            eval "FILENAME=\$SOURCE_${i}_FILENAME"
+            eval "SIG_SHA256=\$SOURCE_${i}_SIG_SHA256"
+
+            DEST_DIR="$ROOT/$PACKAGE_PATH"
+            DEST_FILE="$DEST_DIR/$FILENAME"
+            MANIFEST="$DEST_DIR/MANIFEST.json"
+
+            # Check if already vendored with correct checksum
+            if [[ -f "$DEST_FILE" ]]; then
+                actual_sha256=$(sha256sum "$DEST_FILE" | cut -d' ' -f1)
+                if [[ "$actual_sha256" == "$SHA256" ]]; then
+                    echo "  Already vendored: ${PACKAGE_PATH#packages/}/$FILENAME"
+                    continue
+                else
+                    echo "  Checksum mismatch, re-downloading: ${PACKAGE_PATH#packages/}/$FILENAME"
+                fi
+            fi
+
+            echo "  Downloading: $SRC_URI"
+            echo "           -> ${PACKAGE_PATH#packages/}/$FILENAME"
+
+            # Download the file
+            mkdir -p "$DEST_DIR"
+            if curl -fsSL --retry 3 --retry-delay 2 -o "$DEST_FILE" "$SRC_URI"; then
+                # Verify checksum
+                actual_sha256=$(sha256sum "$DEST_FILE" | cut -d' ' -f1)
+                if [[ "$actual_sha256" != "$SHA256" ]]; then
+                    echo "    ERROR: SHA256 mismatch!"
+                    echo "      Expected: $SHA256"
+                    echo "      Actual:   $actual_sha256"
+                    rm -f "$DEST_FILE"
+                    continue
+                fi
+                echo "    SHA256 verified: $actual_sha256"
+
+                # Download signature if available
+                if [[ -n "$SIG_SHA256" ]]; then
+                    SIG_FILE="$DEST_FILE.sig"
+                    for ext in .sig .asc .sign; do
+                        if curl -fsSL --retry 3 --retry-delay 2 -o "$SIG_FILE" "${SRC_URI}${ext}" 2>/dev/null; then
+                            sig_actual=$(sha256sum "$SIG_FILE" | cut -d' ' -f1)
+                            if [[ "$sig_actual" == "$SIG_SHA256" ]]; then
+                                echo "    Signature downloaded: ${FILENAME}.sig"
+                                break
+                            fi
+                            rm -f "$SIG_FILE"
+                        fi
+                    done
+                fi
+
+                # Update per-directory manifest
+                if command -v jq &> /dev/null; then
+                    # Initialize manifest if it doesn't exist
+                    if [[ ! -f "$MANIFEST" ]]; then
+                        echo '{"version": 1, "sources": []}' > "$MANIFEST"
+                    fi
+
+                    # Remove existing entry for this target if present
+                    tmp_manifest=$(mktemp)
+                    jq --arg target "$TARGET" 'del(.sources[] | select(.target == $target))' "$MANIFEST" > "$tmp_manifest"
+
+                    # Add new entry
+                    new_entry=$(jq -n \
+                        --arg target "$TARGET" \
+                        --arg src_uri "$SRC_URI" \
+                        --arg sha256 "$SHA256" \
+                        --arg filename "$FILENAME" \
+                        --arg sig_sha256 "${SIG_SHA256:-}" \
+                        --arg vendored_at "$(date -Iseconds)" \
+                        '{
+                            target: $target,
+                            src_uri: $src_uri,
+                            sha256: $sha256,
+                            filename: $filename,
+                            signature_sha256: (if $sig_sha256 == "" then null else $sig_sha256 end),
+                            vendored_at: $vendored_at
+                        }')
+
+                    jq --argjson entry "$new_entry" '.sources += [$entry]' "$tmp_manifest" > "$MANIFEST"
+                    rm -f "$tmp_manifest"
+                fi
+            else
+                echo "    ERROR: Failed to download $SRC_URI"
+            fi
+        done
+
+        echo "Done."
+        ;;
+
+    *)
+        # No action specified, just print BXL output (dry-run or error)
+        echo "$BXL_OUTPUT"
+        ;;
+esac

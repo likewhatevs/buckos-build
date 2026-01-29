@@ -21,12 +21,12 @@ autotools_package(
     ],
     use_defaults = ["seccomp", "caps"],
     deps = [
-        "dev-libs//misc/yajl:yajl",
+        "//packages/linux/dev-libs/misc/yajl:yajl",
     ],
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
-        "seccomp": ["system//libs/ipc/libseccomp:libseccomp"],
-        "caps": ["system//libs/ipc/libcap:libcap"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
+        "seccomp": ["//packages/linux/system/libs/ipc/libseccomp:libseccomp"],
+        "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

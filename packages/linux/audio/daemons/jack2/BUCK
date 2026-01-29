@@ -73,7 +73,7 @@ binary_package(
         python3 ./waf install --destdir=$OUT
     """,
     deps = [
-        "audio//daemons/alsa-lib:alsa-lib",
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
     ],
     visibility = ["PUBLIC"],
 )

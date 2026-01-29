@@ -16,8 +16,8 @@ cmake_package(
     homepage = "https://dynamorio.org/",
     license = "BSD-3-Clause",
     deps = [
-        "core//zlib:zlib",
-        "dev-tools//build-systems/cmake:cmake",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

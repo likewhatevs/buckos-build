@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/world-federation-of-advertisers/cardinality_estimation_evaluation_framework/archive/732117efd307230156376e88f4d2ab3bb6b5df97.tar.gz",
     sha256 = "9df10cb8e54741c1536fadfc533d5303746f40fbfcae7fd00719c73d5d96f290",
     deps = [
-        "dev-libs//python/absl-py:absl-py",
-        "dev-libs//python/lxml:lxml",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/matplotlib:matplotlib",
-        "dev-libs//python/tqdm:tqdm",
+        "//packages/linux/dev-libs/python/absl-py:absl-py",
+        "//packages/linux/dev-libs/python/lxml:lxml",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/matplotlib:matplotlib",
+        "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],
 )

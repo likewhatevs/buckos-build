@@ -7,8 +7,8 @@ cargo_package(
     sha256 = "c01da8b74be0daba79781cfc125ffcd3df3a0d090157fe0081c71da2f6057905",
     bins = ["py-spy"],
     deps = [
-        "dev-libs//misc/jemalloc:jemalloc",
-        "system//libs/libunwind:libunwind",
+        "//packages/linux/dev-libs/misc/jemalloc:jemalloc",
+        "//packages/linux/system/libs/libunwind:libunwind",
     ],
     cargo_args = [],
 )

@@ -39,7 +39,7 @@ autotools_package(
         "--without-included-regex",
     ],
     deps = [
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     visibility = ["PUBLIC"],
 )

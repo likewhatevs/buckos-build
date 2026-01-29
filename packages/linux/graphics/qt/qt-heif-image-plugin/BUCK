@@ -9,7 +9,7 @@ cmake_package(
         "-DQT_NO_KEYWORDS=ON",
     ],
     deps = [
-        "graphics//imaging/libheif:libheif",
-        "graphics//qt:qt5",
+        "//packages/linux/graphics/imaging/libheif:libheif",
+        "//packages/linux/graphics/qt:qt5",
     ],
 )

@@ -91,14 +91,14 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "system//libs/data/libxml2:libxml2",
-        "system//libs/data/libxslt:libxslt",
-        "graphics//utilities/imagemagick:imagemagick",
-        "dev-libs//boost:boost",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/system/libs/data/libxslt:libxslt",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     bdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

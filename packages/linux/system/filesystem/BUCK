@@ -19,7 +19,7 @@
 filegroup(
     name = "native",
     srcs = [
-        "system//filesystem/native:native",
+        "//packages/linux/system/filesystem/native:native",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -28,7 +28,7 @@ filegroup(
 filegroup(
     name = "native-common",
     srcs = [
-        "system//filesystem/native:common",
+        "//packages/linux/system/filesystem/native:common",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -42,7 +42,7 @@ filegroup(
 filegroup(
     name = "network",
     srcs = [
-        "system//filesystem/network:network",
+        "//packages/linux/system/filesystem/network:network",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -51,7 +51,7 @@ filegroup(
 filegroup(
     name = "network-common",
     srcs = [
-        "system//filesystem/network:common",
+        "//packages/linux/system/filesystem/network:common",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -65,7 +65,7 @@ filegroup(
 filegroup(
     name = "fuse",
     srcs = [
-        "system//filesystem/fuse:fuse",
+        "//packages/linux/system/filesystem/fuse:fuse",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -74,7 +74,7 @@ filegroup(
 filegroup(
     name = "fuse-common",
     srcs = [
-        "system//filesystem/fuse:common",
+        "//packages/linux/system/filesystem/fuse:common",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -83,7 +83,7 @@ filegroup(
 filegroup(
     name = "fuse-encrypted",
     srcs = [
-        "system//filesystem/fuse:encrypted",
+        "//packages/linux/system/filesystem/fuse:encrypted",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -97,7 +97,7 @@ filegroup(
 filegroup(
     name = "management",
     srcs = [
-        "system//filesystem/management:management",
+        "//packages/linux/system/filesystem/management:management",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -106,7 +106,7 @@ filegroup(
 filegroup(
     name = "partitioning",
     srcs = [
-        "system//filesystem/management:partitioning",
+        "//packages/linux/system/filesystem/management:partitioning",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -115,7 +115,7 @@ filegroup(
 filegroup(
     name = "volume-management",
     srcs = [
-        "system//filesystem/management:volume-management",
+        "//packages/linux/system/filesystem/management:volume-management",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -124,7 +124,7 @@ filegroup(
 filegroup(
     name = "encryption",
     srcs = [
-        "system//filesystem/management:encryption",
+        "//packages/linux/system/filesystem/management:encryption",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -133,7 +133,7 @@ filegroup(
 filegroup(
     name = "disk-utilities",
     srcs = [
-        "system//filesystem/management:disk-utilities",
+        "//packages/linux/system/filesystem/management:disk-utilities",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -160,16 +160,16 @@ filegroup(
 filegroup(
     name = "common",
     srcs = [
-        "system//filesystem/native/e2fsprogs:e2fsprogs",
-        "system//filesystem/native/btrfs-progs:btrfs-progs",
-        "system//filesystem/native/xfsprogs:xfsprogs",
-        "system//filesystem/native/dosfstools:dosfstools",
-        "system//filesystem/fuse/fuse3:fuse3",
-        "system//filesystem/fuse/ntfs-3g:ntfs-3g",
-        "system//filesystem/management/parted:parted",
-        "system//filesystem/management/gptfdisk:gptfdisk",
-        "system//filesystem/management/lvm2:lvm2",
-        "system//filesystem/management/cryptsetup:cryptsetup",
+        "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",
+        "//packages/linux/system/filesystem/native/btrfs-progs:btrfs-progs",
+        "//packages/linux/system/filesystem/native/xfsprogs:xfsprogs",
+        "//packages/linux/system/filesystem/native/dosfstools:dosfstools",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
+        "//packages/linux/system/filesystem/management/parted:parted",
+        "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -179,9 +179,9 @@ filegroup(
 filegroup(
     name = "minimal",
     srcs = [
-        "system//filesystem/native/e2fsprogs:e2fsprogs",
-        "system//filesystem/native/dosfstools:dosfstools",
-        "system//filesystem/management/parted:parted",
+        "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",
+        "//packages/linux/system/filesystem/native/dosfstools:dosfstools",
+        "//packages/linux/system/filesystem/management/parted:parted",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -192,11 +192,11 @@ filegroup(
     name = "desktop",
     srcs = [
         ":common",
-        "system//filesystem/native/exfatprogs:exfatprogs",
-        "system//filesystem/network/cifs-utils:cifs-utils",
-        "system//filesystem/network/sshfs:sshfs",
-        "system//filesystem/management/udisks2:udisks2",
-        "system//filesystem/management/smartmontools:smartmontools",
+        "//packages/linux/system/filesystem/native/exfatprogs:exfatprogs",
+        "//packages/linux/system/filesystem/network/cifs-utils:cifs-utils",
+        "//packages/linux/system/filesystem/network/sshfs:sshfs",
+        "//packages/linux/system/filesystem/management/udisks2:udisks2",
+        "//packages/linux/system/filesystem/management/smartmontools:smartmontools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -207,12 +207,12 @@ filegroup(
     name = "server",
     srcs = [
         ":common",
-        "system//filesystem/native/squashfs-tools:squashfs-tools",
-        "system//filesystem/network/nfs-utils:nfs-utils",
-        "system//filesystem/management/mdadm:mdadm",
-        "system//filesystem/management/multipath-tools:multipath-tools",
-        "system//filesystem/management/quota:quota",
-        "system//filesystem/management/nvme-cli:nvme-cli",
+        "//packages/linux/system/filesystem/native/squashfs-tools:squashfs-tools",
+        "//packages/linux/system/filesystem/network/nfs-utils:nfs-utils",
+        "//packages/linux/system/filesystem/management/mdadm:mdadm",
+        "//packages/linux/system/filesystem/management/multipath-tools:multipath-tools",
+        "//packages/linux/system/filesystem/management/quota:quota",
+        "//packages/linux/system/filesystem/management/nvme-cli:nvme-cli",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -222,9 +222,9 @@ filegroup(
 filegroup(
     name = "nvme-storage",
     srcs = [
-        "system//filesystem/native/f2fs-tools:f2fs-tools",
-        "system//filesystem/management/nvme-cli:nvme-cli",
-        "system//filesystem/management/smartmontools:smartmontools",
+        "//packages/linux/system/filesystem/native/f2fs-tools:f2fs-tools",
+        "//packages/linux/system/filesystem/management/nvme-cli:nvme-cli",
+        "//packages/linux/system/filesystem/management/smartmontools:smartmontools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -234,9 +234,9 @@ filegroup(
 filegroup(
     name = "all-encryption",
     srcs = [
-        "system//filesystem/management/cryptsetup:cryptsetup",
-        "system//filesystem/fuse/encfs:encfs",
-        "system//filesystem/fuse/gocryptfs:gocryptfs",
+        "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
+        "//packages/linux/system/filesystem/fuse/encfs:encfs",
+        "//packages/linux/system/filesystem/fuse/gocryptfs:gocryptfs",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

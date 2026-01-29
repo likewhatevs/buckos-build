@@ -2,17 +2,17 @@
 filegroup(
     name = "all-benchmarks",
     srcs = [
-        "benchmarks//stress-ng:stress-ng",
-        "benchmarks//fio:fio",
-        "benchmarks//iperf3:iperf3",
-        "benchmarks//hackbench:hackbench",
-        "benchmarks//memtester:memtester",
-        "benchmarks//bonnie:bonnie",
-        "benchmarks//iozone:iozone",
-        "benchmarks//stream:stream",
-        "benchmarks//netperf:netperf",
-        "benchmarks//dbench:dbench",
-        "benchmarks//perf:perf",
+        "//packages/linux/benchmarks/stress-ng:stress-ng",
+        "//packages/linux/benchmarks/fio:fio",
+        "//packages/linux/benchmarks/iperf3:iperf3",
+        "//packages/linux/benchmarks/hackbench:hackbench",
+        "//packages/linux/benchmarks/memtester:memtester",
+        "//packages/linux/benchmarks/bonnie:bonnie",
+        "//packages/linux/benchmarks/iozone:iozone",
+        "//packages/linux/benchmarks/stream:stream",
+        "//packages/linux/benchmarks/netperf:netperf",
+        "//packages/linux/benchmarks/dbench:dbench",
+        "//packages/linux/benchmarks/perf:perf",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -22,9 +22,9 @@ filegroup(
 filegroup(
     name = "cpu-memory-benchmarks",
     srcs = [
-        "benchmarks//stress-ng:stress-ng",
-        "benchmarks//memtester:memtester",
-        "benchmarks//stream:stream",
+        "//packages/linux/benchmarks/stress-ng:stress-ng",
+        "//packages/linux/benchmarks/memtester:memtester",
+        "//packages/linux/benchmarks/stream:stream",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -34,10 +34,10 @@ filegroup(
 filegroup(
     name = "storage-benchmarks",
     srcs = [
-        "benchmarks//fio:fio",
-        "benchmarks//bonnie:bonnie",
-        "benchmarks//iozone:iozone",
-        "benchmarks//dbench:dbench",
+        "//packages/linux/benchmarks/fio:fio",
+        "//packages/linux/benchmarks/bonnie:bonnie",
+        "//packages/linux/benchmarks/iozone:iozone",
+        "//packages/linux/benchmarks/dbench:dbench",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -47,8 +47,8 @@ filegroup(
 filegroup(
     name = "network-benchmarks",
     srcs = [
-        "benchmarks//iperf3:iperf3",
-        "benchmarks//netperf:netperf",
+        "//packages/linux/benchmarks/iperf3:iperf3",
+        "//packages/linux/benchmarks/netperf:netperf",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -58,8 +58,8 @@ filegroup(
 filegroup(
     name = "latency-benchmarks",
     srcs = [
-        "benchmarks//hackbench:hackbench",
-        "benchmarks//perf:perf",
+        "//packages/linux/benchmarks/hackbench:hackbench",
+        "//packages/linux/benchmarks/perf:perf",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

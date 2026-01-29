@@ -45,7 +45,7 @@ autotools_package(
         "--enable-minidebuginfo",
     ],
     deps = [
-        "system//libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/xz:xz",
     ],
     visibility = ["PUBLIC"],
 )

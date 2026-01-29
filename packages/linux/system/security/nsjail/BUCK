@@ -9,8 +9,8 @@ autotools_package(
     homepage = "https://github.com/google/nsjail",
     license = "Apache-2.0",
     deps = [
-        "core//libnl:libnl",
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/core/libnl:libnl",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
     pre_configure = """
 # Initialize kafel submodule (it's bundled in the source)

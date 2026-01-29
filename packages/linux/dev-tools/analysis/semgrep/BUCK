@@ -9,12 +9,12 @@ python_package(
     homepage = "https://semgrep.dev",
     license = "LGPL-2.1",
     deps = [
-        "dev-libs//python/attrs:attrs",
-        "dev-libs//python/click:click",
-        "dev-libs//python/colorama:colorama",
-        "dev-libs//python/requests:requests",
-        "dev-libs//python/rich:rich",
-        "dev-libs//python/ruamel-yaml:ruamel-yaml",
+        "//packages/linux/dev-libs/python/attrs:attrs",
+        "//packages/linux/dev-libs/python/click:click",
+        "//packages/linux/dev-libs/python/colorama:colorama",
+        "//packages/linux/dev-libs/python/requests:requests",
+        "//packages/linux/dev-libs/python/rich:rich",
+        "//packages/linux/dev-libs/python/ruamel-yaml:ruamel-yaml",
     ],
     visibility = ["PUBLIC"],
 )

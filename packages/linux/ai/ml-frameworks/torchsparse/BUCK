@@ -9,10 +9,10 @@ python_package(
     homepage = "https://github.com/mit-han-lab/torchsparse",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//misc/sparsehash:sparsehash",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/misc/sparsehash:sparsehash",
     ],
     visibility = ["PUBLIC"],
 )

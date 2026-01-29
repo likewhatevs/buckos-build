@@ -10,9 +10,9 @@ autotools_package(
     license = "Apache-2.0",
     signature_required = False,
     deps = [
-        "dev-libs//misc/libuv:libuv",
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     pre_configure = """
 # uWebSockets doesn't have a configure script

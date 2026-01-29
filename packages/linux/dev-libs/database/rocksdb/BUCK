@@ -35,11 +35,11 @@ cmake_package(
         "-DFAIL_ON_WARNINGS=OFF",
     ],
     deps = [
-        "system//libs/compression/snappy:snappy",
-        "system//libs/compression/lz4:lz4",
-        "system//libs/compression/zstd:zstd",
-        "core//zlib:zlib",
-        "dev-libs//google/gflags:gflags",
+        "//packages/linux/system/libs/compression/snappy:snappy",
+        "//packages/linux/system/libs/compression/lz4:lz4",
+        "//packages/linux/system/libs/compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/google/gflags:gflags",
     ],
     visibility = ["PUBLIC"],
 )

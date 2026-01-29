@@ -26,7 +26,7 @@ meson_package(
         "-test": "-Dtests=disabled",
     },
     use_deps = {
-        "glib": ["dev-libs//glib:glib"],
+        "glib": ["//packages/linux/dev-libs/glib:glib"],
     },
     meson_args = [
         "-Dfreetype=enabled",
@@ -50,14 +50,14 @@ meson_package(
         done
     """,
     deps = [
-        "core//zlib:zlib",
-        "core//libffi:libffi",
-        "system//libs/image/libpng:libpng",
-        "system//libs/compression/brotli:brotli",
-        "fonts//libraries/freetype:freetype",
-        "fonts//libraries/fontconfig:fontconfig",
-        "core//expat:expat",
-        "system//libs/graphics/pixman:pixman",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/compression/brotli:brotli",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
     ],
     visibility = ["PUBLIC"],
 )

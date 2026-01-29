@@ -20,8 +20,8 @@ autotools_package(
         "--with-libxslt-prefix=/usr",
     ],
     deps = [
-        "system//libs/data/libxml2:libxml2",
-        "system//libs/data/libxslt:libxslt",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/system/libs/data/libxslt:libxslt",
     ],
     visibility = ["PUBLIC"],
 )

@@ -17,7 +17,7 @@ autotools_package(
         "--prefix=/usr",
     ],
     deps = [
-        "dev-tools//hdl/iverilog:iverilog",
+        "//packages/linux/dev-tools/hdl/iverilog:iverilog",
     ],
     visibility = ["PUBLIC"],
 )

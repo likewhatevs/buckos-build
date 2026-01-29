@@ -14,8 +14,8 @@ cmake_package(
     use_defaults = ["blas", "lapack"],
     deps = [],
     use_deps = {
-        "blas": ["dev-libs//math/openblas:openblas"],
-        "lapack": ["dev-libs//math/lapack:lapack"],
+        "blas": ["//packages/linux/dev-libs/math/openblas:openblas"],
+        "lapack": ["//packages/linux/dev-libs/math/lapack:lapack"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

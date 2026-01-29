@@ -66,21 +66,21 @@ autotools_package(
 
     # Base dependencies (always required)
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     # Conditional dependencies based on USE flags
     use_deps = {
-        "curl": ["network//curl:curl"],
-        "expat": ["core//expat:expat"],
-        # "geos": ["graphics//geospatial/geos:geos"],  # Not yet available
-        "hdf5": ["dev-libs//misc/hdf5:hdf5"],
-        "jpeg": ["system//libs/image/libjpeg-turbo:libjpeg-turbo"],
-        "png": ["media//image/libpng:libpng"],
-        # "proj": ["graphics//geospatial/proj:proj"],  # Not yet available
-        "sqlite": ["databases//sqlite:sqlite"],
-        "tiff": ["media//image/libtiff:libtiff"],
-        "xml2": ["core//libxml2:libxml2"],
+        "curl": ["//packages/linux/network/curl:curl"],
+        "expat": ["//packages/linux/core/expat:expat"],
+        # "geos": ["//packages/linux/graphics/geospatial/geos:geos"],  # Not yet available
+        "hdf5": ["//packages/linux/dev-libs/misc/hdf5:hdf5"],
+        "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
+        "png": ["//packages/linux/media/image/libpng:libpng"],
+        # "proj": ["//packages/linux/graphics/geospatial/proj:proj"],  # Not yet available
+        "sqlite": ["//packages/linux/databases/sqlite:sqlite"],
+        "tiff": ["//packages/linux/media/image/libtiff:libtiff"],
+        "xml2": ["//packages/linux/core/libxml2:libxml2"],
     },
 
     # Conditional configure arguments based on USE flags

@@ -14,7 +14,7 @@ autotools_package(
 
 
     use_deps = {
-        "pcre": ["system//libs/utility/pcre2:pcre2"],
+        "pcre": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
     },
 
 
@@ -23,7 +23,7 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
+        "//packages/linux/network/libpcap:libpcap",
     ],
 
     description = "Network packet analyzer with grep-like functionality",

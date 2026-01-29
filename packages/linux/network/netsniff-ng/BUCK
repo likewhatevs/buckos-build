@@ -11,9 +11,9 @@ autotools_package(
     use_defaults = ["libnl", "zlib"],
 
     use_deps = {
-        "geoip": ["dev-libs//geoip:geoip"],
-        "zlib": ["system//libs/compression/zlib:zlib"],
-        "libnl": ["network//libnl:libnl"],
+        "geoip": ["//packages/linux/dev-libs/geoip:geoip"],
+        "zlib": ["//packages/linux/system/libs/compression/zlib:zlib"],
+        "libnl": ["//packages/linux/network/libnl:libnl"],
     },
 
     use_configure = {
@@ -30,8 +30,8 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
-        "system//libs/utility/ncurses:ncurses",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/system/libs/utility/ncurses:ncurses",
     ],
 
     description = "High-performance Linux network toolkit with zero-copy packet analyzer",

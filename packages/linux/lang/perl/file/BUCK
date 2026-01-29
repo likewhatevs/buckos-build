@@ -22,7 +22,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -48,7 +48,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -74,7 +74,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -100,8 +100,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/text:text-glob",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/text:text-glob",
     ],
     visibility = ["PUBLIC"],
 )
@@ -127,7 +127,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -153,7 +153,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -179,7 +179,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -205,7 +205,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -231,7 +231,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -257,7 +257,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -283,7 +283,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -309,7 +309,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

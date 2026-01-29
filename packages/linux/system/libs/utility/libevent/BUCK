@@ -44,7 +44,7 @@ autotools_package(
         "verbose-debug": "--enable-verbose-debug",
     },
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     configure_args = [],
     deps = [],

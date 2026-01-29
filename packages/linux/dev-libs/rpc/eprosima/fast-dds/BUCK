@@ -9,12 +9,12 @@ cmake_package(
     homepage = "https://github.com/eProsima/Fast-DDS",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//rpc/eprosima/fast-cdr:fast-cdr",
-        "dev-libs//misc/asio:asio",
-        "dev-libs//crypto/openssl:openssl",
-        "dev-libs//allocators/foonathan_memory:foonathan_memory",
-        "dev-libs//json/nlohmann-json:nlohmann-json",
-        "dev-libs//json/tinyxml2:tinyxml2",
+        "//packages/linux/dev-libs/rpc/eprosima/fast-cdr:fast-cdr",
+        "//packages/linux/dev-libs/misc/asio:asio",
+        "//packages/linux/dev-libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/allocators/foonathan_memory:foonathan_memory",
+        "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
+        "//packages/linux/dev-libs/json/tinyxml2:tinyxml2",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

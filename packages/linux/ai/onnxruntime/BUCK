@@ -17,8 +17,8 @@ cmake_package(
         "-Donnxruntime_USE_FULL_PROTOBUF=ON",
     ],
     deps = [
-        "dev-libs//serialization/protobuf:protobuf",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

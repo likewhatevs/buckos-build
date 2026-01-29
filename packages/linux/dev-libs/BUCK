@@ -9,8 +9,8 @@
 filegroup(
     name = "allocator-libs",
     srcs = [
-        "dev-libs//allocators/jemalloc:jemalloc",
-        "dev-libs//allocators/mimalloc:mimalloc",
+        "//packages/linux/dev-libs/allocators/jemalloc:jemalloc",
+        "//packages/linux/dev-libs/allocators/mimalloc:mimalloc",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -23,7 +23,7 @@ filegroup(
 filegroup(
     name = "boost-libs",
     srcs = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,7 +36,7 @@ filegroup(
 filegroup(
     name = "glib-libs",
     srcs = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -49,10 +49,10 @@ filegroup(
 filegroup(
     name = "serialization-libs",
     srcs = [
-        "dev-libs//serialization/protobuf:protobuf",
-        "dev-libs//serialization/flatbuffers:flatbuffers",
-        "dev-libs//serialization/msgpack:msgpack",
-        "dev-libs//serialization/capnproto:capnproto",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/flatbuffers:flatbuffers",
+        "//packages/linux/dev-libs/serialization/msgpack:msgpack",
+        "//packages/linux/dev-libs/serialization/capnproto:capnproto",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -65,10 +65,10 @@ filegroup(
 filegroup(
     name = "text-libs",
     srcs = [
-        "dev-libs//text/oniguruma:oniguruma",
-        "dev-libs//text/re2:re2",
-        "dev-libs//text/libunistring:libunistring",
-        "dev-libs//text/utf8proc:utf8proc",
+        "//packages/linux/dev-libs/text/oniguruma:oniguruma",
+        "//packages/linux/dev-libs/text/re2:re2",
+        "//packages/linux/dev-libs/text/libunistring:libunistring",
+        "//packages/linux/dev-libs/text/utf8proc:utf8proc",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -81,9 +81,9 @@ filegroup(
 filegroup(
     name = "json-libs",
     srcs = [
-        "dev-libs//json/rapidjson:rapidjson",
-        "dev-libs//json/simdjson:simdjson",
-        "dev-libs//misc/cjson:cjson",
+        "//packages/linux/dev-libs/json/rapidjson:rapidjson",
+        "//packages/linux/dev-libs/json/simdjson:simdjson",
+        "//packages/linux/dev-libs/misc/cjson:cjson",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -96,7 +96,7 @@ filegroup(
 filegroup(
     name = "testing-libs",
     srcs = [
-        "dev-libs//testing/check:check",
+        "//packages/linux/dev-libs/testing/check:check",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -109,7 +109,7 @@ filegroup(
 filegroup(
     name = "config-libs",
     srcs = [
-        "dev-libs//config/libconfig:libconfig",
+        "//packages/linux/dev-libs/config/libconfig:libconfig",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -122,9 +122,9 @@ filegroup(
 filegroup(
     name = "google-libs",
     srcs = [
-        "dev-libs//google/gflags:gflags",
-        "dev-libs//google/glog:glog",
-        "dev-libs//google/abseil-cpp:abseil-cpp",
+        "//packages/linux/dev-libs/google/gflags:gflags",
+        "//packages/linux/dev-libs/google/glog:glog",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -137,8 +137,8 @@ filegroup(
 filegroup(
     name = "database-libs",
     srcs = [
-        "dev-libs//database/leveldb:leveldb",
-        "dev-libs//database/rocksdb:rocksdb",
+        "//packages/linux/dev-libs/database/leveldb:leveldb",
+        "//packages/linux/dev-libs/database/rocksdb:rocksdb",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -151,9 +151,9 @@ filegroup(
 filegroup(
     name = "event-libs",
     srcs = [
-        "dev-libs//misc/libev:libev",
-        "system//libs/utility/libevent:libevent",
-        "system//libs/utility/libuv:libuv",
+        "//packages/linux/dev-libs/misc/libev:libev",
+        "//packages/linux/system/libs/utility/libevent:libevent",
+        "//packages/linux/system/libs/utility/libuv:libuv",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -166,9 +166,9 @@ filegroup(
 filegroup(
     name = "cpp-utility-libs",
     srcs = [
-        "dev-libs//misc/fmt:fmt",
-        "dev-libs//misc/spdlog:spdlog",
-        "dev-libs//misc/double-conversion:double-conversion",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
+        "//packages/linux/dev-libs/misc/spdlog:spdlog",
+        "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -181,8 +181,8 @@ filegroup(
 filegroup(
     name = "gc-libs",
     srcs = [
-        "dev-libs//misc/boehm-gc:boehm-gc",
-        "dev-libs//misc/libatomic_ops:libatomic_ops",
+        "//packages/linux/dev-libs/misc/boehm-gc:boehm-gc",
+        "//packages/linux/dev-libs/misc/libatomic_ops:libatomic_ops",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -195,12 +195,12 @@ filegroup(
 filegroup(
     name = "misc-libs",
     srcs = [
-        "dev-libs//misc/xxhash:xxhash",
-        "dev-libs//misc/libmicrohttpd:libmicrohttpd",
-        "dev-libs//misc/tree-sitter:tree-sitter",
-        "dev-libs//misc/libedit:libedit",
-        "dev-libs//misc/c-blosc:c-blosc",
-        "dev-libs//misc/libgit2:libgit2",
+        "//packages/linux/dev-libs/misc/xxhash:xxhash",
+        "//packages/linux/dev-libs/misc/libmicrohttpd:libmicrohttpd",
+        "//packages/linux/dev-libs/misc/tree-sitter:tree-sitter",
+        "//packages/linux/dev-libs/misc/libedit:libedit",
+        "//packages/linux/dev-libs/misc/c-blosc:c-blosc",
+        "//packages/linux/dev-libs/misc/libgit2:libgit2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -216,8 +216,8 @@ filegroup(
     srcs = [
         ":boost-libs",
         ":glib-libs",
-        "dev-libs//google/abseil-cpp:abseil-cpp",
-        "dev-libs//misc/fmt:fmt",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -230,7 +230,7 @@ filegroup(
         ":boost-libs",
         ":google-libs",
         ":cpp-utility-libs",
-        "dev-libs//text/re2:re2",
+        "//packages/linux/dev-libs/text/re2:re2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -243,8 +243,8 @@ filegroup(
         ":allocator-libs",
         ":event-libs",
         ":gc-libs",
-        "dev-libs//misc/xxhash:xxhash",
-        "dev-libs//misc/libatomic_ops:libatomic_ops",
+        "//packages/linux/dev-libs/misc/xxhash:xxhash",
+        "//packages/linux/dev-libs/misc/libatomic_ops:libatomic_ops",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

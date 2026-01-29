@@ -56,10 +56,10 @@ autotools_package(
     ],
 
     deps = [
-        "graphics//xorg/libXaw:libXaw",
-        "graphics//xorg/libXmu:libXmu",
-        "graphics//xorg/libXt:libXt",
-        "core//ncurses:ncurses",
+        "//packages/linux/graphics/xorg/libXaw:libXaw",
+        "//packages/linux/graphics/xorg/libXmu:libXmu",
+        "//packages/linux/graphics/xorg/libXt:libXt",
+        "//packages/linux/core/ncurses:ncurses",
     ],
 
     visibility = ["PUBLIC"],

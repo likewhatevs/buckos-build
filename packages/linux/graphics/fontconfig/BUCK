@@ -12,9 +12,9 @@ meson_package(
     homepage = "https://www.freedesktop.org/wiki/Software/fontconfig/",
     license = "MIT",
     deps = [
-        "graphics//freetype:freetype",
-        "dev-libs//misc/expat:expat",
-        "core//glib:glib",
+        "//packages/linux/graphics/freetype:freetype",
+        "//packages/linux/dev-libs/misc/expat:expat",
+        "//packages/linux/core/glib:glib",
     ],
     meson_args = [
         "-Ddoc=disabled",

@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/facebookresearch/SONAR/archive/refs/tags/v0.4.0.tar.gz",
     sha256 = "a76bd749057db009d0bcf0ffad258e186f7c9d64907d9e8e6615ba1dc54c0e5b",
     deps = [
-        "ai//ml-frameworks/fairseq2:fairseq2",
-        "lang//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//audio-ml/torchaudio:torchaudio",
-        "audio//utilities/sox:sox",
-        "audio//utilities/soundfile:soundfile",
+        "//packages/linux/ai/ml-frameworks/fairseq2:fairseq2",
+        "//packages/linux/lang/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/audio-ml/torchaudio:torchaudio",
+        "//packages/linux/audio/utilities/sox:sox",
+        "//packages/linux/audio/utilities/soundfile:soundfile",
     ],
 )

@@ -51,7 +51,7 @@ cmake_package(
         "-Dlerc=OFF",
     ],
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
 )

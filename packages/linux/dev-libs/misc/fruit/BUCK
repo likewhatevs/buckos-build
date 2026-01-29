@@ -29,7 +29,7 @@ cmake_package(
         "-static-libs": "-DBUILD_SHARED_LIBS=ON",
     },
     use_deps = {
-        "boost": ["dev-libs//boost:boost"],
+        "boost": ["//packages/linux/dev-libs/boost:boost"],
     },
     visibility = ["PUBLIC"],
 )

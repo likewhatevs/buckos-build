@@ -14,7 +14,7 @@ python_package(
     homepage = "https://github.com/wting/autojump",
     license = "GPL-3.0",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

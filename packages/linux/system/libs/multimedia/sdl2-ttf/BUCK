@@ -33,9 +33,9 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
     -DSDL2TTF_HARFBUZZ=ON
 """,
     deps = [
-        "system//libs/multimedia/sdl2:sdl2",
-        "system//libs/font/freetype:freetype",
-        "system//libs/font/harfbuzz:harfbuzz",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
     ],
     visibility = ["PUBLIC"],
 )

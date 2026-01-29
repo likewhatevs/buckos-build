@@ -46,11 +46,11 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "python": ["lang//python:python"],
-        "perl": ["lang//perl:perl"],
-        "ruby": ["lang//ruby:ruby"],
-        "lua": ["lang//lua:lua"],
-        "ncurses": ["core//ncurses:ncurses"],
+        "python": ["//packages/linux/lang/python:python"],
+        "perl": ["//packages/linux/lang/perl:perl"],
+        "ruby": ["//packages/linux/lang/ruby:ruby"],
+        "lua": ["//packages/linux/lang/lua:lua"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
     },
 
     # Conditional configure arguments

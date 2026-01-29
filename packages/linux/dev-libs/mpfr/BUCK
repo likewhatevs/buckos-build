@@ -32,7 +32,7 @@ make
 make install DESTDIR="$DESTDIR"
 """,
     rdepend = [
-        "dev-libs//gmp:gmp",
+        "//packages/linux/dev-libs/gmp:gmp",
     ],
     visibility = ["PUBLIC"],
 )

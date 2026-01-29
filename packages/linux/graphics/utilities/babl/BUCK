@@ -53,11 +53,11 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/graphics/lcms2:lcms2",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
     ],
     bdepend = [
-        "lang//vala:vala",
+        "//packages/linux/lang/vala:vala",
     ],
     visibility = ["PUBLIC"],
 )

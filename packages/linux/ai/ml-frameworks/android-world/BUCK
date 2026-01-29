@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/google-research/android_world/archive/refs/heads/main.tar.gz",
     sha256 = "fc17d9f0b6fbbf6fec10bcf29ff3bb4faffd06f148a6df50390e8f79ddb7634a",
     deps = [
-        "dev-libs//python/absl-py:absl-py",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/pandas:pandas",
-        "dev-libs//python/requests:requests",
-        "dev-libs//python/protobuf:protobuf",
-        "dev-libs//python/grpcio-tools:grpcio-tools",
+        "//packages/linux/dev-libs/python/absl-py:absl-py",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/pandas:pandas",
+        "//packages/linux/dev-libs/python/requests:requests",
+        "//packages/linux/dev-libs/python/protobuf:protobuf",
+        "//packages/linux/dev-libs/python/grpcio-tools:grpcio-tools",
     ],
 )

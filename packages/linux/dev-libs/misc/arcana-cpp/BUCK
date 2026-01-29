@@ -11,7 +11,7 @@ cmake_package(
     homepage = "https://github.com/microsoft/arcana.cpp",
     license = "MIT",
     deps = [
-        "dev-libs//math/ms-gsl:ms-gsl",
+        "//packages/linux/dev-libs/math/ms-gsl:ms-gsl",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -69,8 +69,8 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 install -m 0644 contrib/completions/bash/runc "$DESTDIR/usr/share/bash-completion/completions/" 2>/dev/null || true
     """,
     deps = [
-        "lang//go:go",
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )

@@ -8,10 +8,10 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "ipset",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -60,7 +60,7 @@ chmod 600 "$DESTDIR/var/lib/ipset/ipset.save"
 
     deps = [
         # TODO: Add libmnl when available:
-        # "system//libs/network/libmnl:libmnl",
+        # "//packages/linux/system/libs/network/libmnl:libmnl",
     ],
 
     description = "Administration tool for IP sets in Linux kernel",

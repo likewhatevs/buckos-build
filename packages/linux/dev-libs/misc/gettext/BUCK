@@ -62,7 +62,7 @@ autotools_package(
         "--disable-libasprintf",
     ],
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

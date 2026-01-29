@@ -90,7 +90,7 @@ autotools_package(
 """,
 
     deps = [
-        "dev-libs//libgpg-error:libgpg-error",
+        "//packages/linux/dev-libs/libgpg-error:libgpg-error",
     ],
     visibility = ["PUBLIC"],
 )

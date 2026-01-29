@@ -19,7 +19,7 @@ autotools_package(
     iuse = ["logger", "logrotate", "systemd"],
     use_defaults = [],
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     use_configure = {
         "-logger": "--disable-logger",

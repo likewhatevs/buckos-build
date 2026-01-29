@@ -20,10 +20,10 @@ meson_package(
         "-Dman=disabled",
     ],
     bdepend = [
-        "dev-tools//build-systems/meson:meson",
+        "//packages/linux/dev-tools/build-systems/meson:meson",
     ],
     deps = [
-        "system//libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
     ],
     visibility = ["PUBLIC"],
 )

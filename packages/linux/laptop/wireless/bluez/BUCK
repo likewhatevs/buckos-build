@@ -82,10 +82,10 @@ autotools_package(
         "--enable-sixaxis",
     ],
     deps = [
-        "system//libs/ipc/dbus:dbus",
-        "dev-libs//glib:glib",
-        "core//readline:readline",
-        # "system//libs/libical:libical",  # TODO: not packaged yet,
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/core/readline:readline",
+        # "//packages/linux/system/libs/libical:libical",  # TODO: not packaged yet,
     ],
     visibility = ["PUBLIC"],
 )

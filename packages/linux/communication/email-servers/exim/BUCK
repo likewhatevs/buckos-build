@@ -56,9 +56,9 @@ MAKEFILE
         install -Dm644 src/configure.default "$OUT/etc/exim/exim.conf" 2>/dev/null || true
     """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/utility/pcre2:pcre2",
-        "system//libs/database/sqlite:sqlite",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
     visibility = ["PUBLIC"],
 )

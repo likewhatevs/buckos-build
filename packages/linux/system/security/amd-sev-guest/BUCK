@@ -6,7 +6,7 @@ autotools_package(
     src_uri = "https://github.com/amdese/sev-guest/archive/refs/heads/main.tar.gz",
     sha256 = "1307d5ac7a7c00ec20ebc6b5dca709bfb9ffcee654dfed0b5df34d4e9224118a",
     deps = [
-        "dev-libs//crypto/openssl:openssl",
-        "system//libs/uuid:uuid",
+        "//packages/linux/dev-libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/uuid:uuid",
     ],
 )

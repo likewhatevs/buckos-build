@@ -38,10 +38,10 @@ done
         "--disable-static",
     ],
     deps = [
-        "system//libs/audio/flac:flac",
-        "system//libs/audio/libogg:libogg",
-        "system//libs/audio/libvorbis:libvorbis",
-        "system//libs/audio/opus:opus",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/opus:opus",
     ],
     visibility = ["PUBLIC"],
 )

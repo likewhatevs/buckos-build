@@ -29,10 +29,10 @@ cd src
 make INSTALL_ROOT="$DESTDIR" install
 """,
     rdepend = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )

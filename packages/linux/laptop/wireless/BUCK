@@ -3,8 +3,8 @@
 filegroup(
     name = "wifi",
     srcs = [
-        "laptop//wireless/iwd:iwd",
-        "laptop//wireless/wpa_supplicant:wpa_supplicant",
+        "//packages/linux/laptop/wireless/iwd:iwd",
+        "//packages/linux/laptop/wireless/wpa_supplicant:wpa_supplicant",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -13,8 +13,8 @@ filegroup(
 filegroup(
     name = "bluetooth",
     srcs = [
-        "laptop//wireless/bluez:bluez",
-        "laptop//wireless/blueman:blueman",
+        "//packages/linux/laptop/wireless/bluez:bluez",
+        "//packages/linux/laptop/wireless/blueman:blueman",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -23,8 +23,8 @@ filegroup(
 filegroup(
     name = "wireless-essential",
     srcs = [
-        "laptop//wireless/iwd:iwd",
-        "laptop//wireless/bluez:bluez",
+        "//packages/linux/laptop/wireless/iwd:iwd",
+        "//packages/linux/laptop/wireless/bluez:bluez",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -33,10 +33,10 @@ filegroup(
 filegroup(
     name = "all-wireless",
     srcs = [
-        "laptop//wireless/iwd:iwd",
-        "laptop//wireless/wpa_supplicant:wpa_supplicant",
-        "laptop//wireless/bluez:bluez",
-        "laptop//wireless/blueman:blueman",
+        "//packages/linux/laptop/wireless/iwd:iwd",
+        "//packages/linux/laptop/wireless/wpa_supplicant:wpa_supplicant",
+        "//packages/linux/laptop/wireless/bluez:bluez",
+        "//packages/linux/laptop/wireless/blueman:blueman",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -9,8 +9,8 @@ python_package(
     homepage = "https://github.com/achow101/signapple",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/elfesteem:elfesteem",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/elfesteem:elfesteem",
     ],
     visibility = ["PUBLIC"],
 )

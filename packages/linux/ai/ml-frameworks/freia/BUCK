@@ -9,10 +9,10 @@ python_package(
     homepage = "https://github.com/VLL-HD/FrEIA",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
-        "ai//ml-frameworks/pytorch:pytorch",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
     visibility = ["PUBLIC"],
 )

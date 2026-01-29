@@ -29,13 +29,13 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "lang//lua:lua",
-        "core//expat:expat",
-        "dev-libs//boost:boost",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/lang/lua:lua",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     bdepend = [
-        # "core//ragel:ragel",  # TODO: not packaged yet
+        # "//packages/linux/core/ragel:ragel",  # TODO: not packaged yet
     ],
     visibility = ["PUBLIC"],
 )

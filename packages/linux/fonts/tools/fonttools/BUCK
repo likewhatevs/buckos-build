@@ -26,8 +26,8 @@ python_package(
         "ufo",
     ],
     deps = [
-        "lang//python:python",
-        "system//libs/compression/brotli:brotli",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/system/libs/compression/brotli:brotli",
     ],
     visibility = ["PUBLIC"],
 )

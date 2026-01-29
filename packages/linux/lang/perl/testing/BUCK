@@ -22,7 +22,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -48,7 +48,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -74,7 +74,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-simple",
     ],
     visibility = ["PUBLIC"],
@@ -101,7 +101,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-simple",
     ],
     visibility = ["PUBLIC"],
@@ -128,7 +128,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-simple",
     ],
     visibility = ["PUBLIC"],
@@ -155,7 +155,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -181,7 +181,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-simple",
     ],
     visibility = ["PUBLIC"],
@@ -208,9 +208,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-simple",
-        "lang//perl/text:text-diff",
+        "//packages/linux/lang/perl/text:text-diff",
     ],
     visibility = ["PUBLIC"],
 )
@@ -236,7 +236,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-simple",
         ":test-deep",
         ":test-differences",
@@ -267,8 +267,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:try-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:try-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -294,7 +294,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -320,7 +320,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -346,7 +346,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -372,7 +372,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":test-pod",
     ],
     visibility = ["PUBLIC"],
@@ -399,7 +399,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

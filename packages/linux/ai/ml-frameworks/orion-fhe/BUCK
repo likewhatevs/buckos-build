@@ -9,10 +9,10 @@ python_package(
     homepage = "https://github.com/baahl-nyu/orion",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "lang//go:go",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
     ],
     build_backend = "poetry",
     build_env = {

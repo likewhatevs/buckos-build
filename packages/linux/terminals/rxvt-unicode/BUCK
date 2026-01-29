@@ -66,7 +66,7 @@ autotools_package(
         "--enable-unicode3",
     ],
     deps = [
-        "system//libs/terminal/libptytty:libptytty",
+        "//packages/linux/system/libs/terminal/libptytty:libptytty",
     ],
     visibility = ["PUBLIC"],
 )

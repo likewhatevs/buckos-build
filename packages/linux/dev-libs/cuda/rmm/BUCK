@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/rapidsai/rmm",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//misc/fmt:fmt",
-        "dev-libs//logging/spdlog:spdlog",
-        "dev-libs//cuda/nvtx:nvtx",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
+        "//packages/linux/dev-libs/logging/spdlog:spdlog",
+        "//packages/linux/dev-libs/cuda/nvtx:nvtx",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

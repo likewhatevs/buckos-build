@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/meta-llama/llama-recipes/archive/refs/tags/v0.0.2.tar.gz",
     sha256 = "dcf475eba02c978155bf059b2c78032a09da27e4e367329562afb90eddf1eff4",
     deps = [
-        "dev-libs//python/accelerate:accelerate",
-        "dev-libs//python/fire:fire",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/transformers:transformers",
-        "dev-libs//python/sentencepiece:sentencepiece",
-        "dev-libs//python/peft:peft",
+        "//packages/linux/dev-libs/python/accelerate:accelerate",
+        "//packages/linux/dev-libs/python/fire:fire",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/transformers:transformers",
+        "//packages/linux/dev-libs/python/sentencepiece:sentencepiece",
+        "//packages/linux/dev-libs/python/peft:peft",
     ],
 )

@@ -39,13 +39,13 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        # "dev-libs//mlt:mlt",  # TODO: not packaged yet
-        "graphics//video/ffmpeg:ffmpeg",
-        # "core//frei0r:frei0r",  # TODO: not packaged yet,
-        "graphics//video/v4l-utils:v4l-utils",
-        # "core//rttr:rttr",  # TODO: not packaged yet,
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        # "//packages/linux/dev-libs/mlt:mlt",  # TODO: not packaged yet
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        # "//packages/linux/core/frei0r:frei0r",  # TODO: not packaged yet,
+        "//packages/linux/graphics/video/v4l-utils:v4l-utils",
+        # "//packages/linux/core/rttr:rttr",  # TODO: not packaged yet,
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

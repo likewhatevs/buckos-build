@@ -14,7 +14,7 @@ python_package(
     homepage = "https://github.com/urwid/urwid",
     license = "LGPL-2.1",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

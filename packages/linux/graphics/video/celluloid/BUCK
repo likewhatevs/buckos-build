@@ -22,9 +22,9 @@ meson_package(
     license = "GPL-3.0-or-later",
     meson_args = [],
     deps = [
-        "graphics//video/mpv:mpv",
-        "desktop//gtk:gtk4",
-        "desktop//gtk:gtk4",
+        "//packages/linux/graphics/video/mpv:mpv",
+        "//packages/linux/desktop/gtk:gtk4",
+        "//packages/linux/desktop/gtk:gtk4",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

@@ -12,10 +12,10 @@ cmake_package(
         "-DDART_ENABLE_SIMD=OFF",
     ],
     deps = [
-        "dev-libs//eigen:eigen",
-        "dev-libs//3d/assimp:assimp",
-        "dev-libs//physics/fcl:fcl",
-        "dev-libs//logging/fmt:fmt",
-        "dev-libs//json/tinyxml2:tinyxml2",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/dev-libs/3d/assimp:assimp",
+        "//packages/linux/dev-libs/physics/fcl:fcl",
+        "//packages/linux/dev-libs/logging/fmt:fmt",
+        "//packages/linux/dev-libs/json/tinyxml2:tinyxml2",
     ],
 )

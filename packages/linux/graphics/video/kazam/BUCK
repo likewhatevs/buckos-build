@@ -13,11 +13,11 @@ python_package(
     homepage = "https://github.com/henrywoo/kazam",
     license = "GPL-3.0-or-later",
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "graphics//video/gstreamer:gstreamer",
-        "desktop//gtk:gtk3",
-        "lang//python:python",
-        "audio//daemons/pulseaudio:pulseaudio",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/graphics/video/gstreamer:gstreamer",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
     ],
     visibility = ["PUBLIC"],
 )

@@ -114,7 +114,7 @@ EOF
 chmod +x "$DESTDIR/usr/bin/setup_vkd3d_proton"
     """,
     deps = [
-        "gaming//compatibility/wine:wine",
+        "//packages/linux/gaming/compatibility/wine:wine",
     ],
     visibility = ["PUBLIC"],
 )

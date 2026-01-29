@@ -13,12 +13,12 @@ autotools_package(
     iuse = ["asm", "fontconfig", "libunibreak"],
     use_defaults = ["fontconfig", "asm"],
     deps = [
-        "graphics//freetype:freetype",
-        "dev-libs//misc/fribidi:fribidi",
-        "graphics//harfbuzz:harfbuzz",
+        "//packages/linux/graphics/freetype:freetype",
+        "//packages/linux/dev-libs/misc/fribidi:fribidi",
+        "//packages/linux/graphics/harfbuzz:harfbuzz",
     ],
     use_deps = {
-        "fontconfig": ["graphics//fontconfig:fontconfig"],
+        "fontconfig": ["//packages/linux/graphics/fontconfig:fontconfig"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

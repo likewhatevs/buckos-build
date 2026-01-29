@@ -9,8 +9,8 @@ cmake_package(
     homepage = "https://icl.utk.edu/magma/",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//math/openblas:openblas",
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/dev-libs/math/openblas:openblas",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

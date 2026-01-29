@@ -18,12 +18,12 @@ autotools_package(
 
 
     use_deps = {
-        "tcl": ["dev-tools//tcl"],
+        "tcl": ["//packages/linux/dev-tools/tcl"],
     },
 
 
     deps = [
-        "network//libpcap:libpcap",
+        "//packages/linux/network/libpcap:libpcap",
     ],
 
     description = "TCP/IP packet assembler and analyzer for network testing",

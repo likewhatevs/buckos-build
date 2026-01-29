@@ -21,10 +21,10 @@ make_package(
     license = "BSD-2-Clause",
     make_args = ["PREFIX=/usr"],
     deps = [
-        "graphics//xorg/libxcb:libxcb",
-        "graphics//xorg/xcb-util:xcb-util",
-        "graphics//xorg/xcb-util-wm:xcb-util-wm",
-        "graphics//xorg/xcb-util-keysyms:xcb-util-keysyms",
+        "//packages/linux/graphics/xorg/libxcb:libxcb",
+        "//packages/linux/graphics/xorg/xcb-util:xcb-util",
+        "//packages/linux/graphics/xorg/xcb-util-wm:xcb-util-wm",
+        "//packages/linux/graphics/xorg/xcb-util-keysyms:xcb-util-keysyms",
     ],
     visibility = ["PUBLIC"],
 )
@@ -34,8 +34,8 @@ filegroup(
     name = "bspwm-desktop",
     srcs = [
         ":bspwm",
-        "desktop//lightdm:lightdm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/lightdm:lightdm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

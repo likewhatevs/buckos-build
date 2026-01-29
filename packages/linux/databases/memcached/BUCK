@@ -21,11 +21,11 @@ autotools_package(
     iuse = ["ssl", "seccomp", "sasl", "doc"],
     use_defaults = ["seccomp"],
     deps = [
-        "system//libs/utility/libevent:libevent",
+        "//packages/linux/system/libs/utility/libevent:libevent",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "sasl": ["system//security/auth/directory:cyrus-sasl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "sasl": ["//packages/linux/system/security/auth/directory:cyrus-sasl"],
     },
     configure_args = [
         "--prefix=/usr",

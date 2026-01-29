@@ -4,7 +4,7 @@
 filegroup(
     name = "daemons",
     srcs = [
-        "audio//daemons:all-daemons",
+        "//packages/linux/audio/daemons:all-daemons",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -14,7 +14,7 @@ filegroup(
 filegroup(
     name = "players",
     srcs = [
-        "audio//players:all-players",
+        "//packages/linux/audio/players:all-players",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -24,7 +24,7 @@ filegroup(
 filegroup(
     name = "production",
     srcs = [
-        "audio//production:all-production",
+        "//packages/linux/audio/production:all-production",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -34,7 +34,7 @@ filegroup(
 filegroup(
     name = "libraries",
     srcs = [
-        "audio//libraries:all-libraries",
+        "//packages/linux/audio/libraries:all-libraries",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -44,7 +44,7 @@ filegroup(
 filegroup(
     name = "utilities",
     srcs = [
-        "audio//utilities:all-utilities",
+        "//packages/linux/audio/utilities:all-utilities",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -54,9 +54,9 @@ filegroup(
 filegroup(
     name = "essential",
     srcs = [
-        "audio//daemons/alsa-lib:alsa-lib",
-        "audio//daemons/alsa-utils:alsa-utils",
-        "audio//daemons/pipewire:pipewire",
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/audio/daemons/alsa-utils:alsa-utils",
+        "//packages/linux/audio/daemons/pipewire:pipewire",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -66,12 +66,12 @@ filegroup(
 filegroup(
     name = "console",
     srcs = [
-        "audio//daemons/alsa-lib:alsa-lib",
-        "audio//daemons/alsa-utils:alsa-utils",
-        "audio//players/cmus:cmus",
-        "audio//players/moc:moc",
-        "audio//players/mpd:mpd",
-        "audio//utilities/sox:sox",
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/audio/daemons/alsa-utils:alsa-utils",
+        "//packages/linux/audio/players/cmus:cmus",
+        "//packages/linux/audio/players/moc:moc",
+        "//packages/linux/audio/players/mpd:mpd",
+        "//packages/linux/audio/utilities/sox:sox",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -82,7 +82,7 @@ filegroup(
     name = "desktop",
     srcs = [
         ":essential",
-        "audio//utilities/pavucontrol:pavucontrol",
+        "//packages/linux/audio/utilities/pavucontrol:pavucontrol",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -93,10 +93,10 @@ filegroup(
     name = "studio",
     srcs = [
         ":essential",
-        "audio//daemons/jack2:jack2",
-        "audio//production:all-production",
-        "audio//libraries:all-libraries",
-        "audio//utilities/sox:sox",
+        "//packages/linux/audio/daemons/jack2:jack2",
+        "//packages/linux/audio/production:all-production",
+        "//packages/linux/audio/libraries:all-libraries",
+        "//packages/linux/audio/utilities/sox:sox",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

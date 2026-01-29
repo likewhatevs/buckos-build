@@ -25,10 +25,10 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "sqlite": ["system//libs/database/sqlite:sqlite"],
-        "readline": ["core//readline:readline"],
-        "ncurses": ["core//ncurses:ncurses"],
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
+        "readline": ["//packages/linux/core/readline:readline"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     # Conditional configure arguments based on USE flags
@@ -51,9 +51,9 @@ autotools_package(
     ],
 
     deps = [
-        "core//zlib:zlib",
-        "core//expat:expat",
-        "core//libffi:libffi",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/core/libffi:libffi",
     ],
 
     # Fix lib-dynload path: Python stdlib is in lib/python3.12 but lib-dynload is in lib64/python3.12

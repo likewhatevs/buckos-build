@@ -76,9 +76,9 @@ find "$DESTDIR" -name "*.la" -type f -delete 2>/dev/null || true
 ''',
 
     depend = [
-        "system//libs/ipc/libtirpc:libtirpc",
-        "system//libs/network/libnsl:libnsl",
-        "system//libs/crypto/libxcrypt:libxcrypt",  # libcrypt.so.2 for password hashing
+        "//packages/linux/system/libs/ipc/libtirpc:libtirpc",
+        "//packages/linux/system/libs/network/libnsl:libnsl",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",  # libcrypt.so.2 for password hashing
     ],
     visibility = ["PUBLIC"],
 )

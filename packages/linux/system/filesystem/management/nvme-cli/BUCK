@@ -18,7 +18,7 @@ meson_package(
     license = "GPL-2.0",
     meson_args = [],
     deps = [
-        "core//util-linux:util-linux",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )

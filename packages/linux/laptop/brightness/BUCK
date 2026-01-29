@@ -3,8 +3,8 @@
 filegroup(
     name = "backlight",
     srcs = [
-        "laptop//brightness/brightnessctl:brightnessctl",
-        "laptop//brightness/light:light",
+        "//packages/linux/laptop/brightness/brightnessctl:brightnessctl",
+        "//packages/linux/laptop/brightness/light:light",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -13,7 +13,7 @@ filegroup(
 filegroup(
     name = "external-monitors",
     srcs = [
-        "laptop//brightness/ddcutil:ddcutil",
+        "//packages/linux/laptop/brightness/ddcutil:ddcutil",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -22,7 +22,7 @@ filegroup(
 filegroup(
     name = "brightness-essential",
     srcs = [
-        "laptop//brightness/brightnessctl:brightnessctl",
+        "//packages/linux/laptop/brightness/brightnessctl:brightnessctl",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -31,9 +31,9 @@ filegroup(
 filegroup(
     name = "all-brightness",
     srcs = [
-        "laptop//brightness/brightnessctl:brightnessctl",
-        "laptop//brightness/light:light",
-        "laptop//brightness/ddcutil:ddcutil",
+        "//packages/linux/laptop/brightness/brightnessctl:brightnessctl",
+        "//packages/linux/laptop/brightness/light:light",
+        "//packages/linux/laptop/brightness/ddcutil:ddcutil",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

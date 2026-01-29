@@ -13,8 +13,8 @@ cmake_package(
         "-DCMAKE_PREFIX_PATH=$(echo $DEP_BASE_DIRS | tr ':' ';' | sed 's|;|/usr;|g' | sed 's|$|/usr|')",
     ],
     deps = [
-        "dev-libs//text/re2:re2",
-        "dev-libs//yaml/yaml-cpp:yaml-cpp",
+        "//packages/linux/dev-libs/text/re2:re2",
+        "//packages/linux/dev-libs/yaml/yaml-cpp:yaml-cpp",
     ],
     visibility = ["PUBLIC"],
 )

@@ -28,8 +28,8 @@ sed -i 's/-Werror //' Make.defaults || true
         "install",
     ],
     deps = [
-        "system//libs/ipc/popt:popt",
-        "system//libs/efivar:efivar",
+        "//packages/linux/system/libs/ipc/popt:popt",
+        "//packages/linux/system/libs/efivar:efivar",
     ],
     visibility = ["PUBLIC"],
 )

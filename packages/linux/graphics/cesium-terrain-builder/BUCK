@@ -18,10 +18,10 @@ cmake_package(
     deps = [
         # GDAL >= 2.0.0 required (RFC 46 unified GDAL/OGR API)
         # TODO: Add GDAL dependency when available
-        # "graphics//gdal:gdal",
+        # "//packages/linux/graphics/gdal:gdal",
 
         # zlib required for terrain tile compression
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
 
         # Note: Threads library (pthread) is provided by system toolchain
     ],

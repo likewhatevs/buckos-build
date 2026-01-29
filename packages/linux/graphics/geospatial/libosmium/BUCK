@@ -13,11 +13,11 @@ cmake_package(
         "-DINSTALL_GDALCPP=ON",
     ],
     deps = [
-        "dev-libs//boost:boost",
-        "dev-libs//compression/bzip2:bzip2",
-        "core//expat:expat",
-        "core//zlib:zlib",
-        "dev-libs//compression:lz4",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/compression/bzip2:bzip2",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/compression:lz4",
     ],
     visibility = ["PUBLIC"],
 )

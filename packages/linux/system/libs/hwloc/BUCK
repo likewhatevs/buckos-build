@@ -67,9 +67,9 @@ autotools_package(
         "xml": "--enable-libxml2",
     },
     use_deps = {
-        "xml": ["dev-libs//parsers/libxml2:libxml2"],
-        "cairo": ["system//libs/graphics/cairo:cairo"],
-        "pci": ["system//libs/io/pciutils:pciutils"],
+        "xml": ["//packages/linux/dev-libs/parsers/libxml2:libxml2"],
+        "cairo": ["//packages/linux/system/libs/graphics/cairo:cairo"],
+        "pci": ["//packages/linux/system/libs/io/pciutils:pciutils"],
     },
     configure_args = [
         "--prefix=/usr",

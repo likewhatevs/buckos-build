@@ -10,9 +10,9 @@ cmake_package(
         "-DBUILD_FREE_LICENSE=ON",
     ],
     deps = [
-        "dev-libs//math/eigen:eigen",
-        "dev-libs//misc/boost:boost",
-        "dev-libs//math/glm:glm",
-        "dev-libs//compression/zlib:zlib",
+        "//packages/linux/dev-libs/math/eigen:eigen",
+        "//packages/linux/dev-libs/misc/boost:boost",
+        "//packages/linux/dev-libs/math/glm:glm",
+        "//packages/linux/dev-libs/compression/zlib:zlib",
     ],
 )

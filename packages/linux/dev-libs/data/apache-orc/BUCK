@@ -15,10 +15,10 @@ cmake_package(
         "-DINSTALL_VENDORED_LIBS=OFF",
     ],
     deps = [
-        "system//compression/lz4:lz4",
-        "dev-libs//serialization/protobuf:protobuf",
-        "system//compression/zlib:zlib",
-        "system//compression/zstd:zstd",
-        "system//compression/snappy:snappy",
+        "//packages/linux/system/compression/lz4:lz4",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/system/compression/zlib:zlib",
+        "//packages/linux/system/compression/zstd:zstd",
+        "//packages/linux/system/compression/snappy:snappy",
     ],
 )

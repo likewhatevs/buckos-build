@@ -25,11 +25,11 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "curl": ["network//curl:curl"],
-        "perl": ["lang//perl:perl"],
-        "python": ["lang//python:python"],
-        "pcre2": ["system//libs/utility/pcre2:pcre2"],
-        "nls": ["dev-libs//misc/gettext:gettext"],
+        "curl": ["//packages/linux/network/curl:curl"],
+        "perl": ["//packages/linux/lang/perl:perl"],
+        "python": ["//packages/linux/lang/python:python"],
+        "pcre2": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
+        "nls": ["//packages/linux/dev-libs/misc/gettext:gettext"],
     },
 
     # Conditional configure arguments
@@ -64,8 +64,8 @@ autotools_package(
         "NO_INSTALL_HARDLINKS=1",
     ],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

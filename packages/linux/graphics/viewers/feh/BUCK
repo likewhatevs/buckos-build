@@ -13,11 +13,11 @@ make_package(
     src_compile = "make PREFIX=/usr exif=1 inotify=1 magic=1",
     src_install = "make PREFIX=/usr DESTDIR=$DESTDIR install",
     deps = [
-        "system//libs/image/libpng:libpng",
-        "core//file:file",
-        "network//curl:curl",
-        "graphics//xorg:x11-extended",
-        "graphics//xorg/libXinerama:libXinerama",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/core/file:file",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/graphics/xorg:x11-extended",
+        "//packages/linux/graphics/xorg/libXinerama:libXinerama",
     ],
     visibility = ["PUBLIC"],
 )

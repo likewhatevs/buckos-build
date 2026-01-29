@@ -25,7 +25,7 @@ autotools_package(
     ],
     use_defaults = [],
     use_deps = {
-        "selinux": ["system//security/selinux:selinux"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
     },
     use_configure = {
         "-nls": "--disable-nls",

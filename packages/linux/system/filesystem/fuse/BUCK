@@ -8,14 +8,14 @@
 filegroup(
     name = "fuse",
     srcs = [
-        "system//filesystem/fuse/fuse3:fuse3",
-        "system//filesystem/fuse/ntfs-3g:ntfs-3g",
-        "system//filesystem/fuse/exfat-fuse:exfat-fuse",
-        "system//filesystem/fuse/bindfs:bindfs",
-        "system//filesystem/fuse/unionfs-fuse:unionfs-fuse",
-        "system//filesystem/fuse/archivemount:archivemount",
-        "system//filesystem/fuse/encfs:encfs",
-        "system//filesystem/fuse/gocryptfs:gocryptfs",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
+        "//packages/linux/system/filesystem/fuse/exfat-fuse:exfat-fuse",
+        "//packages/linux/system/filesystem/fuse/bindfs:bindfs",
+        "//packages/linux/system/filesystem/fuse/unionfs-fuse:unionfs-fuse",
+        "//packages/linux/system/filesystem/fuse/archivemount:archivemount",
+        "//packages/linux/system/filesystem/fuse/encfs:encfs",
+        "//packages/linux/system/filesystem/fuse/gocryptfs:gocryptfs",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -25,8 +25,8 @@ filegroup(
 filegroup(
     name = "common",
     srcs = [
-        "system//filesystem/fuse/fuse3:fuse3",
-        "system//filesystem/fuse/ntfs-3g:ntfs-3g",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,8 +36,8 @@ filegroup(
 filegroup(
     name = "encrypted",
     srcs = [
-        "system//filesystem/fuse/encfs:encfs",
-        "system//filesystem/fuse/gocryptfs:gocryptfs",
+        "//packages/linux/system/filesystem/fuse/encfs:encfs",
+        "//packages/linux/system/filesystem/fuse/gocryptfs:gocryptfs",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -84,10 +84,10 @@ autotools_package(
         "--with-python=python3",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/dbus:dbus",
-        "graphics//rendering/wayland:wayland",
-        "lang//python:python",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )
@@ -129,10 +129,10 @@ autotools_package(
         DESTDIR=$OUT make install
     """,
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/dbus:dbus",
-        "graphics//rendering/wayland:wayland",
-        "system//libs/input/libxkbcommon:libxkbcommon",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
     ],
     visibility = ["PUBLIC"],
 )
@@ -209,7 +209,7 @@ autotools_package(
     """,
     deps = [
         ":fcitx5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )
@@ -248,7 +248,7 @@ autotools_package(
     """,
     deps = [
         ":fcitx5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )
@@ -275,7 +275,7 @@ autotools_package(
     ],
     deps = [
         ":ibus",
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

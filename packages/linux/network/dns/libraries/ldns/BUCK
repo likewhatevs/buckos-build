@@ -19,7 +19,7 @@ autotools_package(
     use_defaults = ["ssl", "dnssec"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     use_configure = {

@@ -12,7 +12,7 @@ autotools_package(
 
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     use_configure = {
@@ -28,7 +28,7 @@ autotools_package(
     ],
 
     deps = [
-        "network//curl:curl",
+        "//packages/linux/network/curl:curl",
     ],
 
     description = "High-speed web-based traffic analysis and flow collection",

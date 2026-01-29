@@ -6,7 +6,7 @@ autotools_package(
     src_uri = "https://www.phidgets.com/downloads/phidget22/libraries/linux/libphidget22/libphidget22-1.17.20231004.tar.gz",
     sha256 = "37e384e86b1f8044904c1ff7d00bdb16bb2b2be87a0962848a984981f457acf8",
     deps = [
-        "system//libs/usb:libusb",
+        "//packages/linux/system/libs/usb:libusb",
     ],
     visibility = ["PUBLIC"],
 )

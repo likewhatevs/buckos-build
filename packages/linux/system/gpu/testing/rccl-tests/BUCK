@@ -10,8 +10,8 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "system//gpu/libraries/rocm:rocm-cmake",
-        "system//gpu/libraries/rocm:rccl",
-        "system//gpu/libraries/rocm:hip",
+        "//packages/linux/system/gpu/libraries/rocm:rocm-cmake",
+        "//packages/linux/system/gpu/libraries/rocm:rccl",
+        "//packages/linux/system/gpu/libraries/rocm:hip",
     ],
 )

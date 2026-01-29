@@ -6,9 +6,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "compatibility",
     srcs = [
-        "gaming//compatibility/wine:wine",
-        "gaming//compatibility/dxvk:dxvk",
-        "gaming//compatibility/vkd3d-proton:vkd3d-proton",
+        "//packages/linux/gaming/compatibility/wine:wine",
+        "//packages/linux/gaming/compatibility/dxvk:dxvk",
+        "//packages/linux/gaming/compatibility/vkd3d-proton:vkd3d-proton",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -18,9 +18,9 @@ filegroup(
 filegroup(
     name = "proton-stack",
     srcs = [
-        "gaming//compatibility/wine:wine",
-        "gaming//compatibility/dxvk:dxvk",
-        "gaming//compatibility/vkd3d-proton:vkd3d-proton",
+        "//packages/linux/gaming/compatibility/wine:wine",
+        "//packages/linux/gaming/compatibility/dxvk:dxvk",
+        "//packages/linux/gaming/compatibility/vkd3d-proton:vkd3d-proton",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

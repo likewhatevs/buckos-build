@@ -11,8 +11,8 @@ cargo_package(
     license = "MIT",
     bins = ["wl-clip-persist"],
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     visibility = ["PUBLIC"],
 )

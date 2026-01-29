@@ -25,7 +25,7 @@ autotools_package(
     use_defaults = ["ipv6"],
 
     use_deps = {
-        "udev": ["system//init/eudev:eudev"],
+        "udev": ["//packages/linux/system/init/eudev:eudev"],
     },
 
     use_configure = {

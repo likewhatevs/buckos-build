@@ -9,7 +9,7 @@ cmake_package(
         "-DCMAKE_CXX_STANDARD=17",
     ],
     deps = [
-        "graphics//qt:qt6-base",
-        "dev-libs//misc/cpp-terminal:cpp-terminal",
+        "//packages/linux/graphics/qt:qt6-base",
+        "//packages/linux/dev-libs/misc/cpp-terminal:cpp-terminal",
     ],
 )

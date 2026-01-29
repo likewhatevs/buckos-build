@@ -9,7 +9,7 @@ python_package(
     homepage = "https://github.com/Stable-Baselines-Team/stable-baselines3-contrib",
     license = "MIT",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

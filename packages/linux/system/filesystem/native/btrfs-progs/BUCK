@@ -39,10 +39,10 @@ autotools_package(
         "--disable-libudev",
     ],
     deps = [
-        "core//util-linux:util-linux",
-        "core//zlib:zlib",
-        "system//libs/compression/lzo:lzo",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/lzo:lzo",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

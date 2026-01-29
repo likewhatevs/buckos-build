@@ -72,7 +72,7 @@ cmake_package(
 
     # Base dependencies
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     # Threading support - DuckDB enables threads by default

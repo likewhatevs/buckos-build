@@ -12,7 +12,7 @@ make_package(
     src_compile = "make",
     src_install = "make install DESTDIR=\"$DESTDIR\"",
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

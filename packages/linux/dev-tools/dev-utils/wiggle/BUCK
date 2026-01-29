@@ -20,7 +20,7 @@ make CC=cc PREFIX=/usr
 make install DESTDIR="$DESTDIR" PREFIX=/usr
 """,
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

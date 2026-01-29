@@ -30,7 +30,7 @@ autotools_package(
         "--sysconfdir=/etc",
     ],
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

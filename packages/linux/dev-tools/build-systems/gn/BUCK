@@ -33,7 +33,7 @@ binary_package(
         install -Dm755 out/gn "$OUT/usr/bin/gn"
     """,
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

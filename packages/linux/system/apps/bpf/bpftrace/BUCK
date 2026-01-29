@@ -35,12 +35,12 @@ cmake_package(
         "-DBUILD_FUZZ=OFF",
     ],
     deps = [
-        "system//apps/bpf/bcc:bcc",
-        "system//libs/bpf/libbpf:libbpf",
-        "dev-tools//dev-utils/elfutils:elfutils",
-        "core//zlib:zlib",
-        "core//llvm:llvm",
-        "dev-libs//serialization/cereal:cereal",
+        "//packages/linux/system/apps/bpf/bcc:bcc",
+        "//packages/linux/system/libs/bpf/libbpf:libbpf",
+        "//packages/linux/dev-tools/dev-utils/elfutils:elfutils",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/dev-libs/serialization/cereal:cereal",
     ],
     visibility = ["PUBLIC"],
 )

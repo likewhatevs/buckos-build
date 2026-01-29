@@ -48,10 +48,10 @@ meson_package(
         done
     """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/image/libpng:libpng",
-        "system//libs/compression/brotli:brotli",
-        "fonts//libraries/freetype:freetype",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/compression/brotli:brotli",
+        "//packages/linux/fonts/libraries/freetype:freetype",
     ],
     visibility = ["PUBLIC"],
 )

@@ -27,8 +27,8 @@ ebuild_package(
         make prefix=/usr DESTDIR="${DESTDIR}" install
     """,
     rdepend = [
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//compression/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/compression/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

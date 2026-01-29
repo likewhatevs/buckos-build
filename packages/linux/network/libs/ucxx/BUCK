@@ -13,6 +13,6 @@ cmake_package(
         "-DUCXX_ENABLE_RMM=OFF",
     ],
     deps = [
-        "network//libs/ucx:ucx",
+        "//packages/linux/network/libs/ucx:ucx",
     ],
 )

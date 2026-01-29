@@ -47,10 +47,10 @@ ebuild_package(
         python3 buildscripts/scons.py install-mongod install-mongos --prefix="${DESTDIR}/usr"
     """,
     rdepend = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     bdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

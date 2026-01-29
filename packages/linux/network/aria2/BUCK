@@ -15,9 +15,9 @@ autotools_package(
     use_defaults = ["ssl", "bittorrent", "metalink", "xml"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
-        "xml": ["system//libs/data/libxml2:libxml2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
+        "xml": ["//packages/linux/system/libs/data/libxml2:libxml2"],
     },
 
 
@@ -26,8 +26,8 @@ autotools_package(
     ],
 
     deps = [
-        "network//ca-certificates:ca-certificates",
-        "core//zlib:zlib",
+        "//packages/linux/network/ca-certificates:ca-certificates",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     description = "Lightweight multi-protocol multi-source download utility",

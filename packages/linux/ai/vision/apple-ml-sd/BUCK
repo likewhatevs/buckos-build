@@ -6,10 +6,10 @@ python_package(
     src_uri = "https://github.com/apple/ml-stable-diffusion/archive/refs/tags/1.1.0.tar.gz",
     sha256 = "85dc3f85ce4bdd169541f94f91841581871e846abb4a3740c155b204d5d5dd32",
     deps = [
-        "ai//ml-frameworks/diffusers:diffusers",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/safetensors:safetensors",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/transformers:transformers",
+        "//packages/linux/ai/ml-frameworks/diffusers:diffusers",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/safetensors:safetensors",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/transformers:transformers",
     ],
 )

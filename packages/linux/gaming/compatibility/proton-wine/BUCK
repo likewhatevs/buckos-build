@@ -33,12 +33,12 @@ autotools_package(
     # Conditional dependencies based on USE flags
     use_deps = {
         "x11": [
-            "graphics//xorg:x11-full",
-            "graphics//freetype:freetype",
-            "system//libs/font/fontconfig:fontconfig",
+            "//packages/linux/graphics/xorg:x11-full",
+            "//packages/linux/graphics/freetype:freetype",
+            "//packages/linux/system/libs/font/fontconfig:fontconfig",
         ],
         "wayland": [
-            "graphics//wayland:wayland",
+            "//packages/linux/graphics/wayland:wayland",
         ],
     },
 
@@ -56,7 +56,7 @@ autotools_package(
         "LDFLAGS": "-Wl,-O1,--as-needed",
     },
     deps = [
-        "core//glibc:glibc",
+        "//packages/linux/core/glibc:glibc",
     ],
     visibility = ["PUBLIC"],
 )

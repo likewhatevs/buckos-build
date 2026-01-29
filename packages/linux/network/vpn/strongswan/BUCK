@@ -36,8 +36,8 @@ autotools_package(
     use_defaults = ["ssl", "curl", "eap", "dhcp", "vici", "swanctl"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "curl": ["network//curl:curl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "curl": ["//packages/linux/network/curl:curl"],
     },
 
     use_configure = {

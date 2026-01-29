@@ -25,7 +25,7 @@ autotools_package(
         "--enable-thread-safe",
     ],
     deps = [
-        "system//libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/gmp:gmp",
     ],
     # Remove .la files - they contain hardcoded paths that break cross-package builds
     post_install = '''

@@ -14,7 +14,7 @@ cmake_package(
     use_defaults = ["snappy"],
     deps = [],
     use_deps = {
-        "snappy": ["system//libs/compression/snappy:snappy"],
+        "snappy": ["//packages/linux/system/libs/compression/snappy:snappy"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -22,9 +22,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:params-util",
-        "lang//perl/core:sub-exporter",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:params-util",
+        "//packages/linux/lang/perl/core:sub-exporter",
     ],
     visibility = ["PUBLIC"],
 )
@@ -50,7 +50,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -76,7 +76,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -102,7 +102,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":term-ansicolor",
     ],
     visibility = ["PUBLIC"],
@@ -129,7 +129,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -155,9 +155,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":getopt-long-descriptive",
-        "lang//perl/oop:class-load",
+        "//packages/linux/lang/perl/oop:class-load",
     ],
     visibility = ["PUBLIC"],
 )
@@ -183,7 +183,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -209,7 +209,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -235,8 +235,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:params-util",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:params-util",
     ],
     visibility = ["PUBLIC"],
 )
@@ -262,7 +262,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -288,7 +288,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

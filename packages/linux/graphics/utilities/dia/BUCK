@@ -49,11 +49,11 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "system//libs/data/libxml2:libxml2",
-        "system//libs/graphics/cairo:cairo",
-        "fonts//libraries/pango:pango",
-        # "core//graphene:graphene",  # TODO: not packaged yet
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
+        "//packages/linux/fonts/libraries/pango:pango",
+        # "//packages/linux/core/graphene:graphene",  # TODO: not packaged yet
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

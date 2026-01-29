@@ -31,8 +31,8 @@ autotools_package(
     ],
     make_args = [],
     deps = [
-        "system//libs/libusb:libusb",
-        "system//init/systemd:systemd",
+        "//packages/linux/system/libs/libusb:libusb",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )

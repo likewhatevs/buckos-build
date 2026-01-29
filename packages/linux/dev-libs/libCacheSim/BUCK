@@ -15,8 +15,8 @@ cmake_package(
         "-DENABLE_3L_CACHE=OFF",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

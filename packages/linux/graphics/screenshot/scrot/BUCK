@@ -26,8 +26,8 @@ autotools_package(
 make DESTDIR=$OUT install
 """,
     deps = [
-        "graphics//xorg:x11-extended",
-        "graphics//xorg/libXinerama:libXinerama",
+        "//packages/linux/graphics/xorg:x11-extended",
+        "//packages/linux/graphics/xorg/libXinerama:libXinerama",
     ],
     visibility = ["PUBLIC"],
 )

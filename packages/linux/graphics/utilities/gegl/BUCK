@@ -93,21 +93,21 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "graphics//utilities/babl:babl",
-        "dev-libs//glib:glib",
-        "system//libs/image/libpng:libpng",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/graphics/cairo:cairo",
-        "fonts//libraries/pango:pango",
-        "dev-libs//openexr:openexr",
-        # "core//libraw:libraw",  # TODO: not packaged yet
-        # "core//librsvg:librsvg",  # TODO: not packaged yet
-        "system//libs/image/libwebp:libwebp",
-        # "editors//poppler:poppler",  # TODO: wrong path
-        "graphics//video/ffmpeg:ffmpeg",
+        "//packages/linux/graphics/utilities/babl:babl",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
+        "//packages/linux/fonts/libraries/pango:pango",
+        "//packages/linux/dev-libs/openexr:openexr",
+        # "//packages/linux/core/libraw:libraw",  # TODO: not packaged yet
+        # "//packages/linux/core/librsvg:librsvg",  # TODO: not packaged yet
+        "//packages/linux/system/libs/image/libwebp:libwebp",
+        # "//packages/linux/editors/poppler:poppler",  # TODO: wrong path
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
     ],
     bdepend = [
-        "lang//vala:vala",
+        "//packages/linux/lang/vala:vala",
     ],
     visibility = ["PUBLIC"],
 )

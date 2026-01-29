@@ -10,7 +10,7 @@ simple_binary_package(
     license = "CC0-1.0",
     extract_to = "/usr/lib/bats-assert",
     deps = [
-        "dev-tools//testing/bats-support:bats-support",
+        "//packages/linux/dev-tools/testing/bats-support:bats-support",
     ],
     visibility = ["PUBLIC"],
 )

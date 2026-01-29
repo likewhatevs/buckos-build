@@ -53,8 +53,8 @@ meson_package(
         "-Drunner=disabled",
     ],
     deps = [
-        "desktop//libdrm:libdrm",
-        "graphics//xorg/libpciaccess:libpciaccess",
+        "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/graphics/xorg/libpciaccess:libpciaccess",
     ],
     env = {
         "CFLAGS": "-O2 -march=x86-64 -pipe",

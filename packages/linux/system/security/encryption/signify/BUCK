@@ -26,8 +26,8 @@ autotools_package(
         "MANDIR=/usr/share/man",
     ],
     deps = [
-        "system//security/encryption:libbsd",
-        "system//security/encryption:libmd",
+        "//packages/linux/system/security/encryption:libbsd",
+        "//packages/linux/system/security/encryption:libmd",
     ],
     visibility = ["PUBLIC"],
 )

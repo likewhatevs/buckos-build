@@ -3,7 +3,7 @@
 filegroup(
     name = "codecs",
     srcs = [
-        "system//libs/video/theora:theora",
+        "//packages/linux/system/libs/video/theora:theora",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -12,7 +12,7 @@ filegroup(
 filegroup(
     name = "subtitles",
     srcs = [
-        "system//libs/video/libass:libass",
+        "//packages/linux/system/libs/video/libass:libass",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -21,9 +21,9 @@ filegroup(
 filegroup(
     name = "dvd-support",
     srcs = [
-        "system//libs/video/libdvdcss:libdvdcss",
-        "system//libs/video/libdvdread:libdvdread",
-        "system//libs/video/libdvdnav:libdvdnav",
+        "//packages/linux/system/libs/video/libdvdcss:libdvdcss",
+        "//packages/linux/system/libs/video/libdvdread:libdvdread",
+        "//packages/linux/system/libs/video/libdvdnav:libdvdnav",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -32,7 +32,7 @@ filegroup(
 filegroup(
     name = "bluray-support",
     srcs = [
-        "system//libs/video/libbluray:libbluray",
+        "//packages/linux/system/libs/video/libbluray:libbluray",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

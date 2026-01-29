@@ -21,9 +21,9 @@ autotools_package(
         "--disable-docs",
     ],
     deps = [
-        "graphics//xorg/libICE:libICE",
-        "graphics//xorg/xorgproto:xorgproto",
-        "graphics//xorg/xtrans:xtrans",
+        "//packages/linux/graphics/xorg/libICE:libICE",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/xtrans:xtrans",
     ],
     visibility = ["PUBLIC"],
 )

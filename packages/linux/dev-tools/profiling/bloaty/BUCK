@@ -11,12 +11,12 @@ cmake_package(
     homepage = "https://github.com/google/bloaty",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//google/abseil-cpp:abseil-cpp",
-        "system//security/capstone:capstone",
-        "dev-libs//serialization/protobuf:protobuf",
-        "dev-libs//text/re2:re2",
-        "core//zlib:zlib",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
+        "//packages/linux/system/security/capstone:capstone",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/text/re2:re2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

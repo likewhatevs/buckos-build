@@ -12,7 +12,7 @@ python_package(
     src_uri = "https://github.com/rahul-goel/fused-ssim/archive/d99e3d27513fa3563d98f74fcd40fd429e9e9b0e.tar.gz",
     sha256 = "ca4c9acde1abb8d27138a78d0512bb8e33773afadf2b3c3b3f5f044bd5ffc1a6",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
 )

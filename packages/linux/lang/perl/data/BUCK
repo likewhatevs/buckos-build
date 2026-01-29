@@ -22,7 +22,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -48,8 +48,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:canary-stability",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:canary-stability",
     ],
     visibility = ["PUBLIC"],
 )
@@ -75,8 +75,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:cpanel-json-xs",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:cpanel-json-xs",
     ],
     visibility = ["PUBLIC"],
 )
@@ -102,7 +102,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -128,7 +128,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -154,7 +154,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -180,7 +180,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -206,7 +206,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":xml-libxml",
     ],
     visibility = ["PUBLIC"],
@@ -233,8 +233,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "core//expat:expat",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/core/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )
@@ -260,7 +260,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":xml-parser",
     ],
     visibility = ["PUBLIC"],
@@ -287,7 +287,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -313,7 +313,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -338,7 +338,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -364,7 +364,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

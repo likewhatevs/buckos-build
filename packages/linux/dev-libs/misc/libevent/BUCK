@@ -23,7 +23,7 @@ cmake_package(
     use_defaults = ["ssl", "threads"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

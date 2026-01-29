@@ -14,7 +14,7 @@ cmake_package(
     use_defaults = ["fmt_external"],
     deps = [],
     use_deps = {
-        "fmt_external": ["dev-libs//misc/fmt:fmt"],
+        "fmt_external": ["//packages/linux/dev-libs/misc/fmt:fmt"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

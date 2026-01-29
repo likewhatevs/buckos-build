@@ -21,9 +21,9 @@ cmake_package(
     ],
     use_defaults = ["zlib", "zstd"],
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//compression/bzip2:bzip2",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/compression/bzip2:bzip2",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/fwilliams/numpyeigen",
     license = "MIT",
     deps = [
-        "dev-libs//eigen:eigen",
-        "dev-libs//python/pybind11:pybind11",
-        "lang//python:python",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/dev-libs/python/pybind11:pybind11",
+        "//packages/linux/lang/python:python",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

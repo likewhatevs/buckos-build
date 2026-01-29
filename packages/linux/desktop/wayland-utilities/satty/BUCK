@@ -11,9 +11,9 @@ cargo_package(
     license = "MPL-2.0",
     bins = ["satty"],
     deps = [
-        "core//libffi:libffi",
-        "desktop//wayland-utilities/grim:grim",
-        "desktop//wayland-utilities/slurp:slurp",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/desktop/wayland-utilities/grim:grim",
+        "//packages/linux/desktop/wayland-utilities/slurp:slurp",
     ],
     visibility = ["PUBLIC"],
 )

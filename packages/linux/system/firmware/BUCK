@@ -2,7 +2,7 @@
 filegroup(
     name = "all-firmware",
     srcs = [
-        "system//firmware/linux-firmware:linux-firmware",
+        "//packages/linux/system/firmware/linux-firmware:linux-firmware",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -11,6 +11,6 @@ filegroup(
 # Alias for convenience
 alias(
     name = "linux-firmware",
-    actual = "system//firmware/linux-firmware:linux-firmware",
+    actual = "//packages/linux/system/firmware/linux-firmware:linux-firmware",
     visibility = ["PUBLIC"],
 )

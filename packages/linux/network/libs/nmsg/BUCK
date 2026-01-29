@@ -10,8 +10,8 @@ autotools_package(
         "--without-libzmq",
     ],
     deps = [
-        "core//zlib:zlib",
-        "network//libs/libpcap:libpcap",
-        "system//libs/data/yajl:yajl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/network/libs/libpcap:libpcap",
+        "//packages/linux/system/libs/data/yajl:yajl",
     ],
 )

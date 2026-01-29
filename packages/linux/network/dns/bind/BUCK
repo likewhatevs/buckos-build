@@ -52,8 +52,8 @@ autotools_package(
     },
     use_defaults = ["dnssec"],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//misc/libuv:libuv",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/misc/libuv:libuv",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

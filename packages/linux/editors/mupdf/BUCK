@@ -50,7 +50,7 @@ autotools_package(
         "USE_SYSTEM_LIBS=yes",
     ],
     deps = [
-        "fonts//libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/freetype:freetype",
     ],
     visibility = ["PUBLIC"],
 )

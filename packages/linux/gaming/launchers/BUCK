@@ -6,9 +6,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "launchers",
     srcs = [
-        "gaming//launchers/steam:steam",
-        "gaming//launchers/lutris:lutris",
-        "gaming//launchers/heroic:heroic",
+        "//packages/linux/gaming/launchers/steam:steam",
+        "//packages/linux/gaming/launchers/lutris:lutris",
+        "//packages/linux/gaming/launchers/heroic:heroic",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

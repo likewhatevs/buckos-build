@@ -27,7 +27,7 @@ autotools_package(
         "-debug": "--disable-debug",
     },
     use_deps = {
-        "python": ["lang//python:python"],
+        "python": ["//packages/linux/lang/python:python"],
     },
     configure_args = ["--prefix=/usr"],
     deps = [],

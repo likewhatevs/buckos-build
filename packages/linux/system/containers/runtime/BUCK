@@ -49,10 +49,10 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 runc "$DESTDIR/usr/bin/runc"
 """,
     rdepend = [
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -83,9 +83,9 @@ make
 make install DESTDIR="$DESTDIR"
 """,
     rdepend = [
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//libs/ipc/libcap:libcap",
-        "system//libs/data/yajl:yajl",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/data/yajl:yajl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -112,8 +112,8 @@ make PREFIX=/usr
 make PREFIX=/usr DESTDIR="$DESTDIR" install
 """,
     rdepend = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )

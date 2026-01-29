@@ -38,7 +38,7 @@ cmake_package(
         "-DGGML_OPENMP=ON",
     ],
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

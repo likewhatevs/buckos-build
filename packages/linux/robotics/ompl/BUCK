@@ -16,8 +16,8 @@ cmake_package(
         "-DOMPL_REGISTRATION=OFF",
     ],
     deps = [
-        "dev-libs//boost:boost",
-        "dev-libs//eigen:eigen",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/eigen:eigen",
     ],
     visibility = ["PUBLIC"],
 )

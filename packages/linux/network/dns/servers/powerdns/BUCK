@@ -13,8 +13,8 @@ autotools_package(
     use_defaults = ["ssl", "tools", "ixfrdist", "sqlite"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "sqlite": ["system//libs/database/sqlite:sqlite"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
     },
 
     use_configure = {
@@ -36,8 +36,8 @@ autotools_package(
     ],
 
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//boost:boost",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/boost:boost",
     ],
 
     description = "PowerDNS authoritative server",

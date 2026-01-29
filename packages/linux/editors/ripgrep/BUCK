@@ -17,7 +17,7 @@ cargo_package(
     license = "MIT",
     cargo_args = [],
     deps = [
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     env = {
         "PCRE2_SYS_STATIC": "0",

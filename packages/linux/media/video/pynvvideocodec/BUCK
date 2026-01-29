@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://api.ngc.nvidia.com/v2/resources/org/nvidia/pynvvideocodec/2.0.2/files?redirect=true&path=PyNvVideoCodec_2.0.2.zip",
     sha256 = "c677121159e95c0f80ded2e70677326328945ce35031c39164ef895d9b1feb64",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
 )

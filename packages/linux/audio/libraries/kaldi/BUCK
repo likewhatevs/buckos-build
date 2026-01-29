@@ -12,9 +12,9 @@ autotools_package(
         "--mathlib=OPENBLAS",
     ],
     deps = [
-        "audio//libraries/openfst-kaldi:openfst-kaldi",
-        "dev-libs//math/openblas:openblas",
-        "dev-libs//math/lapack:lapack",
+        "//packages/linux/audio/libraries/openfst-kaldi:openfst-kaldi",
+        "//packages/linux/dev-libs/math/openblas:openblas",
+        "//packages/linux/dev-libs/math/lapack:lapack",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

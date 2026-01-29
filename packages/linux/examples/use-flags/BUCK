@@ -56,11 +56,11 @@ autotools_package(
 
     # Conditional dependencies based on USE flags
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
-        "http2": ["network//nghttp2:nghttp2"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
-        "brotli": ["system//libs/compression/brotli:brotli"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
+        "http2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
+        "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
 
     # Conditional configure arguments
@@ -119,10 +119,10 @@ autotools_package(
     iuse = ["ssl", "gnutls", "http2", "ipv6", "zstd", "brotli", "ldap", "debug"],
     use_defaults = ["ssl", "ipv6"],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
-        "http2": ["network//nghttp2:nghttp2"],
-        "brotli": ["system//libs/compression/brotli:brotli"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
+        "http2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
     use_configure = {
         "ssl": "--with-ssl=/usr",
@@ -205,8 +205,8 @@ sed -i 's/30[0-4][0-9][0-9][0-9][0-9][0-9]/30[0-9][0-9][0-9][0-9][0-9][0-9]/g' c
         "--with-privsep-path=/var/lib/sshd",
     ],
     deps = [
-        "core//zlib:zlib",
-        "system//security/linux-pam:linux-pam",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/security/linux-pam:linux-pam",
     ],
     env = {
         "CFLAGS": "-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2",

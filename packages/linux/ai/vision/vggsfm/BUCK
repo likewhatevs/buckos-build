@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/facebookresearch/vggsfm/archive/refs/heads/main.tar.gz",
     sha256 = "ac35bf66bfd9557a1d03a8164edec872937b6fca432111ad4a348ec2c76ca57c",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/einops:einops",
-        "dev-libs//python/hydra-core:hydra-core",
-        "dev-libs//python/omegaconf:omegaconf",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/einops:einops",
+        "//packages/linux/dev-libs/python/hydra-core:hydra-core",
+        "//packages/linux/dev-libs/python/omegaconf:omegaconf",
     ],
     maintainers = ["buckos"],
 )

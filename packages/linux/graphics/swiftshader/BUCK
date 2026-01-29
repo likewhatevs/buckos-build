@@ -14,7 +14,7 @@ cmake_package(
         "-DSWIFTSHADER_BUILD_GLESv2=ON",
     ],
     deps = [
-        "graphics//xorg/x11:libx11",
-        "graphics//xorg/xcb:libxcb",
+        "//packages/linux/graphics/xorg/x11:libx11",
+        "//packages/linux/graphics/xorg/xcb:libxcb",
     ],
 )

@@ -10,10 +10,10 @@ cmake_package(
         "-DBUILD_SHARED_LIBS=ON",
     ],
     deps = [
-        "dev-libs//misc/asio:asio",
-        "dev-libs//misc/boost:boost",
-        "dev-libs//json/rapidjson:rapidjson",
-        "network//libs/websocketpp:websocketpp",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/misc/asio:asio",
+        "//packages/linux/dev-libs/misc/boost:boost",
+        "//packages/linux/dev-libs/json/rapidjson:rapidjson",
+        "//packages/linux/network/libs/websocketpp:websocketpp",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 )

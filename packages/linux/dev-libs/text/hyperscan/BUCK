@@ -14,10 +14,10 @@ cmake_package(
     iuse = ["static-libs", "debug"],
     use_defaults = [],
     deps = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     bdepend = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

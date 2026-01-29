@@ -37,7 +37,7 @@ make_package(
     use_defaults = [],  # Don't build static by default (requires glibc-static)
     deps = [],
     use_deps = {
-        "zlib": ["core//zlib:zlib"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
     use_make = {
         "static": "STATIC=1",

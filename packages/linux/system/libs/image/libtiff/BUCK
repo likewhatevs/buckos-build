@@ -51,11 +51,11 @@ autotools_package(
     },
 
     use_deps = {
-        "jpeg": ["system//libs/image/libjpeg-turbo:libjpeg-turbo"],
-        "zlib": ["core//zlib:zlib"],
-        "lzma": ["system//libs/compression/xz:xz"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
-        "webp": ["system//libs/image/libwebp:libwebp"],
+        "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "lzma": ["//packages/linux/system/libs/compression/xz:xz"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
+        "webp": ["//packages/linux/system/libs/image/libwebp:libwebp"],
     },
 
     configure_args = ["--prefix=/usr"],

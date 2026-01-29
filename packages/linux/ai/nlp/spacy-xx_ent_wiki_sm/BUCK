@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/explosion/spacy-models/releases/download/xx_ent_wiki_sm-3.4.0/xx_ent_wiki_sm-3.4.0.tar.gz",
     sha256 = "fddc06f16801fe760bbd9caa727d4887c73b98aa7042c790eb4720a3a90eece1",
     deps = [
-        "ai//nlp/spacy:spacy",
+        "//packages/linux/ai/nlp/spacy:spacy",
     ],
     maintainers = ["buckos"],
 )

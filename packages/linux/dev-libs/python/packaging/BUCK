@@ -55,6 +55,6 @@ echo "Installed packaging to $SITE_PACKAGES"
 ls -la "$SITE_PACKAGES"
 """,
     # Python only needed at runtime (not for build since we don't use pip)
-    depend = ["lang//python:python"],
+    depend = ["//packages/linux/lang/python:python"],
     visibility = ["PUBLIC"],
 )

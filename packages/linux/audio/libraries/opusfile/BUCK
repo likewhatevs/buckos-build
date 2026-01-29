@@ -29,9 +29,9 @@ autotools_package(
         "--disable-doc",
     ],
     deps = [
-        "system//libs/audio/opus:opus",
-        "system//libs/audio/libogg:libogg",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/audio/opus:opus",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

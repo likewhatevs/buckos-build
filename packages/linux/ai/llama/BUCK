@@ -10,7 +10,7 @@ python_package(
     homepage = "https://github.com/facebookresearch/llama",
     license = "GPL-3.0",
     deps = [
-        "ai//ml-frameworks/fairscale:fairscale",
+        "//packages/linux/ai/ml-frameworks/fairscale:fairscale",
     ],
     visibility = ["PUBLIC"],
 )

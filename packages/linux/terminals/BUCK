@@ -2,7 +2,7 @@
 filegroup(
     name = "lightweight-terminals",
     srcs = [
-        "terminals//foot:foot",
+        "//packages/linux/terminals/foot:foot",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -12,10 +12,10 @@ filegroup(
 filegroup(
     name = "all-terminals",
     srcs = [
-        "terminals//alacritty:alacritty",
-        "terminals//foot:foot",
-        "terminals//xterm:xterm",
-        "terminals//rxvt-unicode:rxvt-unicode",
+        "//packages/linux/terminals/alacritty:alacritty",
+        "//packages/linux/terminals/foot:foot",
+        "//packages/linux/terminals/xterm:xterm",
+        "//packages/linux/terminals/rxvt-unicode:rxvt-unicode",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

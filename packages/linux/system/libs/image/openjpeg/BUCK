@@ -35,9 +35,9 @@ cmake_package(
     },
 
     use_deps = {
-        "png": ["system//libs/image/libpng:libpng"],
-        "tiff": ["system//libs/image/libtiff:libtiff"],
-        "lcms2": ["system//libs/color/lcms2:lcms2"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
+        "tiff": ["//packages/linux/system/libs/image/libtiff:libtiff"],
+        "lcms2": ["//packages/linux/system/libs/color/lcms2:lcms2"],
     },
 
     cmake_args = [

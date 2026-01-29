@@ -12,6 +12,6 @@ autotools_package(
         "CUDA_HOME=/usr/local/cuda",
     ],
     deps = [
-        "system//gpu/libraries/nccl:nccl",
+        "//packages/linux/system/gpu/libraries/nccl:nccl",
     ],
 )

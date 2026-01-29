@@ -31,7 +31,7 @@ cmake_package(
     src_uri = "https://github.com/nih-at/libzip/releases/download/v1.11.4/libzip-1.11.4.tar.xz",
     sha256 = "8a247f57d1e3e6f6d11413b12a6f28a9d388de110adc0ec608d893180ed7097b",
     deps = [
-        "dev-libs//compression:zlib",
+        "//packages/linux/dev-libs/compression:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

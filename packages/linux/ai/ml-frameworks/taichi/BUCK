@@ -9,10 +9,10 @@ cmake_package(
     homepage = "https://taichi-lang.org/",
     license = "Apache-2.0",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/pybind11:pybind11",
-        "dev-libs//misc/llvm:llvm",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/pybind11:pybind11",
+        "//packages/linux/dev-libs/misc/llvm:llvm",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

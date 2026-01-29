@@ -15,6 +15,6 @@ cmake_package(
         "-DSPIRV_SKIP_TESTS=ON",
     ],
     deps = [
-        "dev-libs//misc/marl:marl",
+        "//packages/linux/dev-libs/misc/marl:marl",
     ],
 )

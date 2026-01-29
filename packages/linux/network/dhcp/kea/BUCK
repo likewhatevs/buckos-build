@@ -18,9 +18,9 @@ autotools_package(
     use_defaults = ["openssl"],
 
     use_deps = {
-        "openssl": ["system//libs/crypto/openssl:openssl"],
-        "mysql": ["databases//mysql:mysql"],
-        "postgresql": ["databases//postgresql:postgresql"],
+        "openssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "mysql": ["//packages/linux/databases/mysql:mysql"],
+        "postgresql": ["//packages/linux/databases/postgresql:postgresql"],
     },
 
     use_configure = {
@@ -46,8 +46,8 @@ autotools_package(
     ],
 
     deps = [
-        "dev-libs//boost:boost",
-        "system//libs/logging/log4cplus:log4cplus",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/system/libs/logging/log4cplus:log4cplus",
     ],
 
     description = "Modern, open source DHCPv4 and DHCPv6 server",

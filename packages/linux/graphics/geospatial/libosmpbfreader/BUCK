@@ -12,7 +12,7 @@ cmake_package(
         "-DFPIC=ON",
     ],
     deps = [
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
     visibility = ["PUBLIC"],
 )

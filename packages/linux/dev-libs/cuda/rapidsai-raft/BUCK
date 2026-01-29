@@ -92,8 +92,8 @@ echo "RAPIDS RAFT v$PV installed successfully"
         requires = "cuda",
     ),
     deps = [
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
-        "dev-libs//cuda/cutlass4:cutlass4",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/dev-libs/cuda/cutlass4:cutlass4",
     ],
     visibility = ["PUBLIC"],
 )

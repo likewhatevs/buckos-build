@@ -6,9 +6,9 @@ autotools_package(
     src_uri = "https://github.com/hautreux/auks/archive/refs/tags/0.5.3.tar.gz",
     sha256 = "2bcf8f10e3db2cc1bff47798279d15bb5234a38ac41be76cb5c90f7b59eba78a",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -17,7 +17,7 @@ autoreconf -fi
         "--with-tirpc",
     ],
     deps = [
-        "system//libs/ipc/libtirpc:libtirpc",
+        "//packages/linux/system/libs/ipc/libtirpc:libtirpc",
     ],
     maintainers = ["buckos"],
 )

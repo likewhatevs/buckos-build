@@ -25,8 +25,8 @@ meson_package(
     # use_options generates enabled/disabled but builtin needs true/false
 
     use_deps = {
-        "idn": ["network//dns/libraries/libidn2:libidn2"],
-        "icu": ["system//libs/utility/icu:icu"],
+        "idn": ["//packages/linux/network/dns/libraries/libidn2:libidn2"],
+        "icu": ["//packages/linux/system/libs/utility/icu:icu"],
     },
 
     meson_args = [

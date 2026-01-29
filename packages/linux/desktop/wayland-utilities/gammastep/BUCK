@@ -40,15 +40,15 @@ autotools_package(
         "--disable-drm",
     ],
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
-        "dev-tools//build-systems/intltool:intltool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/intltool:intltool",
     ],
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     visibility = ["PUBLIC"],
 )

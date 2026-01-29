@@ -35,7 +35,7 @@ cmake_package(
 
     # Conditional dependencies based on USE flags
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     # Base CMake arguments (always applied)

@@ -40,7 +40,7 @@ make install install-lib \
 ln -sf libpci.so.3 "$DESTDIR/usr/lib64/libpci.so"
 """,
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

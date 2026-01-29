@@ -38,8 +38,8 @@ cmake_package(
     use_defaults = ["shared", "aom", "dav1d"],
     deps = [],
     use_deps = {
-        "aom": ["media//video/libaom:libaom"],
-        "dav1d": ["media//video/dav1d:dav1d"],
+        "aom": ["//packages/linux/media/video/libaom:libaom"],
+        "dav1d": ["//packages/linux/media/video/dav1d:dav1d"],
     },
     cmake_args = [
         "-DCMAKE_INSTALL_PREFIX=${PREFIX}",

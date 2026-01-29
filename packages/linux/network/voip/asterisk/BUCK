@@ -118,10 +118,10 @@ autotools_package(
     use_defaults = ["ssl", "pjsip", "sqlite", "uuid"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "pjsip": ["network//voip/pjsip:pjsip"],
-        "sqlite": ["databases//sqlite:sqlite"],
-        "uuid": ["system//libs/uuid:uuid"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "pjsip": ["//packages/linux/network/voip/pjsip:pjsip"],
+        "sqlite": ["//packages/linux/databases/sqlite:sqlite"],
+        "uuid": ["//packages/linux/system/libs/uuid:uuid"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

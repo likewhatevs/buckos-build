@@ -46,7 +46,7 @@ echo "Found skalibs at: $SKALIBS_DIR"
     --with-lib="$SKALIBS_DIR/usr/lib"
 """,
     deps = [
-        "system//init/skalibs:skalibs",
+        "//packages/linux/system/init/skalibs:skalibs",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

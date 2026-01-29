@@ -14,9 +14,9 @@ simple_package(
     use_defaults = ["ssl", "pcre2", "zlib"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "pcre2": ["system//libs/utility/pcre2:pcre2"],
-        "zlib": ["core//zlib:zlib"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "pcre2": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
     build_commands = [
         "make TARGET=linux-glibc USE_OPENSSL=1 USE_ZLIB=1 USE_PCRE2=1 PREFIX=${PREFIX}",

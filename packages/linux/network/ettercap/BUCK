@@ -26,8 +26,8 @@ cmake_package(
     use_defaults = ["ncurses", "plugins"],
 
     use_deps = {
-        "ncurses": ["core//ncurses:ncurses"],
-        "gtk": ["desktop//gtkgtk3"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "gtk": ["//packages/linux/desktop/gtkgtk3"],
     },
 
     use_options = {
@@ -46,8 +46,8 @@ cmake_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 
     description = "Comprehensive suite for man-in-the-middle attacks and network analysis",

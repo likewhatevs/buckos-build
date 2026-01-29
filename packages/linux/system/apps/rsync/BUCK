@@ -29,10 +29,10 @@ autotools_package(
     ],
     use_defaults = ["acl", "xattr"],
     use_deps = {
-        "lz4": ["system//libs/compression/lz4:lz4"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "acl": ["system//libs/ipc/acl:acl"],
+        "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
     },
     use_configure = {
         "-acl": "--disable-acls",
@@ -67,7 +67,7 @@ autotools_package(
         "CFLAGS": "-std=gnu17 -O2",
     },
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

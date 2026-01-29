@@ -50,13 +50,13 @@ autotools_package(
     ],
     use_defaults = ["ssl", "readline", "zlib", "uuid"],
     deps = [
-        "core//zlib:zlib",
-        "core//readline:readline",
-        "dev-libs//text/icu:icu",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/dev-libs/text/icu:icu",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "xml": ["dev-libs//libxml2:libxml2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "xml": ["//packages/linux/dev-libs/libxml2:libxml2"],
     },
     configure_args = [
         "--prefix=/usr",

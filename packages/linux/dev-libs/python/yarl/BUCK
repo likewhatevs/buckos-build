@@ -14,9 +14,9 @@ python_package(
     homepage = "https://github.com/aio-libs/yarl",
     license = "Apache-2.0",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/multidict:multidict",
-        "dev-libs//python/idna:idna",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/multidict:multidict",
+        "//packages/linux/dev-libs/python/idna:idna",
     ],
     visibility = ["PUBLIC"],
 )

@@ -21,6 +21,6 @@ cmake_package(
         "-DBUILD_EXAMPLES=OFF",
     ],
     deps = [
-        "dev-libs//crypto/openssl:openssl",
+        "//packages/linux/dev-libs/crypto/openssl:openssl",
     ],
 )

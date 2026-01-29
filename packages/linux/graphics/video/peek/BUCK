@@ -22,9 +22,9 @@ meson_package(
         "-Dwith-gettext=true",
     ],
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "desktop//gtk:gtk3",
-        "dev-libs//glib:glib",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

@@ -23,7 +23,7 @@
 # # Simple shell script, copy to /usr/bin
 # """,
 #     deps = [
-#         "core//libffi:libffi",
+#         "//packages/linux/core/libffi:libffi",
 #     ],
 #     visibility = ["PUBLIC"],
 # )

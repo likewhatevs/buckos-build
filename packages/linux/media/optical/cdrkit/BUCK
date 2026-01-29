@@ -16,9 +16,9 @@ cmake_package(
         "-DCMAKE_INSTALL_PREFIX=/usr",
     ],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/bzip2:bzip2",
-        "core//file:file",  # for libmagic
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+        "//packages/linux/core/file:file",  # for libmagic
     ],
     visibility = ["PUBLIC"],
 )

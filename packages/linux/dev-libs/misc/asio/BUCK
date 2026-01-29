@@ -18,7 +18,7 @@ cmake_package(
     use_defaults = ["ssl"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     source_subdir = "asio",
     cmake_args = [

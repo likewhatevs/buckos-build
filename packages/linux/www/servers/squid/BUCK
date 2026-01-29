@@ -25,11 +25,11 @@ autotools_package(
     deps = [
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "caps": ["system//libs/ipc/libcap:libcap"],
-        "ldap": ["network//openldap:openldap"],
-        "pam": ["system//pam:pam"],
-        "kerberos": ["network//krb5:krb5"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
+        "ldap": ["//packages/linux/network/openldap:openldap"],
+        "pam": ["//packages/linux/system/pam:pam"],
+        "kerberos": ["//packages/linux/network/krb5:krb5"],
     },
     configure_args = [
         "--prefix=/usr",

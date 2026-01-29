@@ -11,8 +11,8 @@ meson_package(
     homepage = "https://gitlab.freedesktop.org/wayland/wayland-protocols",
     license = "MIT",
     deps = [
-        "graphics//rendering/wayland:wayland",
-        "core//libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/core/libffi:libffi",
     ],
     meson_args = [
         "-Dtests=false",

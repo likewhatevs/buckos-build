@@ -92,13 +92,13 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "dev-libs//exiv2:exiv2",
-        "system//libs/graphics/lcms2:lcms2",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        # "core//libraw:libraw",  # TODO: not packaged yet
-        # "core//libheif:libheif",  # TODO: not packaged yet,
-        # "core//djvulibre:djvulibre",  # TODO: not packaged yet,
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/dev-libs/exiv2:exiv2",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        # "//packages/linux/core/libraw:libraw",  # TODO: not packaged yet
+        # "//packages/linux/core/libheif:libheif",  # TODO: not packaged yet,
+        # "//packages/linux/core/djvulibre:djvulibre",  # TODO: not packaged yet,
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

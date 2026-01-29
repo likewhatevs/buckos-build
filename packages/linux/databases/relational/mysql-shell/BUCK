@@ -20,13 +20,13 @@ cmake_package(
     iuse = ["python", "ssl"],
     use_defaults = ["ssl"],
     deps = [
-        "databases//mysql:mysql",
-        "dev-libs//misc/protobuf:protobuf",
-        "core//zlib:zlib",
+        "//packages/linux/databases/mysql:mysql",
+        "//packages/linux/dev-libs/misc/protobuf:protobuf",
+        "//packages/linux/core/zlib:zlib",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "python": ["lang//python:python"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "python": ["//packages/linux/lang/python:python"],
     },
     cmake_args = [
         "-DMYSQL_SOURCE_DIR=/usr",

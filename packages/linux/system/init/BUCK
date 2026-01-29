@@ -14,13 +14,13 @@
 
 alias(
     name = "systemd",
-    actual = "system//init/systemd:systemd",
+    actual = "//packages/linux/system/init/systemd:systemd",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "s6",
-    actual = "system//init/s6:s6",
+    actual = "//packages/linux/system/init/s6:s6",
     visibility = ["PUBLIC"],
 )
 
@@ -31,7 +31,7 @@ alias(
 filegroup(
     name = "systemd-stack",
     srcs = [
-        "system//init/systemd:systemd",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -40,10 +40,10 @@ filegroup(
 filegroup(
     name = "s6-stack",
     srcs = [
-        "system//init/skalibs:skalibs",
-        "system//init/s6:s6",
-        "system//init/s6-linux-init:s6-linux-init",
-        "system//init/s6-rc:s6-rc",
+        "//packages/linux/system/init/skalibs:skalibs",
+        "//packages/linux/system/init/s6:s6",
+        "//packages/linux/system/init/s6-linux-init:s6-linux-init",
+        "//packages/linux/system/init/s6-rc:s6-rc",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -60,11 +60,11 @@ filegroup(
 filegroup(
     name = "all-inits",
     srcs = [
-        "system//init/systemd:systemd",
-        "system//init/skalibs:skalibs",
-        "system//init/s6:s6",
-        "system//init/s6-linux-init:s6-linux-init",
-        "system//init/s6-rc:s6-rc",
+        "//packages/linux/system/init/systemd:systemd",
+        "//packages/linux/system/init/skalibs:skalibs",
+        "//packages/linux/system/init/s6:s6",
+        "//packages/linux/system/init/s6-linux-init:s6-linux-init",
+        "//packages/linux/system/init/s6-rc:s6-rc",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

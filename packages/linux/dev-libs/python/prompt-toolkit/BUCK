@@ -7,8 +7,8 @@ python_package(
     sha256 = "ac04b23e73a5cf97551d17f4007674262a023e4f574d3c4cfe8c1383ec9764ec",
     deps = [
         # TODO: Add when available
-        # "dev-libs//python/six:python-six",
-        # "dev-libs//python/wcwidth:wcwidth",
+        # "//packages/linux/dev-libs/python/six:python-six",
+        # "//packages/linux/dev-libs/python/wcwidth:wcwidth",
     ],
     visibility = ["PUBLIC"],
 )

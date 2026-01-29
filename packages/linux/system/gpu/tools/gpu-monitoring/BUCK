@@ -74,7 +74,7 @@ cmake_package(
 #     description = "GPU stress testing and burn-in tool",
 #     homepage = "https://github.com/wilicc/gpu-burn",
 #     license = "BSD-2-Clause",
-#     bdepend = ["system//gpu/cuda:cuda-toolkit"],  # TODO: add CUDA package
+#     bdepend = ["//packages/linux/system/gpu/cuda:cuda-toolkit"],  # TODO: add CUDA package
 #     src_compile = """
 # make
 # """,

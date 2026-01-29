@@ -3,10 +3,10 @@
 filegroup(
     name = "core-codecs",
     srcs = [
-        "system//libs/audio/libogg:libogg",
-        "system//libs/audio/libvorbis:libvorbis",
-        "system//libs/audio/flac:flac",
-        "system//libs/audio/opus:opus",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/opus:opus",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -15,9 +15,9 @@ filegroup(
 filegroup(
     name = "mp3-support",
     srcs = [
-        "system//libs/audio/lame:lame",
-        "system//libs/audio/mpg123:mpg123",
-        "system//libs/audio/mpg123:libmpg123",
+        "//packages/linux/system/libs/audio/lame:lame",
+        "//packages/linux/system/libs/audio/mpg123:mpg123",
+        "//packages/linux/system/libs/audio/mpg123:libmpg123",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -26,8 +26,8 @@ filegroup(
 filegroup(
     name = "speech-codecs",
     srcs = [
-        "system//libs/audio/speex:speex",
-        "system//libs/audio/speex:speexdsp",
+        "//packages/linux/system/libs/audio/speex:speex",
+        "//packages/linux/system/libs/audio/speex:speexdsp",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,8 +36,8 @@ filegroup(
 filegroup(
     name = "lossless-codecs",
     srcs = [
-        "system//libs/audio/flac:flac",
-        "system//libs/audio/wavpack:wavpack",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/wavpack:wavpack",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -46,8 +46,8 @@ filegroup(
 filegroup(
     name = "cd-support",
     srcs = [
-        "system//libs/audio/libcdio:libcdio",
-        "system//libs/audio/libcdio:libcdio-paranoia",
+        "//packages/linux/system/libs/audio/libcdio:libcdio",
+        "//packages/linux/system/libs/audio/libcdio:libcdio-paranoia",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -56,8 +56,8 @@ filegroup(
 filegroup(
     name = "audio-io",
     srcs = [
-        "system//libs/audio/alsa-lib:alsa-lib",
-        "system//libs/audio/libsamplerate:libsamplerate",
+        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
+        "//packages/linux/system/libs/audio/libsamplerate:libsamplerate",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

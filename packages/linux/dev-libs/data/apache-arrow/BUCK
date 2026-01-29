@@ -37,10 +37,10 @@ binary_package(
         make install DESTDIR="$OUT"
     """,
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//compression/lz4:lz4",
-        "system//libs/compression/snappy:snappy",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/compression/lz4:lz4",
+        "//packages/linux/system/libs/compression/snappy:snappy",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

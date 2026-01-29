@@ -49,9 +49,9 @@ autotools_package(
         "--with-z",
     ],
     deps = [
-        "core//zlib:zlib",
-        "core//readline:readline",
-        "core//ncurses:ncurses",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

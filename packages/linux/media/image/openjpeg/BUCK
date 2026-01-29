@@ -13,9 +13,9 @@ cmake_package(
     iuse = ["shared", "static", "tools", "tests"],
     use_defaults = ["shared", "tools"],
     deps = [
-        "system//libs/zlib:zlib",
-        "media//image/libpng:libpng",
-        "media//image/libtiff:libtiff",
+        "//packages/linux/system/libs/zlib:zlib",
+        "//packages/linux/media/image/libpng:libpng",
+        "//packages/linux/media/image/libtiff:libtiff",
     ],
     cmake_args = [
         "-DCMAKE_INSTALL_PREFIX=${PREFIX}",

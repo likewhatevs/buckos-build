@@ -13,8 +13,8 @@ autotools_package(
         "--disable-doc",
     ],
     deps = [
-        "system//libs/audio/opus:opus",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/system/libs/audio/opus:opus",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     visibility = ["PUBLIC"],
 )

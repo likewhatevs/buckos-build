@@ -32,7 +32,7 @@ for font in *.ttf; do
 done
 """,
     rdepend = [
-        "fonts//libraries/fontconfig:fontconfig",
+        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )

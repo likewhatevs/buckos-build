@@ -16,8 +16,8 @@ autotools_package(
     iuse = ["ssl", "pam"],
     use_defaults = ["ssl"],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "pam": ["system//security/auth/pam:pam"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
     },
     use_configure = {
         "ssl": "--with-ssl-dir=/usr",

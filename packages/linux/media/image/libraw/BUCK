@@ -9,10 +9,10 @@ autotools_package(
     homepage = "https://www.libraw.org/",
     license = "LGPL-2.1",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     iuse = [
         "examples",
@@ -45,9 +45,9 @@ autotools_package(
     },
     deps = [],
     use_deps = {
-        "jpeg": ["media//image/libjpeg-turbo:libjpeg-turbo"],
-        "zlib": ["core//zlib:zlib"],
-        "lcms2": ["graphics//utilities/lcms:lcms"],
+        "jpeg": ["//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "lcms2": ["//packages/linux/graphics/utilities/lcms:lcms"],
     },
     visibility = ["PUBLIC"],
 )

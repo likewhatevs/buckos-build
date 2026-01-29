@@ -34,8 +34,8 @@ simple_package(
     use_defaults = ["jemalloc"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "jemalloc": ["dev-libs//allocators/jemalloc:jemalloc"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "jemalloc": ["//packages/linux/dev-libs/allocators/jemalloc:jemalloc"],
     },
     build_env = {
         "PREFIX": "/usr",

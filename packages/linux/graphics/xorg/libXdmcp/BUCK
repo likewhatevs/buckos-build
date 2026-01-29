@@ -17,7 +17,7 @@ autotools_package(
     # Remove .la files that cause libtool path issues
     src_install = "make DESTDIR=\"$DESTDIR\" install && find \"$DESTDIR\" -name '*.la' -delete",
     deps = [
-        "graphics//xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
     ],
     visibility = ["PUBLIC"],
 )

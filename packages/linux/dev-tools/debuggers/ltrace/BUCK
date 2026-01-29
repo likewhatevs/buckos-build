@@ -4,9 +4,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "ltrace",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 mkdir -p config/m4 config/autoconf

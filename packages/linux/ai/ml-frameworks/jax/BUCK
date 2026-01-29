@@ -11,9 +11,9 @@ python_package(
     homepage = "https://github.com/google/jax",
     license = "Apache-2.0",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
     ],
     visibility = ["PUBLIC"],
 )

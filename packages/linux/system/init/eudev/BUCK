@@ -29,8 +29,8 @@ autotools_package(
         "-doc": "--disable-manpages",
     },
     use_deps = {
-        "kmod": ["system//libs/kmod:kmod"],
-        "selinux": ["system//security/selinux:selinux"],
+        "kmod": ["//packages/linux/system/libs/kmod:kmod"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
     },
     configure_args = [
         "--prefix=/usr",
@@ -56,11 +56,11 @@ if [ -x "$OUT/bin/udevadm" ]; then
 fi
 """,
     deps = [
-        "core//util-linux:util-linux",
-        "dev-tools//dev-utils/gperf:gperf",  # Build-time dependency for hwdb generation
-        "system//libs/compression/xz:xz",  # liblzma - needed for kmod's .la files
-        "system//libs/compression/zstd:zstd",  # libzstd - needed for kmod's .la files
-        "core//zlib:zlib",  # zlib - needed for kmod's .la files
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/dev-tools/dev-utils/gperf:gperf",  # Build-time dependency for hwdb generation
+        "//packages/linux/system/libs/compression/xz:xz",  # liblzma - needed for kmod's .la files
+        "//packages/linux/system/libs/compression/zstd:zstd",  # libzstd - needed for kmod's .la files
+        "//packages/linux/core/zlib:zlib",  # zlib - needed for kmod's .la files
     ],
     visibility = ["PUBLIC"],
 )

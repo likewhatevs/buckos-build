@@ -6,9 +6,9 @@ python_package(
     src_uri = "https://github.com/databricks/zerobus-sdk-py/archive/refs/tags/v0.2.0.tar.gz",
     sha256 = "ebd63d735f29f017ac7a6d936e35c5d4ac41d469ee7da98ee38004759fa65890",
     deps = [
-        "dev-libs//python/requests:requests",
-        "dev-libs//python/grpcio:grpcio",
-        "dev-libs//python/protobuf:protobuf",
+        "//packages/linux/dev-libs/python/requests:requests",
+        "//packages/linux/dev-libs/python/grpcio:grpcio",
+        "//packages/linux/dev-libs/python/protobuf:protobuf",
     ],
     maintainers = ["buckos"],
 )

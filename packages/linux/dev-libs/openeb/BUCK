@@ -12,7 +12,7 @@ cmake_package(
         "-DGENERATE_DOC=OFF",
     ],
     deps = [
-        "dev-libs//boost:boost",
-        "system//libs/libusb:libusb",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/system/libs/libusb:libusb",
     ],
 )

@@ -29,14 +29,14 @@ qmake -r CONFIG+=release \
 INSTALL_ROOT=$OUT make install
 """,
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "desktop//qt:qt5",
-        "graphics//utilities/imagemagick:imagemagick",
-        "dev-libs//boost:boost",
-        "system//libs/graphics/cairo:cairo",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
     ],
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     visibility = ["PUBLIC"],
 )

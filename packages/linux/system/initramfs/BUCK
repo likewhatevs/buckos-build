@@ -12,10 +12,10 @@
 filegroup(
     name = "all-initramfs-tools",
     srcs = [
-        "system//initramfs/dracut:dracut",
-        "system//initramfs/mkinitcpio:mkinitcpio",
-        "system//initramfs/genkernel:genkernel",
-        "system//initramfs/initramfs-tools:initramfs-tools",
+        "//packages/linux/system/initramfs/dracut:dracut",
+        "//packages/linux/system/initramfs/mkinitcpio:mkinitcpio",
+        "//packages/linux/system/initramfs/genkernel:genkernel",
+        "//packages/linux/system/initramfs/initramfs-tools:initramfs-tools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -25,8 +25,8 @@ filegroup(
 filegroup(
     name = "modern-initramfs",
     srcs = [
-        "system//initramfs/dracut:dracut",
-        "system//initramfs/mkinitcpio:mkinitcpio",
+        "//packages/linux/system/initramfs/dracut:dracut",
+        "//packages/linux/system/initramfs/mkinitcpio:mkinitcpio",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,9 +36,9 @@ filegroup(
 filegroup(
     name = "dracut-stack",
     srcs = [
-        "system//initramfs/dracut:dracut",
-        "system//libs/kmod:kmod",
-        "system//init/eudev:eudev",
+        "//packages/linux/system/initramfs/dracut:dracut",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -48,9 +48,9 @@ filegroup(
 filegroup(
     name = "mkinitcpio-stack",
     srcs = [
-        "system//initramfs/mkinitcpio:mkinitcpio",
-        "system//libs/kmod:kmod",
-        "system//init/eudev:eudev",
+        "//packages/linux/system/initramfs/mkinitcpio:mkinitcpio",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -60,9 +60,9 @@ filegroup(
 filegroup(
     name = "genkernel-stack",
     srcs = [
-        "system//initramfs/genkernel:genkernel",
-        "system//libs/kmod:kmod",
-        "system//init/eudev:eudev",
+        "//packages/linux/system/initramfs/genkernel:genkernel",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -72,9 +72,9 @@ filegroup(
 filegroup(
     name = "initramfs-tools-stack",
     srcs = [
-        "system//initramfs/initramfs-tools:initramfs-tools",
-        "system//libs/kmod:kmod",
-        "system//init/eudev:eudev",
+        "//packages/linux/system/initramfs/initramfs-tools:initramfs-tools",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -84,11 +84,11 @@ filegroup(
 filegroup(
     name = "initramfs-base-deps",
     srcs = [
-        "system//libs/kmod:kmod",
-        "system//init/eudev:eudev",
-        "core//cpio:cpio",
-        "core//util-linux:util-linux",
-        "system//apps/coreutils:coreutils",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/system/init/eudev:eudev",
+        "//packages/linux/core/cpio:cpio",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/apps/coreutils:coreutils",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -99,17 +99,17 @@ filegroup(
     name = "full-boot-stack",
     srcs = [
         # Initramfs generator (pick one)
-        "system//initramfs/dracut:dracut",
+        "//packages/linux/system/initramfs/dracut:dracut",
         # Kernel module management
-        "system//libs/kmod:kmod",
+        "//packages/linux/system/libs/kmod:kmod",
         # Device management
-        "system//init/eudev:eudev",
+        "//packages/linux/system/init/eudev:eudev",
         # Filesystem tools
-        "system//filesystem/management/lvm2:lvm2",
-        "system//filesystem/management/mdadm:mdadm",
-        "system//filesystem/management/cryptsetup:cryptsetup",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/filesystem/management/mdadm:mdadm",
+        "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         # Bootloader
-        "boot//grub:grub",
+        "//packages/linux/boot/grub:grub",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -119,10 +119,10 @@ filegroup(
 filegroup(
     name = "minimal-boot-stack",
     srcs = [
-        "system//initramfs/dracut:dracut",
-        "system//libs/kmod:kmod",
-        "system//init/eudev:eudev",
-        "boot//grub:grub",
+        "//packages/linux/system/initramfs/dracut:dracut",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/system/init/eudev:eudev",
+        "//packages/linux/boot/grub:grub",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

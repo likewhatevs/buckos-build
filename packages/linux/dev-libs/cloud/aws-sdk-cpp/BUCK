@@ -13,9 +13,9 @@ cmake_package(
     iuse = ["s3", "dynamodb", "lambda", "sqs", "sns"],
     use_defaults = ["s3"],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "network//curl:curl",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/core/zlib:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

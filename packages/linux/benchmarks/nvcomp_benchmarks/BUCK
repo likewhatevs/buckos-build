@@ -10,9 +10,9 @@ cmake_package(
         "-DCMAKE_CUDA_ARCHITECTURES=70;75;80;86;89;90",
     ],
     deps = [
-        "dev-libs//cuda/nvcomp:nvcomp",
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
-        "dev-libs//compression/zlib:zlib",
+        "//packages/linux/dev-libs/cuda/nvcomp:nvcomp",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/dev-libs/compression/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

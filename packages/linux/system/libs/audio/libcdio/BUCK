@@ -39,7 +39,7 @@ autotools_package(
         "--enable-cddb",
     ],
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )
@@ -66,7 +66,7 @@ autotools_package(
         "--enable-shared",
     ],
     deps = [
-        "system//libs/audio/libcdio:libcdio",
+        "//packages/linux/system/libs/audio/libcdio:libcdio",
     ],
     visibility = ["PUBLIC"],
 )

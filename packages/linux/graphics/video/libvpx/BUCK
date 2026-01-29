@@ -72,7 +72,7 @@ DESTDIR=$OUT make install
 """,
     deps = [],
     bdepend = [
-        "dev-tools//assemblers/nasm:nasm",
+        "//packages/linux/dev-tools/assemblers/nasm:nasm",
     ],
     visibility = ["PUBLIC"],
 )

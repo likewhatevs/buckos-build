@@ -41,9 +41,9 @@ autotools_package(
 make DESTDIR=$OUT install
 """,
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/data/json-c:json-c",
-        "graphics//utilities/gegl:gegl",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/data/json-c:json-c",
+        "//packages/linux/graphics/utilities/gegl:gegl",
     ],
     bdepend = [
     ],

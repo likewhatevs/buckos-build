@@ -22,12 +22,12 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":datetime-locale",
         ":datetime-timezone",
-        "lang//perl/core:params-util",
-        "lang//perl/core:try-tiny",
-        "lang//perl/core:namespace-clean",
+        "//packages/linux/lang/perl/core:params-util",
+        "//packages/linux/lang/perl/core:try-tiny",
+        "//packages/linux/lang/perl/core:namespace-clean",
     ],
     visibility = ["PUBLIC"],
 )
@@ -53,9 +53,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:params-util",
-        "lang//perl/core:namespace-clean",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:params-util",
+        "//packages/linux/lang/perl/core:namespace-clean",
     ],
     visibility = ["PUBLIC"],
 )
@@ -81,12 +81,12 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:params-util",
-        "lang//perl/core:try-tiny",
-        "lang//perl/core:module-runtime",
-        "lang//perl/core:namespace-clean",
-        "lang//perl/oop:class-load",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:params-util",
+        "//packages/linux/lang/perl/core:try-tiny",
+        "//packages/linux/lang/perl/core:module-runtime",
+        "//packages/linux/lang/perl/core:namespace-clean",
+        "//packages/linux/lang/perl/oop:class-load",
     ],
     visibility = ["PUBLIC"],
 )
@@ -112,7 +112,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":datetime",
         ":datetime-locale",
         ":datetime-timezone",
@@ -141,7 +141,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":datetime",
         ":datetime-format-builder",
     ],
@@ -169,7 +169,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":datetime",
         ":datetime-format-strptime",
     ],
@@ -197,7 +197,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -223,7 +223,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -249,7 +249,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -275,7 +275,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

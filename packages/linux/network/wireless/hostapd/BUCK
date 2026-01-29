@@ -27,7 +27,7 @@ autotools_package(
     use_defaults = ["ssl", "wps", "ipv6", "acs", "sae", "owe", "dpp", "fils"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     use_configure = {
@@ -104,7 +104,7 @@ install -m 644 hostapd_cli.1 "$DESTDIR/usr/share/man/man1/" 2>/dev/null || true
 """,
 
     deps = [
-        "core//libnl:libnl",
+        "//packages/linux/core/libnl:libnl",
     ],
 
     description = "IEEE 802.11 AP, IEEE 802.1X/WPA/WPA2/EAP/RADIUS Authenticator",

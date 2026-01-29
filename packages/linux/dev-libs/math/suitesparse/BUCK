@@ -25,9 +25,9 @@ cmake_package(
     homepage = "https://people.engr.tamu.edu/davis/suitesparse.html",
     license = "LGPL-2.1-or-later AND BSD-3-Clause AND Apache-2.0",
     deps = [
-        "dev-libs//math/lapack:lapack",
-        "dev-libs//math/openblas:openblas",
-        "dev-libs//math/metis:metis",
+        "//packages/linux/dev-libs/math/lapack:lapack",
+        "//packages/linux/dev-libs/math/openblas:openblas",
+        "//packages/linux/dev-libs/math/metis:metis",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

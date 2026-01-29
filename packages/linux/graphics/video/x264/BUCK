@@ -53,7 +53,7 @@ DESTDIR=$OUT make install
 """,
     deps = [],
     bdepend = [
-        # "lang//nasm:nasm",  # TODO: not packaged yet, using --disable-asm
+        # "//packages/linux/lang/nasm:nasm",  # TODO: not packaged yet, using --disable-asm
     ],
     visibility = ["PUBLIC"],
 )

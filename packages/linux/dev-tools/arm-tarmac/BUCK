@@ -56,7 +56,7 @@ fi
 """,
 
     deps = [
-        "dev-tools//build-systems/cmake:cmake",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
     ],
     visibility = ["PUBLIC"],
 )

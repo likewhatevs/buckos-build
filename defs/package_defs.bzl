@@ -130,6 +130,20 @@ def _get_download_proxy():
     """
     return read_config("download", "proxy", "")
 
+def _get_vendor_prefer():
+    """
+    Check if vendored sources should be preferred over downloads.
+    Reads from vendor.prefer_vendored config in .buckconfig.
+    """
+    return read_config("vendor", "prefer_vendored", "true") == "true"
+
+def _get_vendor_require():
+    """
+    Check if vendored sources are required (strict offline mode).
+    Reads from vendor.require_vendored config in .buckconfig.
+    """
+    return read_config("vendor", "require_vendored", "false") == "true"
+
 def _get_download_max_concurrent():
     """
     Get the maximum concurrent downloads setting.
@@ -222,20 +236,72 @@ def _collect_dep_dirs(deps: list) -> list:
 # -----------------------------------------------------------------------------
 
 def _http_file_with_proxy_impl(ctx: AnalysisContext) -> list[Provider]:
-    """Download a file using curl with proxy support."""
+    """Download a file using curl with proxy support, checking for vendored sources first."""
     out_file = ctx.actions.declare_output(ctx.attrs.out)
 
     # Build curl command with proxy
     proxy = ctx.attrs.proxy
     proxy_args = "--proxy {}".format(proxy) if proxy else ""
 
-    # Create download script inline
+    # Calculate vendor path - .vendor subdirectory within package directory
+    # ctx.label.package gives us the package path (e.g., "packages/linux/core/bash")
+    vendor_path = "{}/.vendor/{}".format(ctx.label.package, ctx.attrs.out)
+
+    # Get vendor configuration
+    prefer_vendored = "true" if _get_vendor_prefer() else "false"
+    require_vendored = "true" if _get_vendor_require() else "false"
+
+    # Create download script that checks for vendored source first
     script_content = """#!/bin/bash
 set -e
 OUT_FILE="$1"
 URL="$2"
 EXPECTED_SHA256="$3"
 PROXY_ARGS="$4"
+VENDOR_PATH="$5"
+PREFER_VENDORED="$6"
+REQUIRE_VENDORED="$7"
+
+# Function to verify SHA256
+verify_sha256() {
+    local file="$1"
+    local expected="$2"
+    if [ -n "$expected" ]; then
+        local actual=$(sha256sum "$file" | cut -d' ' -f1)
+        if [ "$actual" != "$expected" ]; then
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Check for vendored source if prefer_vendored is enabled
+if [ "$PREFER_VENDORED" = "true" ] && [ -n "$VENDOR_PATH" ]; then
+    # Find the repo root (walk up until we find .buckconfig)
+    REPO_ROOT="$PWD"
+    while [ ! -f "$REPO_ROOT/.buckconfig" ] && [ "$REPO_ROOT" != "/" ]; do
+        REPO_ROOT="$(dirname "$REPO_ROOT")"
+    done
+
+    VENDORED_FILE="$REPO_ROOT/$VENDOR_PATH"
+    if [ -f "$VENDORED_FILE" ]; then
+        echo "Found vendored source: $VENDORED_FILE"
+        if verify_sha256 "$VENDORED_FILE" "$EXPECTED_SHA256"; then
+            echo "SHA256 verified, using vendored source"
+            cp "$VENDORED_FILE" "$OUT_FILE"
+            exit 0
+        else
+            echo "WARNING: Vendored source checksum mismatch, falling back to download"
+        fi
+    fi
+fi
+
+# If require_vendored is set, fail if we get here
+if [ "$REQUIRE_VENDORED" = "true" ]; then
+    echo "ERROR: Vendored source required but not found or invalid: $VENDOR_PATH" >&2
+    echo "Run: ./tools/vendor-sources --target <target> to vendor sources" >&2
+    exit 1
+fi
 
 # Download with curl
 curl -fsSL --retry 3 --retry-delay 2 $PROXY_ARGS -o "$OUT_FILE" "$URL"
@@ -263,13 +329,16 @@ fi
         ctx.attrs.urls[0],  # Use first URL
         ctx.attrs.sha256,
         proxy_args,
+        vendor_path,
+        prefer_vendored,
+        require_vendored,
     ])
 
     ctx.actions.run(
         cmd,
         category = "http_file",
         identifier = ctx.attrs.name,
-        local_only = True,  # Network access needed
+        local_only = True,  # Network access needed (unless vendored)
         env = _get_download_env(),
     )
 
@@ -286,25 +355,94 @@ _http_file_with_proxy = rule(
 )
 
 def _download_signature_impl(ctx: AnalysisContext) -> list[Provider]:
-    """Download GPG signature, trying multiple extensions."""
+    """Download GPG signature, trying multiple extensions, checking for vendored signature first."""
     out_file = ctx.actions.declare_output(ctx.attrs.out)
 
-    script = ctx.attrs._download_script[DefaultInfo].default_outputs[0]
+    # Calculate vendor path for signature - .vendor subdirectory within package directory
+    vendor_path = "{}/.vendor/{}".format(ctx.label.package, ctx.attrs.out)
+
+    # Get vendor configuration
+    prefer_vendored = "true" if _get_vendor_prefer() else "false"
+    require_vendored = "true" if _get_vendor_require() else "false"
+
+    # Create a wrapper script that checks vendored first, then falls back to download script
+    wrapper_content = """#!/bin/bash
+set -e
+OUT_FILE="$1"
+BASE_URL="$2"
+EXPECTED_SHA256="$3"
+PROXY="$4"
+VENDOR_PATH="$5"
+PREFER_VENDORED="$6"
+REQUIRE_VENDORED="$7"
+DOWNLOAD_SCRIPT="$8"
+
+# Function to verify SHA256
+verify_sha256() {
+    local file="$1"
+    local expected="$2"
+    if [ -n "$expected" ]; then
+        local actual=$(sha256sum "$file" | cut -d' ' -f1)
+        if [ "$actual" != "$expected" ]; then
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Check for vendored signature if prefer_vendored is enabled
+if [ "$PREFER_VENDORED" = "true" ] && [ -n "$VENDOR_PATH" ]; then
+    # Find the repo root (walk up until we find .buckconfig)
+    REPO_ROOT="$PWD"
+    while [ ! -f "$REPO_ROOT/.buckconfig" ] && [ "$REPO_ROOT" != "/" ]; do
+        REPO_ROOT="$(dirname "$REPO_ROOT")"
+    done
+
+    VENDORED_FILE="$REPO_ROOT/$VENDOR_PATH"
+    if [ -f "$VENDORED_FILE" ]; then
+        echo "Found vendored signature: $VENDORED_FILE"
+        if verify_sha256 "$VENDORED_FILE" "$EXPECTED_SHA256"; then
+            echo "SHA256 verified, using vendored signature"
+            cp "$VENDORED_FILE" "$OUT_FILE"
+            exit 0
+        else
+            echo "WARNING: Vendored signature checksum mismatch, falling back to download"
+        fi
+    fi
+fi
+
+# If require_vendored is set, fail if we get here
+if [ "$REQUIRE_VENDORED" = "true" ]; then
+    echo "ERROR: Vendored signature required but not found or invalid: $VENDOR_PATH" >&2
+    echo "Run: ./tools/vendor-sources --target <target> to vendor sources" >&2
+    exit 1
+fi
+
+# Fall back to original download script
+exec bash "$DOWNLOAD_SCRIPT" "$OUT_FILE" "$BASE_URL" "$EXPECTED_SHA256" "$PROXY"
+"""
+
+    wrapper_script = ctx.actions.write("download_sig_wrapper.sh", wrapper_content, is_executable = True)
+    download_script = ctx.attrs._download_script[DefaultInfo].default_outputs[0]
 
     cmd = cmd_args([
         "bash",
-        script,
+        wrapper_script,
         out_file.as_output(),
         ctx.attrs.src_uri,
         ctx.attrs.sha256,
         ctx.attrs.proxy,
+        vendor_path,
+        prefer_vendored,
+        require_vendored,
+        download_script,
     ])
 
     ctx.actions.run(
         cmd,
         category = "download_signature",
         identifier = ctx.attrs.name,
-        local_only = True,  # Network access needed
+        local_only = True,  # Network access needed (unless vendored)
         env = _get_download_env(),
     )
 
@@ -3400,8 +3538,9 @@ fi
 def cargo_src_compile(args: list[str] = []) -> str:
     """Build Cargo/Rust project."""
     args_str = " ".join(args) if args else ""
+    # Unset CARGO_BUILD_RUSTC_WRAPPER to avoid sccache path length issues in buck-out
     return '''
-cargo build --release \\
+CARGO_BUILD_RUSTC_WRAPPER="" cargo build --release \\
     --jobs ${{MAKEOPTS:-$(nproc)}} \\
     {}
 '''.format(args_str)
@@ -4721,7 +4860,7 @@ def cmake_package(
                 "doc": "BUILD_DOCUMENTATION",
             },
             use_deps = {
-                "ssl": ["dev-libs//openssl"],
+                "ssl": ["//packages/linux/dev-libs/openssl"],
             },
         )
     """
@@ -4934,7 +5073,7 @@ def meson_package(
                 "-xwayland": "-Dxwayland=disabled",
             },
             use_deps = {
-                "ssl": ["dev-libs//openssl"],
+                "ssl": ["//packages/linux/dev-libs/openssl"],
             },
         )
     """
@@ -5116,8 +5255,8 @@ def autotools_package(
                 "-ipv6": "--disable-ipv6",
             },
             use_deps = {
-                "ssl": ["dev-libs//openssl"],
-                "http2": ["network//nghttp2"],
+                "ssl": ["//packages/linux/dev-libs/openssl"],
+                "http2": ["//packages/linux/network/nghttp2"],
             },
         )
     """
@@ -5697,8 +5836,8 @@ def rust_vendor(
         rust_vendor(
             name = "ripgrep-deps",
             deps = [
-                "dev-libs//rust/serde:serde",
-                "dev-libs//rust/regex:regex",
+                "//packages/linux/dev-libs/rust/serde:serde",
+                "//packages/linux/dev-libs/rust/regex:regex",
             ],
         )
     """
@@ -5947,6 +6086,8 @@ def cargo_package(
         deps: list[str] = [],
         vendor_deps: str | None = None,
         cargo_lock_deps: str | None = None,
+        vendor_tarball_uri: str | None = None,
+        vendor_tarball_sha256: str | None = None,
         maintainers: list[str] = [],
         patches: list[str] = [],
         # USE flag support
@@ -5976,6 +6117,9 @@ def cargo_package(
         deps: Base dependencies (always applied)
         vendor_deps: Optional rust_vendor target for pre-downloaded vendor/ directory
         cargo_lock_deps: Optional cargo_lock_deps target for Cargo.lock-based vendor (Gentoo-style)
+        vendor_tarball_uri: URL to pre-made vendor tarball with all cargo dependencies
+                           (use ./tools/cargo-vendor to generate, or use project-provided tarball)
+        vendor_tarball_sha256: SHA256 checksum of vendor tarball
         maintainers: Package maintainers
         iuse: List of USE flags this package supports
         use_defaults: Default enabled USE flags
@@ -6002,7 +6146,7 @@ def cargo_package(
                 "simd": "simd-accel",
             },
             use_deps = {
-                "pcre2": ["dev-libs//pcre2"],
+                "pcre2": ["//packages/linux/dev-libs/pcre2"],
             },
             cargo_lock_deps = ":ripgrep-deps",  # Gentoo-style Cargo.lock deps
         )
@@ -6022,6 +6166,20 @@ def cargo_package(
         gpg_keyring = gpg_keyring,
         exclude_patterns = exclude_patterns,
     )
+
+    # Download vendor tarball if provided (for offline cargo builds with git deps)
+    vendor_tarball_target = None
+    if vendor_tarball_uri and vendor_tarball_sha256:
+        vendor_tarball_name = name + "-vendor"
+        download_source(
+            name = vendor_tarball_name,
+            src_uri = vendor_tarball_uri,
+            sha256 = vendor_tarball_sha256,
+            signature_required = False,
+            # Vendor tarballs have vendor/ and .cargo/ at root level, no wrapper directory
+            strip_components = 0,
+        )
+        vendor_tarball_target = ":" + vendor_tarball_name
 
     # Calculate effective USE flags if USE flags are specified
     effective_use = []
@@ -6072,11 +6230,13 @@ def cargo_package(
         if rust_toolchain_dep:
             bdepend.append(rust_toolchain_dep)
 
-    # Handle vendor_deps and cargo_lock_deps for offline builds
+    # Handle vendor_deps, cargo_lock_deps, and vendor_tarball for offline builds
     if vendor_deps:
         bdepend.append(vendor_deps)
     if cargo_lock_deps:
         bdepend.append(cargo_lock_deps)
+    if vendor_tarball_target:
+        bdepend.append(vendor_tarball_target)
 
     # Filter out rdepend from kwargs since we pass it explicitly as deps
     kwargs.pop("rdepend", None)
@@ -6100,6 +6260,32 @@ for vendor_src in $BDEPEND_DIRS; do
         echo "Copied Cargo config from $vendor_src"
     fi
 done
+"""
+
+    # Handle vendor tarball extraction (pre-made vendor directory with all deps including git)
+    if vendor_tarball_target:
+        vendor_src_prepare += """
+# Copy pre-extracted vendor directory for offline cargo build
+for vendor_src in $BDEPEND_DIRS; do
+    # Look for vendor/ directory (extracted from vendor tarball)
+    if [ -d "$vendor_src/vendor" ]; then
+        echo "Found vendored crates in $vendor_src/vendor"
+        cp -r "$vendor_src/vendor" . 2>/dev/null || true
+    fi
+    # Look for .cargo/config.toml
+    if [ -f "$vendor_src/.cargo/config.toml" ]; then
+        echo "Found cargo vendor config in $vendor_src/.cargo"
+        mkdir -p .cargo
+        cp "$vendor_src/.cargo/config.toml" .cargo/ 2>/dev/null || true
+    elif [ -f "$vendor_src/config.toml" ]; then
+        echo "Found cargo vendor config in $vendor_src"
+        mkdir -p .cargo
+        cp "$vendor_src/config.toml" .cargo/ 2>/dev/null || true
+    fi
+done
+if [ -d vendor ]; then
+    echo "Vendor directory ready for offline build"
+fi
 """
 
     base_src_prepare = custom_src_prepare if custom_src_prepare else eclass_config.get("src_prepare", "")
@@ -6295,8 +6481,8 @@ def go_vendor(
         go_vendor(
             name = "trivy-deps",
             deps = [
-                "dev-libs//go/cobra:cobra",
-                "dev-libs//go/zap:zap",
+                "//packages/linux/dev-libs/go/cobra:cobra",
+                "//packages/linux/dev-libs/go/zap:zap",
             ],
         )
     """
@@ -6587,7 +6773,7 @@ def go_package(
                 "fts5": "fts5",
             },
             use_deps = {
-                "icu": ["dev-libs//icu"],
+                "icu": ["//packages/linux/dev-libs/icu"],
             },
         )
     """
@@ -6794,7 +6980,7 @@ def perl_package(
             version = "2.46",
             src_uri = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.46.tar.gz",
             sha256 = "...",
-            deps = ["dev-libs//expat:expat"],
+            deps = ["//packages/linux/dev-libs/expat:expat"],
         )
     """
     # Apply platform-specific constraints
@@ -6899,7 +7085,7 @@ def ruby_package(
             version = "2.0.18",
             src_uri = "https://github.com/asciidoctor/asciidoctor/archive/v2.0.18.tar.gz",
             sha256 = "...",
-            deps = ["lang//ruby:ruby"],
+            deps = ["//packages/linux/lang/ruby:ruby"],
         )
     """
     # Apply platform-specific constraints
@@ -7019,7 +7205,7 @@ def font_package(
             src_uri = "https://github.com/notofonts/noto-fonts/archive/v2023.05.tar.gz",
             sha256 = "...",
             font_types = ["ttf", "otf"],
-            deps = ["fonts//libraries/fontconfig:fontconfig"],
+            deps = ["//packages/linux/fonts/libraries/fontconfig:fontconfig"],
         )
 
         # With custom suffix patterns:
@@ -7462,8 +7648,8 @@ def python_vendor(
         python_vendor(
             name = "app-deps",
             deps = [
-                "dev-libs//python/requests:requests",
-                "dev-libs//python/click:click",
+                "//packages/linux/dev-libs/python/requests:requests",
+                "//packages/linux/dev-libs/python/click:click",
             ],
         )
     """
@@ -7790,7 +7976,7 @@ def python_package(
                 "security": "security",
             },
             use_deps = {
-                "socks": ["lang//python/pysocks"],
+                "socks": ["//packages/linux/lang/python/pysocks"],
             },
             pypi_deps = ":requests-deps",  # Pre-downloaded dependencies
         )
@@ -8087,8 +8273,8 @@ def ruby_vendor(
         ruby_vendor(
             name = "app-deps",
             deps = [
-                "dev-libs//ruby/nokogiri:nokogiri",
-                "dev-libs//ruby/rack:rack",
+                "//packages/linux/dev-libs/ruby/nokogiri:nokogiri",
+                "//packages/linux/dev-libs/ruby/rack:rack",
             ],
         )
     """

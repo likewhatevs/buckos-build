@@ -9,7 +9,7 @@ autotools_package(
     homepage = "https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/fsverity-utils.git",
     license = "MIT",
     deps = [
-        "dev-libs//crypto/openssl:openssl",
+        "//packages/linux/dev-libs/crypto/openssl:openssl",
     ],
     pre_configure = """
 # fsverity-utils uses a plain Makefile, skip configure

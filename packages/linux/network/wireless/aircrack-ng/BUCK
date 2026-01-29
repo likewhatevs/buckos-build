@@ -9,10 +9,10 @@ autotools_package(
     signature_required = False,
 
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
 
     iuse = [
@@ -27,8 +27,8 @@ autotools_package(
     use_defaults = ["ssl", "sqlite", "experimental"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "sqlite": ["system//libs/database/sqlite:sqlite"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
     },
 
     use_configure = {
@@ -58,8 +58,8 @@ autoreconf -fiv
     ],
 
     deps = [
-        "core//zlib:zlib",
-        "network//libpcap:libpcap",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/network/libpcap:libpcap",
     ],
 
     description = "WiFi security auditing tools suite",

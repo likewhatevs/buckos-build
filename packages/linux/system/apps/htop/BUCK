@@ -30,8 +30,8 @@ autotools_package(
     ],
     use_defaults = ["unicode"],
     use_deps = {
-        "hwloc": ["system//hardware/hwloc:hwloc"],
-        "caps": ["system//libs/ipc/libcap:libcap"],
+        "hwloc": ["//packages/linux/system/hardware/hwloc:hwloc"],
+        "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
     },
     use_configure = {
         "-caps": "--disable-capabilities",
@@ -62,7 +62,7 @@ autotools_package(
         "--sysconfdir=/etc",
     ],
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

@@ -13,7 +13,7 @@ cmake_package(
     iuse = ["blas", "cuda"],
     use_defaults = ["blas"],
     deps = [
-        "dev-libs//eigen:eigen",
+        "//packages/linux/dev-libs/eigen:eigen",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -33,7 +33,7 @@ cmake_package(
         "-cuda": "-DBASPACHO_USE_CUBLAS=OFF",
     },
     use_deps = {
-        "blas": ["dev-libs//math/openblas:openblas"],
+        "blas": ["//packages/linux/dev-libs/math/openblas:openblas"],
     },
     visibility = ["PUBLIC"],
 )

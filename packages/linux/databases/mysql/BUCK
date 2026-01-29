@@ -31,9 +31,9 @@ cmake_package(
     ],
     use_defaults = ["server"],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "core//zlib:zlib",
-        "core//ncurses:ncurses",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

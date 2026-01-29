@@ -44,7 +44,7 @@ autotools_package(
         "--enable-static",
     ],
     deps = [
-        "system//libs/libunwind:libunwind",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/libunwind:libunwind",
+        "//packages/linux/core/zlib:zlib",
     ],
 )

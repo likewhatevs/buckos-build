@@ -24,8 +24,8 @@ autotools_package(
     ],
     use_defaults = [],
     use_deps = {
-        "pam": ["system//security/auth/pam:pam"],
-        "selinux": ["system//security/selinux:selinux"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
     },
     use_configure = {
         "-debug": "--disable-debug",
@@ -47,7 +47,7 @@ autotools_package(
     ],
     env = {"CFLAGS": "-std=gnu17 -O2"},
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

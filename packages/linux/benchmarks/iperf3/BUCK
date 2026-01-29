@@ -22,7 +22,7 @@ autotools_package(
     # Fix GCC strict function pointer type checking
     env = {"CFLAGS": "-O2 -Wno-incompatible-pointer-types"},
     use_deps = {
-        "sctp": ["network//lksctp-tools:lksctp-tools"],
+        "sctp": ["//packages/linux/network/lksctp-tools:lksctp-tools"],
     },
     configure_args = [
         "--disable-static",

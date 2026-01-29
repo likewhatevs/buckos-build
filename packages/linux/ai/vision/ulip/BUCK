@@ -9,12 +9,12 @@ python_package(
     homepage = "https://github.com/salesforce/ulip",
     license = "BSD-3-Clause",
     deps = [
-        "lang//python:python",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//ml-frameworks/torchvision:torchvision",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/h5py:h5py",
-        "graphics//3d/open3d:open3d",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/h5py:h5py",
+        "//packages/linux/graphics/3d/open3d:open3d",
     ],
     visibility = ["PUBLIC"],
 )

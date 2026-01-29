@@ -35,11 +35,11 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr \\
     -DGENERATE_DOC=OFF
 """,
     bdepend = [
-        "graphics//imagemagick:imagemagick",
-        "dev-tools//build-systems/cmake:cmake",
+        "//packages/linux/graphics/imagemagick:imagemagick",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
     ],
     deps = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )
@@ -49,8 +49,8 @@ filegroup(
     name = "awesome-desktop",
     srcs = [
         ":awesome",
-        "desktop//lightdm:lightdm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/lightdm:lightdm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

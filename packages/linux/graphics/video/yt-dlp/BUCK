@@ -20,8 +20,8 @@ python_package(
     homepage = "https://github.com/yt-dlp/yt-dlp",
     license = "Unlicense",
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "lang//python:python",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/lang/python:python",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

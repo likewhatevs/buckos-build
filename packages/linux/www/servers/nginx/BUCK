@@ -31,9 +31,9 @@ ebuild_package(
     homepage = "https://nginx.org/",
     license = "BSD-2-Clause",
     rdepend = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     # nginx has a custom configure script (not autotools)
     src_configure = """

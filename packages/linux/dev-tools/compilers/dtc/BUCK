@@ -31,8 +31,8 @@ meson_package(
         "-Dtests=disabled",
     ],
     deps = [
-        "dev-tools//dev-utils/flex:flex",
-        "dev-tools//dev-utils/bison:bison",
+        "//packages/linux/dev-tools/dev-utils/flex:flex",
+        "//packages/linux/dev-tools/dev-utils/bison:bison",
     ],
     visibility = ["PUBLIC"],
 )

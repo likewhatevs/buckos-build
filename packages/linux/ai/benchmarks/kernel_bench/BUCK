@@ -9,9 +9,9 @@ python_package(
     homepage = "https://github.com/scalingintelligence/kernelbench",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
     visibility = ["PUBLIC"],
 )

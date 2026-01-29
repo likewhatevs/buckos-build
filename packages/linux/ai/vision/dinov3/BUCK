@@ -9,9 +9,9 @@ python_package(
     homepage = "https://github.com/facebookresearch/dinov3",
     license = "DINOv3 License",
     deps = [
-        "lang//python:python",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//ml-frameworks/torchvision:torchvision",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
     ],
     visibility = ["PUBLIC"],
 )

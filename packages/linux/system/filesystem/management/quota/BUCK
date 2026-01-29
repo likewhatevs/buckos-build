@@ -38,10 +38,10 @@ autotools_package(
     homepage = "https://github.com/sailfishos-mirror/quota",
     license = "GPL-2.0",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -50,7 +50,7 @@ autoreconf -fi
         "--disable-ldapmail",
     ],
     deps = [
-        "core//util-linux:util-linux",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )

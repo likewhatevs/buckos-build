@@ -11,7 +11,7 @@ go_package(
     packages = ["./cmd/defsec"],
     bins = ["defsec"],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

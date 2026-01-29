@@ -23,7 +23,7 @@ ebuild_package(
         cp -r "$S/install"/* "$DESTDIR/usr/lib/python3.12/site-packages/"
     """,
     bdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

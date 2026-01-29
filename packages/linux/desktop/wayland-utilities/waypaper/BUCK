@@ -10,8 +10,8 @@ python_package(
     homepage = "https://github.com/anufrievroman/waypaper",
     license = "GPL-3.0",
     deps = [
-        "core//libffi:libffi",
-        "desktop//wayland-utilities/swaybg:swaybg",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/desktop/wayland-utilities/swaybg:swaybg",
     ],
     visibility = ["PUBLIC"],
 )

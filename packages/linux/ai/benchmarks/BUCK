@@ -1,10 +1,10 @@
 filegroup(
     name = "benchmarks",
     srcs = [
-        "ai//benchmarks/appworld:appworld",
-        "ai//benchmarks/chakra:chakra",
-        "ai//benchmarks/mlcommons:mlcommons-loadgen",
-        "ai//benchmarks/mlcommons:mlcommons-logging",
+        "//packages/linux/ai/benchmarks/appworld:appworld",
+        "//packages/linux/ai/benchmarks/chakra:chakra",
+        "//packages/linux/ai/benchmarks/mlcommons:mlcommons-loadgen",
+        "//packages/linux/ai/benchmarks/mlcommons:mlcommons-logging",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

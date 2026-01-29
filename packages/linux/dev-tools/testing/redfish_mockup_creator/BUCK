@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://github.com/DMTF/Redfish-Mockup-Creator/archive/refs/tags/1.2.0.tar.gz",
     sha256 = "4c561a3079651633674eacccd9ae2bb057f88c7aa09edb4ef160c9ac366117fb",
     deps = [
-        "dev-libs//python/redfish:redfish",
+        "//packages/linux/dev-libs/python/redfish:redfish",
     ],
 )

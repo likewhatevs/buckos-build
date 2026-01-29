@@ -18,8 +18,8 @@ cmake_package(
     homepage = "https://logging.apache.org/log4cxx/",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//misc/apr:apr",
-        "dev-libs//misc/apr-util:apr-util",
+        "//packages/linux/dev-libs/misc/apr:apr",
+        "//packages/linux/dev-libs/misc/apr-util:apr-util",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

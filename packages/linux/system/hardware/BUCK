@@ -5,8 +5,8 @@
 filegroup(
     name = "essential",
     srcs = [
-        "system//hardware/usbutils:usbutils",
-        "system//hardware/dmidecode:dmidecode",
+        "//packages/linux/system/hardware/usbutils:usbutils",
+        "//packages/linux/system/hardware/dmidecode:dmidecode",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -16,10 +16,10 @@ filegroup(
 filegroup(
     name = "all-hardware",
     srcs = [
-        "system//hardware/usbutils:usbutils",
-        "system//hardware/lshw:lshw",
-        "system//hardware/dmidecode:dmidecode",
-        "system//hardware/hwinfo:hwinfo",
+        "//packages/linux/system/hardware/usbutils:usbutils",
+        "//packages/linux/system/hardware/lshw:lshw",
+        "//packages/linux/system/hardware/dmidecode:dmidecode",
+        "//packages/linux/system/hardware/hwinfo:hwinfo",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -38,7 +38,7 @@ filegroup(
 filegroup(
     name = "usb",
     srcs = [
-        "system//hardware/usbutils:usbutils",
+        "//packages/linux/system/hardware/usbutils:usbutils",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -48,9 +48,9 @@ filegroup(
 filegroup(
     name = "sysinfo",
     srcs = [
-        "system//hardware/dmidecode:dmidecode",
-        "system//hardware/lshw:lshw",
-        "system//hardware/hwinfo:hwinfo",
+        "//packages/linux/system/hardware/dmidecode:dmidecode",
+        "//packages/linux/system/hardware/lshw:lshw",
+        "//packages/linux/system/hardware/hwinfo:hwinfo",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

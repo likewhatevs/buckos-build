@@ -13,11 +13,11 @@ cmake_package(
     iuse = ["cli", "plugins", "zlib", "zstd", "avx2", "avx512"],
     use_defaults = ["zlib", "zstd", "avx2"],
     deps = [
-        "dev-libs//compression/lz4:lz4",
+        "//packages/linux/dev-libs/compression/lz4:lz4",
     ],
     use_deps = {
-        "zlib": ["core//zlib:zlib"],
-        "zstd": ["dev-libs//compression/zstd:zstd"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "zstd": ["//packages/linux/dev-libs/compression/zstd:zstd"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

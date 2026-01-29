@@ -21,7 +21,7 @@ make_package(
 
     # Conditional dependencies
     use_deps = {
-        "ffi": ["core//libffi:libffi"],
+        "ffi": ["//packages/linux/core/libffi:libffi"],
     },
 
     # Custom build phases for micropython's non-standard build

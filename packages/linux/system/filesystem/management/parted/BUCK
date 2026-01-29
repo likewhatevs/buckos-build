@@ -37,7 +37,7 @@ autotools_package(
         "--without-readline",
     ],
     deps = [
-        "core//util-linux:util-linux",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )

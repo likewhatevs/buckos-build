@@ -50,11 +50,11 @@ echo "LDFLAGS starts with: $(echo "$_NEW_LDFLAGS" | cut -c1-200)"
 make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} LDFLAGS="$_NEW_LDFLAGS"
 """,
     deps = [
-        "system//libs/font/freetype:freetype",
-        "system//libs/data/expat:expat",
-        "core//zlib:zlib",
-        "system//libs/image/libpng:libpng",
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/data/expat:expat",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )

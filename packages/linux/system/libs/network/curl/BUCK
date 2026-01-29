@@ -58,12 +58,12 @@ autotools_package(
     ],
     use_defaults = ["ssl", "zstd", "http2", "ipv6"],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
-        "http2": ["system//libs/network/nghttp2:nghttp2"],
-        "ssh": ["system//libs/network/libssh2:libssh2"],
-        "c-ares": ["system//libs/network/c-ares:c-ares"],
-        "brotli": ["system//libs/compression/brotli:brotli"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
+        "http2": ["//packages/linux/system/libs/network/nghttp2:nghttp2"],
+        "ssh": ["//packages/linux/system/libs/network/libssh2:libssh2"],
+        "c-ares": ["//packages/linux/system/libs/network/c-ares:c-ares"],
+        "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
     use_configure = {
         "-adns": "--disable-adns",
@@ -152,8 +152,8 @@ autotools_package(
         "--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt",
     ],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/network/libpsl:libpsl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/network/libpsl:libpsl",
     ],
     visibility = ["PUBLIC"],
 )

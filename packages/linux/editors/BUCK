@@ -6,43 +6,43 @@
 
 alias(
     name = "vim",
-    actual = "editors//vim:vim",
+    actual = "//packages/linux/editors/vim:vim",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "vim-minimal",
-    actual = "editors//vim-minimal:vim-minimal",
+    actual = "//packages/linux/editors/vim-minimal:vim-minimal",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "neovim",
-    actual = "editors//neovim:neovim",
+    actual = "//packages/linux/editors/neovim:neovim",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "emacs",
-    actual = "editors//emacs:emacs",
+    actual = "//packages/linux/editors/emacs:emacs",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "emacs-nox",
-    actual = "editors//emacs-nox:emacs-nox",
+    actual = "//packages/linux/editors/emacs-nox:emacs-nox",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "vscodium",
-    actual = "editors//vscodium:vscodium",
+    actual = "//packages/linux/editors/vscodium:vscodium",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "ed",
-    actual = "editors//ed:ed",
+    actual = "//packages/linux/editors/ed:ed",
     visibility = ["PUBLIC"],
 )
 
@@ -52,109 +52,109 @@ alias(
 
 alias(
     name = "sed",
-    actual = "editors//sed:sed",
+    actual = "//packages/linux/editors/sed:sed",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "gawk",
-    actual = "editors//gawk:gawk",
+    actual = "//packages/linux/editors/gawk:gawk",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "grep",
-    actual = "editors//grep:grep",
+    actual = "//packages/linux/editors/grep:grep",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "diffutils",
-    actual = "editors//diffutils:diffutils",
+    actual = "//packages/linux/editors/diffutils:diffutils",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "patch",
-    actual = "editors//patch:patch",
+    actual = "//packages/linux/editors/patch:patch",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "jq",
-    actual = "editors//jq:jq",
+    actual = "//packages/linux/editors/jq:jq",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "yq",
-    actual = "editors//yq:yq",
+    actual = "//packages/linux/editors/yq:yq",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "xmlstarlet",
-    actual = "editors//xmlstarlet:xmlstarlet",
+    actual = "//packages/linux/editors/xmlstarlet:xmlstarlet",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "ripgrep",
-    actual = "editors//ripgrep:ripgrep",
+    actual = "//packages/linux/editors/ripgrep:ripgrep",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "bat",
-    actual = "editors//bat:bat",
+    actual = "//packages/linux/editors/bat:bat",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "fzf",
-    actual = "editors//fzf:fzf",
+    actual = "//packages/linux/editors/fzf:fzf",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "pandoc",
-    actual = "editors//pandoc:pandoc",
+    actual = "//packages/linux/editors/pandoc:pandoc",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "entr",
-    actual = "editors//entr:entr",
+    actual = "//packages/linux/editors/entr:entr",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "delta",
-    actual = "editors//delta:delta",
+    actual = "//packages/linux/editors/delta:delta",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "sd",
-    actual = "editors//sd:sd",
+    actual = "//packages/linux/editors/sd:sd",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "hunspell",
-    actual = "editors//hunspell:hunspell",
+    actual = "//packages/linux/editors/hunspell:hunspell",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "aspell",
-    actual = "editors//aspell:aspell",
+    actual = "//packages/linux/editors/aspell:aspell",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "enchant",
-    actual = "editors//enchant:enchant",
+    actual = "//packages/linux/editors/enchant:enchant",
     visibility = ["PUBLIC"],
 )
 

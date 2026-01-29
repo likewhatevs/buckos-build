@@ -54,7 +54,7 @@ cmake_package(
     # Dependencies - CUTLASS requires CUDA toolkit
     # Note: You'll need to add the CUDA toolkit dependency when available
     deps = [
-        # "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        # "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
 
     # CMake configuration
@@ -82,7 +82,7 @@ cmake_package(
     use_deps = {
         "tests": [
             # Google Test dependency if tests are enabled
-            # "dev-libs//testing/googletest:googletest",
+            # "//packages/linux/dev-libs/testing/googletest:googletest",
         ],
     },
 

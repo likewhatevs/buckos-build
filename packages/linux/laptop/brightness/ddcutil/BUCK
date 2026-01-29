@@ -44,8 +44,8 @@ autotools_package(
         "--enable-drm",
     ],
     deps = [
-        "system//libs/libusb:libusb",
-        "desktop//libdrm:libdrm",
+        "//packages/linux/system/libs/libusb:libusb",
+        "//packages/linux/desktop/libdrm:libdrm",
     ],
     visibility = ["PUBLIC"],
 )

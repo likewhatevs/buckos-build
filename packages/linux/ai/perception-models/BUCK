@@ -6,9 +6,9 @@ python_package(
     src_uri = "https://github.com/facebookresearch/perception_models/archive/refs/heads/main.tar.gz",
     sha256 = "d41428146200a19d4411f69a020f524666e8a7f2239cdc1351faa8b9baa70a0b",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/pillow:pillow",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/scikit-learn:scikit-learn",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/pillow:pillow",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
     ],
 )

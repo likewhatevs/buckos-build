@@ -15,7 +15,7 @@ cargo_package(
         "--package=codex-cli",
     ],
     deps = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

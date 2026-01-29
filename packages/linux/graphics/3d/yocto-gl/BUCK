@@ -11,12 +11,12 @@ cmake_package(
     iuse = ["embree", "opengl", "denoise"],
     use_defaults = ["embree"],
     deps = [
-        "dev-libs//misc/stb:stb",
-        "dev-libs//misc/fast_float:fast_float",
-        "dev-libs//json/nlohmann-json:nlohmann-json",
+        "//packages/linux/dev-libs/misc/stb:stb",
+        "//packages/linux/dev-libs/misc/fast_float:fast_float",
+        "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
     ],
     use_deps = {
-        "embree": ["graphics//3d/embree:embree"],
+        "embree": ["//packages/linux/graphics/3d/embree:embree"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

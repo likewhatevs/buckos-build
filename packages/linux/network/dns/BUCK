@@ -11,11 +11,11 @@
 filegroup(
     name = "dns-libraries",
     srcs = [
-        "network//dns/libraries/c-ares:c-ares",
-        "network//dns/libraries/ldns:ldns",
-        "network//dns/libraries/getdns:getdns",
-        "network//dns/libraries/libidn:libidn",
-        "network//dns/libraries/libidn2:libidn2",
+        "//packages/linux/network/dns/libraries/c-ares:c-ares",
+        "//packages/linux/network/dns/libraries/ldns:ldns",
+        "//packages/linux/network/dns/libraries/getdns:getdns",
+        "//packages/linux/network/dns/libraries/libidn:libidn",
+        "//packages/linux/network/dns/libraries/libidn2:libidn2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -28,9 +28,9 @@ filegroup(
 filegroup(
     name = "authoritative-servers",
     srcs = [
-        "network//dns/servers/bind:bind",
-        "network//dns/servers/powerdns:powerdns",
-        "network//dns/servers/nsd:nsd",
+        "//packages/linux/network/dns/servers/bind:bind",
+        "//packages/linux/network/dns/servers/powerdns:powerdns",
+        "//packages/linux/network/dns/servers/nsd:nsd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -43,7 +43,7 @@ filegroup(
 filegroup(
     name = "recursive-resolvers",
     srcs = [
-        "network//dns/servers/pdns-recursor:pdns-recursor",
+        "//packages/linux/network/dns/servers/pdns-recursor:pdns-recursor",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -56,8 +56,8 @@ filegroup(
 filegroup(
     name = "lightweight-servers",
     srcs = [
-        "network//dns/servers/dnsmasq:dnsmasq",
-        "network//dns/servers/coredns:coredns",
+        "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
+        "//packages/linux/network/dns/servers/coredns:coredns",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -70,12 +70,12 @@ filegroup(
 filegroup(
     name = "dns-servers",
     srcs = [
-        "network//dns/servers/bind:bind",
-        "network//dns/servers/dnsmasq:dnsmasq",
-        "network//dns/servers/powerdns:powerdns",
-        "network//dns/servers/coredns:coredns",
-        "network//dns/servers/nsd:nsd",
-        "network//dns/servers/pdns-recursor:pdns-recursor",
+        "//packages/linux/network/dns/servers/bind:bind",
+        "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
+        "//packages/linux/network/dns/servers/powerdns:powerdns",
+        "//packages/linux/network/dns/servers/coredns:coredns",
+        "//packages/linux/network/dns/servers/nsd:nsd",
+        "//packages/linux/network/dns/servers/pdns-recursor:pdns-recursor",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -88,8 +88,8 @@ filegroup(
 filegroup(
     name = "dns-query-tools",
     srcs = [
-        "network//dns/tools/bind-tools:bind-tools",
-        "network//dns/tools/ldns-utils:ldns-utils",
+        "//packages/linux/network/dns/tools/bind-tools:bind-tools",
+        "//packages/linux/network/dns/tools/ldns-utils:ldns-utils",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -102,9 +102,9 @@ filegroup(
 filegroup(
     name = "modern-dns-clients",
     srcs = [
-        "network//dns/tools/doggo:doggo",
-        "network//dns/tools/dog:dog",
-        "network//dns/tools/q:q",
+        "//packages/linux/network/dns/tools/doggo:doggo",
+        "//packages/linux/network/dns/tools/dog:dog",
+        "//packages/linux/network/dns/tools/q:q",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -117,8 +117,8 @@ filegroup(
 filegroup(
     name = "dns-privacy-tools",
     srcs = [
-        "network//dns/tools/dnscrypt-proxy:dnscrypt-proxy",
-        "network//dns/tools/stubby:stubby",
+        "//packages/linux/network/dns/tools/dnscrypt-proxy:dnscrypt-proxy",
+        "//packages/linux/network/dns/tools/stubby:stubby",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -131,13 +131,13 @@ filegroup(
 filegroup(
     name = "dns-tools",
     srcs = [
-        "network//dns/tools/bind-tools:bind-tools",
-        "network//dns/tools/ldns-utils:ldns-utils",
-        "network//dns/tools/doggo:doggo",
-        "network//dns/tools/dnscrypt-proxy:dnscrypt-proxy",
-        "network//dns/tools/stubby:stubby",
-        "network//dns/tools/dog:dog",
-        "network//dns/tools/q:q",
+        "//packages/linux/network/dns/tools/bind-tools:bind-tools",
+        "//packages/linux/network/dns/tools/ldns-utils:ldns-utils",
+        "//packages/linux/network/dns/tools/doggo:doggo",
+        "//packages/linux/network/dns/tools/dnscrypt-proxy:dnscrypt-proxy",
+        "//packages/linux/network/dns/tools/stubby:stubby",
+        "//packages/linux/network/dns/tools/dog:dog",
+        "//packages/linux/network/dns/tools/q:q",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -150,9 +150,9 @@ filegroup(
 filegroup(
     name = "essential-dns",
     srcs = [
-        "network//dns/servers/dnsmasq:dnsmasq",
-        "network//dns/tools/bind-tools:bind-tools",
-        "network//dns/libraries/c-ares:c-ares",
+        "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
+        "//packages/linux/network/dns/tools/bind-tools:bind-tools",
+        "//packages/linux/network/dns/libraries/c-ares:c-ares",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -165,9 +165,9 @@ filegroup(
 filegroup(
     name = "enterprise-dns",
     srcs = [
-        "network//dns/servers/bind:bind",
-        "network//dns/servers/powerdns:powerdns",
-        "network//dns/servers/nsd:nsd",
+        "//packages/linux/network/dns/servers/bind:bind",
+        "//packages/linux/network/dns/servers/powerdns:powerdns",
+        "//packages/linux/network/dns/servers/nsd:nsd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -180,7 +180,7 @@ filegroup(
 filegroup(
     name = "cloud-dns",
     srcs = [
-        "network//dns/servers/coredns:coredns",
+        "//packages/linux/network/dns/servers/coredns:coredns",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

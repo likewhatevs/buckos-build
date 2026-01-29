@@ -22,10 +22,10 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/web:uri",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/web:uri",
         ":http-message",
-        "lang//perl/core:try-tiny",
+        "//packages/linux/lang/perl/core:try-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -51,7 +51,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -77,8 +77,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/web:uri",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/web:uri",
     ],
     visibility = ["PUBLIC"],
 )
@@ -104,7 +104,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":http-message",
     ],
     visibility = ["PUBLIC"],
@@ -131,7 +131,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":net-ssleay",
     ],
     visibility = ["PUBLIC"],
@@ -158,7 +158,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -184,7 +184,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -210,7 +210,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -236,7 +236,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -262,7 +262,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -288,9 +288,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/oop:moo",
-        "lang//perl/core:try-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/oop:moo",
+        "//packages/linux/lang/perl/core:try-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -316,9 +316,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":lwp",
-        "lang//perl/web:html-parser",
+        "//packages/linux/lang/perl/web:html-parser",
     ],
     visibility = ["PUBLIC"],
 )
@@ -344,7 +344,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":http-message",
     ],
     visibility = ["PUBLIC"],

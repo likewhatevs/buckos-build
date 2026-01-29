@@ -63,10 +63,10 @@ DESKTOP
         chmod 4755 "$OUT/opt/Signal/chrome-sandbox" 2>/dev/null || true
     """,
     deps = [
-        "dev-libs//glib:glib",
-        "system//security/auth/biometric:nss",
-        "system//security/auth/biometric:nspr",
-        "audio//daemons/pulseaudio:pulseaudio",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/security/auth/biometric:nss",
+        "//packages/linux/system/security/auth/biometric:nspr",
+        "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
     ],
     visibility = ["PUBLIC"],
 )

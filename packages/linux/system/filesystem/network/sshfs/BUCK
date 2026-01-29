@@ -17,9 +17,9 @@ meson_package(
     license = "GPL-2.0",
     meson_args = [],
     deps = [
-        "system//filesystem/fuse/fuse3:fuse3",
-        "network//openssh:openssh",
-        "dev-libs//glib:glib",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/network/openssh:openssh",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )

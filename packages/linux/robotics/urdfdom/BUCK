@@ -10,8 +10,8 @@ cmake_package(
         "-DAPPEND_PROJECT_NAME_TO_INCLUDEDIR=OFF",
     ],
     deps = [
-        "robotics//urdfdom_headers:urdfdom_headers",
-        "system//terminal/console_bridge:console_bridge",
-        "dev-libs//json/tinyxml2:tinyxml2",
+        "//packages/linux/robotics/urdfdom_headers:urdfdom_headers",
+        "//packages/linux/system/terminal/console_bridge:console_bridge",
+        "//packages/linux/dev-libs/json/tinyxml2:tinyxml2",
     ],
 )

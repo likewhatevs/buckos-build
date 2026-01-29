@@ -6,9 +6,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "utilities",
     srcs = [
-        "gaming//utilities/mangohud:mangohud",
-        "gaming//utilities/gamemode:gamemode",
-        "gaming//utilities/gamescope:gamescope",
+        "//packages/linux/gaming/utilities/mangohud:mangohud",
+        "//packages/linux/gaming/utilities/gamemode:gamemode",
+        "//packages/linux/gaming/utilities/gamescope:gamescope",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

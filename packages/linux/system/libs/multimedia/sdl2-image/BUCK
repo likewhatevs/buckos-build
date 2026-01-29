@@ -43,10 +43,10 @@ autotools_package(
         "webp": "-DSDL2IMAGE_WEBP=ON",
     },
     use_deps = {
-        "png": ["system//libs/image/libpng:libpng"],
-        "jpeg": ["system//libs/image/libjpeg-turbo:libjpeg-turbo"],
-        "webp": ["system//libs/image/libwebp:libwebp"],
-        "tiff": ["system//libs/image/libtiff:libtiff"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
+        "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
+        "webp": ["//packages/linux/system/libs/image/libwebp:libwebp"],
+        "tiff": ["//packages/linux/system/libs/image/libtiff:libtiff"],
     },
     configure_args = [],
     pre_configure = """
@@ -58,7 +58,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
     $CONFIGURE_ARGS
 """,
     deps = [
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     visibility = ["PUBLIC"],
 )

@@ -11,7 +11,7 @@ cmake_package(
     homepage = "https://naios.github.io/continuable/",
     license = "MIT",
     deps = [
-        "dev-libs//misc/function2:function2",
+        "//packages/linux/dev-libs/misc/function2:function2",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -60,8 +60,8 @@ autotools_package(
     homepage = "https://wiki.gnome.org/Projects/GDM",
     license = "GPL-2.0",
     bdepend = [
-        "dev-tools//build-systems/meson:meson",
-        "dev-tools//build-systems/ninja:ninja",
+        "//packages/linux/dev-tools/build-systems/meson:meson",
+        "//packages/linux/dev-tools/build-systems/ninja:ninja",
     ],
     pre_configure = """
 mkdir -p build
@@ -73,8 +73,8 @@ meson setup .. --prefix=/usr \\
     -Dplymouth=disabled
 """,
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     visibility = ["PUBLIC"],
 )

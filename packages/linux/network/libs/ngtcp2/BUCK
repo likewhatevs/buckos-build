@@ -14,8 +14,8 @@ cmake_package(
     use_defaults = ["ssl"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["dev-libs//crypto/gnutls:gnutls"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/dev-libs/crypto/gnutls:gnutls"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

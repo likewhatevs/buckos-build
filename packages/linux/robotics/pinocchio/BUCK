@@ -9,8 +9,8 @@ cmake_package(
     homepage = "https://github.com/stack-of-tasks/pinocchio",
     license = "BSD-2-Clause",
     deps = [
-        "dev-libs//misc/boost:boost",
-        "robotics//eigen3:eigen3",
+        "//packages/linux/dev-libs/misc/boost:boost",
+        "//packages/linux/robotics/eigen3:eigen3",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

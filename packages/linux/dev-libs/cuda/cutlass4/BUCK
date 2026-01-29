@@ -98,7 +98,7 @@ echo "CUTLASS v4.2.1 installed successfully"
         requires = "cuda",
     ),
     deps = [
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
     visibility = ["PUBLIC"],
 )

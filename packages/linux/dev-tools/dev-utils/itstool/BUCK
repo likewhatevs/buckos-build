@@ -20,7 +20,7 @@ autotools_package(
         "--prefix=/usr",
     ],
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

@@ -10,6 +10,9 @@ cargo_package(
     description = "Modern cloud workload-focused virtual machine monitor",
     homepage = "https://www.cloudhypervisor.org/",
     license = "Apache-2.0 AND BSD-3-Clause",
+    # Vendor tarball with all cargo dependencies (run ./tools/cargo-vendor --target ... to regenerate)
+    vendor_tarball_uri = "https://github.com/cloud-hypervisor/cloud-hypervisor/releases/download/v41.0/vendor.tar.gz",
+    vendor_tarball_sha256 = "3415170d34c699f010741f9b01a3988724dab1b86dadf71513fde5e2c3a3f76e",
     cargo_args = [
         "--workspace",
         "--bin",
@@ -22,7 +25,7 @@ cargo_package(
         "ch-remote",
     ],
     deps = [
-        "lang//rust:rust",
+        "//packages/linux/lang/rust:rust",
     ],
     visibility = ["PUBLIC"],
 )

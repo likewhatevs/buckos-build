@@ -22,7 +22,7 @@ cmake_package(
         "-DCMAKE_PREFIX_PATH=$(echo $DEP_BASE_DIRS | tr ':' ';' | sed 's|;|/usr;|g' | sed 's|$|/usr|')",
     ],
     deps = [
-        "dev-libs//google/abseil-cpp:abseil-cpp",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
     ],
     visibility = ["PUBLIC"],
 )

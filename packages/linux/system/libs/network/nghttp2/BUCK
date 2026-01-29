@@ -57,7 +57,7 @@ autotools_package(
     },
 
     use_deps = {
-        "xml": ["system//libs/xml/libxml2:libxml2"],
+        "xml": ["//packages/linux/system/libs/xml/libxml2:libxml2"],
     },
 
     configure_args = [

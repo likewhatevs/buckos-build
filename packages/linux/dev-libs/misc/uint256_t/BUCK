@@ -7,7 +7,7 @@ simple_binary_package(
     sha256 = "60f2fe965b05f46e80d79f1ab9ab112bb1a88813c53555a490b90880778bf0d8",
     extract_to = "/usr/include",
     deps = [
-        "dev-libs//misc/uint128_t:uint128_t",
+        "//packages/linux/dev-libs/misc/uint128_t:uint128_t",
     ],
     visibility = ["PUBLIC"],
 )

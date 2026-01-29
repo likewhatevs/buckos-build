@@ -30,11 +30,11 @@ autotools_package(
     deps = [],
     # nasm is needed when asm is enabled (x86/x86_64 optimizations)
     use_bdepend = {
-        "asm": ["dev-tools//assemblers/nasm:nasm"],
+        "asm": ["//packages/linux/dev-tools/assemblers/nasm:nasm"],
     },
     use_deps = {
-        "opencl": ["dev-libs//opencl:opencl"],
-        "lavf": ["media//video/ffmpeg:ffmpeg"],
+        "opencl": ["//packages/linux/dev-libs/opencl:opencl"],
+        "lavf": ["//packages/linux/media/video/ffmpeg:ffmpeg"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

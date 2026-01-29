@@ -43,8 +43,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -83,8 +83,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -123,8 +123,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -164,9 +164,9 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "editors//poppler:poppler",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/editors/poppler:poppler",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -206,10 +206,10 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "dev-libs//exiv2:exiv2",
-        "system//libs/graphics/lcms2:lcms2",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/dev-libs/exiv2:exiv2",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -248,10 +248,10 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "system//libs/compression/libarchive:libarchive",
-        "system//libs/compression/libzip:libzip",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/system/libs/compression/libarchive:libarchive",
+        "//packages/linux/system/libs/compression/libzip:libzip",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -290,10 +290,10 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "core//libffi:libffi",
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "graphics//rendering/wayland:wayland",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -332,10 +332,10 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "dev-libs//gmp:gmp",
-        "dev-libs//mpfr:mpfr",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/dev-libs/gmp:gmp",
+        "//packages/linux/dev-libs/mpfr:mpfr",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -374,8 +374,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -415,9 +415,9 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -456,9 +456,9 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "desktop//kde/apps:konsole",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/desktop/kde/apps:konsole",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -497,8 +497,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -537,8 +537,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -578,9 +578,9 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "laptop//monitoring/lm-sensors:lm-sensors",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -619,9 +619,9 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "desktop//kde/apps:ksystemstats",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/desktop/kde/apps:ksystemstats",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -661,10 +661,10 @@ DESTDIR=$OUT make install
 # DESTDIR=$OUT make install
 # """,
 #     deps = [
-#         "desktop//kde:kf5",
-#         "desktop//qt:qt5",
+#         "//packages/linux/desktop/kde:kf5",
+#         "//packages/linux/desktop/qt:qt5",
 #
-#         "core//kpmcore",
+#         "//packages/linux/core/kpmcore",
 #     ],
 #     bdepend = [],
 #     visibility = ["PUBLIC"],
@@ -703,9 +703,9 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
-        "dev-libs//boost:boost",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -745,8 +745,8 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

@@ -75,9 +75,9 @@ This allows gamescope to set real-time scheduling for better performance.
 EOF
     """,
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     visibility = ["PUBLIC"],
 )

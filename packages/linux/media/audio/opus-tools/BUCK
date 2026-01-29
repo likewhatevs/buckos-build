@@ -11,9 +11,9 @@ autotools_package(
     homepage = "https://opus-codec.org/",
     license = "BSD-2-Clause",
     deps = [
-        "system//libs/audio/opus:opus",
-        "system//libs/audio/libogg:libogg",
-        "audio//libraries/opusfile:opusfile",
+        "//packages/linux/system/libs/audio/opus:opus",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/audio/libraries/opusfile:opusfile",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

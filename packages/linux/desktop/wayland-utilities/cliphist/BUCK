@@ -11,8 +11,8 @@ go_package(
     license = "GPL-3.0",
     bins = ["cliphist"],
     deps = [
-        "core//libffi:libffi",
-        "desktop//wayland-utilities/wl-clipboard:wl-clipboard",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/desktop/wayland-utilities/wl-clipboard:wl-clipboard",
     ],
     visibility = ["PUBLIC"],
 )

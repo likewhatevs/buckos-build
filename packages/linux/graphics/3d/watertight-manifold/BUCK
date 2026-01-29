@@ -9,8 +9,8 @@ cmake_package(
     homepage = "https://github.com/hjwdzh/Manifold",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//math/eigen:eigen",
-        "dev-libs//math/glm:glm",
+        "//packages/linux/dev-libs/math/eigen:eigen",
+        "//packages/linux/dev-libs/math/glm:glm",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

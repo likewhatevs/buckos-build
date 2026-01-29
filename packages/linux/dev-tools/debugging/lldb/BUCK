@@ -36,11 +36,11 @@ cmake_package(
     homepage = "https://lldb.llvm.org/",
     license = "Apache-2.0",
     deps = [
-        "core//zlib:zlib",
-        "system//libs/libxml2:libxml2",
-        "lang//python:python",
-        "system//libs/ncurses:ncurses",
-        "dev-libs//libffi:libffi",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/libxml2:libxml2",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/system/libs/ncurses:ncurses",
+        "//packages/linux/dev-libs/libffi:libffi",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

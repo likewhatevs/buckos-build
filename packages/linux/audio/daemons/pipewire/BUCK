@@ -43,11 +43,11 @@ meson_package(
         "-examples": "-Dexamples=disabled",
     },
     use_deps = {
-        "alsa": ["audio//daemons/alsa-lib:alsa-lib"],
-        "bluetooth": ["system//bluetooth/bluez:bluez"],
-        "gstreamer": ["graphics//video/gstreamer:gstreamer"],
-        "ffmpeg": ["graphics//video/ffmpeg:ffmpeg"],
-        "systemd": ["system//init/systemd:systemd"],
+        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "bluetooth": ["//packages/linux/system/bluetooth/bluez:bluez"],
+        "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],
+        "ffmpeg": ["//packages/linux/graphics/video/ffmpeg:ffmpeg"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     meson_args = [
         "-Dspa-plugins=enabled",
@@ -75,7 +75,7 @@ meson_package(
         "-Drlimits-install=false",
     ],
     deps = [
-        "system//libs/ipc/dbus:dbus",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
     ],
     visibility = ["PUBLIC"],
 )

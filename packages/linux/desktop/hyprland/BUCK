@@ -36,11 +36,11 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr \\
     -DNO_SYSTEMD=ON
 """,
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
-        "desktop//mesa:mesa",
-        "desktop//libinput:libinput",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/desktop/libinput:libinput",
     ],
     visibility = ["PUBLIC"],
 )
@@ -50,8 +50,8 @@ filegroup(
     name = "hyprland-desktop",
     srcs = [
         ":hyprland",
-        "graphics//rendering/wayland:wayland",
-        "desktop//mesa:mesa",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

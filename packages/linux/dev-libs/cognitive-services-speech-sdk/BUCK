@@ -17,7 +17,7 @@ simple_binary_package(
         "lib/x64/libpal_azure_c_shared_openssl3.so",
     ],
     deps = [
-        "system//libs/ipc:libuuid",
-        "audio//libraries:alsa-lib",
+        "//packages/linux/system/libs/ipc:libuuid",
+        "//packages/linux/audio/libraries:alsa-lib",
     ],
 )

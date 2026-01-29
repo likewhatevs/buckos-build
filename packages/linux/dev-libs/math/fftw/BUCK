@@ -30,7 +30,7 @@ autotools_package(
     use_defaults = ["threads", "avx2"],
     deps = [],
     use_deps = {
-        "mpi": ["network//mpi/openmpi:openmpi"],
+        "mpi": ["//packages/linux/network/mpi/openmpi:openmpi"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

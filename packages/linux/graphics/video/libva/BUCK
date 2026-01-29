@@ -28,7 +28,7 @@ meson_package(
         "-Denable_docs=false",
     ],
     deps = [
-        "desktop//libdrm:libdrm",
+        "//packages/linux/desktop/libdrm:libdrm",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],
@@ -74,7 +74,7 @@ fi
     cmake_args = [],
     deps = [
         ":libva",
-        "desktop//libdrm:libdrm",
+        "//packages/linux/desktop/libdrm:libdrm",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

@@ -3,8 +3,8 @@
 filegroup(
     name = "console-players",
     srcs = [
-        "audio//players/cmus:cmus",
-        "audio//players/moc:moc",
+        "//packages/linux/audio/players/cmus:cmus",
+        "//packages/linux/audio/players/moc:moc",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -13,7 +13,7 @@ filegroup(
 filegroup(
     name = "daemon-players",
     srcs = [
-        "audio//players/mpd:mpd",
+        "//packages/linux/audio/players/mpd:mpd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -88,9 +88,9 @@ autotools_package(
         mkdir -p "$OUT/var/cache/cups"
     """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/ipc/dbus:dbus",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -123,8 +123,8 @@ autotools_package(
     ],
     deps = [
         ":cups",
-        "dev-libs//glib:glib",
-        "editors//ghostscript:ghostscript",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/editors/ghostscript:ghostscript",
     ],
     visibility = ["PUBLIC"],
 )
@@ -140,9 +140,9 @@ download_source(
 autotools_package(
     name = "libpaper",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi

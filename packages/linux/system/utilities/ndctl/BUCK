@@ -18,9 +18,9 @@ autotools_package(
         "--without-bash",
     ],
     deps = [
-        "system//libs/kmod:kmod",
-        "core//util-linux:util-linux",
-        "dev-libs//json/json-c:json-c",
-        "system//init/eudev:eudev",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/dev-libs/json/json-c:json-c",
+        "//packages/linux/system/init/eudev:eudev",
     ],
 )

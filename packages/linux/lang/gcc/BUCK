@@ -100,12 +100,12 @@ binary_package(
         ln -sf g++ c++
     """,
     deps = [
-        "lang//binutils:binutils",
-        "system//libs/utility/gmp:gmp",
-        "system//libs/utility/mpfr:mpfr",
-        "system//libs/utility/mpc:mpc",
-        "system//libs/utility/isl:isl",
-        "core//zlib:zlib",
+        "//packages/linux/lang/binutils:binutils",
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
+        "//packages/linux/system/libs/utility/mpc:mpc",
+        "//packages/linux/system/libs/utility/isl:isl",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

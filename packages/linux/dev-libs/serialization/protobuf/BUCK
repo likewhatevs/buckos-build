@@ -25,11 +25,11 @@ cmake_package(
         "zlib",
     ],
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//google/abseil-cpp:abseil-cpp",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
     ],
     use_deps = {
-        "python": ["lang//python:python"],
+        "python": ["//packages/linux/lang/python:python"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

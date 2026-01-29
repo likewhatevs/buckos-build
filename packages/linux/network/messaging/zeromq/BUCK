@@ -21,7 +21,7 @@ cmake_package(
     use_defaults = ["sodium", "curve"],
     deps = [],
     use_deps = {
-        "sodium": ["dev-libs//misc/libsodium:libsodium"],
+        "sodium": ["//packages/linux/dev-libs/misc/libsodium:libsodium"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

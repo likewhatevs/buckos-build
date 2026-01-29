@@ -55,10 +55,10 @@ meson_package(
     homepage = "https://gitlab.freedesktop.org/mesa/mesa.git",
     license = "MIT",
     deps = [
-        "core//zlib:zlib",
-        "core//expat:expat",
-        "core//libffi:libffi",
-        "lang//python/jinja2:python-mako",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/lang/python/jinja2:python-mako",
     ],
     meson_args = [
         "-Dvulkan-drivers=",

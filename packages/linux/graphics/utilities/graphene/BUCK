@@ -12,7 +12,7 @@ meson_package(
     use_defaults = ["gobject"],
     deps = [],
     use_deps = {
-        "gobject": ["dev-libs//glib:gobject"],
+        "gobject": ["//packages/linux/dev-libs/glib:gobject"],
     },
     meson_args = [
         "-Dtests=false",

@@ -18,7 +18,7 @@ ebuild_package(
     homepage = "https://github.com/golang/tools/tree/master/gopls",
     license = "BSD-3-Clause",
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     # gopls has its own go.mod in the gopls/ subdirectory
     # ebuild.sh now auto-detects and pre-fetches from subdirectories

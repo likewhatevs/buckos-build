@@ -19,8 +19,8 @@ meson_package(
         "-Dgles2=true",
     ],
     deps = [
-        "graphics//xorg/libs/libx11:libx11",
-        "graphics//xorg/libs/libxext:libxext",
-        "graphics//xorg/protos/glproto:glproto",
+        "//packages/linux/graphics/xorg/libs/libx11:libx11",
+        "//packages/linux/graphics/xorg/libs/libxext:libxext",
+        "//packages/linux/graphics/xorg/protos/glproto:glproto",
     ],
 )

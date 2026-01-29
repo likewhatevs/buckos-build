@@ -13,8 +13,8 @@ autotools_package(
     iuse = ["dnscrypt", "dnstap", "ecdsa"],
     use_defaults = ["ecdsa"],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//misc/libevent:libevent",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/misc/libevent:libevent",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

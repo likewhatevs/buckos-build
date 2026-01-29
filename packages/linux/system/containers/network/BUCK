@@ -34,7 +34,7 @@ mkdir -p "$DESTDIR/usr/lib/cni"
 install -m 755 bin/* "$DESTDIR/usr/lib/cni/"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -61,7 +61,7 @@ mkdir -p "$DESTDIR/usr/libexec/podman"
 install -m 755 target/release/netavark "$DESTDIR/usr/libexec/podman/"
 """,
     bdepend = inherit(["cargo"])["bdepend"] + [
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
     visibility = ["PUBLIC"],
 )
@@ -116,11 +116,11 @@ make
 make install DESTDIR="$DESTDIR"
 """,
     rdepend = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
         # TODO: libslirp package needs to be created
-        # "system//libs/network/libslirp:libslirp",
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//libs/ipc/libcap:libcap",
+        # "//packages/linux/system/libs/network/libslirp:libslirp",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
     ],
     visibility = ["PUBLIC"],
 )

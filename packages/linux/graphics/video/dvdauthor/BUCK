@@ -32,13 +32,13 @@ autotools_package(
 DESTDIR=$OUT make install
 """,
     deps = [
-        "system//libs/data/libxml2:libxml2",
-        "graphics//utilities/imagemagick:imagemagick",
-        "fonts//libraries/freetype:freetype",
-        "system//libs/font/fribidi:fribidi",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/system/libs/font/fribidi:fribidi",
     ],
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     visibility = ["PUBLIC"],
 )

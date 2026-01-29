@@ -25,7 +25,7 @@ binary_package(
         find "$SRCS" -type f -exec install -Dm755 {} "$OUT/usr/bin/runc" \;
     """,
     deps = [
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )

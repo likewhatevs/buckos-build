@@ -31,7 +31,7 @@ meson_package(
         "-Dcrypto-library=openssl",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 )

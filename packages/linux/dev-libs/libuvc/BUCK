@@ -11,7 +11,7 @@ cmake_package(
         "-DBUILD_TEST=OFF",
     ],
     deps = [
-        "system//libs/libusb:libusb",
-        "media//libs/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/libusb:libusb",
+        "//packages/linux/media/libs/libjpeg-turbo:libjpeg-turbo",
     ],
 )

@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://github.com/facebookresearch/audiocraft/archive/refs/tags/v1.3.0.tar.gz",
     sha256 = "774a0885ff6fb55c6a6c98efc123d5656c469488eff95ba01070cfd73fa265dd",
     deps = [
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
 )

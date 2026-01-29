@@ -50,12 +50,12 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 # mkdir -p "$DESTDIR/usr/share/crosvm/seccomp/x86_64"
 #     """,
 #     deps = [
-#         "lang//rust:rust",
-#         "system//libs/graphics/minigbm:minigbm",
-#         "desktop//mesa:virglrenderer",
-#         "system//libs/ipc/libcap:libcap",
-#         "desktop//libdrm:libdrm",
-#         "audio//daemons/pulseaudio:pulseaudio",
+#         "//packages/linux/lang/rust:rust",
+#         "//packages/linux/system/libs/graphics/minigbm:minigbm",
+#         "//packages/linux/desktop/mesa:virglrenderer",
+#         "//packages/linux/system/libs/ipc/libcap:libcap",
+#         "//packages/linux/desktop/libdrm:libdrm",
+#         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
 #     ],
 #     visibility = ["PUBLIC"],
 # )

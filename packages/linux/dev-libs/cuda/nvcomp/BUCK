@@ -57,7 +57,7 @@ echo "nvcomp $PV installed successfully"
         libs_private = "-lnvcomp_cpu",
     ),
     deps = [
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
     visibility = ["PUBLIC"],
 )

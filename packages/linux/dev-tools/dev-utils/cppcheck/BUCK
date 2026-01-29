@@ -36,7 +36,7 @@ autotools_package(
     homepage = "https://cppcheck.sourceforge.io/",
     license = "GPL-3",
     bdepend = [
-        "dev-tools//build-systems/cmake:cmake",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
     ],
     configure_args = [
         "-DCMAKE_BUILD_TYPE=Release",

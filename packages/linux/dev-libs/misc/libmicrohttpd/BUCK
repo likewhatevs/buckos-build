@@ -43,7 +43,7 @@ autotools_package(
         "--enable-https",
     ],
     deps = [
-        "system//libs/crypto/gnutls:gnutls",
+        "//packages/linux/system/libs/crypto/gnutls:gnutls",
     ],
     visibility = ["PUBLIC"],
 )

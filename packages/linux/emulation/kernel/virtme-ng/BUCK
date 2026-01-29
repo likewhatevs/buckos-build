@@ -44,8 +44,8 @@ kvm = true
 EOF
     """,
     deps = [
-        "lang//python:python",
-        "emulation//hypervisors/qemu:qemu",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/emulation/hypervisors/qemu:qemu",
     ],
     visibility = ["PUBLIC"],
 )
@@ -79,8 +79,8 @@ EOF
 # python3 setup.py install --prefix=/usr --root="$DESTDIR"
 #     """,
 #     deps = [
-#         "lang//python:python",
-#         "emulation//hypervisors/qemu:qemu",
+#         "//packages/linux/lang/python:python",
+#         "//packages/linux/emulation/hypervisors/qemu:qemu",
 #     ],
 #     visibility = ["PUBLIC"],
 # )

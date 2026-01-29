@@ -52,7 +52,7 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "pcre": ["system//libs/utility/pcre2:pcre2"],
+        "pcre": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
     },
 
     # Base configure arguments (always applied)
@@ -71,7 +71,7 @@ autotools_package(
 
     # ncurses is required for terminal handling
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
 
     # No src_prepare needed - official tarball has pre-generated configure

@@ -44,8 +44,8 @@ autotools_package(
         "--disable-werror",
     ],
     deps = [
-        "system//libs/libusb:libusb",
-        "system//libs/libftdi:libftdi",
+        "//packages/linux/system/libs/libusb:libusb",
+        "//packages/linux/system/libs/libftdi:libftdi",
     ],
     visibility = ["PUBLIC"],
 )

@@ -12,13 +12,13 @@ cmake_package(
     license = "LGPL-2.1",
     iuse = ["gui", "zstd"],
     deps = [
-        "system//libs/libunwind:libunwind",
-        "dev-libs//boost:boost",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/libunwind:libunwind",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/core/zlib:zlib",
     ],
     use_deps = {
         "gui": [
-            "graphics//qt:qt",
+            "//packages/linux/graphics/qt:qt",
         ],
     },
     cmake_args = [

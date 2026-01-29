@@ -27,7 +27,7 @@ cmake_package(
     },
     use_defaults = ["htmlreport"],
     deps = [
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

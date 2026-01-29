@@ -79,9 +79,9 @@ cmake_package(
     },
     use_deps = {
         "external-libs": [
-            "media//audio/ogg:ogg",
-            "media//audio/vorbis:vorbis",
-            "media//audio/opus:opus",
+            "//packages/linux/media/audio/ogg:ogg",
+            "//packages/linux/media/audio/vorbis:vorbis",
+            "//packages/linux/media/audio/opus:opus",
         ],
     },
     deps = [],

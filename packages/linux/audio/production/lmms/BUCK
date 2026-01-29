@@ -42,11 +42,11 @@ cmake_package(
         "-DWANT_GIG=OFF",
     ],
     deps = [
-        "audio//daemons/alsa-lib:alsa-lib",
-        "system//libs/audio/flac:flac",
-        "system//libs/audio/libvorbis:libvorbis",
-        "system//libs/audio/libogg:libogg",
-        # "desktop//qt:qt5",  # FIXME: Qt5 not yet implemented
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        # "//packages/linux/desktop/qt:qt5",  # FIXME: Qt5 not yet implemented
     ],
     visibility = ["PUBLIC"],
 )

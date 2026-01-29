@@ -8,8 +8,8 @@ go_package(
     bins = ["step-ca"],
     packages = ["./cmd/step-ca"],
     deps = [
-        "lang//go:go",
-        "system//security/smartcard:pcsc-lite",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/system/security/smartcard:pcsc-lite",
     ],
     maintainers = ["buckos"],
 )

@@ -11,7 +11,7 @@ python_package(
     homepage = "https://www.scons.org/",
     license = "MIT",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

@@ -15,7 +15,7 @@
 filegroup(
     name = "vector-search",
     srcs = [
-        "ai//vector-search/diskann:diskann",
+        "//packages/linux/ai/vector-search/diskann:diskann",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -24,6 +24,6 @@ filegroup(
 # Convenience alias
 alias(
     name = "diskann",
-    actual = "ai//vector-search/diskann:diskann",
+    actual = "//packages/linux/ai/vector-search/diskann:diskann",
     visibility = ["PUBLIC"],
 )

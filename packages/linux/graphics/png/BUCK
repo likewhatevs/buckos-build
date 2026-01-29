@@ -11,6 +11,6 @@ cmake_package(
         "-DPNG_TESTS=OFF",
     ],
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
 )

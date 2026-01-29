@@ -3,8 +3,8 @@
 filegroup(
     name = "daws",
     srcs = [
-        "audio//production/lmms:lmms",
-        "audio//production/rosegarden:rosegarden",
+        "//packages/linux/audio/production/lmms:lmms",
+        "//packages/linux/audio/production/rosegarden:rosegarden",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

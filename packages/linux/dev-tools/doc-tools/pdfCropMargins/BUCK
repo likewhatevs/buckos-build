@@ -9,7 +9,7 @@ python_package(
     homepage = "https://github.com/abarker/pdfCropMargins",
     license = "GPL-3.0",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

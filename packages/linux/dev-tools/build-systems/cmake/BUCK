@@ -53,12 +53,12 @@ make install DESTDIR="$DESTDIR"
 """,
 
     deps = [
-        "core//zlib:zlib",
-        "core//expat:expat",
-        "network//curl:curl",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
         # nghttp2 is needed because curl links against it for HTTP/2 support
-        "network//nghttp2:nghttp2",
+        "//packages/linux/network/nghttp2:nghttp2",
     ],
     visibility = ["PUBLIC"],
 )

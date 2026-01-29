@@ -35,7 +35,7 @@ autotools_package(
         cp -r config/* $OUT/etc/fail2ban/
     """,
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

@@ -23,7 +23,7 @@ binary_package(
         cp -r $SRCS/* $OUT/usr/share/s-tui/
     """,
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

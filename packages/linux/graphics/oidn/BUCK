@@ -30,6 +30,6 @@ cmake_package(
         "-DBUILD_SHARED_LIBS=ON",
     ],
     deps = [
-        "dev-libs//misc/tbb:tbb",
+        "//packages/linux/dev-libs/misc/tbb:tbb",
     ],
 )

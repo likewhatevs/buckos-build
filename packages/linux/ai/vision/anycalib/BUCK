@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/javrtg/AnyCalib/archive/refs/tags/v1.0.0.tar.gz",
     sha256 = "eb6d316c9f0da2ecf7013fc60a12e3baa8e43454f19aedc4d54a5f6a2503d80a",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//ml-frameworks/torchvision:torchvision",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
     ],
 )

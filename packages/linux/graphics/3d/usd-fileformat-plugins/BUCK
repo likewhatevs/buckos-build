@@ -23,7 +23,7 @@ cmake_package(
         "stl",
     ],
     deps = [
-        "dev-libs//compression/zlib:zlib",
+        "//packages/linux/dev-libs/compression/zlib:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

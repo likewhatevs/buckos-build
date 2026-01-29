@@ -5,8 +5,8 @@
 filegroup(
     name = "communication-packages",
     srcs = [
-        "communication//email-clients:all-email-clients",
-        "communication//email-servers:all-email-servers",
+        "//packages/linux/communication/email-clients:all-email-clients",
+        "//packages/linux/communication/email-servers:all-email-servers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -16,7 +16,7 @@ filegroup(
 filegroup(
     name = "email-clients",
     srcs = [
-        "communication//email-clients:all-email-clients",
+        "//packages/linux/communication/email-clients:all-email-clients",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -26,7 +26,7 @@ filegroup(
 filegroup(
     name = "cli-email",
     srcs = [
-        "communication//email-clients:cli-clients",
+        "//packages/linux/communication/email-clients:cli-clients",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,7 +36,7 @@ filegroup(
 filegroup(
     name = "email-servers",
     srcs = [
-        "communication//email-servers:all-email-servers",
+        "//packages/linux/communication/email-servers:all-email-servers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -46,7 +46,7 @@ filegroup(
 filegroup(
     name = "all-in-one-servers",
     srcs = [
-        "communication//email-servers:all-in-one",
+        "//packages/linux/communication/email-servers:all-in-one",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -56,7 +56,7 @@ filegroup(
 filegroup(
     name = "mta",
     srcs = [
-        "communication//email-servers:mta",
+        "//packages/linux/communication/email-servers:mta",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -66,7 +66,7 @@ filegroup(
 filegroup(
     name = "imap-servers",
     srcs = [
-        "communication//email-servers:imap-servers",
+        "//packages/linux/communication/email-servers:imap-servers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -76,7 +76,7 @@ filegroup(
 filegroup(
     name = "traditional-mail-stack",
     srcs = [
-        "communication//email-servers:traditional-stack",
+        "//packages/linux/communication/email-servers:traditional-stack",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -86,8 +86,8 @@ filegroup(
 filegroup(
     name = "complete-email",
     srcs = [
-        "communication//email-clients:all-email-clients",
-        "communication//email-servers:all-email-servers",
+        "//packages/linux/communication/email-clients:all-email-clients",
+        "//packages/linux/communication/email-servers:all-email-servers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

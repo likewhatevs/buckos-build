@@ -17,7 +17,7 @@ cmake_package(
         "-DSPDLOG_FMT_EXTERNAL=ON",
     ],
     deps = [
-        "dev-libs//misc/fmt:fmt",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
     ],
     visibility = ["PUBLIC"],
 )

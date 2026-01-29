@@ -31,11 +31,11 @@ autotools_package(
     ],
     use_defaults = ["pam"],
     use_deps = {
-        "pam": ["system//security/auth/pam:pam"],
-        "selinux": ["system//security/selinux:selinux"],
-        "audit": ["system//security/audit:audit"],
-        "acl": ["system//libs/ipc/acl:acl"],
-        "attr": ["system//libs/ipc/attr:attr"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
+        "audit": ["//packages/linux/system/security/audit:audit"],
+        "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
+        "attr": ["//packages/linux/system/libs/ipc/attr:attr"],
     },
     use_configure = {
         "-acl": "--without-acl",
@@ -152,9 +152,9 @@ else
 fi
 """,
     deps = [
-        "system//libs/crypto/libxcrypt:libxcrypt",
-        "system//libs/bsd:libbsd",
-        "core//libmd:libmd",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
+        "//packages/linux/system/libs/bsd:libbsd",
+        "//packages/linux/core/libmd:libmd",
     ],
 
     post_install = """

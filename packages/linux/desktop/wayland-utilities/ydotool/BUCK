@@ -16,7 +16,7 @@ cmake_package(
     license = "AGPL-3.0",
     cmake_args = [],
     deps = [
-        "core//libffi:libffi",
+        "//packages/linux/core/libffi:libffi",
     ],
     visibility = ["PUBLIC"],
 )

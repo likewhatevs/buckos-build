@@ -13,8 +13,8 @@ autotools_package(
     use_defaults = ["ssl", "readline", "wps", "mesh", "sae", "owe", "dpp", "fils"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "readline": ["core//readline:readline"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "readline": ["//packages/linux/core/readline:readline"],
     },
 
     use_configure = {},
@@ -75,7 +75,7 @@ install -m 644 dbus/dbus-wpa_supplicant.conf "$DESTDIR/etc/dbus-1/system.d/" 2>/
 """,
 
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
 
     description = "WPA/WPA2/WPA3 supplicant for wireless network authentication",

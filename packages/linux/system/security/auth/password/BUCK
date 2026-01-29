@@ -15,9 +15,9 @@ download_source(
 autotools_package(
     name = "libpwquality",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -47,7 +47,7 @@ autoreconf -fi
         mkdir -p "$OUT/etc/security"
     """,
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
         ":cracklib",
     ],
     visibility = ["PUBLIC"],
@@ -64,9 +64,9 @@ download_source(
 autotools_package(
     name = "cracklib",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -106,9 +106,9 @@ download_source(
 autotools_package(
     name = "passwdqc",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -130,7 +130,7 @@ autoreconf -fi
         "DEVEL_LIBDIR=/usr/lib",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )

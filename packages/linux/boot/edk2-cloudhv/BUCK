@@ -22,9 +22,9 @@ make_package(
     homepage = "https://github.com/tianocore/edk2",
     license = "BSD-2-Clause",
     bdepend = [
-        "lang//python:python",
-        "dev-tools//nasm:nasm",
-        "dev-tools//acpica:iasl",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-tools/nasm:nasm",
+        "//packages/linux/dev-tools/acpica:iasl",
     ],
     # EDK2 requires submodule initialization and specific build setup
     src_unpack = """

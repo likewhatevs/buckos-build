@@ -26,7 +26,7 @@ autotools_package(
     license = "GPL-2.0",
     configure_args = [],
     deps = [
-        "core//util-linux:util-linux",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )

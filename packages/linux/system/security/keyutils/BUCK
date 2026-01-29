@@ -30,7 +30,7 @@ make_package(
         "USRLIBDIR=/usr/lib",
     ],
     bdepend = [
-        "dev-tools//build-systems/binutils:binutils",
+        "//packages/linux/dev-tools/build-systems/binutils:binutils",
     ],
     deps = [
     ],

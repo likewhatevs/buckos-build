@@ -123,7 +123,7 @@ EOF
 chmod +x "$DESTDIR/usr/bin/setup_dxvk"
     """,
     deps = [
-        "gaming//compatibility/wine:wine",
+        "//packages/linux/gaming/compatibility/wine:wine",
     ],
     visibility = ["PUBLIC"],
 )

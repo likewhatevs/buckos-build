@@ -24,7 +24,7 @@ meson_package(
         "-Dwith-pam-group=games",
     ],
     deps = [
-        "core//glibc:glibc",
+        "//packages/linux/core/glibc:glibc",
     ],
     visibility = ["PUBLIC"],
 )

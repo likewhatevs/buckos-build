@@ -89,7 +89,7 @@ autotools_package(
 """,
 
     deps = [
-        "system//libs/crypto/libgpg-error:libgpg-error",
+        "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
     ],
     visibility = ["PUBLIC"],
 )

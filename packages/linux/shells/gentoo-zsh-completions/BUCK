@@ -20,7 +20,7 @@ ebuild_package(
 make PREFIX=/usr DESTDIR="$DESTDIR" install
 """,
     rdepend = [
-        "shells//zsh:zsh",
+        "//packages/linux/shells/zsh:zsh",
     ],
     visibility = ["PUBLIC"],
 )

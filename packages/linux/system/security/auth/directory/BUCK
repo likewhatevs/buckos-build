@@ -16,10 +16,10 @@ download_source(
 autotools_package(
     name = "krb5",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -53,7 +53,7 @@ autoreconf -fi
         mkdir -p "$OUT/var/lib/krb5kdc"
     """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
         ":openldap",
         ":e2fsprogs-libs",
     ],
@@ -72,10 +72,10 @@ download_source(
 autotools_package(
     name = "e2fsprogs-libs",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -111,10 +111,10 @@ download_source(
 autotools_package(
     name = "openldap",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -146,7 +146,7 @@ autoreconf -fi
         mkdir -p "$OUT/var/run/openldap"
     """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
         ":cyrus-sasl",
     ],
     visibility = ["PUBLIC"],
@@ -164,10 +164,10 @@ download_source(
 autotools_package(
     name = "cyrus-sasl",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -203,8 +203,8 @@ autoreconf -fi
         mkdir -p "$OUT/etc/sasl2"
     """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/security/encryption:linux-pam",
         ":lmdb",
     ],
     visibility = ["PUBLIC"],
@@ -254,10 +254,10 @@ download_source(
 autotools_package(
     name = "sssd",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -293,8 +293,8 @@ autoreconf -fi
         mkdir -p "$OUT/var/log/sssd"
     """,
     deps = [
-        "system//libs/ipc/dbus:dbus",
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/security/encryption:linux-pam",
         ":krb5",
         ":openldap",
         ":cyrus-sasl",
@@ -319,10 +319,10 @@ download_source(
 autotools_package(
     name = "talloc",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -351,10 +351,10 @@ download_source(
 autotools_package(
     name = "tdb",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -383,10 +383,10 @@ download_source(
 autotools_package(
     name = "tevent",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -416,10 +416,10 @@ download_source(
 autotools_package(
     name = "ldb",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -454,10 +454,10 @@ download_source(
 autotools_package(
     name = "ding-libs",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -490,10 +490,10 @@ download_source(
 autotools_package(
     name = "libunistring",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -526,10 +526,10 @@ download_source(
 autotools_package(
     name = "nss-pam-ldapd",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -556,7 +556,7 @@ autoreconf -fi
     """,
     deps = [
         ":openldap",
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )

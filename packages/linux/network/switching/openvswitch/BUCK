@@ -33,10 +33,10 @@ autotools_package(
     },
     use_defaults = ["ssl"],
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

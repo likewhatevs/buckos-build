@@ -29,7 +29,7 @@ cmake_package(
         "-DCMAKE_INSTALL_PREFIX=/usr",
     ],
     deps = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )
@@ -53,7 +53,7 @@ cmake_package(
         "-DCMAKE_INSTALL_PREFIX=/usr",
     ],
     deps = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )
@@ -64,8 +64,8 @@ filegroup(
     srcs = [
         ":lxqt-session",
         ":lxqt-panel",
-        "desktop//sddm:sddm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/sddm:sddm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -48,12 +48,12 @@ autotools_package(
     ],
     deps = [
         ":spice-protocol",
-        "dev-libs//glib:glib",
-        "system//libs/graphics/pixman:pixman",
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/audio/opus:opus",
-        "system//libs/compression/lz4:lz4",
-        "graphics//video/gstreamer:gstreamer",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/audio/opus:opus",
+        "//packages/linux/system/libs/compression/lz4:lz4",
+        "//packages/linux/graphics/video/gstreamer:gstreamer",
     ],
     visibility = ["PUBLIC"],
 )
@@ -87,11 +87,11 @@ meson_package(
     ],
     deps = [
         ":spice-protocol",
-        "desktop//gtk:gtk3",
-        "dev-libs//glib:glib",
-        "system//libs/graphics/pixman:pixman",
-        "system//libs/compression/lz4:lz4",
-        "audio//daemons/pulseaudio:pulseaudio",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/libs/compression/lz4:lz4",
+        "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
     ],
     visibility = ["PUBLIC"],
 )
@@ -134,8 +134,8 @@ mkdir -p "$DESTDIR/usr/lib/udev/rules.d"
 install -m 0644 data/70-spice-vdagentd.rules "$DESTDIR/usr/lib/udev/rules.d/" 2>/dev/null || true
     """,
     deps = [
-        "dev-libs//glib:glib",
-        "system//init/systemd:systemd",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )

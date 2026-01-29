@@ -7,10 +7,10 @@ python_package(
     src_uri = "https://github.com/facebookresearch/seamless_communication/archive/refs/heads/main.tar.gz",
     sha256 = "87541e6b12697efec7eb1c2a1d240df2283a74aa0f427e8d8b54f22ccbcf6152",
     deps = [
-        "ai//ml-frameworks/fairseq2:fairseq2",
-        "audio//analysis/librosa:librosa",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/soundfile:soundfile",
-        "dev-libs//python/tqdm:tqdm",
+        "//packages/linux/ai/ml-frameworks/fairseq2:fairseq2",
+        "//packages/linux/audio/analysis/librosa:librosa",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/soundfile:soundfile",
+        "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],
 )

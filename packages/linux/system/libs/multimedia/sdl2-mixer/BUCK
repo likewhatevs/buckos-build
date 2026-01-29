@@ -70,10 +70,10 @@ autotools_package(
         "xmp": "--enable-xmp",
     },
     use_deps = {
-        "flac": ["system//libs/audio/flac:flac"],
-        "ogg": ["system//libs/audio/libogg:libogg",
-                "system//libs/audio/libvorbis:libvorbis"],
-        "opus": ["system//libs/audio/opus:opus"],
+        "flac": ["//packages/linux/system/libs/audio/flac:flac"],
+        "ogg": ["//packages/linux/system/libs/audio/libogg:libogg",
+                "//packages/linux/system/libs/audio/libvorbis:libvorbis"],
+        "opus": ["//packages/linux/system/libs/audio/opus:opus"],
     },
     configure_args = [],
     pre_configure = """
@@ -85,7 +85,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
     $CONFIGURE_ARGS
 """,
     deps = [
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     visibility = ["PUBLIC"],
 )

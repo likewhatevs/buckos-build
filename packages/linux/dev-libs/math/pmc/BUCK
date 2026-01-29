@@ -9,6 +9,6 @@ cmake_package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "dev-libs//parallel/openmp:openmp",
+        "//packages/linux/dev-libs/parallel/openmp:openmp",
     ],
 )

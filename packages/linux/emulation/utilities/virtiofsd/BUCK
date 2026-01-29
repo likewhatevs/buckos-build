@@ -13,9 +13,9 @@ cargo_package(
     cargo_args = [],
     bins = ["virtiofsd"],
     deps = [
-        "lang//rust:rust",
-        "system//libs/ipc/libcap-ng:libcap-ng",
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/lang/rust:rust",
+        "//packages/linux/system/libs/ipc/libcap-ng:libcap-ng",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )

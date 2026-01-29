@@ -21,7 +21,7 @@ mkdir -p "$DESTDIR/usr/share/zsh/site-functions"
 cp src/* "$DESTDIR/usr/share/zsh/site-functions/"
 """,
     rdepend = [
-        "shells//zsh:zsh",
+        "//packages/linux/shells/zsh:zsh",
     ],
     visibility = ["PUBLIC"],
 )

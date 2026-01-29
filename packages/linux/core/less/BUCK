@@ -23,7 +23,7 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "ncurses": ["core//ncurses:ncurses"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
     },
 
     # Conditional configure arguments

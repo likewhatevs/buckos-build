@@ -48,10 +48,10 @@ meson_package(
         mkdir -p $DESTDIR/etc/runlevels/sysinit
     """,
     bdepend = [
-        "lang//python:python",  # Python for meson
+        "//packages/linux/lang/python:python",  # Python for meson
     ],
     deps = [
-        "core//ncurses:ncurses",  # For termcap
+        "//packages/linux/core/ncurses:ncurses",  # For termcap
     ],
     visibility = ["PUBLIC"],
 )

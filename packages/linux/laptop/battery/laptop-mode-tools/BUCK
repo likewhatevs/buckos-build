@@ -42,7 +42,7 @@ make_package(
         fi
     """,
     deps = [
-        "core//bash:bash",
+        "//packages/linux/core/bash:bash",
     ],
     visibility = ["PUBLIC"],
 )

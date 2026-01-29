@@ -62,8 +62,8 @@ meson_package(
         "-ukify": "-Dukify=disabled",
     },
     deps = [
-        "system//libs/ipc/libcap:libcap",
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )

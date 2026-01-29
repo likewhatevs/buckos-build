@@ -30,8 +30,8 @@ autotools_package(
         "--disable-gtk-doc",
     ],
     deps = [
-        "system//libs/ipc/dbus:dbus",
-        "system//libs/data/libxml2:libxml2",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
     ],
     visibility = ["PUBLIC"],
 )

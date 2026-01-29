@@ -21,7 +21,7 @@ cmake_package(
     homepage = "https://github.com/fnc12/sqlite_orm",
     license = "BSD-3-Clause",
     deps = [
-        "databases//sqlite:sqlite",
+        "//packages/linux/databases/sqlite:sqlite",
     ],
     cmake_args = [
         "-DSQLITE_ORM_ENABLE_CXX_17=ON",

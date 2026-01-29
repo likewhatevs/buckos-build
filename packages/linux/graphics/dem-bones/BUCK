@@ -21,12 +21,12 @@ cmake_package(
     iuse = ["alembic", "openmp"],
     use_defaults = ["openmp"],
     deps = [
-        "dev-libs//eigen:eigen",
-        "core//zlib:zlib",
-        "system//libs/data/libxml2:libxml2",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
     ],
     use_deps = {
-        "alembic": ["dev-libs//alembic:alembic"],
+        "alembic": ["//packages/linux/dev-libs/alembic:alembic"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

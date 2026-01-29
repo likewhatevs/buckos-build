@@ -15,7 +15,7 @@ make -C elf PREFIX=/usr DESTDIR="$DESTDIR" install
 make -C dwarf PREFIX=/usr DESTDIR="$DESTDIR" install
 """,
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

@@ -43,7 +43,7 @@ binary_package(
         $PYTHON_CMD -m pip install --prefix=/usr --root="$OUT" .
     """,
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

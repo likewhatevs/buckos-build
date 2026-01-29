@@ -5,8 +5,8 @@
 filegroup(
     name = "power-profiles",
     srcs = [
-        "laptop//power/tlp:tlp",
-        "laptop//power/auto-cpufreq:auto-cpufreq",
+        "//packages/linux/laptop/power/tlp:tlp",
+        "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -16,7 +16,7 @@ filegroup(
 filegroup(
     name = "acpi-tools",
     srcs = [
-        "laptop//power/acpid:acpid",
+        "//packages/linux/laptop/power/acpid:acpid",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -26,7 +26,7 @@ filegroup(
 filegroup(
     name = "thermal-management",
     srcs = [
-        "laptop//power/thermald:thermald",
+        "//packages/linux/laptop/power/thermald:thermald",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,8 +36,8 @@ filegroup(
 filegroup(
     name = "cpu-scaling",
     srcs = [
-        "laptop//power/cpupower:cpupower",
-        "laptop//power/auto-cpufreq:auto-cpufreq",
+        "//packages/linux/laptop/power/cpupower:cpupower",
+        "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -47,8 +47,8 @@ filegroup(
 filegroup(
     name = "intel-laptop",
     srcs = [
-        "system//power/x86_energy_perf_policy:x86_energy_perf_policy",
-        "system//power/intel-undervolt:intel-undervolt",
+        "//packages/linux/system/power/x86_energy_perf_policy:x86_energy_perf_policy",
+        "//packages/linux/system/power/intel-undervolt:intel-undervolt",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -58,7 +58,7 @@ filegroup(
 filegroup(
     name = "amd-laptop",
     srcs = [
-        "system//power/rapl-read-ryzen:rapl-read-ryzen",
+        "//packages/linux/system/power/rapl-read-ryzen:rapl-read-ryzen",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -68,8 +68,8 @@ filegroup(
 filegroup(
     name = "storage-power",
     srcs = [
-        "system//power/hdparm:hdparm",
-        "system//power/nvme-cli:nvme-cli",
+        "//packages/linux/system/power/hdparm:hdparm",
+        "//packages/linux/system/power/nvme-cli:nvme-cli",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -79,9 +79,9 @@ filegroup(
 filegroup(
     name = "tuning-daemons",
     srcs = [
-        "system//power/tuned:tuned",
-        "system//power/power-profiles-daemon:power-profiles-daemon",
-        "system//power/irqbalance:irqbalance",
+        "//packages/linux/system/power/tuned:tuned",
+        "//packages/linux/system/power/power-profiles-daemon:power-profiles-daemon",
+        "//packages/linux/system/power/irqbalance:irqbalance",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -91,9 +91,9 @@ filegroup(
 filegroup(
     name = "power-essential",
     srcs = [
-        "laptop//power/tlp:tlp",
-        "laptop//power/acpid:acpid",
-        "laptop//power/cpupower:cpupower",
+        "//packages/linux/laptop/power/tlp:tlp",
+        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/laptop/power/cpupower:cpupower",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -104,8 +104,8 @@ filegroup(
     name = "console",
     srcs = [
         ":power-essential",
-        "system//power/hdparm:hdparm",
-        "laptop//monitoring/powertop:powertop",
+        "//packages/linux/system/power/hdparm:hdparm",
+        "//packages/linux/laptop/monitoring/powertop:powertop",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -115,11 +115,11 @@ filegroup(
 filegroup(
     name = "max-battery",
     srcs = [
-        "laptop//power/tlp:tlp",
-        "laptop//power/auto-cpufreq:auto-cpufreq",
-        "laptop//power/thermald:thermald",
-        "system//power/power-profiles-daemon:power-profiles-daemon",
-        "laptop//monitoring/powertop:powertop",
+        "//packages/linux/laptop/power/tlp:tlp",
+        "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
+        "//packages/linux/laptop/power/thermald:thermald",
+        "//packages/linux/system/power/power-profiles-daemon:power-profiles-daemon",
+        "//packages/linux/laptop/monitoring/powertop:powertop",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -157,11 +157,11 @@ filegroup(
 filegroup(
     name = "all-power",
     srcs = [
-        "laptop//power/tlp:tlp",
-        "laptop//power/acpid:acpid",
-        "laptop//power/thermald:thermald",
-        "laptop//power/cpupower:cpupower",
-        "laptop//power/auto-cpufreq:auto-cpufreq",
+        "//packages/linux/laptop/power/tlp:tlp",
+        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/laptop/power/thermald:thermald",
+        "//packages/linux/laptop/power/cpupower:cpupower",
+        "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
         ":intel-laptop",
         ":amd-laptop",
         ":storage-power",

@@ -69,8 +69,8 @@ rm -f src/backend/snowball/snowball_create.sql || true
 
     # Dependencies
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     visibility = ["PUBLIC"],

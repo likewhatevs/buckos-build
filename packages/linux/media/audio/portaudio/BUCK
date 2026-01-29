@@ -70,7 +70,7 @@ cmake_package(
         "static-libs": "-DPA_BUILD_STATIC=ON",
     },
     use_deps = {
-        "alsa": ["audio//daemons/alsa-lib:alsa-lib"],
+        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
     },
     deps = [],
     visibility = ["PUBLIC"],

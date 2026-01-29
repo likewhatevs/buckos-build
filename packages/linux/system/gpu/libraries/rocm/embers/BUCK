@@ -10,7 +10,7 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "system//gpu/libraries/rocm:rocm",
+        "//packages/linux/system/gpu/libraries/rocm:rocm",
     ],
     visibility = ["PUBLIC"],
 )

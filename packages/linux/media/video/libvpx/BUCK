@@ -23,7 +23,7 @@ autotools_package(
     use_defaults = ["vp8", "vp9", "threads"],
     deps = [],
     bdepend = [
-        "dev-tools//assemblers/nasm:nasm",
+        "//packages/linux/dev-tools/assemblers/nasm:nasm",
     ],
     src_configure = """
 ./configure --prefix=/usr --enable-shared --disable-static --enable-pic --as=nasm

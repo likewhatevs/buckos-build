@@ -16,8 +16,8 @@ autotools_package(
     iuse = ["nls", "acl", "xattr", "selinux"],
     use_defaults = ["acl", "xattr"],
     use_deps = {
-        "acl": ["system//libs/ipc/acl:acl"],
-        "selinux": ["system//security/selinux:selinux"],
+        "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
     },
     use_configure = {
         "nls": "--enable-nls",

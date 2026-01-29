@@ -17,9 +17,9 @@
 filegroup(
     name = "drivers",
     srcs = [
-        "system//gpu/drivers/nvidia:nvidia-drivers",
-        "system//gpu/drivers/amd:amd-drivers",
-        "system//gpu/drivers/intel:intel-drivers",
+        "//packages/linux/system/gpu/drivers/nvidia:nvidia-drivers",
+        "//packages/linux/system/gpu/drivers/amd:amd-drivers",
+        "//packages/linux/system/gpu/drivers/intel:intel-drivers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -33,8 +33,8 @@ filegroup(
 filegroup(
     name = "nvidia-stack",
     srcs = [
-        "system//gpu/drivers/nvidia:nvidia-drivers",
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/system/gpu/drivers/nvidia:nvidia-drivers",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -44,8 +44,8 @@ filegroup(
 filegroup(
     name = "amd-stack",
     srcs = [
-        "system//gpu/drivers/amd:amd-drivers",
-        "system//gpu/libraries/rocm:rocm",
+        "//packages/linux/system/gpu/drivers/amd:amd-drivers",
+        "//packages/linux/system/gpu/libraries/rocm:rocm",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -55,7 +55,7 @@ filegroup(
 filegroup(
     name = "intel-stack",
     srcs = [
-        "system//gpu/drivers/intel:intel-drivers",
+        "//packages/linux/system/gpu/drivers/intel:intel-drivers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -68,9 +68,9 @@ filegroup(
 filegroup(
     name = "compute-libraries",
     srcs = [
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
-        "system//gpu/libraries/rocm:rocm",
-        "system//gpu/libraries/opencl:opencl",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/system/gpu/libraries/rocm:rocm",
+        "//packages/linux/system/gpu/libraries/opencl:opencl",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -83,7 +83,7 @@ filegroup(
 filegroup(
     name = "tools",
     srcs = [
-        "system//gpu/tools/gpu-monitoring:gpu-monitoring",
+        "//packages/linux/system/gpu/tools/gpu-monitoring:gpu-monitoring",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

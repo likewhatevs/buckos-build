@@ -26,7 +26,7 @@ autotools_package(
     ],
     use_defaults = ["shared"],
     deps = [
-        "media//audio/ogg:ogg",
+        "//packages/linux/media/audio/ogg:ogg",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

@@ -13,11 +13,11 @@ cmake_package(
         "-DPY_IGL_PYTHON_TESTS=OFF",
     ],
     deps = [
-        "dev-libs//3d/libigl:libigl",
-        "dev-libs//eigen:eigen",
-        "dev-libs//python/numpyeigen:numpyeigen",
-        "dev-libs//python/pybind11:pybind11",
-        "lang//python:python",
+        "//packages/linux/dev-libs/3d/libigl:libigl",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/dev-libs/python/numpyeigen:numpyeigen",
+        "//packages/linux/dev-libs/python/pybind11:pybind11",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

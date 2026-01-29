@@ -14,9 +14,9 @@ download_source(
 autotools_package(
     name = "docker-cli",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -62,7 +62,7 @@ install -m 0644 contrib/completion/zsh/_docker "$DESTDIR/usr/share/zsh/site-func
 install -m 0644 contrib/completion/fish/docker.fish "$DESTDIR/usr/share/fish/vendor_completions.d/"
     """,
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -80,9 +80,9 @@ download_source(
 autotools_package(
     name = "docker-engine",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -162,11 +162,11 @@ mkdir -p "$DESTDIR/usr/lib/sysusers.d"
 echo 'g docker - -' > "$DESTDIR/usr/lib/sysusers.d/docker.conf"
     """,
     deps = [
-        "lang//go:go",
-        "emulation//containers/containerd:containerd",
-        "emulation//containers/runc:runc",
-        "system//libs/ipc/libseccomp:libseccomp",
-        "network//firewall/iptables:iptables",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/emulation/containers/containerd:containerd",
+        "//packages/linux/emulation/containers/runc:runc",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/network/firewall/iptables:iptables",
     ],
     visibility = ["PUBLIC"],
 )
@@ -184,9 +184,9 @@ download_source(
 autotools_package(
     name = "docker-compose",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -216,7 +216,7 @@ mkdir -p "$DESTDIR/usr/bin"
 ln -sf /usr/lib/docker/cli-plugins/docker-compose "$DESTDIR/usr/bin/docker-compose"
     """,
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -261,7 +261,7 @@ mkdir -p "$DESTDIR/usr/lib/docker/cli-plugins"
 install -m 0755 buildx-binary "$DESTDIR/usr/lib/docker/cli-plugins/docker-buildx"
     """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

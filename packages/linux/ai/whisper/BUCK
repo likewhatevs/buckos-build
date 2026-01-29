@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/openai/whisper/archive/refs/tags/v20231117.tar.gz",
     sha256 = "b0f8b8d3b485fad2c423ba7f8b95eded067aad11ed3165828aad819d168cac06",
     deps = [
-        "dev-libs//python/numba:numba",
-        "dev-libs//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/tqdm:tqdm",
-        "dev-libs//python/more-itertools:more-itertools",
-        "dev-libs//python/tiktoken:tiktoken",
+        "//packages/linux/dev-libs/python/numba:numba",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/tqdm:tqdm",
+        "//packages/linux/dev-libs/python/more-itertools:more-itertools",
+        "//packages/linux/dev-libs/python/tiktoken:tiktoken",
     ],
 )

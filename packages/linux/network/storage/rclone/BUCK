@@ -11,7 +11,7 @@ go_package(
     bins = ["rclone"],
     packages = ["."],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

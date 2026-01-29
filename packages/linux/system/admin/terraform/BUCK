@@ -23,7 +23,7 @@ go build -o terraform
 install -Dm755 terraform "$DESTDIR/usr/bin/terraform"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

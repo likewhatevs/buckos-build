@@ -43,7 +43,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m755 zip zipcloak zipnote zipsplit "$DESTDIR/usr/bin/"
 """,
     deps = [
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )

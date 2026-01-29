@@ -68,7 +68,7 @@ make -j$(nproc)
 make DESTDIR="$DESTDIR" install
 """,
     bdepend = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

@@ -13,11 +13,11 @@ autotools_package(
     iuse = ["encode", "examples", "doc", "vorbis", "sdl"],
     use_defaults = ["encode", "vorbis"],
     deps = [
-        "system//libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libogg:libogg",
     ],
     use_deps = {
-        "vorbis": ["media//audio/vorbis:vorbis"],
-        "sdl": ["desktop//libs/sdl:sdl"],
+        "vorbis": ["//packages/linux/media/audio/vorbis:vorbis"],
+        "sdl": ["//packages/linux/desktop/libs/sdl:sdl"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

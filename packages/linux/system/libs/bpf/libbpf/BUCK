@@ -31,8 +31,8 @@ make install \
     DESTDIR="$DESTDIR"
 """,
     deps = [
-        "dev-tools//dev-utils/elfutils:elfutils",
-        "core//zlib:zlib",
+        "//packages/linux/dev-tools/dev-utils/elfutils:elfutils",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/pantor/inja",
     license = "MIT",
     deps = [
-        "dev-libs//json/nlohmann-json:nlohmann-json",
+        "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

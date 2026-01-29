@@ -46,7 +46,7 @@ cmake_package(
         "-DGRAPHICS_DISABLED=ON",
     ],
     deps = [
-        "graphics//ocr/leptonica:leptonica",
+        "//packages/linux/graphics/ocr/leptonica:leptonica",
     ],
     visibility = ["PUBLIC"],
 )

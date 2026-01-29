@@ -3,7 +3,7 @@
 filegroup(
     name = "power-abstraction",
     srcs = [
-        "laptop//battery/upower:upower",
+        "//packages/linux/laptop/battery/upower:upower",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -12,8 +12,8 @@ filegroup(
 filegroup(
     name = "kernel-modules",
     srcs = [
-        "laptop//battery/acpi_call:acpi_call",
-        "laptop//battery/tp_smapi:tp_smapi",
+        "//packages/linux/laptop/battery/acpi_call:acpi_call",
+        "//packages/linux/laptop/battery/tp_smapi:tp_smapi",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -22,7 +22,7 @@ filegroup(
 filegroup(
     name = "power-saving",
     srcs = [
-        "laptop//battery/laptop-mode-tools:laptop-mode-tools",
+        "//packages/linux/laptop/battery/laptop-mode-tools:laptop-mode-tools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -31,7 +31,7 @@ filegroup(
 filegroup(
     name = "battery-essential",
     srcs = [
-        "laptop//battery/upower:upower",
+        "//packages/linux/laptop/battery/upower:upower",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -40,8 +40,8 @@ filegroup(
 filegroup(
     name = "thinkpad",
     srcs = [
-        "laptop//battery/tp_smapi:tp_smapi",
-        "laptop//battery/acpi_call:acpi_call",
+        "//packages/linux/laptop/battery/tp_smapi:tp_smapi",
+        "//packages/linux/laptop/battery/acpi_call:acpi_call",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -50,10 +50,10 @@ filegroup(
 filegroup(
     name = "all-battery",
     srcs = [
-        "laptop//battery/upower:upower",
-        "laptop//battery/acpi_call:acpi_call",
-        "laptop//battery/tp_smapi:tp_smapi",
-        "laptop//battery/laptop-mode-tools:laptop-mode-tools",
+        "//packages/linux/laptop/battery/upower:upower",
+        "//packages/linux/laptop/battery/acpi_call:acpi_call",
+        "//packages/linux/laptop/battery/tp_smapi:tp_smapi",
+        "//packages/linux/laptop/battery/laptop-mode-tools:laptop-mode-tools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

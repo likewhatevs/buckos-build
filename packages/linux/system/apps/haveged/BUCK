@@ -7,9 +7,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "haveged",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -30,7 +30,7 @@ autoreconf -fi
     ],
     use_defaults = [],
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     use_configure = {
         "-nistest": "--disable-nistest",

@@ -12,6 +12,6 @@ autotools_package(
         "--without-nccl",
     ],
     deps = [
-        "network//libs/ucx:ucx",
+        "//packages/linux/network/libs/ucx:ucx",
     ],
 )

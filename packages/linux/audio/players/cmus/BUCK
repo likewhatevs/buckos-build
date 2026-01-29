@@ -125,14 +125,14 @@ autotools_package(
         "wavpack": "CONFIG_WAVPACK=y",
     },
     use_deps = {
-        "alsa": ["audio//daemons/alsa-lib:alsa-lib"],
-        "pulseaudio": ["audio//daemons/pulseaudio:pulseaudio"],
-        "flac": ["system//libs/audio/flac:flac"],
-        "vorbis": ["system//libs/audio/libvorbis:libvorbis", "system//libs/audio/libogg:libogg"],
-        "opus": ["system//libs/audio/opus:opus"],
+        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "pulseaudio": ["//packages/linux/audio/daemons/pulseaudio:pulseaudio"],
+        "flac": ["//packages/linux/system/libs/audio/flac:flac"],
+        "vorbis": ["//packages/linux/system/libs/audio/libvorbis:libvorbis", "//packages/linux/system/libs/audio/libogg:libogg"],
+        "opus": ["//packages/linux/system/libs/audio/opus:opus"],
     },
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

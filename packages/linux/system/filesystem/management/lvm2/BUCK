@@ -59,9 +59,9 @@ autotools_package(
         "--disable-selinux",
     ],
     deps = [
-        "core//util-linux:util-linux",
-        "system//init/eudev:eudev",
-        "system//libs/io/libaio:libaio",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/init/eudev:eudev",
+        "//packages/linux/system/libs/io/libaio:libaio",
     ],
     visibility = ["PUBLIC"],
 )

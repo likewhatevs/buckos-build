@@ -5,7 +5,7 @@
 filegroup(
     name = "power",
     srcs = [
-        "laptop//power:all-power",
+        "//packages/linux/laptop/power:all-power",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -15,7 +15,7 @@ filegroup(
 filegroup(
     name = "brightness",
     srcs = [
-        "laptop//brightness:all-brightness",
+        "//packages/linux/laptop/brightness:all-brightness",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -25,7 +25,7 @@ filegroup(
 filegroup(
     name = "monitoring",
     srcs = [
-        "laptop//monitoring:all-monitoring",
+        "//packages/linux/laptop/monitoring:all-monitoring",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -35,7 +35,7 @@ filegroup(
 filegroup(
     name = "input",
     srcs = [
-        "laptop//input:all-input",
+        "//packages/linux/laptop/input:all-input",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -45,7 +45,7 @@ filegroup(
 filegroup(
     name = "wireless",
     srcs = [
-        "laptop//wireless:all-wireless",
+        "//packages/linux/laptop/wireless:all-wireless",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -55,7 +55,7 @@ filegroup(
 filegroup(
     name = "battery",
     srcs = [
-        "laptop//battery:all-battery",
+        "//packages/linux/laptop/battery:all-battery",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -65,12 +65,12 @@ filegroup(
 filegroup(
     name = "essential",
     srcs = [
-        "laptop//power:power-essential",
-        "laptop//brightness:brightness-essential",
-        "laptop//monitoring:monitoring-essential",
-        "laptop//input:input-essential",
-        "laptop//wireless:wireless-essential",
-        "laptop//battery:battery-essential",
+        "//packages/linux/laptop/power:power-essential",
+        "//packages/linux/laptop/brightness:brightness-essential",
+        "//packages/linux/laptop/monitoring:monitoring-essential",
+        "//packages/linux/laptop/input:input-essential",
+        "//packages/linux/laptop/wireless:wireless-essential",
+        "//packages/linux/laptop/battery:battery-essential",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -80,18 +80,18 @@ filegroup(
 filegroup(
     name = "console",
     srcs = [
-        "laptop//power/tlp:tlp",
-        "laptop//power/acpid:acpid",
-        "laptop//power/cpupower:cpupower",
-        "laptop//brightness/brightnessctl:brightnessctl",
-        "laptop//brightness/light:light",
-        "laptop//monitoring/lm-sensors:lm-sensors",
-        "laptop//monitoring/acpi:acpi",
-        "laptop//monitoring/powertop:powertop",
-        "laptop//input/libevdev:libevdev",
-        "laptop//input/libinput:libinput",
-        "laptop//wireless/iwd:iwd",
-        "laptop//battery/upower:upower",
+        "//packages/linux/laptop/power/tlp:tlp",
+        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/laptop/power/cpupower:cpupower",
+        "//packages/linux/laptop/brightness/brightnessctl:brightnessctl",
+        "//packages/linux/laptop/brightness/light:light",
+        "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
+        "//packages/linux/laptop/monitoring/acpi:acpi",
+        "//packages/linux/laptop/monitoring/powertop:powertop",
+        "//packages/linux/laptop/input/libevdev:libevdev",
+        "//packages/linux/laptop/input/libinput:libinput",
+        "//packages/linux/laptop/wireless/iwd:iwd",
+        "//packages/linux/laptop/battery/upower:upower",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -102,8 +102,8 @@ filegroup(
     name = "desktop",
     srcs = [
         ":essential",
-        "laptop//wireless/blueman:blueman",
-        "laptop//brightness/ddcutil:ddcutil",
+        "//packages/linux/laptop/wireless/blueman:blueman",
+        "//packages/linux/laptop/brightness/ddcutil:ddcutil",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -114,8 +114,8 @@ filegroup(
     name = "thinkpad",
     srcs = [
         ":essential",
-        "laptop//battery/tp_smapi:tp_smapi",
-        "laptop//battery/acpi_call:acpi_call",
+        "//packages/linux/laptop/battery/tp_smapi:tp_smapi",
+        "//packages/linux/laptop/battery/acpi_call:acpi_call",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -126,8 +126,8 @@ filegroup(
     name = "intel",
     srcs = [
         ":essential",
-        "laptop//power/thermald:thermald",
-        "laptop//monitoring/i7z:i7z",
+        "//packages/linux/laptop/power/thermald:thermald",
+        "//packages/linux/laptop/monitoring/i7z:i7z",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -137,11 +137,11 @@ filegroup(
 filegroup(
     name = "power-efficient",
     srcs = [
-        "laptop//power/tlp:tlp",
-        "laptop//power/auto-cpufreq:auto-cpufreq",
-        "laptop//power/thermald:thermald",
-        "laptop//monitoring/powertop:powertop",
-        "laptop//battery/laptop-mode-tools:laptop-mode-tools",
+        "//packages/linux/laptop/power/tlp:tlp",
+        "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
+        "//packages/linux/laptop/power/thermald:thermald",
+        "//packages/linux/laptop/monitoring/powertop:powertop",
+        "//packages/linux/laptop/battery/laptop-mode-tools:laptop-mode-tools",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

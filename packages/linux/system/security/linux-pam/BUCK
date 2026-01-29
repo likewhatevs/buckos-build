@@ -20,7 +20,7 @@ autotools_package(
         "--disable-regenerate-docu",
     ],
     deps = [
-        "system//libs/crypto/libxcrypt:libxcrypt",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
     ],
     visibility = ["PUBLIC"],
 )

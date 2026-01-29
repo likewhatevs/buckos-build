@@ -43,9 +43,9 @@ autotools_package(
         "--disable-schemas-compile",
     ],
     deps = [
-        "laptop//wireless/bluez:bluez",
-        "lang//python:python",
-        "desktop//gtk:gtk3",
+        "//packages/linux/laptop/wireless/bluez:bluez",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/desktop/gtk:gtk3",
     ],
     visibility = ["PUBLIC"],
 )

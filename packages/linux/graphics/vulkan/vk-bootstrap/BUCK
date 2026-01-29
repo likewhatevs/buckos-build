@@ -10,6 +10,6 @@ cmake_package(
         "-DVK_BOOTSTRAP_INSTALL=ON",
     ],
     deps = [
-        "graphics//vulkan/vulkan-headers:vulkan-headers",
+        "//packages/linux/graphics/vulkan/vulkan-headers:vulkan-headers",
     ],
 )

@@ -12,6 +12,6 @@ cmake_package(
         "-DBUILD_SHARED_LIBS=ON",
     ],
     deps = [
-        "dev-libs//data/arrow:arrow",
+        "//packages/linux/dev-libs/data/arrow:arrow",
     ],
 )

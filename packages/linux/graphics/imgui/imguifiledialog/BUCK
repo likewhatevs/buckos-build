@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/aiekick/ImGuiFileDialog",
     license = "MIT",
     deps = [
-        "graphics//imgui:imgui",
+        "//packages/linux/graphics/imgui:imgui",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

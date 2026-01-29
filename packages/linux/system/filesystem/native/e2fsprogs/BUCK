@@ -45,7 +45,7 @@ autotools_package(
         "--disable-fsck",
     ],
     deps = [
-        "core//util-linux:util-linux",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )

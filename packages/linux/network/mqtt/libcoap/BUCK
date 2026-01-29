@@ -5,10 +5,10 @@ load("@root//defs:package_defs.bzl", "autotools_package")
 autotools_package(
     name = "libcoap",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     src_prepare = """
 autoreconf -fi
@@ -23,7 +23,7 @@ autoreconf -fi
     use_defaults = ["ssl", "dtls"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

@@ -30,118 +30,118 @@ alias(
 
 alias(
     name = "bootloader",
-    actual = "boot//grub:grub",
+    actual = "//packages/linux/boot/grub:grub",
     visibility = ["PUBLIC"],
 )
 
 # Default shell
 alias(
     name = "shell",
-    actual = "core//bash:bash",
+    actual = "//packages/linux/core/bash:bash",
     visibility = ["PUBLIC"],
 )
 
 # Default terminal
 alias(
     name = "terminal",
-    actual = "terminals//foot:foot",
+    actual = "//packages/linux/terminals/foot:foot",
     visibility = ["PUBLIC"],
 )
 
 # Default cron
 alias(
     name = "cron",
-    actual = "system//apps/cronie:cronie",
+    actual = "//packages/linux/system/apps/cronie:cronie",
     visibility = ["PUBLIC"],
 )
 
 # Essential utilities from sys-apps
 alias(
     name = "tar",
-    actual = "system//apps/tar:tar",
+    actual = "//packages/linux/system/apps/tar:tar",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "gzip",
-    actual = "system//libs/compression/gzip:gzip",
+    actual = "//packages/linux/system/libs/compression/gzip:gzip",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "shadow",
-    actual = "system//apps/shadow:shadow",
+    actual = "//packages/linux/system/apps/shadow:shadow",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "man-db",
-    actual = "system//docs:man-db",
+    actual = "//packages/linux/system/docs:man-db",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "texinfo",
-    actual = "system//docs:texinfo",
+    actual = "//packages/linux/system/docs:texinfo",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "gettext",
-    actual = "dev-libs//misc/gettext:gettext",
+    actual = "//packages/linux/dev-libs/misc/gettext:gettext",
     visibility = ["PUBLIC"],
 )
 
 # Default privilege escalation
 alias(
     name = "sudo",
-    actual = "system//apps/sudo:sudo",
+    actual = "//packages/linux/system/apps/sudo:sudo",
     visibility = ["PUBLIC"],
 )
 
 # Default terminal multiplexer
 alias(
     name = "multiplexer",
-    actual = "system//apps/tmux:tmux",
+    actual = "//packages/linux/system/apps/tmux:tmux",
     visibility = ["PUBLIC"],
 )
 
 # VPN solutions
 alias(
     name = "wireguard",
-    actual = "network//vpn/wireguard-tools:wireguard-tools",
+    actual = "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "openvpn",
-    actual = "network//vpn/openvpn:openvpn",
+    actual = "//packages/linux/network/vpn/openvpn:openvpn",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "strongswan",
-    actual = "network//vpn/strongswan:strongswan",
+    actual = "//packages/linux/network/vpn/strongswan:strongswan",
     visibility = ["PUBLIC"],
 )
 
 # Benchmarking tools
 alias(
     name = "benchmarks",
-    actual = "benchmarks//:all-benchmarks",
+    actual = "//packages/linux/benchmarks/:all-benchmarks",
     visibility = ["PUBLIC"],
 )
 
 # Default init system
 alias(
     name = "init",
-    actual = "system//init:systemd",
+    actual = "//packages/linux/system/init:systemd",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "init-s6",
-    actual = "system//init:s6",
+    actual = "//packages/linux/system/init:s6",
     visibility = ["PUBLIC"],
 )
 
@@ -152,10 +152,10 @@ alias(
 filegroup(
     name = "core-packages",
     srcs = [
-        "core//musl:musl",
-        "core//cpio:cpio",
-        "core//util-linux:util-linux",
-        "core//zlib:zlib",
+        "//packages/linux/core/musl:musl",
+        "//packages/linux/core/cpio:cpio",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )
@@ -163,7 +163,7 @@ filegroup(
 filegroup(
     name = "filesystem-packages",
     srcs = [
-        "core//e2fsprogs:e2fsprogs",
+        "//packages/linux/core/e2fsprogs:e2fsprogs",
     ],
     visibility = ["PUBLIC"],
 )
@@ -172,11 +172,11 @@ filegroup(
 filegroup(
     name = "net-packages",
     srcs = [
-        "system//libs/crypto/openssl:openssl",
-        "network//curl:curl",
-        "network//openssh:openssh",
-        "network//iproute2:iproute2",
-        "network//dhcpcd:dhcpcd",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/network/openssh:openssh",
+        "//packages/linux/network/iproute2:iproute2",
+        "//packages/linux/network/dhcpcd:dhcpcd",
     ],
     visibility = ["PUBLIC"],
 )
@@ -185,14 +185,14 @@ filegroup(
 filegroup(
     name = "vpn-packages",
     srcs = [
-        "network//vpn/wireguard-tools:wireguard-tools",
-        "network//vpn/openvpn:openvpn",
-        "network//vpn/strongswan:strongswan",
-        "network//vpn/libreswan:libreswan",
-        "network//vpn/openconnect:openconnect",
-        "network//vpn/tinc:tinc",
-        "network//vpn/zerotier:zerotier",
-        "network//vpn/nebula:nebula",
+        "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
+        "//packages/linux/network/vpn/openvpn:openvpn",
+        "//packages/linux/network/vpn/strongswan:strongswan",
+        "//packages/linux/network/vpn/libreswan:libreswan",
+        "//packages/linux/network/vpn/openconnect:openconnect",
+        "//packages/linux/network/vpn/tinc:tinc",
+        "//packages/linux/network/vpn/zerotier:zerotier",
+        "//packages/linux/network/vpn/nebula:nebula",
     ],
     visibility = ["PUBLIC"],
 )
@@ -201,9 +201,9 @@ filegroup(
 filegroup(
     name = "vpn-modern",
     srcs = [
-        "network//vpn/wireguard-tools:wireguard-tools",
-        "network//vpn/openvpn:openvpn",
-        "network//vpn/strongswan:strongswan",
+        "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
+        "//packages/linux/network/vpn/openvpn:openvpn",
+        "//packages/linux/network/vpn/strongswan:strongswan",
     ],
     visibility = ["PUBLIC"],
 )
@@ -212,10 +212,10 @@ filegroup(
 filegroup(
     name = "vpn-mesh",
     srcs = [
-        "network//vpn/tinc:tinc",
-        "network//vpn/zerotier:zerotier",
-        "network//vpn/nebula:nebula",
-        "network//vpn/tailscale:tailscale",
+        "//packages/linux/network/vpn/tinc:tinc",
+        "//packages/linux/network/vpn/zerotier:zerotier",
+        "//packages/linux/network/vpn/nebula:nebula",
+        "//packages/linux/network/vpn/tailscale:tailscale",
     ],
     visibility = ["PUBLIC"],
 )
@@ -224,9 +224,9 @@ filegroup(
 filegroup(
     name = "editor-packages",
     srcs = [
-        "editors//vim",
-        "editors//neovim",
-        "editors//emacs",
+        "//packages/linux/editors/vim",
+        "//packages/linux/editors/neovim",
+        "//packages/linux/editors/emacs",
     ],
     visibility = ["PUBLIC"],
 )
@@ -234,8 +234,8 @@ filegroup(
 filegroup(
     name = "shell-packages",
     srcs = [
-        "core//bash:bash",
-        "shells//zsh:zsh",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/shells/zsh:zsh",
     ],
     visibility = ["PUBLIC"],
 )
@@ -244,8 +244,8 @@ filegroup(
 filegroup(
     name = "terminal-packages",
     srcs = [
-        "terminals//alacritty:alacritty",
-        "terminals//foot:foot",
+        "//packages/linux/terminals/alacritty:alacritty",
+        "//packages/linux/terminals/foot:foot",
     ],
     visibility = ["PUBLIC"],
 )
@@ -253,16 +253,16 @@ filegroup(
 filegroup(
     name = "sys-apps-packages",
     srcs = [
-        "system//apps/coreutils:coreutils",
-        "system//apps/findutils:findutils",
-        "system//apps/cronie:cronie",
-        "system//apps/sudo:sudo",
-        "system//apps/tmux:tmux",
-        "system//apps/htop:htop",
-        "system//apps/rsync:rsync",
-        "system//apps/logrotate:logrotate",
-        "system//apps/tar:tar",
-        "system//apps/shadow:shadow",
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/system/apps/findutils:findutils",
+        "//packages/linux/system/apps/cronie:cronie",
+        "//packages/linux/system/apps/sudo:sudo",
+        "//packages/linux/system/apps/tmux:tmux",
+        "//packages/linux/system/apps/htop:htop",
+        "//packages/linux/system/apps/rsync:rsync",
+        "//packages/linux/system/apps/logrotate:logrotate",
+        "//packages/linux/system/apps/tar:tar",
+        "//packages/linux/system/apps/shadow:shadow",
     ],
     visibility = ["PUBLIC"],
 )
@@ -270,11 +270,11 @@ filegroup(
 filegroup(
     name = "benchmark-packages",
     srcs = [
-        "benchmarks//stress-ng:stress-ng",
-        "benchmarks//fio:fio",
-        "benchmarks//iperf3:iperf3",
-        "benchmarks//hackbench:hackbench",
-        "benchmarks//memtester:memtester",
+        "//packages/linux/benchmarks/stress-ng:stress-ng",
+        "//packages/linux/benchmarks/fio:fio",
+        "//packages/linux/benchmarks/iperf3:iperf3",
+        "//packages/linux/benchmarks/hackbench:hackbench",
+        "//packages/linux/benchmarks/memtester:memtester",
     ],
     visibility = ["PUBLIC"],
 )
@@ -283,9 +283,9 @@ filegroup(
 filegroup(
     name = "shell-libs",
     srcs = [
-        "core//readline:readline",
-        "core//ncurses:ncurses",
-        "core//less:less",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/core/less:less",
     ],
     visibility = ["PUBLIC"],
 )
@@ -294,11 +294,11 @@ filegroup(
 filegroup(
     name = "compression-packages",
     srcs = [
-        "core//zlib:zlib",
-        "core//bzip2:bzip2",
-        "core//xz:xz",
-        "system//libs/compression/gzip:gzip",
-        "system//apps/tar:tar",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/bzip2:bzip2",
+        "//packages/linux/core/xz:xz",
+        "//packages/linux/system/libs/compression/gzip:gzip",
+        "//packages/linux/system/apps/tar:tar",
     ],
     visibility = ["PUBLIC"],
 )
@@ -307,10 +307,10 @@ filegroup(
 filegroup(
     name = "docs-packages",
     srcs = [
-        "system//docs:man-db",
-        "system//docs:texinfo",
-        "system//docs:man-pages",
-        "system//docs:groff",
+        "//packages/linux/system/docs:man-db",
+        "//packages/linux/system/docs:texinfo",
+        "//packages/linux/system/docs:man-pages",
+        "//packages/linux/system/docs:groff",
     ],
     visibility = ["PUBLIC"],
 )
@@ -319,7 +319,7 @@ filegroup(
 filegroup(
     name = "i18n-packages",
     srcs = [
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     visibility = ["PUBLIC"],
 )
@@ -328,8 +328,8 @@ filegroup(
 filegroup(
     name = "system-packages",
     srcs = [
-        "core//procps-ng:procps-ng",
-        "core//file:file",
+        "//packages/linux/core/procps-ng:procps-ng",
+        "//packages/linux/core/file:file",
     ],
     visibility = ["PUBLIC"],
 )
@@ -338,9 +338,9 @@ filegroup(
 filegroup(
     name = "dev-libraries",
     srcs = [
-        "core//libffi:libffi",
-        "core//expat:expat",
-        "core//libnl:libnl",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/core/libnl:libnl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -349,7 +349,7 @@ filegroup(
 filegroup(
     name = "init-packages",
     srcs = [
-        "system//init:systemd",
+        "//packages/linux/system/init:systemd",
     ],
     visibility = ["PUBLIC"],
 )
@@ -368,75 +368,75 @@ filegroup(
 # Full desktop environments
 alias(
     name = "kde-plasma",
-    actual = "desktop//kde:kde-plasma",
+    actual = "//packages/linux/desktop/kde:kde-plasma",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "xfce",
-    actual = "desktop//xfce:xfce",
+    actual = "//packages/linux/desktop/xfce:xfce",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "lxqt",
-    actual = "desktop//lxqt:lxqt",
+    actual = "//packages/linux/desktop/lxqt:lxqt",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "cinnamon",
-    actual = "desktop//cinnamon:cinnamon-desktop",
+    actual = "//packages/linux/desktop/cinnamon:cinnamon-desktop",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "mate",
-    actual = "desktop//mate:mate",
+    actual = "//packages/linux/desktop/mate:mate",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "budgie",
-    actual = "desktop//budgie:budgie",
+    actual = "//packages/linux/desktop/budgie:budgie",
     visibility = ["PUBLIC"],
 )
 
 # Wayland compositors
 alias(
     name = "sway",
-    actual = "desktop//sway:sway-desktop",
+    actual = "//packages/linux/desktop/sway:sway-desktop",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "hyprland",
-    actual = "desktop//hyprland:hyprland-desktop",
+    actual = "//packages/linux/desktop/hyprland:hyprland-desktop",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "wayfire",
-    actual = "desktop//wayfire:wayfire-desktop",
+    actual = "//packages/linux/desktop/wayfire:wayfire-desktop",
     visibility = ["PUBLIC"],
 )
 
 # X11 window managers
 alias(
     name = "i3",
-    actual = "desktop//i3:i3-desktop",
+    actual = "//packages/linux/desktop/i3:i3-desktop",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "bspwm",
-    actual = "desktop//bspwm:bspwm-desktop",
+    actual = "//packages/linux/desktop/bspwm:bspwm-desktop",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "awesome",
-    actual = "desktop//awesome:awesome-desktop",
+    actual = "//packages/linux/desktop/awesome:awesome-desktop",
     visibility = ["PUBLIC"],
 )
 
@@ -479,10 +479,10 @@ filegroup(
 filegroup(
     name = "monitoring-packages",
     srcs = [
-        "system//apps/htop:htop",
-        "system//apps/lsof:lsof",
-        "system//apps/strace:strace",
-        "core//procps-ng:procps-ng",
+        "//packages/linux/system/apps/htop:htop",
+        "//packages/linux/system/apps/lsof:lsof",
+        "//packages/linux/system/apps/strace:strace",
+        "//packages/linux/core/procps-ng:procps-ng",
     ],
     visibility = ["PUBLIC"],
 )
@@ -502,21 +502,21 @@ filegroup(
 # QEMU - Full system emulator
 alias(
     name = "qemu",
-    actual = "emulation//hypervisors/qemu:qemu",
+    actual = "//packages/linux/emulation/hypervisors/qemu:qemu",
     visibility = ["PUBLIC"],
 )
 
 # libvirt - Virtualization API
 alias(
     name = "libvirt",
-    actual = "emulation//virtualization/libvirt:libvirt",
+    actual = "//packages/linux/emulation/virtualization/libvirt:libvirt",
     visibility = ["PUBLIC"],
 )
 
 # virt-manager - VM management GUI
 alias(
     name = "virt-manager",
-    actual = "emulation//virtualization/virt-manager:virt-manager",
+    actual = "//packages/linux/emulation/virtualization/virt-manager:virt-manager",
     visibility = ["PUBLIC"],
 )
 
@@ -524,49 +524,49 @@ alias(
 # Docker
 alias(
     name = "docker",
-    actual = "emulation//containers:docker-full",
+    actual = "//packages/linux/emulation/containers:docker-full",
     visibility = ["PUBLIC"],
 )
 
 # Podman
 alias(
     name = "podman",
-    actual = "emulation//containers:podman-full",
+    actual = "//packages/linux/emulation/containers:podman-full",
     visibility = ["PUBLIC"],
 )
 
 # containerd
 alias(
     name = "containerd",
-    actual = "emulation//containers/containerd:containerd",
+    actual = "//packages/linux/emulation/containers/containerd:containerd",
     visibility = ["PUBLIC"],
 )
 
 # Firecracker - Secure microVMs
 alias(
     name = "firecracker",
-    actual = "emulation//utilities/firecracker:firecracker",
+    actual = "//packages/linux/emulation/utilities/firecracker:firecracker",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor
 alias(
     name = "cloud-hypervisor",
-    actual = "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
+    actual = "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
     visibility = ["PUBLIC"],
 )
 
 # crosvm - Chrome OS VMM
 alias(
     name = "crosvm",
-    actual = "emulation//utilities/crosvm:crosvm",
+    actual = "//packages/linux/emulation/utilities/crosvm:crosvm",
     visibility = ["PUBLIC"],
 )
 
 # virtme-ng - Fast kernel testing
 alias(
     name = "virtme-ng",
-    actual = "emulation//kernel/virtme-ng:virtme-ng",
+    actual = "//packages/linux/emulation/kernel/virtme-ng:virtme-ng",
     visibility = ["PUBLIC"],
 )
 
@@ -577,67 +577,67 @@ alias(
 # Cloud Hypervisor full stack (CH + virtiofsd + firmware)
 alias(
     name = "ch-full",
-    actual = "emulation//:cloud-hypervisor-full",
+    actual = "//packages/linux/emulation/:cloud-hypervisor-full",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor minimal (CH + virtiofsd)
 alias(
     name = "ch-minimal",
-    actual = "emulation//:cloud-hypervisor-minimal",
+    actual = "//packages/linux/emulation/:cloud-hypervisor-minimal",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor optimized kernel
 alias(
     name = "kernel-ch",
-    actual = "kernel//buckos-kernel:buckos-kernel-ch",
+    actual = "//packages/linux/kernel/buckos-kernel:buckos-kernel-ch",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor firmware
 alias(
     name = "hypervisor-fw",
-    actual = "boot//rust-hypervisor-firmware:rust-hypervisor-firmware",
+    actual = "//packages/linux/boot/rust-hypervisor-firmware:rust-hypervisor-firmware",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor UEFI firmware
 alias(
     name = "edk2-cloudhv",
-    actual = "boot//edk2-cloudhv:edk2-cloudhv",
+    actual = "//packages/linux/boot/edk2-cloudhv:edk2-cloudhv",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor boot scripts
 alias(
     name = "ch-boot-direct",
-    actual = "boot//cloud-hypervisor-boot:ch-boot-direct",
+    actual = "//packages/linux/boot/cloud-hypervisor-boot:ch-boot-direct",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "ch-boot-virtiofs",
-    actual = "boot//cloud-hypervisor-boot:ch-boot-virtiofs",
+    actual = "//packages/linux/boot/cloud-hypervisor-boot:ch-boot-virtiofs",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "ch-boot-network",
-    actual = "boot//cloud-hypervisor-boot:ch-boot-network",
+    actual = "//packages/linux/boot/cloud-hypervisor-boot:ch-boot-network",
     visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor disk images
 alias(
     name = "ch-disk-minimal",
-    actual = "system//cloud-hypervisor:ch-minimal-disk",
+    actual = "//packages/linux/system/cloud-hypervisor:ch-minimal-disk",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "ch-disk-full",
-    actual = "system//cloud-hypervisor:ch-full-disk",
+    actual = "//packages/linux/system/cloud-hypervisor:ch-full-disk",
     visibility = ["PUBLIC"],
 )
 
@@ -649,7 +649,7 @@ alias(
 filegroup(
     name = "emulation-essential",
     srcs = [
-        "emulation//:essential",
+        "//packages/linux/emulation/:essential",
     ],
     visibility = ["PUBLIC"],
 )
@@ -662,7 +662,7 @@ filegroup(
 filegroup(
     name = "container-runtime",
     srcs = [
-        "system//containers:container-runtime",
+        "//packages/linux/system/containers:container-runtime",
     ],
     visibility = ["PUBLIC"],
 )
@@ -671,7 +671,7 @@ filegroup(
 filegroup(
     name = "emulation-server",
     srcs = [
-        "emulation//:server",
+        "//packages/linux/emulation/:server",
     ],
     visibility = ["PUBLIC"],
 )
@@ -680,7 +680,7 @@ filegroup(
 filegroup(
     name = "container-networking",
     srcs = [
-        "system//containers:container-networking",
+        "//packages/linux/system/containers:container-networking",
     ],
     visibility = ["PUBLIC"],
 )
@@ -689,7 +689,7 @@ filegroup(
 filegroup(
     name = "emulation-desktop",
     srcs = [
-        "emulation//:desktop",
+        "//packages/linux/emulation/:desktop",
     ],
     visibility = ["PUBLIC"],
 )
@@ -698,7 +698,7 @@ filegroup(
 filegroup(
     name = "podman-tools",
     srcs = [
-        "system//containers:podman-tools",
+        "//packages/linux/system/containers:podman-tools",
     ],
     visibility = ["PUBLIC"],
 )
@@ -707,7 +707,7 @@ filegroup(
 filegroup(
     name = "emulation-cloud",
     srcs = [
-        "emulation//:cloud",
+        "//packages/linux/emulation/:cloud",
     ],
     visibility = ["PUBLIC"],
 )
@@ -716,7 +716,7 @@ filegroup(
 filegroup(
     name = "container-utilities",
     srcs = [
-        "system//containers:container-utilities",
+        "//packages/linux/system/containers:container-utilities",
     ],
     visibility = ["PUBLIC"],
 )
@@ -725,7 +725,7 @@ filegroup(
 filegroup(
     name = "emulation-development",
     srcs = [
-        "emulation//:development",
+        "//packages/linux/emulation/:development",
     ],
     visibility = ["PUBLIC"],
 )
@@ -734,7 +734,7 @@ filegroup(
 filegroup(
     name = "container-security",
     srcs = [
-        "system//containers:container-security",
+        "//packages/linux/system/containers:container-security",
     ],
     visibility = ["PUBLIC"],
 )
@@ -743,7 +743,7 @@ filegroup(
 filegroup(
     name = "container-packages",
     srcs = [
-        "emulation//containers:all-containers",
+        "//packages/linux/emulation/containers:all-containers",
     ],
     visibility = ["PUBLIC"],
 )
@@ -752,7 +752,7 @@ filegroup(
 filegroup(
     name = "emulation-all",
     srcs = [
-        "emulation//:all",
+        "//packages/linux/emulation/:all",
     ],
     visibility = ["PUBLIC"],
 )
@@ -761,7 +761,7 @@ filegroup(
 filegroup(
     name = "container-packages-complete",
     srcs = [
-        "system//containers:all-containers",
+        "//packages/linux/system/containers:all-containers",
     ],
     visibility = ["PUBLIC"],
 )
@@ -904,7 +904,7 @@ combined_set(
     name = "full-stack-server",
     sets = ["@web-server", "@database-server", "@monitoring"],
     additions = [
-        "network//vpn/wireguard-tools:wireguard-tools",
+        "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
     ],
     description = "Complete web application server stack",
 )
@@ -921,8 +921,8 @@ system_set(
     name = "secure-server",
     profile = "hardened",
     additions = [
-        "network//vpn/wireguard-tools:wireguard-tools",
-        "network//vpn/openvpn:openvpn",
+        "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
+        "//packages/linux/network/vpn/openvpn:openvpn",
     ],
     description = "Hardened server with VPN support",
 )
@@ -932,10 +932,10 @@ combined_set(
     name = "ci-runner",
     sets = ["@container-host"],
     additions = [
-        "editors//vim",
+        "//packages/linux/editors/vim",
     ],
     removals = [
-        "system//docs:texinfo",
+        "//packages/linux/system/docs:texinfo",
     ],
     description = "CI/CD runner with container support",
 )
@@ -945,9 +945,9 @@ system_set(
     name = "lightweight-server",
     profile = "minimal",
     additions = [
-        "network//openssh:openssh",
-        "editors//vim",
-        "system//apps/sudo:sudo",
+        "//packages/linux/network/openssh:openssh",
+        "//packages/linux/editors/vim",
+        "//packages/linux/system/apps/sudo:sudo",
     ],
     description = "Lightweight server with SSH access",
 )

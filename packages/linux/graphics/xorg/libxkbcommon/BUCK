@@ -30,14 +30,14 @@ meson_package(
     },
     # Base dependencies - xkeyboard-config is always needed
     deps = [
-        "graphics//xorg/xkeyboard-config:xkeyboard-config",
+        "//packages/linux/graphics/xorg/xkeyboard-config:xkeyboard-config",
     ],
     # X11 support requires libxcb, Wayland support requires libxml2 (and its transitive dep zlib)
     use_deps = {
-        "X": ["graphics//xorg/libxcb:libxcb"],
+        "X": ["//packages/linux/graphics/xorg/libxcb:libxcb"],
         "wayland": [
-            "system//libs/data/libxml2:libxml2",
-            "core//zlib:zlib",  # Transitive dep required by libxml2's pkg-config
+            "//packages/linux/system/libs/data/libxml2:libxml2",
+            "//packages/linux/core/zlib:zlib",  # Transitive dep required by libxml2's pkg-config
         ],
     },
     # Default to Wayland-only (no X11)

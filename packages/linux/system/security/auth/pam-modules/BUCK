@@ -28,9 +28,9 @@ autotools_package(
         mkdir -p "$OUT/etc/security"
     """,
     deps = [
-        "system//security/encryption:linux-pam",
-        "core//util-linux:util-linux",
-        "system//security/cryptsetup:cryptsetup",
+        "//packages/linux/system/security/encryption:linux-pam",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/security/cryptsetup:cryptsetup",
     ],
     visibility = ["PUBLIC"],
 )
@@ -58,7 +58,7 @@ autotools_package(
         "--libdir=/lib/security",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )
@@ -87,8 +87,8 @@ autotools_package(
         "--with-mantype=man",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/security/encryption:linux-pam",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -120,9 +120,9 @@ autotools_package(
         mkdir -p "$OUT/etc/pam_pkcs11"
     """,
     deps = [
-        "system//security/encryption:linux-pam",
-        "system//libs/crypto/openssl:openssl",
-        "system//security/encryption:pcsc-lite",
+        "//packages/linux/system/security/encryption:linux-pam",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/security/encryption:pcsc-lite",
     ],
     visibility = ["PUBLIC"],
 )
@@ -151,7 +151,7 @@ autotools_package(
         "--with-pam-lib-dir=/lib/security",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )

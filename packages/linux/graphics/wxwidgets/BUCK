@@ -15,8 +15,8 @@ autotools_package(
         "--disable-mediactrl",
     ],
     deps = [
-        "graphics//gtk3:gtk3",
-        "dev-libs//glew:glew",
+        "//packages/linux/graphics/gtk3:gtk3",
+        "//packages/linux/dev-libs/glew:glew",
     ],
     visibility = ["PUBLIC"],
 )

@@ -18,8 +18,8 @@ autotools_package(
     iuse = ["selinux", "pam"],
     use_defaults = [],
     use_deps = {
-        "selinux": ["system//security/selinux:selinux"],
-        "pam": ["system//security/auth/pam:pam"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
     },
     use_configure = {
         "selinux": "--with-selinux",

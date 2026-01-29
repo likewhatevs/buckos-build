@@ -110,13 +110,13 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "dev-libs//glib:glib",
-        "graphics//utilities/gegl:gegl",
-        "graphics//utilities/babl:babl",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/graphics/utilities/gegl:gegl",
+        "//packages/linux/graphics/utilities/babl:babl",
     ],
     bdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

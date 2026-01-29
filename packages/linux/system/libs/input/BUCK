@@ -3,9 +3,9 @@
 filegroup(
     name = "core-input",
     srcs = [
-        "system//libs/input/libevdev:libevdev",
-        "system//libs/input/mtdev:mtdev",
-        "system//libs/input/libinput:libinput",
+        "//packages/linux/system/libs/input/libevdev:libevdev",
+        "//packages/linux/system/libs/input/mtdev:mtdev",
+        "//packages/linux/system/libs/input/libinput:libinput",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -14,8 +14,8 @@ filegroup(
 filegroup(
     name = "keyboard",
     srcs = [
-        "system//libs/input/libxkbcommon:libxkbcommon",
-        "system//libs/input/libfakekey:libfakekey",
+        "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
+        "//packages/linux/system/libs/input/libfakekey:libfakekey",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

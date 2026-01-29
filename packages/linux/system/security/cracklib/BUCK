@@ -42,7 +42,7 @@ autotools_package(
         "--disable-static",
     ],
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

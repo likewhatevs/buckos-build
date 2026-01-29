@@ -7,7 +7,7 @@ go_package(
     sha256 = "cda730162327f5380bb027deba734d56dc92be239daef77f642b563f51e26286",
     packages = ["."],
     deps = [
-        "dev-libs//go/crypto:crypto",
-        "dev-libs//go/text:text",
+        "//packages/linux/dev-libs/go/crypto:crypto",
+        "//packages/linux/dev-libs/go/text:text",
     ],
 )

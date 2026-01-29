@@ -42,9 +42,9 @@ sed -i 's/ok, is_clang, clang_version, gcc_version = try_check_compiler/ok, is_c
         make DESTDIR="$DESTDIR" install
     """,
     depend = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/utility/icu:icu",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/utility/icu:icu",
     ],
     visibility = ["PUBLIC"],
 )

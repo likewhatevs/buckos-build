@@ -21,8 +21,8 @@ cmake_package(
         "zlib",
     ],
     deps = [
-        "dev-tools//build-systems:bison",
-        "dev-tools//build-systems:flex",
+        "//packages/linux/dev-tools/build-systems:bison",
+        "//packages/linux/dev-tools/build-systems:flex",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -38,8 +38,8 @@ cmake_package(
         "zlib": "with_zlib",
     },
     use_deps = {
-        "expat": ["dev-libs//parsers/expat:expat"],
-        "zlib": ["system//compression/zlib:zlib"],
+        "expat": ["//packages/linux/dev-libs/parsers/expat:expat"],
+        "zlib": ["//packages/linux/system/compression/zlib:zlib"],
     },
     visibility = ["PUBLIC"],
 )

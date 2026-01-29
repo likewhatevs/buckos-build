@@ -28,13 +28,13 @@ cmake_package(
     iuse = ["cuda", "cudnn", "mkl", "openblas", "distributed", "nnpack"],
     use_defaults = ["openblas"],
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//serialization/protobuf:protobuf",
-        "core//zlib:zlib",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/core/zlib:zlib",
     ],
     use_deps = {
-        "openblas": ["dev-libs//math/openblas:openblas"],
+        "openblas": ["//packages/linux/dev-libs/math/openblas:openblas"],
         "mkl": [],  # MKL is proprietary, not in BuckOS
     },
     cmake_args = [

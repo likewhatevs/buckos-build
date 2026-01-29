@@ -17,17 +17,17 @@ autotools_package(
     license = "LGPL-2.0",
     configure_args = [],
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     src_prepare = """
 autoreconf -fi
 """,
     deps = [
-        "system//filesystem/fuse/fuse3:fuse3",
-        "system//libs/compression/libarchive:libarchive",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/libs/compression/libarchive:libarchive",
     ],
     visibility = ["PUBLIC"],
 )
