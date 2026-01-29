@@ -29,8 +29,8 @@ meson_package(
         "-wayland": "-Denable-wayland=false",
     },
     deps = [
-        "core//zlib:zlib",
-        "system//libs/data/libxml2:libxml2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
     ],
     visibility = ["PUBLIC"],
 )

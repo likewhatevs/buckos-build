@@ -28,10 +28,10 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "json": ["dev-libs//data/jansson:jansson"],
-        "yaml": ["dev-libs//data/libyaml:libyaml"],
-        "xml": ["dev-libs//text/libxml2:libxml2"],
-        "pcre2": ["dev-libs//text/pcre2:pcre2"],
+        "json": ["//packages/linux/dev-libs/data/jansson:jansson"],
+        "yaml": ["//packages/linux/dev-libs/data/libyaml:libyaml"],
+        "xml": ["//packages/linux/dev-libs/text/libxml2:libxml2"],
+        "pcre2": ["//packages/linux/dev-libs/text/pcre2:pcre2"],
     },
 
     # Conditional configure arguments

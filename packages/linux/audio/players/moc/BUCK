@@ -102,13 +102,13 @@ autotools_package(
         "wavpack": "--with-wavpack",
     },
     use_deps = {
-        "alsa": ["audio//daemons/alsa-lib:alsa-lib"],
-        "flac": ["system//libs/audio/flac:flac"],
-        "vorbis": ["system//libs/audio/libvorbis:libvorbis", "system//libs/audio/libogg:libogg"],
-        "curl": ["network//curl:curl"],
+        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "flac": ["//packages/linux/system/libs/audio/flac:flac"],
+        "vorbis": ["//packages/linux/system/libs/audio/libvorbis:libvorbis", "//packages/linux/system/libs/audio/libogg:libogg"],
+        "curl": ["//packages/linux/network/curl:curl"],
     },
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

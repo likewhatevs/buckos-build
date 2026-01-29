@@ -13,10 +13,10 @@ autotools_package(
     use_defaults = ["ssl", "lzo", "lz4", "plugins", "systemd", "iproute2"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "lzo": ["system//libs/compression/lzo:lzo"],
-        "lz4": ["system//libs/compression/lz4:lz4"],
-        "systemd": ["system//init/systemd:systemd"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "lzo": ["//packages/linux/system/libs/compression/lzo:lzo"],
+        "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
 
     use_configure = {

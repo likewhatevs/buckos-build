@@ -28,8 +28,8 @@ autotools_package(
         "--enable-null",
     ],
     deps = [
-        "system//libs/audio/libogg:libogg",
-        "system//libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
     ],
     visibility = ["PUBLIC"],
 )
@@ -37,11 +37,11 @@ autotools_package(
 filegroup(
     name = "codec-libraries",
     srcs = [
-        "system//libs/audio/libogg:libogg",
-        "system//libs/audio/libvorbis:libvorbis",
-        "system//libs/audio/flac:flac",
-        "system//libs/audio/opus:opus",
-        "system//libs/audio/lame:lame",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/opus:opus",
+        "//packages/linux/system/libs/audio/lame:lame",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

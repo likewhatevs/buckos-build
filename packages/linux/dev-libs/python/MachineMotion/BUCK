@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/ventionco/mm-python-api/archive/refs/tags/v4.2.tar.gz",
     sha256 = "a60af2a937d0e028aae2fcf889841c51e6c1afbd7f347cdcc004d918243c57a2",
     deps = [
-        "dev-libs//python/paho-mqtt:paho-mqtt",
-        "dev-libs//python/python-socketio:python-socketio",
+        "//packages/linux/dev-libs/python/paho-mqtt:paho-mqtt",
+        "//packages/linux/dev-libs/python/python-socketio:python-socketio",
     ],
 )

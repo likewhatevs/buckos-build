@@ -29,7 +29,7 @@ cmake -G Ninja -S "$S/runtimes" -B "$S/build" \
 """,
     cmake_args = [],
     deps = [
-        "core//llvm:llvm",
+        "//packages/linux/core/llvm:llvm",
     ],
     visibility = ["PUBLIC"],
 )

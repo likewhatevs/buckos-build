@@ -42,8 +42,8 @@ cmake_package(
     # - Boost (context, fiber) - line 101: find_package(Boost COMPONENTS context fiber)
     # - LLVM - line 281: find_package(LLVM CONFIG) when BUILD_CLANG_PLUGIN=true
     deps = [
-        "dev-libs//boost:boost",
-        "core//llvm:llvm",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/core/llvm:llvm",
     ],
 
     # CMake configuration arguments based on CMakeLists.txt:

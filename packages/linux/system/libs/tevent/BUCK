@@ -48,7 +48,7 @@ autotools_package(
 make -j${MAKEOPTS:-$(nproc)}
 ''',
     deps = [
-        "system//libs/talloc:talloc",
+        "//packages/linux/system/libs/talloc:talloc",
     ],
     visibility = ["PUBLIC"],
 )

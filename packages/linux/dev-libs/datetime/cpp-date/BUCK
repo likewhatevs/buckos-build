@@ -31,7 +31,7 @@ binary_package(
         make install DESTDIR="$OUT"
     """,
     deps = [
-        "core//libcurl:curl",
+        "//packages/linux/core/libcurl:curl",
     ],
     visibility = ["PUBLIC"],
 )

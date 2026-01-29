@@ -38,11 +38,11 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        # "core//jsoncpp:jsoncpp",  # TODO: not packaged yet
-        # "core//zeromq:zeromq",  # TODO: not packaged yet,
-        "desktop//qt:qt5",
-        "desktop//mesa:mesa",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        # "//packages/linux/core/jsoncpp:jsoncpp",  # TODO: not packaged yet
+        # "//packages/linux/core/zeromq:zeromq",  # TODO: not packaged yet,
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     visibility = ["PUBLIC"],
 )
@@ -64,9 +64,9 @@ python3 setup.py install --prefix=/usr --root=$OUT
 """,
     deps = [
         ":libopenshot",
-        "lang//python:python",
-        "desktop//qt:qt5",
-        # "core//requests:requests",  # TODO: not packaged yet,
+        "//packages/linux/lang/python:python",
+        "//packages/linux/desktop/qt:qt5",
+        # "//packages/linux/core/requests:requests",  # TODO: not packaged yet,
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

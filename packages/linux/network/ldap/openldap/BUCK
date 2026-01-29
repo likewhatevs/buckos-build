@@ -22,10 +22,10 @@ autotools_package(
     },
     use_defaults = ["tls"],
     deps = [
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     use_deps = {
-        "tls": ["system//libs/crypto/openssl:openssl"],
+        "tls": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

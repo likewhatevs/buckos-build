@@ -32,12 +32,12 @@ cmake_package(
         "mkl": "-DENABLE_MKL=ON",
     },
     deps = [
-        "dev-libs//math/lapack:lapack",
-        "dev-libs//math/openblas:openblas",
+        "//packages/linux/dev-libs/math/lapack:lapack",
+        "//packages/linux/dev-libs/math/openblas:openblas",
     ],
     use_deps = {
-        "hdf5": ["dev-libs//misc/hdf5:hdf5"],
-        "superlu": ["dev-libs//math/superlu:superlu"],
+        "hdf5": ["//packages/linux/dev-libs/misc/hdf5:hdf5"],
+        "superlu": ["//packages/linux/dev-libs/math/superlu:superlu"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

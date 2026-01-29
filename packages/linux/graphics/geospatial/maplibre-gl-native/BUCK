@@ -9,10 +9,10 @@ cmake_package(
     homepage = "https://maplibre.org/",
     license = "BSD",
     deps = [
-        "dev-libs//compression/zlib:zlib",
-        "dev-libs//text/icu:icu",
-        "graphics//rendering/opengl:opengl",
-        "databases//sqlite:sqlite",
+        "//packages/linux/dev-libs/compression/zlib:zlib",
+        "//packages/linux/dev-libs/text/icu:icu",
+        "//packages/linux/graphics/rendering/opengl:opengl",
+        "//packages/linux/databases/sqlite:sqlite",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

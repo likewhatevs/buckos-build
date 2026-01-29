@@ -38,6 +38,6 @@ autotools_package(
         "--enable-verbs",
     ],
     deps = [
-        "network//libs/rdma-core:rdma-core",
+        "//packages/linux/network/libs/rdma-core:rdma-core",
     ],
 )

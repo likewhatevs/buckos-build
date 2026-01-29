@@ -9,8 +9,8 @@ cmake_package(
     homepage = "https://github.com/foxglove/mcap",
     license = "MIT",
     deps = [
-        "dev-libs//compression/lz4:lz4",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/dev-libs/compression/lz4:lz4",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

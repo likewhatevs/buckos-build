@@ -30,9 +30,9 @@ autotools_package(
     use_defaults = ["deprecated", "experimental", "mesh", "midi", "nfc", "sixaxis", "readline"],
 
     use_deps = {
-        "readline": ["core//readline:readline"],
-        "systemd": ["system//init/systemd:systemd"],
-        "udev": ["system//hardware/eudev:eudev"],
+        "readline": ["//packages/linux/core/readline:readline"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
+        "udev": ["//packages/linux/system/hardware/eudev:eudev"],
     },
 
     use_configure = {
@@ -83,8 +83,8 @@ autotools_package(
     ],
 
     deps = [
-        "dev-libs//glib:glib",
-        "core//ncurses:ncurses",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/core/ncurses:ncurses",
     ],
 
     description = "Official Linux Bluetooth protocol stack",

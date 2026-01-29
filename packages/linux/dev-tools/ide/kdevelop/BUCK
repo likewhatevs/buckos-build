@@ -40,7 +40,7 @@ cmake_package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "desktop//kde:kde-plasma",
+        "//packages/linux/desktop/kde:kde-plasma",
     ],
     visibility = ["PUBLIC"],
 )

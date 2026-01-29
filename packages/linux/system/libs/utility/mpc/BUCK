@@ -24,8 +24,8 @@ autotools_package(
         "--disable-static",
     ],
     deps = [
-        "system//libs/utility/gmp:gmp",
-        "system//libs/utility/mpfr:mpfr",
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
     ],
     # Remove .la files - they contain hardcoded paths that break cross-package builds
     post_install = '''

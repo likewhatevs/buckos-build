@@ -43,11 +43,11 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "system//libs/graphics/lcms2:lcms2",
-        "dev-libs//fftw:fftw",
-        # "dev-libs//libiptcdata:libiptcdata",  # TODO: not packaged yet
-        "dev-libs//lensfun:lensfun",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
+        "//packages/linux/dev-libs/fftw:fftw",
+        # "//packages/linux/dev-libs/libiptcdata:libiptcdata",  # TODO: not packaged yet
+        "//packages/linux/dev-libs/lensfun:lensfun",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

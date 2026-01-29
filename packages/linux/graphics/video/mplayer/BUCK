@@ -355,18 +355,18 @@ autotools_package(
 DESTDIR=$OUT make install
 """,
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "graphics//video/libva:libva",
-        "graphics//video/vdpau:vdpau",
-        "audio//daemons/alsa-lib:alsa-lib",
-        "audio//daemons/pulseaudio:pulseaudio",
-        "core//zlib:zlib",
-        "fonts//libraries/freetype:freetype",
-        "system//libs/font/fontconfig:fontconfig",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/graphics/video/libva:libva",
+        "//packages/linux/graphics/video/vdpau:vdpau",
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
-        # "lang//yasm:yasm",  # TODO: not packaged yet,
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+        # "//packages/linux/lang/yasm:yasm",  # TODO: not packaged yet,
     ],
     visibility = ["PUBLIC"],
 )

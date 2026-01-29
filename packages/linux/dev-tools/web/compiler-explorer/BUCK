@@ -31,7 +31,7 @@ EOF
         chmod +x "$OUT/usr/bin/compiler-explorer"
     """,
     deps = [
-        "lang//nodejs:nodejs",
+        "//packages/linux/lang/nodejs:nodejs",
     ],
     visibility = ["PUBLIC"],
 )

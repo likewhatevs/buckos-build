@@ -59,8 +59,8 @@ autotools_package(
         "--with-readline=yes",
     ],
     deps = [
-        "core//readline:readline",
-        "core//ncurses:ncurses",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

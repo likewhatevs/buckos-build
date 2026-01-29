@@ -73,8 +73,8 @@ cmake_package(
         "-DUSE_QT=OFF",
     ],
     deps = [
-        "dev-libs//boost:boost",
-        "dev-libs//openexr:openexr",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/openexr:openexr",
     ],
     visibility = ["PUBLIC"],
 )

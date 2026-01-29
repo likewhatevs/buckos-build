@@ -31,7 +31,7 @@ cmake_package(
     use_defaults = ["ssl", "websocket", "ipv6"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     cmake_args = [
         "-DBUILD_SHARED_LIBS=ON",

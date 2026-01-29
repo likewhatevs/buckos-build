@@ -16,7 +16,7 @@ download_source(
 autotools_package(
     name = "lightdm",
     bdepend = [
-        "dev-tools//dev-utils/intltool:intltool",
+        "//packages/linux/dev-tools/dev-utils/intltool:intltool",
     ],
     src_prepare = "",
     source = ":lightdm-src",

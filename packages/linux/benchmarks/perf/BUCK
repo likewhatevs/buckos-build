@@ -32,7 +32,7 @@ binary_package(
     """,
     deps = use_dep(
         {
-            "zlib": ["core//zlib:zlib"],
+            "zlib": ["//packages/linux/core/zlib:zlib"],
         },
         ["zlib"],
     ),

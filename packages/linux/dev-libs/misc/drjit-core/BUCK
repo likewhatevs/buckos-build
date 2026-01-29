@@ -74,7 +74,7 @@ fi
 
     deps = [
         # LZ4 compression library (used for compressed PTX kernels)
-        "system//libs/compression/lz4:lz4",
+        "//packages/linux/system/libs/compression/lz4:lz4",
 
         # Note: nanothread and robin-map are included as vendored submodules
         # and built as part of the drjit-core build process

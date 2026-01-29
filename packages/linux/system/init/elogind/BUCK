@@ -40,10 +40,10 @@ meson_package(
         "-debug": "-Ddebug=false",
     },
     bdepend = [
-        "lang//python:python",  # Python for meson
+        "//packages/linux/lang/python:python",  # Python for meson
     ],
     deps = [
-        "core//util-linux:util-linux",  # libmount, libblkid
+        "//packages/linux/core/util-linux:util-linux",  # libmount, libblkid
     ],
     visibility = ["PUBLIC"],
 )

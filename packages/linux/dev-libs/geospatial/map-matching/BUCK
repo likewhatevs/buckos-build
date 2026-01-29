@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/jaegs/map-matching/archive/51e04721e739f3176d874bba7eb58f2844d1c93f.tar.gz",
     sha256 = "a9c34055b76f1d7ede262680d5c2751e2aedfc630c2c095156139e4e158e6672",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

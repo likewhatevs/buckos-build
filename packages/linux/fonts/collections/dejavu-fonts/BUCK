@@ -32,7 +32,7 @@ if [ -d fontconfig ]; then
 fi
 """,
     rdepend = [
-        "fonts//libraries/fontconfig:fontconfig",
+        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )

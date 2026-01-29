@@ -100,7 +100,7 @@ EOF
         libdir = "${prefix}/lib64",
     ),
     deps = [
-        "system//gpu/drivers/nvidia:nvidia-drivers",
+        "//packages/linux/system/gpu/drivers/nvidia:nvidia-drivers",
     ],
     visibility = ["PUBLIC"],
 )

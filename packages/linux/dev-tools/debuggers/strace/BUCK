@@ -21,7 +21,7 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "unwind": ["system//libs/libunwind:libunwind"],
+        "unwind": ["//packages/linux/system/libs/libunwind:libunwind"],
     },
 
     # Conditional configure arguments

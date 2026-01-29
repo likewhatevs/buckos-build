@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/prs-eth/marigold/archive/refs/tags/v0.1.1.tar.gz",
     sha256 = "bb68569f29d6b7d04fda7d4efaa54a57653e4a7a7fff94e77a9b5658ff88f7a2",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/matplotlib:matplotlib",
-        "ai//ml-frameworks/transformers:transformers",
-        "ai//ml-frameworks/diffusers:diffusers",
-        "ai//ml-frameworks/accelerate:accelerate",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/matplotlib:matplotlib",
+        "//packages/linux/ai/ml-frameworks/transformers:transformers",
+        "//packages/linux/ai/ml-frameworks/diffusers:diffusers",
+        "//packages/linux/ai/ml-frameworks/accelerate:accelerate",
     ],
 )

@@ -56,11 +56,11 @@ autotools_package(
     ],
     use_defaults = ["imfile", "imptcp"],
     use_deps = {
-        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gcrypt": ["system//libs/crypto/libgcrypt:libgcrypt"],
-        "mysql": ["databases//mysql:mysql"],
-        "systemd": ["system//init/systemd:systemd"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gcrypt": ["//packages/linux/system/libs/crypto/libgcrypt:libgcrypt"],
+        "mysql": ["//packages/linux/databases/mysql:mysql"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     use_configure = {
         "-clickhouse": "--disable-clickhouse",
@@ -142,7 +142,7 @@ autotools_package(
         "--disable-liblogging-stdlog",
     ],
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

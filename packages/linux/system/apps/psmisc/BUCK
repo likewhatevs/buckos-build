@@ -7,10 +7,10 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "psmisc",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fiv
@@ -31,7 +31,7 @@ autoreconf -fiv
     ],
     use_defaults = ["ipv6"],
     use_deps = {
-        "selinux": ["system//security/selinux:selinux"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
     },
     use_configure = {
         "-X": "--without-x",
@@ -49,7 +49,7 @@ autoreconf -fiv
         "--prefix=/usr",
     ],
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

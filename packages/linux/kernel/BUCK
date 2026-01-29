@@ -26,13 +26,13 @@ export_file(
 # Convenience alias for the default BuckOS kernel
 alias(
     name = "default",
-    actual = "kernel//buckos-kernel:buckos-kernel",
+    actual = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
     visibility = ["PUBLIC"],
 )
 
 # Alias for linux-headers (many packages expect this)
 alias(
     name = "linux-headers",
-    actual = "kernel//src:linux-src",
+    actual = "//packages/linux/kernel/src:linux-src",
     visibility = ["PUBLIC"],
 )

@@ -16,7 +16,7 @@ cmake_package(
     homepage = "https://mpusz.github.io/mp-units/",
     license = "MIT",
     deps = [
-        "dev-libs//misc/fmt:fmt",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

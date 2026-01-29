@@ -5,11 +5,11 @@
 filegroup(
     name = "all-email-servers",
     srcs = [
-        "communication//email-servers/dovecot:dovecot",
-        "communication//email-servers/exim:exim",
-        "communication//email-servers/maddy:maddy",
-        "communication//email-servers/opensmtpd:opensmtpd",
-        "communication//email-servers/postfix:postfix",
+        "//packages/linux/communication/email-servers/dovecot:dovecot",
+        "//packages/linux/communication/email-servers/exim:exim",
+        "//packages/linux/communication/email-servers/maddy:maddy",
+        "//packages/linux/communication/email-servers/opensmtpd:opensmtpd",
+        "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -19,7 +19,7 @@ filegroup(
 filegroup(
     name = "all-in-one",
     srcs = [
-        "communication//email-servers/maddy:maddy",
+        "//packages/linux/communication/email-servers/maddy:maddy",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -29,9 +29,9 @@ filegroup(
 filegroup(
     name = "mta",
     srcs = [
-        "communication//email-servers/exim:exim",
-        "communication//email-servers/opensmtpd:opensmtpd",
-        "communication//email-servers/postfix:postfix",
+        "//packages/linux/communication/email-servers/exim:exim",
+        "//packages/linux/communication/email-servers/opensmtpd:opensmtpd",
+        "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -41,7 +41,7 @@ filegroup(
 filegroup(
     name = "imap-servers",
     srcs = [
-        "communication//email-servers/dovecot:dovecot",
+        "//packages/linux/communication/email-servers/dovecot:dovecot",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -51,8 +51,8 @@ filegroup(
 filegroup(
     name = "traditional-stack",
     srcs = [
-        "communication//email-servers/dovecot:dovecot",
-        "communication//email-servers/postfix:postfix",
+        "//packages/linux/communication/email-servers/dovecot:dovecot",
+        "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -62,8 +62,8 @@ filegroup(
 filegroup(
     name = "lightweight",
     srcs = [
-        "communication//email-servers/maddy:maddy",
-        "communication//email-servers/opensmtpd:opensmtpd",
+        "//packages/linux/communication/email-servers/maddy:maddy",
+        "//packages/linux/communication/email-servers/opensmtpd:opensmtpd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -73,7 +73,7 @@ filegroup(
 filegroup(
     name = "modern",
     srcs = [
-        "communication//email-servers/maddy:maddy",
+        "//packages/linux/communication/email-servers/maddy:maddy",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -83,9 +83,9 @@ filegroup(
 filegroup(
     name = "enterprise",
     srcs = [
-        "communication//email-servers/dovecot:dovecot",
-        "communication//email-servers/exim:exim",
-        "communication//email-servers/postfix:postfix",
+        "//packages/linux/communication/email-servers/dovecot:dovecot",
+        "//packages/linux/communication/email-servers/exim:exim",
+        "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

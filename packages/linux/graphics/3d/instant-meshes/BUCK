@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/wjakob/instant-meshes",
     license = "BSD-3-Clause",
     deps = [
-        "robotics//eigen3:eigen3",
-        "dev-libs//misc/tbb:tbb",
-        "graphics//rendering/glfw:glfw",
+        "//packages/linux/robotics/eigen3:eigen3",
+        "//packages/linux/dev-libs/misc/tbb:tbb",
+        "//packages/linux/graphics/rendering/glfw:glfw",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

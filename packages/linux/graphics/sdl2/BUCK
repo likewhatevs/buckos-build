@@ -14,12 +14,12 @@ cmake_package(
     use_defaults = ["alsa", "x11", "opengl"],
     deps = [],
     use_deps = {
-        "alsa": ["media//sound/alsa-lib:alsa-lib"],
-        "pulseaudio": ["media//sound/pulseaudio:pulseaudio"],
-        "jack": ["media//sound/jack:jack"],
-        "x11": ["graphics//x11-libs/libx11:libx11"],
-        "wayland": ["graphics//wayland/wayland:wayland"],
-        "vulkan": ["graphics//vulkan/vulkan-loader:vulkan-loader"],
+        "alsa": ["//packages/linux/media/sound/alsa-lib:alsa-lib"],
+        "pulseaudio": ["//packages/linux/media/sound/pulseaudio:pulseaudio"],
+        "jack": ["//packages/linux/media/sound/jack:jack"],
+        "x11": ["//packages/linux/graphics/x11-libs/libx11:libx11"],
+        "wayland": ["//packages/linux/graphics/wayland/wayland:wayland"],
+        "vulkan": ["//packages/linux/graphics/vulkan/vulkan-loader:vulkan-loader"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

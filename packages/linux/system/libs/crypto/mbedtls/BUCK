@@ -30,7 +30,7 @@ cmake_package(
         "zlib": "ENABLE_ZLIB_SUPPORT",
     },
     use_deps = {
-        "zlib": ["core//zlib:zlib"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

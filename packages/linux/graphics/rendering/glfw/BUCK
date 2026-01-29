@@ -14,8 +14,8 @@ cmake_package(
     use_defaults = ["x11"],
     deps = [],
     use_deps = {
-        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
-        "x11": ["desktop//xorg/x11:libx11"],
+        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "x11": ["//packages/linux/desktop/xorg/x11:libx11"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

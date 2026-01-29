@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/mtrojnar/osslsigncode",
     license = "GPL-3.0",
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/network/curl:curl",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/network/curl:curl",
+        "//packages/linux/core/zlib:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

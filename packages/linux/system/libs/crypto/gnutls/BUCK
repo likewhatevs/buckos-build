@@ -74,17 +74,17 @@ autotools_package(
         "zstd": "--with-zstd",
     },
     use_deps = {
-        "p11": ["dev-libs//p11-kit:p11-kit"],
-        "guile": ["lang//guile:guile"],
+        "p11": ["//packages/linux/dev-libs/p11-kit:p11-kit"],
+        "guile": ["//packages/linux/lang/guile:guile"],
     },
     configure_args = [
         "--with-included-libtasn1",
         "--with-included-unistring",
     ],
     deps = [
-        "system//libs/crypto/nettle:nettle",
-        "system//libs/crypto/libgcrypt:libgcrypt",
-        "system//libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/crypto/nettle:nettle",
+        "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
+        "//packages/linux/system/libs/utility/gmp:gmp",
     ],
     visibility = ["PUBLIC"],
 )

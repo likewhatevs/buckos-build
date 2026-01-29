@@ -42,11 +42,11 @@ cmake_package(
         "-DPYTHON_CMD=python3",
     ],
     deps = [
-        "system//libs/bpf/libbpf:libbpf",
-        "dev-tools//dev-utils/elfutils:elfutils",
-        "core//zlib:zlib",
-        "core//llvm:llvm",
-        "core//libffi:libffi",
+        "//packages/linux/system/libs/bpf/libbpf:libbpf",
+        "//packages/linux/dev-tools/dev-utils/elfutils:elfutils",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/core/libffi:libffi",
     ],
     visibility = ["PUBLIC"],
 )

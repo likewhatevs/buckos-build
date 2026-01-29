@@ -57,7 +57,7 @@ autotools_package(
         "TLP_ULIB=/usr/lib/udev",
     ],
     deps = [
-        "core//bash:bash",
+        "//packages/linux/core/bash:bash",
     ],
     visibility = ["PUBLIC"],
 )

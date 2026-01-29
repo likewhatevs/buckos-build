@@ -46,9 +46,9 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "ncurses": ["core//ncurses:ncurses"],
-        "systemd": ["system//init:systemd"],
-        "udev": ["system//init/eudev:eudev"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "systemd": ["//packages/linux/system/init:systemd"],
+        "udev": ["//packages/linux/system/init/eudev:eudev"],
     },
 
     # Conditional configure arguments
@@ -171,7 +171,7 @@ fi
 """,
 
     deps = [
-        "system//libs/crypto/libxcrypt:libxcrypt",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
     ],
     visibility = ["PUBLIC"],
 )

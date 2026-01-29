@@ -18,10 +18,10 @@ cmake_package(
     homepage = "https://github.com/iovisor/bpftrace",
     license = "Apache-2.0",
     deps = [
-        "system//libs/bpf:libbpf",
-        "dev-libs//llvm:llvm",
-        "system//libs/elfutils:libelf",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/bpf:libbpf",
+        "//packages/linux/dev-libs/llvm:llvm",
+        "//packages/linux/system/libs/elfutils:libelf",
+        "//packages/linux/core/zlib:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

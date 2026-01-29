@@ -13,8 +13,8 @@ cmake_package(
     iuse = ["static-libs", "dwarfgen", "dwarfexample"],
     use_defaults = [],
     deps = [
-        "system//libs/compression/zlib:zlib",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/system/libs/compression/zlib:zlib",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

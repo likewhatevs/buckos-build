@@ -48,7 +48,7 @@ autotools_package(
     homepage = "https://xfce.org/",
     license = "LGPL-2.0+",
     deps = [
-        "desktop//gtk:gtk3",
+        "//packages/linux/desktop/gtk:gtk3",
     ],
     visibility = ["PUBLIC"],
 )
@@ -83,7 +83,7 @@ download_source(
 autotools_package(
     name = "xfwm4",
     bdepend = [
-        "dev-tools//dev-utils/intltool:intltool",
+        "//packages/linux/dev-tools/dev-utils/intltool:intltool",
     ],
     source = ":xfwm4-src",
     version = "4.18.0",
@@ -123,8 +123,8 @@ filegroup(
         ":xfce4-panel",
         ":xfwm4",
         ":xfdesktop",
-        "desktop//lightdm:lightdm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/lightdm:lightdm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

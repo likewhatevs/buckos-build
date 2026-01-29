@@ -11,8 +11,8 @@ cmake_package(
         "-DBUILD_EXPERIMENTS=OFF",
     ],
     deps = [
-        "dev-libs//math/eigen:eigen",
-        "databases//sqlite:sqlite",
-        "dev-libs//logging/glog:glog",
+        "//packages/linux/dev-libs/math/eigen:eigen",
+        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/dev-libs/logging/glog:glog",
     ],
 )

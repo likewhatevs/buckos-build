@@ -13,12 +13,12 @@ autotools_package(
     iuse = ["ssl", "http2", "proxy", "rewrite", "cgi"],
     use_defaults = ["ssl", "http2", "rewrite"],
     deps = [
-        "system//libs/utility/pcre2:pcre2",
-        "dev-libs//misc/apr:apr",
-        "dev-libs//misc/apr-util:apr-util",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/dev-libs/misc/apr:apr",
+        "//packages/linux/dev-libs/misc/apr-util:apr-util",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

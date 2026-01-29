@@ -66,10 +66,10 @@ autotools_package(
     },
 
     use_deps = {
-        "png": ["system//libs/image/libpng:libpng"],
-        "jpeg": ["system//libs/image/libjpeg-turbo:libjpeg-turbo"],
-        "tiff": ["system//libs/image/libtiff:libtiff"],
-        "gif": ["system//libs/image/giflib:giflib"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
+        "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
+        "tiff": ["//packages/linux/system/libs/image/libtiff:libtiff"],
+        "gif": ["//packages/linux/system/libs/image/giflib:giflib"],
     },
 
     configure_args = ["--prefix=/usr"],

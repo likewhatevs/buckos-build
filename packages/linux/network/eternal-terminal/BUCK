@@ -13,9 +13,9 @@ cmake_package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//serialization/protobuf:protobuf",
-        "dev-libs//misc/libsodium:libsodium",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/misc/libsodium:libsodium",
     ],
 )

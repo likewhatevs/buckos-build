@@ -52,8 +52,8 @@ meson_package(
         "-Dintrospection=false",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "dev-libs//libgcrypt:libgcrypt",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/libgcrypt:libgcrypt",
     ],
     visibility = ["PUBLIC"],
 )

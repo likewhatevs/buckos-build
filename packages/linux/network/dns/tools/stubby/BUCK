@@ -12,7 +12,7 @@ autotools_package(
     use_defaults = ["ssl", "dnssec"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     pre_configure = """
@@ -33,7 +33,7 @@ install -Dm644 stubby.yml.example "$DESTDIR/etc/stubby/stubby.yml" || true
 """,
 
     deps = [
-        "network//dns/libraries/getdns:getdns",
+        "//packages/linux/network/dns/libraries/getdns:getdns",
     ],
 
     description = "DNS Privacy stub resolver using DNS-over-TLS",

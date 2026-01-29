@@ -31,8 +31,8 @@ autotools_package(
     use_defaults = ["lua", "geoip", "ssl"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "lua": ["lang//lua:lua"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "lua": ["//packages/linux/lang/lua:lua"],
     },
 
     use_configure = {
@@ -81,11 +81,11 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
-        "system//libs/utility/pcre2:pcre2",
-        "system//libs/data/yaml:yaml",
-        "system//libs/data/jansson:jansson",
-        "core//zlib:zlib",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/data/yaml:yaml",
+        "//packages/linux/system/libs/data/jansson:jansson",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     description = "High performance Network IDS, IPS and Network Security Monitoring engine",

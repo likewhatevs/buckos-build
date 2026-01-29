@@ -28,7 +28,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 build/umoci "$DESTDIR/usr/bin/umoci"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -58,7 +58,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 dive-bin "$DESTDIR/usr/bin/dive"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -87,7 +87,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 ctop "$DESTDIR/usr/bin/ctop"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -116,7 +116,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 lazydocker "$DESTDIR/usr/bin/lazydocker"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -149,7 +149,7 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 ./trivy completion bash > "$DESTDIR/usr/share/bash-completion/completions/trivy" || true
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -180,7 +180,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 docker-credential-pass "$DESTDIR/usr/bin/"
 """,
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

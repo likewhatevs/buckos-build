@@ -22,9 +22,9 @@ cmake_package(
         "-DWITH_CGAL_Qt5=OFF",
     ],
     deps = [
-        "dev-libs//boost:boost",
-        "dev-libs//gmp:gmp",
-        "dev-libs//mpfr:mpfr",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/gmp:gmp",
+        "//packages/linux/dev-libs/mpfr:mpfr",
     ],
     visibility = ["PUBLIC"],
 )

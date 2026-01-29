@@ -15,9 +15,9 @@ autotools_package(
     use_defaults = ["threads"],
     use_configure = {},
     use_deps = {
-        "lz4": ["system//libs/compression/lz4:lz4"],
-        "zlib": ["core//zlib:zlib"],
-        "lzma": ["system//libs/compression/xz:xz"],
+        "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "lzma": ["//packages/linux/system/libs/compression/xz:xz"],
     },
     configure_args = [],
     # zstd doesn't use autotools - skip configure phase

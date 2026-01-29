@@ -38,9 +38,9 @@ autotools_package(
         "-demos": "-Ddemos=false",
     },
     use_deps = {
-        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
-        "cups": ["system//printing/cups:cups"],
-        "colord": ["system//color/colord:colord"],
+        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "cups": ["//packages/linux/system/printing/cups:cups"],
+        "colord": ["//packages/linux/system/color/colord:colord"],
     },
     pre_configure = """
 mkdir -p build
@@ -50,11 +50,11 @@ meson setup .. --prefix=/usr \
     $CONFIGURE_ARGS
 """,
     deps = [
-        "dev-libs//glib:glib",
-        "fonts//libraries/freetype:freetype",
-        "fonts//libraries/pango:pango",
-        "desktop//cairo:cairo",
-        "desktop//gdk-pixbuf:gdk-pixbuf",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/pango:pango",
+        "//packages/linux/desktop/cairo:cairo",
+        "//packages/linux/desktop/gdk-pixbuf:gdk-pixbuf",
     ],
     visibility = ["PUBLIC"],
 )
@@ -100,10 +100,10 @@ autotools_package(
         "-demos": "-Dbuild-demos=false",
     },
     use_deps = {
-        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
-        "gstreamer": ["graphics//video/gstreamer:gstreamer"],
-        "colord": ["system//color/colord:colord"],
-        "cups": ["system//printing/cups:cups"],
+        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],
+        "colord": ["//packages/linux/system/color/colord:colord"],
+        "cups": ["//packages/linux/system/printing/cups:cups"],
     },
     pre_configure = """
 mkdir -p build
@@ -113,11 +113,11 @@ meson setup .. --prefix=/usr \
     $CONFIGURE_ARGS
 """,
     deps = [
-        "dev-libs//glib:glib",
-        "fonts//libraries/freetype:freetype",
-        "fonts//libraries/pango:pango",
-        "desktop//cairo:cairo",
-        "desktop//gdk-pixbuf:gdk-pixbuf",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/pango:pango",
+        "//packages/linux/desktop/cairo:cairo",
+        "//packages/linux/desktop/gdk-pixbuf:gdk-pixbuf",
     ],
     visibility = ["PUBLIC"],
 )

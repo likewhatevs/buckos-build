@@ -29,7 +29,7 @@ autotools_package(
         "PREFIX=/usr",
     ],
     deps = [
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )

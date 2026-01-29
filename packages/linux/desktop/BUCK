@@ -13,11 +13,11 @@
 filegroup(
     name = "desktop-foundation",
     srcs = [
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
-        "desktop//mesa:mesa",
-        "desktop//libdrm:libdrm",
-        "desktop//libinput:libinput",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/desktop/libinput:libinput",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -27,9 +27,9 @@ filegroup(
 filegroup(
     name = "display-managers",
     srcs = [
-        "desktop//gdm:gdm",
-        "desktop//sddm:sddm",
-        "desktop//lightdm:lightdm",
+        "//packages/linux/desktop/gdm:gdm",
+        "//packages/linux/desktop/sddm:sddm",
+        "//packages/linux/desktop/lightdm:lightdm",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -39,12 +39,12 @@ filegroup(
 filegroup(
     name = "all-desktops",
     srcs = [
-        "desktop//kde:kde-plasma",
-        "desktop//xfce:xfce",
-        "desktop//lxqt:lxqt",
-        "desktop//cinnamon:cinnamon-desktop",
-        "desktop//mate:mate",
-        "desktop//budgie:budgie",
+        "//packages/linux/desktop/kde:kde-plasma",
+        "//packages/linux/desktop/xfce:xfce",
+        "//packages/linux/desktop/lxqt:lxqt",
+        "//packages/linux/desktop/cinnamon:cinnamon-desktop",
+        "//packages/linux/desktop/mate:mate",
+        "//packages/linux/desktop/budgie:budgie",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -54,9 +54,9 @@ filegroup(
 filegroup(
     name = "wayland-compositors",
     srcs = [
-        "desktop//sway:sway-desktop",
-        "desktop//hyprland:hyprland-desktop",
-        "desktop//wayfire:wayfire-desktop",
+        "//packages/linux/desktop/sway:sway-desktop",
+        "//packages/linux/desktop/hyprland:hyprland-desktop",
+        "//packages/linux/desktop/wayfire:wayfire-desktop",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -66,9 +66,9 @@ filegroup(
 filegroup(
     name = "x11-window-managers",
     srcs = [
-        "desktop//i3:i3-desktop",
-        "desktop//bspwm:bspwm-desktop",
-        "desktop//awesome:awesome-desktop",
+        "//packages/linux/desktop/i3:i3-desktop",
+        "//packages/linux/desktop/bspwm:bspwm-desktop",
+        "//packages/linux/desktop/awesome:awesome-desktop",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -78,9 +78,9 @@ filegroup(
 filegroup(
     name = "lightweight-desktops",
     srcs = [
-        "desktop//xfce:xfce",
-        "desktop//lxqt:lxqt",
-        "desktop//i3:i3-desktop",
+        "//packages/linux/desktop/xfce:xfce",
+        "//packages/linux/desktop/lxqt:lxqt",
+        "//packages/linux/desktop/i3:i3-desktop",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -90,9 +90,9 @@ filegroup(
 filegroup(
     name = "modern-wayland-desktops",
     srcs = [
-        "desktop//kde:kde-plasma",
-        "desktop//sway:sway-desktop",
-        "desktop//hyprland:hyprland-desktop",
+        "//packages/linux/desktop/kde:kde-plasma",
+        "//packages/linux/desktop/sway:sway-desktop",
+        "//packages/linux/desktop/hyprland:hyprland-desktop",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -102,11 +102,11 @@ filegroup(
 filegroup(
     name = "tiling-desktops",
     srcs = [
-        "desktop//sway:sway-desktop",
-        "desktop//hyprland:hyprland-desktop",
-        "desktop//i3:i3-desktop",
-        "desktop//bspwm:bspwm-desktop",
-        "desktop//awesome:awesome-desktop",
+        "//packages/linux/desktop/sway:sway-desktop",
+        "//packages/linux/desktop/hyprland:hyprland-desktop",
+        "//packages/linux/desktop/i3:i3-desktop",
+        "//packages/linux/desktop/bspwm:bspwm-desktop",
+        "//packages/linux/desktop/awesome:awesome-desktop",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -120,7 +120,7 @@ filegroup(
 filegroup(
     name = "wayland-utilities",
     srcs = [
-        "desktop//wayland-utilities:all",
+        "//packages/linux/desktop/wayland-utilities:all",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -130,7 +130,7 @@ filegroup(
 filegroup(
     name = "wayland-utilities-essential",
     srcs = [
-        "desktop//wayland-utilities:essential",
+        "//packages/linux/desktop/wayland-utilities:essential",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -142,7 +142,7 @@ filegroup(
 filegroup(
     name = "i3-complete",
     srcs = [
-        "desktop//i3:i3-desktop",
+        "//packages/linux/desktop/i3:i3-desktop",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -152,8 +152,8 @@ filegroup(
 filegroup(
     name = "sway-complete",
     srcs = [
-        "desktop//sway:sway-desktop",
-        "desktop//wayland-utilities:sway-companions",
+        "//packages/linux/desktop/sway:sway-desktop",
+        "//packages/linux/desktop/wayland-utilities:sway-companions",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -163,8 +163,8 @@ filegroup(
 filegroup(
     name = "hyprland-complete",
     srcs = [
-        "desktop//hyprland:hyprland-desktop",
-        "desktop//wayland-utilities:hyprland-companions",
+        "//packages/linux/desktop/hyprland:hyprland-desktop",
+        "//packages/linux/desktop/wayland-utilities:hyprland-companions",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

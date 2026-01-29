@@ -42,11 +42,11 @@ gtk-update-icon-cache -f "$DESTDIR/usr/share/icons/hicolor" 2>/dev/null || true
 update-desktop-database "$DESTDIR/usr/share/applications" 2>/dev/null || true
     """,
     deps = [
-        "lang//python:python",
-        "desktop//gtk:gtk3",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/desktop/gtk:gtk3",
         # gtksourceview4 - optional dependency for syntax highlighting
-        # "desktop//gtk:libvte",  # TODO: add libvte package
-        "emulation//virtualization/libvirt:libvirt-python",
+        # "//packages/linux/desktop/gtk:libvte",  # TODO: add libvte package
+        "//packages/linux/emulation/virtualization/libvirt:libvirt-python",
     ],
     visibility = ["PUBLIC"],
 )
@@ -65,8 +65,8 @@ autotools_package(
         "--prefix=/usr",
     ],
     deps = [
-        "lang//python:python",
-        "emulation//virtualization/libvirt:libvirt-python",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/emulation/virtualization/libvirt:libvirt-python",
     ],
     visibility = ["PUBLIC"],
 )
@@ -97,10 +97,10 @@ autotools_package(
         "--with-libvirt",
     ],
     deps = [
-        "desktop//gtk:gtk3",
+        "//packages/linux/desktop/gtk:gtk3",
         # gtk-vnc - TODO: add gtk-vnc package
-        "emulation//utilities/spice:spice-gtk",
-        "emulation//virtualization/libvirt:libvirt",
+        "//packages/linux/emulation/utilities/spice:spice-gtk",
+        "//packages/linux/emulation/virtualization/libvirt:libvirt",
     ],
     visibility = ["PUBLIC"],
 )

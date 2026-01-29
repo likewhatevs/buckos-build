@@ -77,11 +77,11 @@ chmod 600 "$DESTDIR/etc/iptables/rules.v6"
 """,
 
     deps = [
-        "core//libnl:libnl",
-        "network//libpcap:libpcap",
+        "//packages/linux/core/libnl:libnl",
+        "//packages/linux/network/libpcap:libpcap",
         # TODO: Add these libraries when available:
-        # "system//libs/network/libmnl:libmnl",
-        # "system//libs/network/libnftnl:libnftnl",
+        # "//packages/linux/system/libs/network/libmnl:libmnl",
+        # "//packages/linux/system/libs/network/libnftnl:libnftnl",
     ],
 
     description = "Linux kernel packet filtering administration tools",

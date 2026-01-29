@@ -31,11 +31,11 @@ cmake_package(
     },
     use_defaults = ["avx2"],
     deps = [
-        "dev-libs//misc/brotli:brotli",
-        "dev-libs//misc/highway:highway",
+        "//packages/linux/dev-libs/misc/brotli:brotli",
+        "//packages/linux/dev-libs/misc/highway:highway",
     ],
     use_deps = {
-        "openexr": ["media//image/openexr:openexr"],
+        "openexr": ["//packages/linux/media/image/openexr:openexr"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

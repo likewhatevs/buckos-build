@@ -3,7 +3,7 @@
 filegroup(
     name = "sdl2-core",
     srcs = [
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -12,7 +12,7 @@ filegroup(
 filegroup(
     name = "sdl2-all",
     srcs = [
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -21,8 +21,8 @@ filegroup(
 filegroup(
     name = "audio-frameworks",
     srcs = [
-        "system//libs/multimedia/openal-soft:openal-soft",
-        "system//libs/multimedia/portaudio:portaudio",
+        "//packages/linux/system/libs/multimedia/openal-soft:openal-soft",
+        "//packages/linux/system/libs/multimedia/portaudio:portaudio",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

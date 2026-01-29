@@ -6,8 +6,8 @@ python_package(
     src_uri = "https://github.com/kkoutini/passt_hear21/archive/refs/tags/0.0.23.tar.gz",
     sha256 = "9a8466724058af5e896ed92822388deb0b1f6a48a2cb7fc1a4a1c3a3fafee5ea",
     deps = [
-        "ai//ml-frameworks/timm:timm",
-        "media//audio/libraries/torchaudio:torchaudio",
+        "//packages/linux/ai/ml-frameworks/timm:timm",
+        "//packages/linux/media/audio/libraries/torchaudio:torchaudio",
     ],
     maintainers = ["buckos"],
 )

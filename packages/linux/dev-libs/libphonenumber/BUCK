@@ -19,9 +19,9 @@ cmake_package(
         "-DUSE_STDMUTEX=ON",
     ],
     deps = [
-        "dev-libs//text/icu:icu",
-        "dev-libs//serialization/protobuf:protobuf",
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/text/icu:icu",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     visibility = ["PUBLIC"],
 )

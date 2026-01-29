@@ -1,0 +1,209 @@
+"""
+BXL script for vendoring source archives for offline builds.
+
+Usage:
+    # Vendor a target and all dependencies
+    buck2 bxl //defs:vendor_sources -- --target //core:bash
+
+    # Vendor multiple targets
+    buck2 bxl //defs:vendor_sources -- --target //core:bash --target //network:curl
+
+    # Dry-run mode (show what would be vendored)
+    buck2 bxl //defs:vendor_sources -- --target //core:bash --dry-run
+
+    # Verify existing vendored sources
+    buck2 bxl //defs:vendor_sources -- --verify
+
+    # Clean all vendored sources (uses manifest)
+    buck2 bxl //defs:vendor_sources -- --clean
+
+    # List all vendored sources
+    buck2 bxl //defs:vendor_sources -- --list
+"""
+
+def _filename_from_url(url: str) -> str | None:
+    """Extract filename from URL, handling query strings."""
+    url_path = url.split("?")[0]
+    filename = url_path.split("/")[-1]
+    if not filename or "." not in filename:
+        return None
+    return filename
+
+def _get_source_info_from_target(ctx: bxl.Context, target) -> dict | None:
+    """
+    Extract source vendoring info from a target.
+    Returns dict with src_uri, sha256, etc. or None if not a source target.
+    """
+    # Use the new attribute access API
+    src_uri_val = target.get_attr("src_uri")
+    sha256_val = target.get_attr("sha256")
+
+    if src_uri_val and sha256_val:
+        version_val = target.get_attr("version")
+
+        # Handle ${VERSION} substitution
+        if version_val and "${VERSION}" in src_uri_val:
+            src_uri_val = src_uri_val.replace("${VERSION}", version_val)
+
+        sig_sha256_val = target.get_attr("signature_sha256")
+
+        filename = _filename_from_url(src_uri_val)
+        if not filename:
+            # Derive filename from target name
+            name_val = target.get_attr("name")
+            if not name_val:
+                name_val = str(target.label.name)
+            filename = name_val + ".tar.gz"
+
+        # Vendor path is package_path/.vendor
+        vendor_path = target.label.package + "/.vendor"
+
+        return {
+            "target": str(target.label),
+            "package_path": vendor_path,
+            "src_uri": src_uri_val,
+            "sha256": sha256_val,
+            "signature_sha256": sig_sha256_val,
+            "filename": filename,
+        }
+
+    # Check for http_file targets (urls/sha256/out attributes)
+    urls_val = target.get_attr("urls")
+    out_val = target.get_attr("out")
+
+    if urls_val and sha256_val and len(urls_val) > 0:
+        src_uri_val = urls_val[0]
+        filename = out_val if out_val else _filename_from_url(src_uri_val)
+
+        # Vendor path is package_path/.vendor
+        vendor_path = target.label.package + "/.vendor"
+
+        return {
+            "target": str(target.label),
+            "package_path": vendor_path,
+            "src_uri": src_uri_val,
+            "sha256": sha256_val,
+            "signature_sha256": None,
+            "filename": filename,
+        }
+
+    return None
+
+def _collect_sources_from_deps(ctx: bxl.Context, targets: list) -> list:
+    """
+    Collect all source info from targets and their dependencies.
+    Returns a list of source info dicts.
+    """
+    sources = {}
+
+    for target_pattern in targets:
+        # Use uquery to get the target and its dependencies
+        query = ctx.uquery()
+
+        # Evaluate the target pattern
+        target_set = query.eval(target_pattern)
+
+        # Get all dependencies
+        all_targets = query.deps(target_set)
+
+        # Process each target
+        for target in all_targets:
+            label_str = str(target.label)
+
+            # Skip if already processed
+            if label_str in sources:
+                continue
+
+            source_info = _get_source_info_from_target(ctx, target)
+            if source_info:
+                sources[label_str] = source_info
+
+    return list(sources.values())
+
+def _vendor_sources_impl(ctx: bxl.Context) -> None:
+    """Main BXL implementation for vendoring sources."""
+    targets = ctx.cli_args.target
+    dry_run = ctx.cli_args.dry_run
+    verify = ctx.cli_args.verify
+    clean = ctx.cli_args.clean
+    list_sources = ctx.cli_args.list
+
+    # Get project root
+    root = ctx.root()
+
+    if clean:
+        # Output command to clean vendored sources (scans all .vendor dirs)
+        ctx.output.print("VENDOR_ACTION=clean")
+        ctx.output.print("ROOT=" + root)
+        return
+
+    if list_sources:
+        # Output command to list vendored sources (scans all .vendor dirs)
+        ctx.output.print("VENDOR_ACTION=list")
+        ctx.output.print("ROOT=" + root)
+        return
+
+    if verify:
+        # Output command to verify vendored sources (scans all .vendor dirs)
+        ctx.output.print("VENDOR_ACTION=verify")
+        ctx.output.print("ROOT=" + root)
+        return
+
+    if not targets:
+        ctx.output.print("ERROR: No targets specified. Use --target <target>")
+        return
+
+    # Collect all sources from targets and dependencies
+    sources = _collect_sources_from_deps(ctx, targets)
+
+    if not sources:
+        ctx.output.print("No sources found to vendor.")
+        return
+
+    if dry_run:
+        ctx.output.print("Would vendor {} sources:".format(len(sources)))
+        for source in sources:
+            ctx.output.print("  {} -> {}/{}".format(
+                source["target"],
+                source["package_path"],
+                source["filename"],
+            ))
+        return
+
+    # Output source info for the wrapper script to process
+    ctx.output.print("VENDOR_ACTION=download")
+    ctx.output.print("ROOT=" + root)
+    ctx.output.print("SOURCES_COUNT=" + str(len(sources)))
+
+    for i, source in enumerate(sources):
+        prefix = "SOURCE_" + str(i) + "_"
+        ctx.output.print(prefix + "TARGET=" + source["target"])
+        ctx.output.print(prefix + "PACKAGE_PATH=" + source["package_path"])
+        ctx.output.print(prefix + "SRC_URI=" + source["src_uri"])
+        ctx.output.print(prefix + "SHA256=" + source["sha256"])
+        ctx.output.print(prefix + "FILENAME=" + source["filename"])
+        if source["signature_sha256"]:
+            ctx.output.print(prefix + "SIG_SHA256=" + source["signature_sha256"])
+
+vendor_sources = bxl_main(
+    doc = """Vendor source archives for offline builds.
+
+    Downloads source archives for a target and all its dependencies,
+    storing them alongside each package's BUCK file.
+
+    Examples:
+        buck2 bxl //defs:vendor_sources -- --target //core:bash
+        buck2 bxl //defs:vendor_sources -- --target //core:bash --dry-run
+        buck2 bxl //defs:vendor_sources -- --verify
+        buck2 bxl //defs:vendor_sources -- --clean
+        buck2 bxl //defs:vendor_sources -- --list
+    """,
+    impl = _vendor_sources_impl,
+    cli_args = {
+        "target": cli_args.list(cli_args.string(), default = []),
+        "dry_run": cli_args.bool(default = False, doc = "Show what would be vendored without downloading"),
+        "verify": cli_args.bool(default = False, doc = "Verify existing vendored sources"),
+        "clean": cli_args.bool(default = False, doc = "Remove all vendored sources"),
+        "list": cli_args.bool(default = False, doc = "List all vendored sources"),
+    },
+)

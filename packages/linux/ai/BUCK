@@ -14,10 +14,10 @@
 filegroup(
     name = "ai",
     srcs = [
-        "ai//ollama:ollama",
-        "ai//llama-cpp:llama-cpp",
-        "ai//whisper-cpp:whisper-cpp",
-        "ai//stable-diffusion-cpp:stable-diffusion-cpp",
+        "//packages/linux/ai/ollama:ollama",
+        "//packages/linux/ai/llama-cpp:llama-cpp",
+        "//packages/linux/ai/whisper-cpp:whisper-cpp",
+        "//packages/linux/ai/stable-diffusion-cpp:stable-diffusion-cpp",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -27,8 +27,8 @@ filegroup(
 filegroup(
     name = "llm-inference",
     srcs = [
-        "ai//ollama:ollama",
-        "ai//llama-cpp:llama-cpp",
+        "//packages/linux/ai/ollama:ollama",
+        "//packages/linux/ai/llama-cpp:llama-cpp",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -38,8 +38,8 @@ filegroup(
 filegroup(
     name = "multimodal",
     srcs = [
-        "ai//whisper-cpp:whisper-cpp",
-        "ai//stable-diffusion-cpp:stable-diffusion-cpp",
+        "//packages/linux/ai/whisper-cpp:whisper-cpp",
+        "//packages/linux/ai/stable-diffusion-cpp:stable-diffusion-cpp",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -48,24 +48,24 @@ filegroup(
 # Convenience aliases for common packages
 alias(
     name = "ollama",
-    actual = "ai//ollama:ollama",
+    actual = "//packages/linux/ai/ollama:ollama",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "llama-cpp",
-    actual = "ai//llama-cpp:llama-cpp",
+    actual = "//packages/linux/ai/llama-cpp:llama-cpp",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "whisper-cpp",
-    actual = "ai//whisper-cpp:whisper-cpp",
+    actual = "//packages/linux/ai/whisper-cpp:whisper-cpp",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "stable-diffusion-cpp",
-    actual = "ai//stable-diffusion-cpp:stable-diffusion-cpp",
+    actual = "//packages/linux/ai/stable-diffusion-cpp:stable-diffusion-cpp",
     visibility = ["PUBLIC"],
 )

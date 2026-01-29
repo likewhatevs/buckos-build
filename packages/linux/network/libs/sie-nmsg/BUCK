@@ -7,7 +7,7 @@ autotools_package(
     sha256 = "724dd4e64d4f88de88a95c42343248e53a93401bf274c67580a30842f7fe1fba",
     configure_args = [],
     deps = [
-        "network//libs/nmsg:nmsg",
+        "//packages/linux/network/libs/nmsg:nmsg",
         # TODO: Add wdns dependency when available: network//libs/wdns:wdns
         # TODO: Add protobuf-c dependency when available: dev-libs//serialization/protobuf-c:protobuf-c
     ],

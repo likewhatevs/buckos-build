@@ -19,6 +19,6 @@ cmake_package(
         "-DSEAL_BUILD_SEAL_C=OFF",
     ],
     deps = [
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
 )

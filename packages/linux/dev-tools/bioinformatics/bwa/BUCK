@@ -21,7 +21,7 @@ binary_package(
         cp bwa $OUT/usr/bin/
     """,
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

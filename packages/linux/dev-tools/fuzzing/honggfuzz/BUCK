@@ -33,7 +33,7 @@ make install \
     PREFIX=/usr
 """,
     deps = [
-        "system//libs/libunwind:libunwind",
+        "//packages/linux/system/libs/libunwind:libunwind",
     ],
     visibility = ["PUBLIC"],
 )

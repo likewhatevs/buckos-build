@@ -25,7 +25,7 @@ cmake_package(
         "-DWITH_GFLAGS=ON",
     ],
     deps = [
-        "dev-libs//google/gflags:gflags",
+        "//packages/linux/dev-libs/google/gflags:gflags",
     ],
     visibility = ["PUBLIC"],
 )

@@ -52,8 +52,8 @@ install -Dm644 share/man/man1/lutris.1 \
     "$DESTDIR/usr/share/man/man1/lutris.1"
     """,
     deps = [
-        "lang//python:python",
-        "gaming//compatibility/wine:wine",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/gaming/compatibility/wine:wine",
     ],
     visibility = ["PUBLIC"],
 )

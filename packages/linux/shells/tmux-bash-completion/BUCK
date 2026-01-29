@@ -25,8 +25,8 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 cp completions/tmux "$DESTDIR/usr/share/bash-completion/completions/"
 """,
     rdepend = [
-        "core//bash:bash",
-        "system//apps/tmux:tmux",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/system/apps/tmux:tmux",
     ],
     visibility = ["PUBLIC"],
 )

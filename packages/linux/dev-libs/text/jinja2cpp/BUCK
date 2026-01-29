@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/jinja2cpp/Jinja2Cpp",
     license = "MPL-2.0",
     deps = [
-        "dev-libs//boost:boost",
-        "dev-libs//misc/fmt:fmt",
-        "dev-libs//json/rapidjson:rapidjson",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
+        "//packages/linux/dev-libs/json/rapidjson:rapidjson",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

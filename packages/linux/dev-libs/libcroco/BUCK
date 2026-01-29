@@ -10,7 +10,7 @@ autotools_package(
         "--disable-gtk-doc",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "dev-libs//libxml2:libxml2",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/libxml2:libxml2",
     ],
 )

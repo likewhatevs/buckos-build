@@ -6,8 +6,8 @@ python_package(
     src_uri = "https://github.com/facebookresearch/metaseq/archive/f7ffa5fd61cf90f498a36d365c13dd7f1a912ff7.tar.gz",
     sha256 = "a517ef629b20381d2a1d58b4a16650eb73eeea3e6f35e30fa5eaa20fe85b4c69",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/omegaconf:omegaconf",
-        "dev-libs//python/transformers:transformers",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/omegaconf:omegaconf",
+        "//packages/linux/dev-libs/python/transformers:transformers",
     ],
 )

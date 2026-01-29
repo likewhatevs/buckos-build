@@ -21,11 +21,11 @@ Example usage:
         iuse = ["ssl", "gnutls", "http2", "zstd", "brotli", "ipv6", "ldap"],
         use_defaults = ["ssl", "http2", "ipv6"],
         use_deps = {
-            "ssl": ["dev-libs//openssl"],
-            "gnutls": ["system//libs/crypto/gnutls"],
-            "http2": ["network//nghttp2"],
-            "zstd": ["system//libs/compression/zstd"],
-            "brotli": ["system//libs/compression/brotli"],
+            "ssl": ["//packages/linux/dev-libs/openssl"],
+            "gnutls": ["//packages/linux/system/libs/crypto/gnutls"],
+            "http2": ["//packages/linux/network/nghttp2"],
+            "zstd": ["//packages/linux/system/libs/compression/zstd"],
+            "brotli": ["//packages/linux/system/libs/compression/brotli"],
         },
         use_configure = {
             "ssl": "--with-ssl",

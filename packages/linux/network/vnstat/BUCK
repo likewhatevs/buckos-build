@@ -15,12 +15,12 @@ autotools_package(
 
 
     use_deps = {
-        "gd": ["core//gd"],
+        "gd": ["//packages/linux/core/gd"],
     },
 
 
     deps = [
-        "system//libs/database/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
 
     description = "Network traffic monitor and logger",

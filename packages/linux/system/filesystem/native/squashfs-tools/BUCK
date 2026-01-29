@@ -30,10 +30,10 @@ install -m 755 sqfstar "$DESTDIR/usr/bin/" || true
 install -m 644 ../USAGE "$DESTDIR/usr/share/man/man1/mksquashfs.1" || true
 """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/xz:xz",
-        "system//libs/compression/lzo:lzo",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/lzo:lzo",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

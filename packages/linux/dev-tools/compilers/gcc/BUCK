@@ -13,10 +13,10 @@ autotools_package(
     iuse = ["cxx", "fortran", "objc", "ada", "go"],
     use_defaults = ["cxx"],
     deps = [
-        "core//gmp:gmp",
-        "core//mpfr:mpfr",
-        "core//mpc:mpc",
-        "core//zlib:zlib",
+        "//packages/linux/core/gmp:gmp",
+        "//packages/linux/core/mpfr:mpfr",
+        "//packages/linux/core/mpc:mpc",
+        "//packages/linux/core/zlib:zlib",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

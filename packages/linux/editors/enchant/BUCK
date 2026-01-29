@@ -37,7 +37,7 @@ autotools_package(
         "--enable-relocatable",
     ],
     deps = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )

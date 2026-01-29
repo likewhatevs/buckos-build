@@ -3,8 +3,8 @@
 filegroup(
     name = "alsa-packages",
     srcs = [
-        "audio//daemons/alsa-lib:alsa-lib",
-        "audio//daemons/alsa-utils:alsa-utils",
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/audio/daemons/alsa-utils:alsa-utils",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -13,9 +13,9 @@ filegroup(
 filegroup(
     name = "sound-servers",
     srcs = [
-        "audio//daemons/pulseaudio:pulseaudio",
-        "audio//daemons/pipewire:pipewire",
-        "audio//daemons/jack2:jack2",
+        "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
+        "//packages/linux/audio/daemons/pipewire:pipewire",
+        "//packages/linux/audio/daemons/jack2:jack2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

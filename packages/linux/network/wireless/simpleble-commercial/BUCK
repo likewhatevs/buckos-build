@@ -15,10 +15,10 @@ cmake_package(
     ],
 
     deps = [
-        "dev-libs//misc/fmt:fmt",
-        "network//wireless/bluez:bluez",
-        "dev-libs//compression/lz4:lz4",
-        "dev-libs//compression/zstd:zstd",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
+        "//packages/linux/network/wireless/bluez:bluez",
+        "//packages/linux/dev-libs/compression/lz4:lz4",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
     ],
 
     description = "Cross-platform Bluetooth Low Energy library",

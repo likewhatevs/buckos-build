@@ -44,11 +44,11 @@ make_package(
     homepage = "https://man-db.nongnu.org/",
     license = "GPL-2.0-or-later",
     deps = [
-        "core//less:less",
-        "system//docs:libpipeline",
-        "core//zlib:zlib",
-        "system//docs:groff",
-        "system//docs:gdbm",
+        "//packages/linux/core/less:less",
+        "//packages/linux/system/docs:libpipeline",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/docs:groff",
+        "//packages/linux/system/docs:gdbm",
     ],
     visibility = ["PUBLIC"],
 )
@@ -133,8 +133,8 @@ make_package(
     homepage = "https://www.gnu.org/software/gdbm/",
     license = "GPL-3.0-or-later",
     deps = [
-        "core//readline:readline",
-        "core//ncurses:ncurses",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )
@@ -156,7 +156,7 @@ make_package(
     homepage = "https://www.gnu.org/software/texinfo",
     license = "GPL-3.0-or-later",
     deps = [
-        "core//ncurses:ncurses",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

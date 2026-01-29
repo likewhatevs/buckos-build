@@ -4,8 +4,8 @@
 filegroup(
     name = "cli-email-clients",
     srcs = [
-        "communication//email-clients/cli/aerc:aerc",
-        "communication//email-clients/cli/himalaya:himalaya",
+        "//packages/linux/communication/email-clients/cli/aerc:aerc",
+        "//packages/linux/communication/email-clients/cli/himalaya:himalaya",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -23,8 +23,8 @@ filegroup(
 filegroup(
     name = "modern-cli-clients",
     srcs = [
-        "communication//email-clients/cli/aerc:aerc",
-        "communication//email-clients/cli/himalaya:himalaya",
+        "//packages/linux/communication/email-clients/cli/aerc:aerc",
+        "//packages/linux/communication/email-clients/cli/himalaya:himalaya",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

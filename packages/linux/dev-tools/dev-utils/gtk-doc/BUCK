@@ -26,8 +26,8 @@ autotools_package(
         "-Dtests=false",
     ],
     deps = [
-        "lang//python:python",
-        "dev-tools//dev-utils/itstool:itstool",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-tools/dev-utils/itstool:itstool",
     ],
     visibility = ["PUBLIC"],
 )

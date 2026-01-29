@@ -19,9 +19,9 @@ cmake_package(
         "-DBUILD_TESTS=OFF",
     ],
     deps = [
-        "dev-libs//serialization/capnproto:capnproto",
-        "dev-libs//compression/brotli:brotli",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/serialization/capnproto:capnproto",
+        "//packages/linux/dev-libs/compression/brotli:brotli",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

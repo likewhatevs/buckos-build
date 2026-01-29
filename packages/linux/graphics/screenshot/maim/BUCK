@@ -34,14 +34,14 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "system//libs/image/libpng:libpng",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/image/libwebp:libwebp",
-        "system//libs/utility/icu:icu",
-        # "system//libs/x11/libxcomposite:libxcomposite",  # TODO: not packaged yet
-        # "system//libs/glm:glm",  # TODO: not packaged yet,
-        "desktop//mesa:mesa",
-        "graphics//utilities/slop:slop",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libwebp:libwebp",
+        "//packages/linux/system/libs/utility/icu:icu",
+        # "//packages/linux/system/libs/x11/libxcomposite:libxcomposite",  # TODO: not packaged yet
+        # "//packages/linux/system/libs/glm:glm",  # TODO: not packaged yet,
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/graphics/utilities/slop:slop",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

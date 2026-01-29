@@ -22,7 +22,7 @@ meson_package(
         "-Dpci-ids=/usr/share/hwdata",
     ],
     deps = [
-        "system//hardware/hwdata:hwdata",
+        "//packages/linux/system/hardware/hwdata:hwdata",
     ],
     visibility = ["PUBLIC"],
 )

@@ -58,8 +58,8 @@ cmake_package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "desktop//kde:kf5",
-        "editors//poppler:poppler",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/editors/poppler:poppler",
     ],
     visibility = ["PUBLIC"],
 )

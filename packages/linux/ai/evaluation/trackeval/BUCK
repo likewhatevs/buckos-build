@@ -9,10 +9,10 @@ python_package(
     homepage = "https://github.com/JonathonLuiten/TrackEval",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/matplotlib:matplotlib",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/matplotlib:matplotlib",
     ],
     visibility = ["PUBLIC"],
 )

@@ -3,7 +3,7 @@
 filegroup(
     name = "virtme-tools",
     srcs = [
-        "emulation//kernel/virtme-ng:virtme-ng",
+        "//packages/linux/emulation/kernel/virtme-ng:virtme-ng",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -12,7 +12,7 @@ filegroup(
 filegroup(
     name = "kvm-tools",
     srcs = [
-        "emulation//kernel/kvmtool:kvmtool",
+        "//packages/linux/emulation/kernel/kvmtool:kvmtool",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -16,10 +16,10 @@ meson_package(
         "-Ddocumentation=false",
     ],
     deps = [
-        "desktop//libdrm:libdrm",
-        "graphics//xorg/libX11:libX11",
-        "graphics//xorg/libXext:libXext",
-        "graphics//xorg/xorgproto:xorgproto",
+        "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/graphics/xorg/libX11:libX11",
+        "//packages/linux/graphics/xorg/libXext:libXext",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],
@@ -38,7 +38,7 @@ meson_package(
     meson_args = [],
     deps = [
         ":vdpau",
-        "graphics//video/libva:libva",
+        "//packages/linux/graphics/video/libva:libva",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

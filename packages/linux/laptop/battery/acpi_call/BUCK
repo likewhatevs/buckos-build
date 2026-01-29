@@ -139,7 +139,7 @@ install -m 644 README.md "$DESTDIR/usr/share/doc/acpi_call/" 2>/dev/null || true
 ''',
 
     bdepend = [
-        "kernel//buckos-kernel:buckos-kernel",
+        "//packages/linux/kernel/buckos-kernel:buckos-kernel",
     ],
     visibility = ["PUBLIC"],
 )

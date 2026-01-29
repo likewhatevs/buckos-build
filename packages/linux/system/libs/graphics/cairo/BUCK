@@ -31,9 +31,9 @@ autotools_package(
         "-opengl": "-Dgl-backend=disabled",
     },
     use_deps = {
-        "png": ["system//libs/image/libpng:libpng"],
-        "glib": ["dev-libs//glib:glib"],
-        "opengl": ["desktop//mesa:mesa"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
+        "glib": ["//packages/linux/dev-libs/glib:glib"],
+        "opengl": ["//packages/linux/desktop/mesa:mesa"],
     },
     pre_configure = """
 mkdir -p build
@@ -45,10 +45,10 @@ meson setup .. --prefix=/usr \
     $CONFIGURE_ARGS
 """,
     deps = [
-        "system//libs/graphics/pixman:pixman",
-        "system//libs/font/freetype:freetype",
-        "system//libs/font/fontconfig:fontconfig",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

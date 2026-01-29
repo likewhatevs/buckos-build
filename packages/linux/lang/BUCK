@@ -14,13 +14,13 @@
 filegroup(
     name = "compiled-languages",
     srcs = [
-        "lang//go:go",
-        "lang//rust:rust",
-        "lang//zig:zig",
-        "lang//nim:nim",
-        "lang//crystal:crystal",
-        "lang//swift:swift",
-        "lang//kotlin-native:kotlin-native",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/lang/rust:rust",
+        "//packages/linux/lang/zig:zig",
+        "//packages/linux/lang/nim:nim",
+        "//packages/linux/lang/crystal:crystal",
+        "//packages/linux/lang/swift:swift",
+        "//packages/linux/lang/kotlin-native:kotlin-native",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -34,12 +34,12 @@ filegroup(
 filegroup(
     name = "interpreted-languages",
     srcs = [
-        "lang//python:python",
-        "lang//ruby:ruby",
-        "lang//perl:perl",
-        "lang//nodejs:nodejs",
-        "lang//lua:lua",
-        "lang//tcl:tcl",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/lang/ruby:ruby",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/nodejs:nodejs",
+        "//packages/linux/lang/lua:lua",
+        "//packages/linux/lang/tcl:tcl",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -53,7 +53,7 @@ filegroup(
 filegroup(
     name = "functional-languages",
     srcs = [
-        "lang//ocaml:ocaml",
+        "//packages/linux/lang/ocaml:ocaml",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -67,7 +67,7 @@ filegroup(
 filegroup(
     name = "scientific-languages",
     srcs = [
-        "lang//julia:julia",
+        "//packages/linux/lang/julia:julia",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -81,9 +81,9 @@ filegroup(
 filegroup(
     name = "compiler-infrastructure",
     srcs = [
-        "lang//binutils:binutils",
-        "lang//linkers:mold",
-        "lang//linkers:lld",
+        "//packages/linux/lang/binutils:binutils",
+        "//packages/linux/lang/linkers:mold",
+        "//packages/linux/lang/linkers:lld",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

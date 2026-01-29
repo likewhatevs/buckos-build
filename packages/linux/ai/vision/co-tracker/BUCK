@@ -6,9 +6,9 @@ python_package(
     src_uri = "https://github.com/facebookresearch/co-tracker/archive/refs/heads/main.tar.gz",
     sha256 = "33a81fefb598c935cb4bd7a7018e7d0c5d0021ae24c971cc1ec48020cc211eab",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/pillow:pillow",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/pillow:pillow",
     ],
     maintainers = ["buckos"],
 )

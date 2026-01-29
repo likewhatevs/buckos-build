@@ -5,11 +5,11 @@
 filegroup(
     name = "wifi-tools",
     srcs = [
-        "network//wireless/wpa-supplicant:wpa-supplicant",
-        "network//wireless/hostapd:hostapd",
-        "network//wireless/iw:iw",
-        "network//wireless/wireless-tools:wireless-tools",
-        "network//wireless/wireless-regdb:wireless-regdb",
+        "//packages/linux/network/wireless/wpa-supplicant:wpa-supplicant",
+        "//packages/linux/network/wireless/hostapd:hostapd",
+        "//packages/linux/network/wireless/iw:iw",
+        "//packages/linux/network/wireless/wireless-tools:wireless-tools",
+        "//packages/linux/network/wireless/wireless-regdb:wireless-regdb",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -19,7 +19,7 @@ filegroup(
 filegroup(
     name = "bluetooth-tools",
     srcs = [
-        "network//wireless/bluez:bluez",
+        "//packages/linux/network/wireless/bluez:bluez",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -29,8 +29,8 @@ filegroup(
 filegroup(
     name = "wireless-security",
     srcs = [
-        "network//wireless/aircrack-ng:aircrack-ng",
-        "network//wireless/kismet:kismet",
+        "//packages/linux/network/wireless/aircrack-ng:aircrack-ng",
+        "//packages/linux/network/wireless/kismet:kismet",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -40,7 +40,7 @@ filegroup(
 filegroup(
     name = "wireless-monitoring",
     srcs = [
-        "network//wireless/wavemon:wavemon",
+        "//packages/linux/network/wireless/wavemon:wavemon",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -50,7 +50,7 @@ filegroup(
 filegroup(
     name = "sdr-tools",
     srcs = [
-        "network//wireless/rtl-sdr:rtl-sdr",
+        "//packages/linux/network/wireless/rtl-sdr:rtl-sdr",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

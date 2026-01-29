@@ -16,9 +16,9 @@ cmake_package(
         "-DFORCE_LLVM_STATIC=OFF",
     ],
     deps = [
-        "dev-libs//boost:boost",
-        "dev-libs//logging/glog:glog",
-        "databases//rocksdb:rocksdb",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/logging/glog:glog",
+        "//packages/linux/databases/rocksdb:rocksdb",
     ],
     visibility = ["PUBLIC"],
 )

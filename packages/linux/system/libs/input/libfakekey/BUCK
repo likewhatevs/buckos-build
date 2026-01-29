@@ -12,9 +12,9 @@ download_source(
 autotools_package(
     name = "libfakekey",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -33,7 +33,7 @@ autoreconf -fi
         "--disable-static",
     ],
     deps = [
-        # "graphics//xorg/libs:libxtst",
+        # "//packages/linux/graphics/xorg/libs:libxtst",
     ],
     visibility = ["PUBLIC"],
 )

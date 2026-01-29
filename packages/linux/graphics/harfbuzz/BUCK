@@ -23,13 +23,13 @@ meson_package(
     ],
     use_defaults = ["glib"],
     deps = [
-        "graphics//freetype:freetype",
+        "//packages/linux/graphics/freetype:freetype",
     ],
     use_deps = {
-        "graphite2": ["graphics//graphite2:graphite2"],
-        "icu": ["dev-libs//misc/icu:icu"],
-        "cairo": ["graphics//cairo:cairo"],
-        "glib": ["core//glib:glib"],
+        "graphite2": ["//packages/linux/graphics/graphite2:graphite2"],
+        "icu": ["//packages/linux/dev-libs/misc/icu:icu"],
+        "cairo": ["//packages/linux/graphics/cairo:cairo"],
+        "glib": ["//packages/linux/core/glib:glib"],
     },
     meson_args = [
         "-Dtests=disabled",

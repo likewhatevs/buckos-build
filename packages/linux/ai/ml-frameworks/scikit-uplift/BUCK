@@ -9,7 +9,7 @@ python_package(
     homepage = "https://github.com/maks-sh/scikit-uplift",
     license = "MIT",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

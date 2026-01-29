@@ -56,11 +56,11 @@ autotools_package(
         "zlib": "--with-zlib=yes",
     },
     use_deps = {
-        "bzip2": ["system//libs/compression/bzip2:bzip2"],
-        "png": ["system//libs/image/libpng:libpng"],
-        "harfbuzz": ["fonts//libraries/harfbuzz:harfbuzz"],
-        "brotli": ["system//libs/compression/brotli:brotli"],
-        "zlib": ["core//zlib:zlib"],
+        "bzip2": ["//packages/linux/system/libs/compression/bzip2:bzip2"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
+        "harfbuzz": ["//packages/linux/fonts/libraries/harfbuzz:harfbuzz"],
+        "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
     # GCC 14+ emits -Wdangling-pointer warnings which cause build failures
     # CC_BUILD is set globally in ebuild.sh for cross-compilation

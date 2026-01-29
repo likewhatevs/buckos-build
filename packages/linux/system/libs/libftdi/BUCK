@@ -25,7 +25,7 @@ cmake_package(
     homepage = "https://www.intra2net.com/en/developer/libftdi/",
     license = "LGPL-2.1+",
     deps = [
-        "system//libs/libusb:libusb",
+        "//packages/linux/system/libs/libusb:libusb",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

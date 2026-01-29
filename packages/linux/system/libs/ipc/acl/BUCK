@@ -43,14 +43,14 @@ make DESTDIR="$DESTDIR" install
 ''',
 
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
-        "system//libs/ipc/attr:attr",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
+        "//packages/linux/system/libs/ipc/attr:attr",
     ],
     rdepend = [
-        "system//libs/ipc/attr:attr",
+        "//packages/linux/system/libs/ipc/attr:attr",
     ],
     visibility = ["PUBLIC"],
 )

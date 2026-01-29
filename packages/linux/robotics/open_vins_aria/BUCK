@@ -9,11 +9,11 @@ cmake_package(
     homepage = "https://github.com/rpng/open_vins",
     license = "LGPL-3.0",
     deps = [
-        "robotics//eigen3:eigen3",
-        "robotics//ceres-solver:ceres-solver",
-        "robotics//sophus:sophus",
-        "ai//vision/opencv:opencv",
-        "dev-libs//misc/boost:boost",
+        "//packages/linux/robotics/eigen3:eigen3",
+        "//packages/linux/robotics/ceres-solver:ceres-solver",
+        "//packages/linux/robotics/sophus:sophus",
+        "//packages/linux/ai/vision/opencv:opencv",
+        "//packages/linux/dev-libs/misc/boost:boost",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -59,7 +59,7 @@ find "$DESTDIR" -name '*.la' -delete
 ''',
 
     bdepend = [
-        "system//libs/ipc/libtirpc:libtirpc",
+        "//packages/linux/system/libs/ipc/libtirpc:libtirpc",
     ],
     visibility = ["PUBLIC"],
 )

@@ -23,8 +23,8 @@ autotools_package(
         "--with-doc=no",
     ],
     deps = [
-        "fonts//libraries/freetype:freetype",
-        "fonts//libraries/harfbuzz:harfbuzz",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/harfbuzz:harfbuzz",
     ],
     visibility = ["PUBLIC"],
 )

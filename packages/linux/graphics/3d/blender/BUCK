@@ -216,21 +216,21 @@ mkdir -p $OUT/usr/share/applications
 mkdir -p $OUT/usr/share/icons/hicolor/scalable/apps
 """,
     deps = [
-        "lang//python:python",
-        "dev-libs//boost:boost",
-        "desktop//mesa:mesa",
-        "dev-libs//openexr:openexr",
-        "system//libs/image/openjpeg:openjpeg",
-        "graphics//video/ffmpeg:ffmpeg",
-        "dev-libs//fftw:fftw",
-        # "dev-libs//opencolorio:opencolorio",  # TODO: not packaged yet
-        "dev-libs//openimageio:openimageio",
-        "dev-libs//openvdb:openvdb",
-        "dev-libs//alembic:alembic",
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/dev-libs/openexr:openexr",
+        "//packages/linux/system/libs/image/openjpeg:openjpeg",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/dev-libs/fftw:fftw",
+        # "//packages/linux/dev-libs/opencolorio:opencolorio",  # TODO: not packaged yet
+        "//packages/linux/dev-libs/openimageio:openimageio",
+        "//packages/linux/dev-libs/openvdb:openvdb",
+        "//packages/linux/dev-libs/alembic:alembic",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     bdepend = [
-        "core//llvm:llvm",
+        "//packages/linux/core/llvm:llvm",
     ],
     visibility = ["PUBLIC"],
 )

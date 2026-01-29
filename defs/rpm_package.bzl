@@ -19,8 +19,8 @@ Example usage:
         sha256 = "...",
         fedora_version = "40",
         rpm_deps = {
-            "gtk3": "desktop//gtk:gtk3",
-            "dbus-libs": "core//dbus:dbus",
+            "gtk3": "//packages/linux/desktop/gtk:gtk3",
+            "dbus-libs": "//packages/linux/core/dbus:dbus",
         },
     )
 """
@@ -163,7 +163,7 @@ def rpm_package(
         sha256: Expected SHA256 checksum
         fedora_version: Fedora version (39, 40, 41, etc.)
         rpm_deps: Dict mapping RPM dependency names to Buck targets
-                 Example: {"gtk3": "desktop//gtk:gtk3"}
+                 Example: {"gtk3": "//packages/linux/desktop/gtk:gtk3"}
         deps: Additional Buck dependencies
         compat_tags: Distribution compatibility tags (defaults to ["fedora"])
         description: Package description
@@ -228,33 +228,33 @@ def rpm_package(
 # Common RPM -> Buck dependency mappings
 RPM_DEPENDENCY_MAP = {
     # Core libraries
-    "glibc": "core//glibc:glibc",
-    "zlib": "core//zlib:zlib",
-    "bzip2-libs": "system//libs/compression/bzip2:bzip2",
-    "xz-libs": "system//libs/compression/xz:xz",
-    "openssl-libs": "system//libs/crypto/openssl:openssl",
+    "glibc": "//packages/linux/core/glibc:glibc",
+    "zlib": "//packages/linux/core/zlib:zlib",
+    "bzip2-libs": "//packages/linux/system/libs/compression/bzip2:bzip2",
+    "xz-libs": "//packages/linux/system/libs/compression/xz:xz",
+    "openssl-libs": "//packages/linux/system/libs/crypto/openssl:openssl",
 
     # Desktop libraries
-    "gtk3": "desktop//gtk:gtk3",
-    "gtk4": "desktop//gtk:gtk4",
-    "qt5-qtbase": "desktop//qt:qt5",
-    "qt6-qtbase": "desktop//qt:qt6",
+    "gtk3": "//packages/linux/desktop/gtk:gtk3",
+    "gtk4": "//packages/linux/desktop/gtk:gtk4",
+    "qt5-qtbase": "//packages/linux/desktop/qt:qt5",
+    "qt6-qtbase": "//packages/linux/desktop/qt:qt6",
 
     # System libraries
-    "dbus-libs": "core//dbus:dbus",
-    "systemd-libs": "system//systemd:systemd",
-    "libX11": "graphics//xorg:libX11",
-    "libwayland-client": "graphics//wayland:wayland",
+    "dbus-libs": "//packages/linux/core/dbus:dbus",
+    "systemd-libs": "//packages/linux/system/systemd:systemd",
+    "libX11": "//packages/linux/graphics/xorg:libX11",
+    "libwayland-client": "//packages/linux/graphics/wayland:wayland",
 
     # Multimedia
-    "ffmpeg-libs": "graphics//ffmpeg:ffmpeg",
-    "pulseaudio-libs": "audio//pulseaudio:pulseaudio",
-    "pipewire-libs": "audio//pipewire:pipewire",
+    "ffmpeg-libs": "//packages/linux/graphics/ffmpeg:ffmpeg",
+    "pulseaudio-libs": "//packages/linux/audio/pulseaudio:pulseaudio",
+    "pipewire-libs": "//packages/linux/audio/pipewire:pipewire",
 
     # Compression
-    "libzstd": "core//zstd:zstd",
-    "lz4-libs": "core//lz4:lz4",
-    "brotli": "core//brotli:brotli",
+    "libzstd": "//packages/linux/core/zstd:zstd",
+    "lz4-libs": "//packages/linux/core/lz4:lz4",
+    "brotli": "//packages/linux/core/brotli:brotli",
 }
 
 def translate_rpm_deps(rpm_dep_names):

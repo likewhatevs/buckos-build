@@ -22,16 +22,16 @@ ebuild_package(
         cp -r "$S/install"/* "$DESTDIR/usr/lib/python3.12/site-packages/"
     """,
     bdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     rdepend = [
-        "dev-libs//python/anthropic:anthropic",
-        "dev-libs//python/litellm:litellm",
-        "dev-libs//python/mistralai:mistralai",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/openai:openai",
-        "dev-libs//python/tenacity:tenacity",
-        "dev-libs//python/termcolor:termcolor",
+        "//packages/linux/dev-libs/python/anthropic:anthropic",
+        "//packages/linux/dev-libs/python/litellm:litellm",
+        "//packages/linux/dev-libs/python/mistralai:mistralai",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/openai:openai",
+        "//packages/linux/dev-libs/python/tenacity:tenacity",
+        "//packages/linux/dev-libs/python/termcolor:termcolor",
     ],
     visibility = ["PUBLIC"],
 )

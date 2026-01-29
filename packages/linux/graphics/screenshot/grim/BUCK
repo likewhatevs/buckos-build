@@ -38,16 +38,16 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
-        "system//libs/graphics/cairo:cairo",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/image/libpng:libpng",
-        "system//libs/graphics/pixman:pixman",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
     ],
     bdepend = [
-        "dev-tools//doc-tools/scdoc:scdoc",
+        "//packages/linux/dev-tools/doc-tools/scdoc:scdoc",
     ],
     visibility = ["PUBLIC"],
 )

@@ -7,18 +7,18 @@ autotools_package(
     sha256 = "2079172cce034556f110048e26083ce9bea751f3154b0ad2809751815b11ea9d",
 
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//misc/libevent:libevent",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/misc/libevent:libevent",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     iuse = ["systemd", "zstd", "lzma"],
     use_defaults = [],
 
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
-        "lzma": ["system//libs/compression/xz-utils:xz-utils"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
+        "lzma": ["//packages/linux/system/libs/compression/xz-utils:xz-utils"],
     },
 
     use_configure = {

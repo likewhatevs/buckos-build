@@ -15,10 +15,10 @@ autotools_package(
     iuse = ["libunwind"],
     use_defaults = ["libunwind"],
     deps = [
-        "system//libs/compression/xz-utils:xz-utils",
+        "//packages/linux/system/libs/compression/xz-utils:xz-utils",
     ],
     use_deps = {
-        "libunwind": ["system//libs/libunwind:libunwind"],
+        "libunwind": ["//packages/linux/system/libs/libunwind:libunwind"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

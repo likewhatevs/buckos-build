@@ -9,8 +9,8 @@ autotools_package(
         "--prefix=/usr",
     ],
     deps = [
-        "dev-tools//parsers/flex:flex",
-        "dev-tools//parsers/bison:bison",
+        "//packages/linux/dev-tools/parsers/flex:flex",
+        "//packages/linux/dev-tools/parsers/bison:bison",
     ],
     visibility = ["PUBLIC"],
 )

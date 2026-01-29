@@ -14,9 +14,9 @@ autotools_package(
     use_defaults = ["ssl", "opus"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "opus": ["system//libs/audio/opus:opus"],
-        "speex": ["system//libs/audio/speex:speex"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "opus": ["//packages/linux/system/libs/audio/opus:opus"],
+        "speex": ["//packages/linux/system/libs/audio/speex:speex"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

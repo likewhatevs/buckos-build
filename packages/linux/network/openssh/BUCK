@@ -33,11 +33,11 @@ autotools_package(
     use_defaults = ["ssl"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "pam": ["core//linux-pam"],
-        "kerberos": ["system//libs/auth:krb5"],
-        "ldap": ["system//libs/directory:openldap"],
-        "libedit": ["dev-libs//misc/libedit:libedit"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "pam": ["//packages/linux/core/linux-pam"],
+        "kerberos": ["//packages/linux/system/libs/auth:krb5"],
+        "ldap": ["//packages/linux/system/libs/directory:openldap"],
+        "libedit": ["//packages/linux/dev-libs/misc/libedit:libedit"],
     },
 
     use_configure = {
@@ -84,7 +84,7 @@ autotools_package(
         "--with-privsep-path=/var/empty",
     ],
 
-    deps = ["core//zlib:zlib"],
+    deps = ["//packages/linux/core/zlib:zlib"],
 
     post_install = """
 # Create privilege separation directory

@@ -28,7 +28,7 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 # install -Dm755 bin/vault "$DESTDIR/usr/bin/vault"
 # """,
 #     bdepend = [
-#         "lang//go:go",
+#         "//packages/linux/lang/go:go",
 #     ],
 #     visibility = ["PUBLIC"],
 # )

@@ -94,11 +94,11 @@ registries = ['docker.io', 'quay.io', 'registry.fedoraproject.org']
 EOF
     """,
     deps = [
-        "lang//go:go",
-        "emulation//containers/crun:crun",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/emulation/containers/crun:crun",
         ":conmon",
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//init/systemd:systemd",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )
@@ -140,9 +140,9 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 install -m 0644 contrib/completions/bash/buildah "$DESTDIR/usr/share/bash-completion/completions/"
     """,
     deps = [
-        "lang//go:go",
-        "emulation//containers/runc:runc",
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/emulation/containers/runc:runc",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )
@@ -182,8 +182,8 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 install -m 0644 completions/bash/skopeo "$DESTDIR/usr/share/bash-completion/completions/"
     """,
     deps = [
-        "lang//go:go",
-        "system//libs/crypto/gpgme:gpgme",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
     ],
     visibility = ["PUBLIC"],
 )
@@ -216,9 +216,9 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 0755 bin/conmon "$DESTDIR/usr/bin/"
     """,
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//init/systemd:systemd",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )

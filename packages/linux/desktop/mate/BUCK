@@ -15,9 +15,9 @@ download_source(
 autotools_package(
     name = "mate-panel",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 NOCONFIGURE=1 ./autogen.sh
@@ -41,7 +41,7 @@ NOCONFIGURE=1 ./autogen.sh
     homepage = "https://mate-desktop.org/",
     license = "GPL-2.0",
     deps = [
-        "desktop//gtk:gtk3",
+        "//packages/linux/desktop/gtk:gtk3",
     ],
     visibility = ["PUBLIC"],
 )
@@ -56,9 +56,9 @@ download_source(
 autotools_package(
     name = "marco",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 NOCONFIGURE=1 ./autogen.sh
@@ -73,7 +73,7 @@ NOCONFIGURE=1 ./autogen.sh
     homepage = "https://mate-desktop.org/",
     license = "GPL-2.0",
     deps = [
-        "desktop//gtk:gtk3",
+        "//packages/linux/desktop/gtk:gtk3",
     ],
     visibility = ["PUBLIC"],
 )
@@ -84,8 +84,8 @@ filegroup(
     srcs = [
         ":mate-panel",
         ":marco",
-        "desktop//lightdm:lightdm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/lightdm:lightdm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

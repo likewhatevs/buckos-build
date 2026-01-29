@@ -35,8 +35,8 @@ if [ -f gocryptfs-xray/gocryptfs-xray ]; then
 fi
 """,
     deps = [
-        "system//filesystem/fuse/fuse3:fuse3",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

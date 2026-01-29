@@ -3,10 +3,10 @@
 filegroup(
     name = "spice-full",
     srcs = [
-        "emulation//utilities/spice:spice-protocol",
-        "emulation//utilities/spice:spice-server",
-        "emulation//utilities/spice:spice-gtk",
-        "emulation//utilities/spice:spice-vdagent",
+        "//packages/linux/emulation/utilities/spice:spice-protocol",
+        "//packages/linux/emulation/utilities/spice:spice-server",
+        "//packages/linux/emulation/utilities/spice:spice-gtk",
+        "//packages/linux/emulation/utilities/spice:spice-vdagent",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -15,8 +15,8 @@ filegroup(
 filegroup(
     name = "spice-server-only",
     srcs = [
-        "emulation//utilities/spice:spice-protocol",
-        "emulation//utilities/spice:spice-server",
+        "//packages/linux/emulation/utilities/spice:spice-protocol",
+        "//packages/linux/emulation/utilities/spice:spice-server",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -25,7 +25,7 @@ filegroup(
 filegroup(
     name = "spice-guest",
     srcs = [
-        "emulation//utilities/spice:spice-vdagent",
+        "//packages/linux/emulation/utilities/spice:spice-vdagent",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -34,9 +34,9 @@ filegroup(
 filegroup(
     name = "microvm-hypervisors",
     srcs = [
-        "emulation//utilities/firecracker:firecracker",
-        "emulation//utilities/cloud-hypervisor:cloud-hypervisor",
-        "emulation//utilities/crosvm:crosvm",
+        "//packages/linux/emulation/utilities/firecracker:firecracker",
+        "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
+        "//packages/linux/emulation/utilities/crosvm:crosvm",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -45,7 +45,7 @@ filegroup(
 filegroup(
     name = "virtio-tools",
     srcs = [
-        "emulation//utilities/virtiofsd:virtiofsd",
+        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

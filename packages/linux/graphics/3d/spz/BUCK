@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/nianticlabs/spz",
     license = "MIT",
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     pre_configure = """
 # Create CMakeLists.txt for spz library

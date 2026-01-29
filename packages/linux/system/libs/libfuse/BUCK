@@ -11,7 +11,7 @@ meson_package(
         "-Duseroot=false",
     ],
     deps = [
-        "system//libs/liburing:liburing",
-        "system//libs/numactl:numactl",
+        "//packages/linux/system/libs/liburing:liburing",
+        "//packages/linux/system/libs/numactl:numactl",
     ],
 )

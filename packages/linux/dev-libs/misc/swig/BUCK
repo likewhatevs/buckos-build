@@ -19,10 +19,10 @@ autotools_package(
     homepage = "https://www.swig.org/",
     license = "GPL-3.0",
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     deps = [
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     src_prepare = "",
     configure_args = [

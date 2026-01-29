@@ -24,8 +24,8 @@ meson_package(
         "-json": "-Djson-c=disabled",
     },
     deps = [
-        # "system//libs/libnvme:libnvme",  # TODO: not packaged yet,
-        "system//libs/data/json-c:json-c",
+        # "//packages/linux/system/libs/libnvme:libnvme",  # TODO: not packaged yet,
+        "//packages/linux/system/libs/data/json-c:json-c",
     ],
     visibility = ["PUBLIC"],
 )

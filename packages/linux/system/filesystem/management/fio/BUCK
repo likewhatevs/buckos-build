@@ -72,7 +72,7 @@ autotools_package(
     license = "GPL-2.0",
     src_configure = "./configure --prefix=/usr",
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

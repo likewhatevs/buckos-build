@@ -15,10 +15,10 @@ autotools_package(
     use_defaults = ["caps"],
 
     use_deps = {
-        "caps": ["system//libs/ipc/libcap:libcap"],
-        "elf": ["dev-tools//dev-utils/elfutils:elfutils"],
+        "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
+        "elf": ["//packages/linux/dev-tools/dev-utils/elfutils:elfutils"],
         # TODO: Add libselinux when available:
-        # "selinux": ["system//security/selinux/libselinux:libselinux"],
+        # "selinux": ["//packages/linux/system/security/selinux/libselinux:libselinux"],
     },
 
 

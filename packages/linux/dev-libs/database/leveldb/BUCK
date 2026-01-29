@@ -23,7 +23,7 @@ cmake_package(
         "-DLEVELDB_BUILD_BENCHMARKS=OFF",
     ],
     deps = [
-        "system//libs/compression/snappy:snappy",
+        "//packages/linux/system/libs/compression/snappy:snappy",
     ],
     visibility = ["PUBLIC"],
 )

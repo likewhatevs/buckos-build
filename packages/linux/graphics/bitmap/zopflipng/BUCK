@@ -9,8 +9,8 @@ simple_package(
     homepage = "https://github.com/google/zopfli",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//compression/zopfli:zopfli",
-        "graphics//bitmap/lodepng:lodepng",
+        "//packages/linux/dev-libs/compression/zopfli:zopfli",
+        "//packages/linux/graphics/bitmap/lodepng:lodepng",
     ],
     build_commands = [
         "cd src/zopflipng",

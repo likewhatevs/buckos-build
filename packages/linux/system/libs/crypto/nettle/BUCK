@@ -65,8 +65,8 @@ autotools_package(
     },
 
     use_deps = {
-        "openssl": ["system//libs/crypto/openssl:openssl"],
-        "gmp": ["dev-libs//gmp:gmp"],
+        "openssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gmp": ["//packages/linux/dev-libs/gmp:gmp"],
     },
 
     configure_args = [
@@ -88,9 +88,9 @@ autoreconf -fiv
 """,
 
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     deps = [],
     visibility = ["PUBLIC"],

@@ -869,7 +869,34 @@ fi
 # before entering the network-isolated build environment. This is more robust than
 # cargo fetch because the vendored sources are self-contained and don't depend on
 # CARGO_HOME cache being correctly populated.
+
+# First check if vendor directory exists in dependencies (from vendor tarball)
+# This allows pre-made vendor tarballs to be used for fully offline builds
+# Use DEP_BASE_DIRS which contains absolute paths (converted earlier in the script)
+VENDOR_FROM_DEP=false
 if [ -f Cargo.toml ] && [ ! -d vendor ]; then
+    IFS=':' read -ra ABS_DEP_DIRS <<< "$DEP_BASE_DIRS"
+    for dep_dir in "${ABS_DEP_DIRS[@]}"; do
+        if [ -d "$dep_dir/vendor" ]; then
+            echo "📦 Found pre-made vendor directory in $dep_dir"
+            cp -r "$dep_dir/vendor" .
+            if [ -f "$dep_dir/.cargo/config.toml" ]; then
+                mkdir -p .cargo
+                cp "$dep_dir/.cargo/config.toml" .cargo/
+                echo "✓ Copied vendor directory and config.toml from dependency"
+            elif [ -f "$dep_dir/config.toml" ]; then
+                mkdir -p .cargo
+                cp "$dep_dir/config.toml" .cargo/
+                echo "✓ Copied vendor directory and config.toml from dependency"
+            fi
+            VENDOR_FROM_DEP=true
+            export CARGO_NET_OFFLINE=true
+            break
+        fi
+    done
+fi
+
+if [ -f Cargo.toml ] && [ ! -d vendor ] && [ "$VENDOR_FROM_DEP" = "false" ]; then
     echo "🔄 Vendoring Cargo crate dependencies (before network isolation)..."
 
     # Set up Cargo environment

@@ -23,13 +23,13 @@ autoreconf -fiv
     ],
 
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
 
     deps = [
-        "system//libs/utility/libevent:libevent",
+        "//packages/linux/system/libs/utility/libevent:libevent",
     ],
 
     description = "User-level SOCKS and port-forwarding proxy for OpenConnect",

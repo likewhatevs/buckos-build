@@ -13,17 +13,17 @@ Example usage:
     system_set(
         name = "my-server",
         profile = "server",
-        additions = ["network//vpn/wireguard-tools:wireguard-tools"],
-        removals = ["editors//emacs"],
+        additions = ["//packages/linux/network/vpn/wireguard-tools:wireguard-tools"],
+        removals = ["//packages/linux/editors/emacs"],
     )
 
     # Create a custom package set
     package_set(
         name = "web-development",
         packages = [
-            "lang//nodejs",
-            "lang//python",
-            "editors//neovim",
+            "//packages/linux/lang/nodejs",
+            "//packages/linux/lang/python",
+            "//packages/linux/editors/neovim",
         ],
         inherits = ["@base"],
     )
@@ -73,39 +73,39 @@ def _set_union(set1, set2):
 # System packages with musl (lightweight C library)
 SYSTEM_PACKAGES_MUSL = [
     # Core C library
-    "core//musl:musl",              # lightweight C library
+    "//packages/linux/core/musl:musl",              # lightweight C library
 
     # Essential system utilities
-    "system//apps/coreutils:coreutils",  # ls, cp, mv, rm, etc
-    "core//util-linux:util-linux",        # mount, fdisk, etc
-    "core//procps-ng:procps-ng",         # ps, top, etc
-    "system//apps/shadow:shadow",  # user/group management
-    "core//file:file",              # file type detection
+    "//packages/linux/system/apps/coreutils:coreutils",  # ls, cp, mv, rm, etc
+    "//packages/linux/core/util-linux:util-linux",        # mount, fdisk, etc
+    "//packages/linux/core/procps-ng:procps-ng",         # ps, top, etc
+    "//packages/linux/system/apps/shadow:shadow",  # user/group management
+    "//packages/linux/core/file:file",              # file type detection
 
     # Shell
-    "core//bash:bash",              # default shell
+    "//packages/linux/core/bash:bash",              # default shell
 
     # Basic libraries needed by most packages
-    "core//zlib:zlib",              # compression library
+    "//packages/linux/core/zlib:zlib",              # compression library
 ]
 
 # System packages with glibc (GNU C library - broader compatibility)
 SYSTEM_PACKAGES_GLIBC = [
     # Core C library
-    "core//glibc:glibc",             # GNU C library (broader compatibility)
+    "//packages/linux/core/glibc:glibc",             # GNU C library (broader compatibility)
 
     # Essential system utilities
-    "system//apps/coreutils:coreutils",  # ls, cp, mv, rm, etc
-    "core//util-linux:util-linux",        # mount, fdisk, etc
-    "core//procps-ng:procps-ng",         # ps, top, etc
-    "system//apps/shadow:shadow",  # user/group management
-    "core//file:file",              # file type detection
+    "//packages/linux/system/apps/coreutils:coreutils",  # ls, cp, mv, rm, etc
+    "//packages/linux/core/util-linux:util-linux",        # mount, fdisk, etc
+    "//packages/linux/core/procps-ng:procps-ng",         # ps, top, etc
+    "//packages/linux/system/apps/shadow:shadow",  # user/group management
+    "//packages/linux/core/file:file",              # file type detection
 
     # Shell
-    "core//bash:bash",              # default shell
+    "//packages/linux/core/bash:bash",              # default shell
 
     # Basic libraries needed by most packages
-    "core//zlib:zlib",              # compression library
+    "//packages/linux/core/zlib:zlib",              # compression library
 ]
 
 # Default to glibc for maximum compatibility
@@ -114,33 +114,33 @@ SYSTEM_PACKAGES = SYSTEM_PACKAGES_GLIBC
 # Base packages that should be in almost every installation
 BASE_PACKAGES = SYSTEM_PACKAGES + [
     # Core libraries
-    "core//readline:readline",
-    "core//ncurses:ncurses",
-    "core//less:less",
-    "core//libffi:libffi",
-    "core//expat:expat",
+    "//packages/linux/core/readline:readline",
+    "//packages/linux/core/ncurses:ncurses",
+    "//packages/linux/core/less:less",
+    "//packages/linux/core/libffi:libffi",
+    "//packages/linux/core/expat:expat",
 
     # Shell and terminal
-    "core//bash:bash",
+    "//packages/linux/core/bash:bash",
 
     # Compression
-    "system//libs/compression/bzip2:bzip2",
-    "system//libs/compression/xz:xz",
-    "system//libs/compression/gzip:gzip",
-    "system//apps/tar:tar",
+    "//packages/linux/system/libs/compression/bzip2:bzip2",
+    "//packages/linux/system/libs/compression/xz:xz",
+    "//packages/linux/system/libs/compression/gzip:gzip",
+    "//packages/linux/system/apps/tar:tar",
 
     # System utilities
-    "system//apps/coreutils:coreutils",
-    "system//apps/findutils:findutils",
-    "core//procps-ng:procps-ng",
-    "core//file:file",
-    "system//apps/shadow:shadow",
+    "//packages/linux/system/apps/coreutils:coreutils",
+    "//packages/linux/system/apps/findutils:findutils",
+    "//packages/linux/core/procps-ng:procps-ng",
+    "//packages/linux/core/file:file",
+    "//packages/linux/system/apps/shadow:shadow",
 
     # Networking basics
-    "system//libs/crypto/openssl:openssl",
-    "network//curl:curl",
-    "network//iproute2:iproute2",
-    "network//dhcpcd:dhcpcd",
+    "//packages/linux/system/libs/crypto/openssl:openssl",
+    "//packages/linux/network/curl:curl",
+    "//packages/linux/network/iproute2:iproute2",
+    "//packages/linux/network/dhcpcd:dhcpcd",
 ]
 
 # =============================================================================
@@ -153,9 +153,9 @@ PROFILE_PACKAGE_SETS = {
     "minimal": {
         "description": "Absolute minimum packages for a bootable system",
         "packages": SYSTEM_PACKAGES + [
-            "core//bash:bash",
-            "core//readline:readline",
-            "core//ncurses:ncurses",
+            "//packages/linux/core/bash:bash",
+            "//packages/linux/core/readline:readline",
+            "//packages/linux/core/ncurses:ncurses",
         ],
         "inherits": [],
         "use_profile": "minimal",
@@ -166,24 +166,24 @@ PROFILE_PACKAGE_SETS = {
         "description": "Server-optimized package set without GUI",
         "packages": BASE_PACKAGES + [
             # Remote access
-            "network//openssh:openssh",
+            "//packages/linux/network/openssh:openssh",
 
             # Editors
-            "editors//vim",
+            "//packages/linux/editors/vim",
 
             # System administration
-            "system//apps/sudo:sudo",
-            "system//apps/tmux:tmux",
-            "system//apps/htop:htop",
-            "system//apps/rsync:rsync",
-            "system//apps/logrotate:logrotate",
-            "system//apps/cronie:cronie",
-            "system//apps/lsof:lsof",
-            "system//apps/strace:strace",
+            "//packages/linux/system/apps/sudo:sudo",
+            "//packages/linux/system/apps/tmux:tmux",
+            "//packages/linux/system/apps/htop:htop",
+            "//packages/linux/system/apps/rsync:rsync",
+            "//packages/linux/system/apps/logrotate:logrotate",
+            "//packages/linux/system/apps/cronie:cronie",
+            "//packages/linux/system/apps/lsof:lsof",
+            "//packages/linux/system/apps/strace:strace",
 
             # Documentation
-            "system//docs:man-db",
-            "system//docs:man-pages",
+            "//packages/linux/system/docs:man-db",
+            "//packages/linux/system/docs:man-pages",
         ],
         "inherits": [],
         "use_profile": "server",
@@ -194,34 +194,34 @@ PROFILE_PACKAGE_SETS = {
         "description": "Full desktop environment with multimedia support",
         "packages": BASE_PACKAGES + [
             # Remote access
-            "network//openssh:openssh",
+            "//packages/linux/network/openssh:openssh",
 
             # Editors
-            "editors//vim",
-            "editors//neovim",
+            "//packages/linux/editors/vim",
+            "//packages/linux/editors/neovim",
 
             # System administration
-            "system//apps/sudo:sudo",
-            "system//apps/tmux:tmux",
-            "system//apps/htop:htop",
-            "system//apps/rsync:rsync",
-            "system//apps/logrotate:logrotate",
-            "system//apps/cronie:cronie",
+            "//packages/linux/system/apps/sudo:sudo",
+            "//packages/linux/system/apps/tmux:tmux",
+            "//packages/linux/system/apps/htop:htop",
+            "//packages/linux/system/apps/rsync:rsync",
+            "//packages/linux/system/apps/logrotate:logrotate",
+            "//packages/linux/system/apps/cronie:cronie",
 
             # Shells
-            "shells//zsh:zsh",
+            "//packages/linux/shells/zsh:zsh",
 
             # Terminals
-            "terminals//alacritty:alacritty",
-            "terminals//foot:foot",
+            "//packages/linux/terminals/alacritty:alacritty",
+            "//packages/linux/terminals/foot:foot",
 
             # Documentation
-            "system//docs:man-db",
-            "system//docs:man-pages",
-            "system//docs:texinfo",
+            "//packages/linux/system/docs:man-db",
+            "//packages/linux/system/docs:man-pages",
+            "//packages/linux/system/docs:texinfo",
 
             # Internationalization
-            "dev-libs//misc/gettext:gettext",
+            "//packages/linux/dev-libs/misc/gettext:gettext",
         ],
         "inherits": [],
         "use_profile": "desktop",
@@ -232,29 +232,29 @@ PROFILE_PACKAGE_SETS = {
         "description": "Development-focused with languages, tools, and documentation",
         "packages": BASE_PACKAGES + [
             # Remote access
-            "network//openssh:openssh",
+            "//packages/linux/network/openssh:openssh",
 
             # Editors
-            "editors//vim",
-            "editors//neovim",
-            "editors//emacs",
+            "//packages/linux/editors/vim",
+            "//packages/linux/editors/neovim",
+            "//packages/linux/editors/emacs",
 
             # Shells
-            "shells//zsh:zsh",
+            "//packages/linux/shells/zsh:zsh",
 
             # System administration
-            "system//apps/sudo:sudo",
-            "system//apps/tmux:tmux",
-            "system//apps/htop:htop",
-            "system//apps/rsync:rsync",
-            "system//apps/strace:strace",
-            "system//apps/lsof:lsof",
+            "//packages/linux/system/apps/sudo:sudo",
+            "//packages/linux/system/apps/tmux:tmux",
+            "//packages/linux/system/apps/htop:htop",
+            "//packages/linux/system/apps/rsync:rsync",
+            "//packages/linux/system/apps/strace:strace",
+            "//packages/linux/system/apps/lsof:lsof",
 
             # Documentation
-            "system//docs:man-db",
-            "system//docs:man-pages",
-            "system//docs:texinfo",
-            "system//docs:groff",
+            "//packages/linux/system/docs:man-db",
+            "//packages/linux/system/docs:man-pages",
+            "//packages/linux/system/docs:texinfo",
+            "//packages/linux/system/docs:groff",
         ],
         "inherits": [],
         "use_profile": "developer",
@@ -265,19 +265,19 @@ PROFILE_PACKAGE_SETS = {
         "description": "Security-hardened configuration with minimal attack surface",
         "packages": BASE_PACKAGES + [
             # Remote access (required for server management)
-            "network//openssh:openssh",
+            "//packages/linux/network/openssh:openssh",
 
             # Minimal editor
-            "editors//vim",
+            "//packages/linux/editors/vim",
 
             # System administration
-            "system//apps/sudo:sudo",
-            "system//apps/htop:htop",
-            "system//apps/rsync:rsync",
-            "system//apps/logrotate:logrotate",
+            "//packages/linux/system/apps/sudo:sudo",
+            "//packages/linux/system/apps/htop:htop",
+            "//packages/linux/system/apps/rsync:rsync",
+            "//packages/linux/system/apps/logrotate:logrotate",
 
             # VPN for secure communications
-            "network//vpn/wireguard-tools:wireguard-tools",
+            "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
         ],
         "inherits": [],
         "use_profile": "hardened",
@@ -287,8 +287,8 @@ PROFILE_PACKAGE_SETS = {
     "embedded": {
         "description": "Minimal footprint for embedded and IoT systems",
         "packages": SYSTEM_PACKAGES + [
-            "core//readline:readline",
-            # "network//dropbear:dropbear",  # TODO: Smaller SSH - not packaged yet
+            "//packages/linux/core/readline:readline",
+            # "//packages/linux/network/dropbear:dropbear",  # TODO: Smaller SSH - not packaged yet
         ],
         "inherits": [],
         "use_profile": "minimal",
@@ -298,10 +298,10 @@ PROFILE_PACKAGE_SETS = {
     "container": {
         "description": "Minimal base for container images",
         "packages": SYSTEM_PACKAGES + [
-            "core//bash:bash",
-            "core//readline:readline",
-            "core//ncurses:ncurses",
-            "network//curl:curl",
+            "//packages/linux/core/bash:bash",
+            "//packages/linux/core/readline:readline",
+            "//packages/linux/core/ncurses:ncurses",
+            "//packages/linux/network/curl:curl",
         ],
         "inherits": [],
         "use_profile": "minimal",
@@ -317,7 +317,7 @@ TASK_PACKAGE_SETS = {
     "web-server": {
         "description": "Packages for running a web server",
         "packages": [
-            "www//servers/nginx:nginx",
+            "//packages/linux/www/servers/nginx:nginx",
         ],
         "inherits": ["server"],
     },
@@ -326,7 +326,7 @@ TASK_PACKAGE_SETS = {
     "database-server": {
         "description": "Database server packages",
         "packages": [
-            "system//libs/database/sqlite:sqlite",
+            "//packages/linux/system/libs/database/sqlite:sqlite",
         ],
         "inherits": ["server"],
     },
@@ -335,9 +335,9 @@ TASK_PACKAGE_SETS = {
     "container-host": {
         "description": "Host system for running containers",
         "packages": [
-            "emulation//containers:podman-full",
-            "emulation//containers/podman:buildah",
-            "emulation//containers/podman:skopeo",
+            "//packages/linux/emulation/containers:podman-full",
+            "//packages/linux/emulation/containers/podman:buildah",
+            "//packages/linux/emulation/containers/podman:skopeo",
         ],
         "inherits": ["server"],
     },
@@ -346,8 +346,8 @@ TASK_PACKAGE_SETS = {
     "virtualization-host": {
         "description": "Host system for virtual machines",
         "packages": [
-            "emulation//hypervisors/qemu:qemu",
-            "emulation//virtualization/libvirt:libvirt",
+            "//packages/linux/emulation/hypervisors/qemu:qemu",
+            "//packages/linux/emulation/virtualization/libvirt:libvirt",
         ],
         "inherits": ["server"],
     },
@@ -356,9 +356,9 @@ TASK_PACKAGE_SETS = {
     "vpn-server": {
         "description": "VPN server packages",
         "packages": [
-            "network//vpn/wireguard-tools:wireguard-tools",
-            "network//vpn/openvpn:openvpn",
-            "network//vpn/strongswan:strongswan",
+            "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
+            "//packages/linux/network/vpn/openvpn:openvpn",
+            "//packages/linux/network/vpn/strongswan:strongswan",
         ],
         "inherits": ["server"],
     },
@@ -367,9 +367,9 @@ TASK_PACKAGE_SETS = {
     "monitoring": {
         "description": "System monitoring and observability tools",
         "packages": [
-            "system//apps/htop:htop",
-            "system//apps/lsof:lsof",
-            "system//apps/strace:strace",
+            "//packages/linux/system/apps/htop:htop",
+            "//packages/linux/system/apps/lsof:lsof",
+            "//packages/linux/system/apps/strace:strace",
         ],
         "inherits": ["server"],
     },
@@ -378,11 +378,11 @@ TASK_PACKAGE_SETS = {
     "benchmarking": {
         "description": "Performance testing and benchmarking tools",
         "packages": [
-            "benchmarks//stress-ng:stress-ng",
-            "benchmarks//fio:fio",
-            "benchmarks//iperf3:iperf3",
-            "benchmarks//hackbench:hackbench",
-            "benchmarks//memtester:memtester",
+            "//packages/linux/benchmarks/stress-ng:stress-ng",
+            "//packages/linux/benchmarks/fio:fio",
+            "//packages/linux/benchmarks/iperf3:iperf3",
+            "//packages/linux/benchmarks/hackbench:hackbench",
+            "//packages/linux/benchmarks/memtester:memtester",
         ],
         "inherits": ["server"],
     },
@@ -397,7 +397,7 @@ INIT_SYSTEM_SETS = {
     "systemd": {
         "description": "systemd init system and service manager",
         "packages": [
-            "system//init:systemd",
+            "//packages/linux/system/init:systemd",
         ],
         "inherits": [],
     },
@@ -406,7 +406,7 @@ INIT_SYSTEM_SETS = {
     "openrc": {
         "description": "OpenRC dependency-based init system",
         "packages": [
-            "system//init:openrc",
+            "//packages/linux/system/init:openrc",
         ],
         "inherits": [],
     },
@@ -415,7 +415,7 @@ INIT_SYSTEM_SETS = {
     "runit": {
         "description": "runit init system with service supervision",
         "packages": [
-            "system//init:runit",
+            "//packages/linux/system/init:runit",
         ],
         "inherits": [],
     },
@@ -424,10 +424,10 @@ INIT_SYSTEM_SETS = {
     "s6": {
         "description": "s6 init system with supervision suite",
         "packages": [
-            "system//init:s6",
-            "system//init:s6-linux-init",
-            "system//init:s6-rc",
-            "system//init:skalibs",
+            "//packages/linux/system/init:s6",
+            "//packages/linux/system/init:s6-linux-init",
+            "//packages/linux/system/init:s6-rc",
+            "//packages/linux/system/init:skalibs",
         ],
         "inherits": [],
     },
@@ -436,7 +436,7 @@ INIT_SYSTEM_SETS = {
     "sysvinit": {
         "description": "Traditional SysV init system",
         "packages": [
-            "system//init:sysvinit",
+            "//packages/linux/system/init:sysvinit",
         ],
         "inherits": [],
     },
@@ -445,7 +445,7 @@ INIT_SYSTEM_SETS = {
     "dinit": {
         "description": "dinit service manager and init system",
         "packages": [
-            "system//init:dinit",
+            "//packages/linux/system/init:dinit",
         ],
         "inherits": [],
     },
@@ -470,7 +470,7 @@ DESKTOP_ENVIRONMENT_SETS = {
     "kde-desktop": {
         "description": "KDE Plasma desktop environment",
         "packages": [
-            "desktop//kde:kde-plasma",
+            "//packages/linux/desktop/kde:kde-plasma",
         ],
         "inherits": ["desktop"],
     },
@@ -479,7 +479,7 @@ DESKTOP_ENVIRONMENT_SETS = {
     "xfce-desktop": {
         "description": "XFCE lightweight desktop environment",
         "packages": [
-            "desktop//xfce:xfce",
+            "//packages/linux/desktop/xfce:xfce",
         ],
         "inherits": ["desktop"],
     },
@@ -488,7 +488,7 @@ DESKTOP_ENVIRONMENT_SETS = {
     "sway-desktop": {
         "description": "Sway Wayland compositor with tiling",
         "packages": [
-            "desktop//sway:sway-desktop",
+            "//packages/linux/desktop/sway:sway-desktop",
         ],
         "inherits": ["desktop"],
     },
@@ -497,7 +497,7 @@ DESKTOP_ENVIRONMENT_SETS = {
     "hyprland-desktop": {
         "description": "Hyprland Wayland compositor",
         "packages": [
-            "desktop//hyprland:hyprland-desktop",
+            "//packages/linux/desktop/hyprland:hyprland-desktop",
         ],
         "inherits": ["desktop"],
     },
@@ -506,7 +506,7 @@ DESKTOP_ENVIRONMENT_SETS = {
     "i3-desktop": {
         "description": "i3 X11 tiling window manager",
         "packages": [
-            "desktop//i3:i3-desktop",
+            "//packages/linux/desktop/i3:i3-desktop",
         ],
         "inherits": ["desktop"],
     },
@@ -521,7 +521,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "python-dev": {
         "description": "Python development environment with tooling",
         "packages": [
-            "lang//python:python",
+            "//packages/linux/lang/python:python",
         ],
         "inherits": ["developer"],
     },
@@ -530,7 +530,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "nodejs-dev": {
         "description": "Node.js development environment with npm",
         "packages": [
-            "lang//nodejs:nodejs",
+            "//packages/linux/lang/nodejs:nodejs",
         ],
         "inherits": ["developer"],
     },
@@ -539,7 +539,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "rust-dev": {
         "description": "Rust development environment with cargo",
         "packages": [
-            "lang//rust:rust",
+            "//packages/linux/lang/rust:rust",
         ],
         "inherits": ["developer"],
     },
@@ -548,7 +548,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "go-dev": {
         "description": "Go development environment with tooling",
         "packages": [
-            "lang//go:go",
+            "//packages/linux/lang/go:go",
         ],
         "inherits": ["developer"],
     },
@@ -557,15 +557,15 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "cpp-dev": {
         "description": "C/C++ development with GCC/Clang toolchain",
         "packages": [
-            "lang//gcc:gcc",
-            "lang//clang:clang",
-            "lang//binutils:binutils",
-            "dev-tools//build-systems/cmake:cmake",
-            "dev-tools//build-systems/make:make",
-            "dev-tools//build-systems/autoconf:autoconf",
-            "dev-tools//build-systems/automake:automake",
-            "dev-tools//debuggers/gdb:gdb",
-            "dev-tools//build-systems/pkg-config:pkg-config",
+            "//packages/linux/lang/gcc:gcc",
+            "//packages/linux/lang/clang:clang",
+            "//packages/linux/lang/binutils:binutils",
+            "//packages/linux/dev-tools/build-systems/cmake:cmake",
+            "//packages/linux/dev-tools/build-systems/make:make",
+            "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+            "//packages/linux/dev-tools/build-systems/automake:automake",
+            "//packages/linux/dev-tools/debuggers/gdb:gdb",
+            "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
         ],
         "inherits": ["developer"],
     },
@@ -574,7 +574,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "ruby-dev": {
         "description": "Ruby development environment with gems",
         "packages": [
-            "lang//ruby:ruby",
+            "//packages/linux/lang/ruby:ruby",
         ],
         "inherits": ["developer"],
     },
@@ -583,7 +583,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "php-dev": {
         "description": "PHP development environment",
         "packages": [
-            "lang//php:php",
+            "//packages/linux/lang/php:php",
         ],
         "inherits": ["developer"],
     },
@@ -592,7 +592,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "zig-dev": {
         "description": "Zig development environment",
         "packages": [
-            "lang//zig:zig",
+            "//packages/linux/lang/zig:zig",
         ],
         "inherits": ["developer"],
     },
@@ -601,7 +601,7 @@ LANGUAGE_DEVELOPMENT_SETS = {
     "julia-dev": {
         "description": "Julia development for scientific computing",
         "packages": [
-            "lang//julia:julia",
+            "//packages/linux/lang/julia:julia",
         ],
         "inherits": ["developer"],
     },
@@ -620,26 +620,26 @@ STAGE3_PACKAGE_SETS = {
         "description": "Minimal stage3 for chroot bootstrap (no toolchain)",
         "packages": [
             # Core C library
-            "core//glibc:glibc",
+            "//packages/linux/core/glibc:glibc",
             # Essential utilities
-            "system//apps/coreutils:coreutils",
-            "core//util-linux:util-linux",
-            "core//procps-ng:procps-ng",
-            "system//apps/shadow:shadow",
-            "core//file:file",
+            "//packages/linux/system/apps/coreutils:coreutils",
+            "//packages/linux/core/util-linux:util-linux",
+            "//packages/linux/core/procps-ng:procps-ng",
+            "//packages/linux/system/apps/shadow:shadow",
+            "//packages/linux/core/file:file",
             # Shell
-            "core//bash:bash",
+            "//packages/linux/core/bash:bash",
             # Terminal
-            "core//readline:readline",
-            "core//ncurses:ncurses",
-            "core//less:less",
+            "//packages/linux/core/readline:readline",
+            "//packages/linux/core/ncurses:ncurses",
+            "//packages/linux/core/less:less",
             # Compression (required for package management)
-            "system//libs/compression/bzip2:bzip2",
-            "system//libs/compression/xz:xz",
-            "system//libs/compression/gzip:gzip",
-            "system//apps/tar:tar",
+            "//packages/linux/system/libs/compression/bzip2:bzip2",
+            "//packages/linux/system/libs/compression/xz:xz",
+            "//packages/linux/system/libs/compression/gzip:gzip",
+            "//packages/linux/system/apps/tar:tar",
             # Basic libraries
-            "core//zlib:zlib",
+            "//packages/linux/core/zlib:zlib",
         ],
         "inherits": [],
         "use_profile": "minimal",
@@ -650,32 +650,32 @@ STAGE3_PACKAGE_SETS = {
         "description": "Standard stage3 with GCC toolchain for building packages",
         "packages": [
             # Additional core libraries
-            "core//libffi:libffi",
-            "core//expat:expat",
+            "//packages/linux/core/libffi:libffi",
+            "//packages/linux/core/expat:expat",
             # Networking basics
-            "system//libs/crypto/openssl:openssl",
-            "network//curl:curl",
-            "network//iproute2:iproute2",
+            "//packages/linux/system/libs/crypto/openssl:openssl",
+            "//packages/linux/network/curl:curl",
+            "//packages/linux/network/iproute2:iproute2",
             # Toolchain
-            "lang//gcc:gcc",
-            "lang//binutils:binutils",
+            "//packages/linux/lang/gcc:gcc",
+            "//packages/linux/lang/binutils:binutils",
             # Build systems
-            "dev-tools//build-systems/make:make",
-            "dev-tools//build-systems/pkg-config:pkg-config",
-            "dev-tools//build-systems/m4:m4",
-            "dev-tools//build-systems/autoconf:autoconf",
-            "dev-tools//build-systems/automake:automake",
-            "dev-tools//build-systems/libtool:libtool",
+            "//packages/linux/dev-tools/build-systems/make:make",
+            "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+            "//packages/linux/dev-tools/build-systems/m4:m4",
+            "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+            "//packages/linux/dev-tools/build-systems/automake:automake",
+            "//packages/linux/dev-tools/build-systems/libtool:libtool",
             # Essential for building (patch, sed, awk, grep)
-            "system//apps/patch:patch",
-            "system//apps/sed:sed",
-            "system//apps/gawk:gawk",
-            "system//apps/grep:grep",
-            "system//apps/diffutils:diffutils",
-            "system//apps/findutils:findutils",
+            "//packages/linux/system/apps/patch:patch",
+            "//packages/linux/system/apps/sed:sed",
+            "//packages/linux/system/apps/gawk:gawk",
+            "//packages/linux/system/apps/grep:grep",
+            "//packages/linux/system/apps/diffutils:diffutils",
+            "//packages/linux/system/apps/findutils:findutils",
             # Scripting languages (needed for many build systems)
-            "lang//perl:perl",
-            "lang//python:python",
+            "//packages/linux/lang/perl:perl",
+            "//packages/linux/lang/python:python",
         ],
         "inherits": ["stage3-minimal"],
         "use_profile": "server",
@@ -686,19 +686,19 @@ STAGE3_PACKAGE_SETS = {
         "description": "Developer stage3 with modern build systems (cmake, meson)",
         "packages": [
             # Modern build systems
-            "dev-tools//build-systems/cmake:cmake",
-            "dev-tools//build-systems/meson:meson",
-            "dev-tools//build-systems/ninja:ninja",
+            "//packages/linux/dev-tools/build-systems/cmake:cmake",
+            "//packages/linux/dev-tools/build-systems/meson:meson",
+            "//packages/linux/dev-tools/build-systems/ninja:ninja",
             # VCS
-            "dev-tools//vcs/git:git",
+            "//packages/linux/dev-tools/vcs/git:git",
             # Editors
-            "editors//vim:vim",
+            "//packages/linux/editors/vim:vim",
             # Debugging
-            "dev-tools//debugging/gdb:gdb",
+            "//packages/linux/dev-tools/debugging/gdb:gdb",
             # SSH for remote development
-            "network//openssh:openssh",
+            "//packages/linux/network/openssh:openssh",
             # System administration
-            "system//apps/sudo:sudo",
+            "//packages/linux/system/apps/sudo:sudo",
         ],
         "inherits": ["stage3-base"],
         "use_profile": "developer",
@@ -709,13 +709,13 @@ STAGE3_PACKAGE_SETS = {
         "description": "Complete stage3 with all development tools (Rust, Go, LLVM)",
         "packages": [
             # Additional languages
-            "lang//rust:rust",
-            "lang//go:go",
+            "//packages/linux/lang/rust:rust",
+            "//packages/linux/lang/go:go",
             # LLVM toolchain
-            "dev-tools//compilers/llvm:llvm",
-            "dev-tools//compilers/clang:clang",
+            "//packages/linux/dev-tools/compilers/llvm:llvm",
+            "//packages/linux/dev-tools/compilers/clang:clang",
             # Additional editors
-            "editors//neovim:neovim",
+            "//packages/linux/editors/neovim:neovim",
         ],
         "inherits": ["stage3-developer"],
         "use_profile": "developer",
@@ -726,26 +726,26 @@ STAGE3_PACKAGE_SETS = {
         "description": "Minimal stage3 with musl libc (smaller, static-friendly)",
         "packages": [
             # Core C library (musl instead of glibc)
-            "core//musl:musl",
+            "//packages/linux/core/musl:musl",
             # Essential utilities
-            "system//apps/coreutils:coreutils",
-            "core//util-linux:util-linux",
-            "core//procps-ng:procps-ng",
-            "system//apps/shadow:shadow",
-            "core//file:file",
+            "//packages/linux/system/apps/coreutils:coreutils",
+            "//packages/linux/core/util-linux:util-linux",
+            "//packages/linux/core/procps-ng:procps-ng",
+            "//packages/linux/system/apps/shadow:shadow",
+            "//packages/linux/core/file:file",
             # Shell
-            "core//bash:bash",
+            "//packages/linux/core/bash:bash",
             # Terminal
-            "core//readline:readline",
-            "core//ncurses:ncurses",
-            "core//less:less",
+            "//packages/linux/core/readline:readline",
+            "//packages/linux/core/ncurses:ncurses",
+            "//packages/linux/core/less:less",
             # Compression
-            "system//libs/compression/bzip2:bzip2",
-            "system//libs/compression/xz:xz",
-            "system//libs/compression/gzip:gzip",
-            "system//apps/tar:tar",
+            "//packages/linux/system/libs/compression/bzip2:bzip2",
+            "//packages/linux/system/libs/compression/xz:xz",
+            "//packages/linux/system/libs/compression/gzip:gzip",
+            "//packages/linux/system/apps/tar:tar",
             # Basic libraries
-            "core//zlib:zlib",
+            "//packages/linux/core/zlib:zlib",
         ],
         "inherits": [],
         "use_profile": "minimal",
@@ -953,8 +953,8 @@ def package_set(
         package_set(
             name = "my-tools",
             packages = [
-                "editors//vim",
-                "system//apps/tmux:tmux",
+                "//packages/linux/editors/vim",
+                "//packages/linux/system/apps/tmux:tmux",
             ],
             inherits = ["@base"],
             description = "My essential tools",
@@ -1006,11 +1006,11 @@ def system_set(
             name = "my-server",
             profile = "server",
             additions = [
-                "network//vpn/wireguard-tools:wireguard-tools",
-                "www//servers/nginx:nginx",
+                "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
+                "//packages/linux/www/servers/nginx:nginx",
             ],
             removals = [
-                "editors//emacs",
+                "//packages/linux/editors/emacs",
             ],
             description = "Custom web server configuration",
         )
@@ -1065,7 +1065,7 @@ def combined_set(
         combined_set(
             name = "full-stack-server",
             sets = ["@web-server", "@database-server", "@container-host"],
-            additions = ["network//vpn/wireguard-tools:wireguard-tools"],
+            additions = ["//packages/linux/network/vpn/wireguard-tools:wireguard-tools"],
             description = "Complete server stack",
         )
     """
@@ -1115,7 +1115,7 @@ def task_set(
         task_set(
             name = "my-web-server",
             task = "web-server",
-            additions = ["network//vpn/wireguard-tools:wireguard-tools"],
+            additions = ["//packages/linux/network/vpn/wireguard-tools:wireguard-tools"],
             description = "Web server with VPN",
         )
     """
@@ -1168,7 +1168,7 @@ def desktop_set(
         desktop_set(
             name = "my-gnome",
             environment = "gnome-desktop",
-            additions = ["editors//vscode"],
+            additions = ["//packages/linux/editors/vscode"],
             description = "GNOME with VS Code",
         )
     """

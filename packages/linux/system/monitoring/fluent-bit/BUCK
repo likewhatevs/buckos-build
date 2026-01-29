@@ -29,14 +29,14 @@ cmake_package(
         "systemd",
     ],
     deps = [
-        "dev-tools//dev-utils/flex:flex",
-        "dev-tools//dev-utils/bison:bison",
+        "//packages/linux/dev-tools/dev-utils/flex:flex",
+        "//packages/linux/dev-tools/dev-utils/bison:bison",
     ],
     use_deps = {
-        "tls": ["system//libs/crypto/openssl:openssl"],
-        "yaml": ["system//libs/data/yaml:yaml"],
-        "systemd": ["system//systemd:systemd"],
-        "jemalloc": ["dev-libs//misc/jemalloc:jemalloc"],
+        "tls": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "yaml": ["//packages/linux/system/libs/data/yaml:yaml"],
+        "systemd": ["//packages/linux/system/systemd:systemd"],
+        "jemalloc": ["//packages/linux/dev-libs/misc/jemalloc:jemalloc"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

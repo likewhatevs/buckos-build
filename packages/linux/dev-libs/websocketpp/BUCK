@@ -14,7 +14,7 @@ cmake_package(
     homepage = "https://github.com/zaphoyd/websocketpp",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

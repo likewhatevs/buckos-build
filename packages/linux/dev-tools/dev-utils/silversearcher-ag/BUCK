@@ -16,10 +16,10 @@ autotools_package(
     homepage = "https://geoff.greer.fm/ag/",
     license = "Apache-2.0",
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     deps = [
-        "dev-libs//text/pcre:pcre",
+        "//packages/linux/dev-libs/text/pcre:pcre",
     ],
     visibility = ["PUBLIC"],
 )

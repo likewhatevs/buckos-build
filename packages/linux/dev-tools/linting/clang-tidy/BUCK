@@ -11,8 +11,8 @@ cmake_package(
     homepage = "https://clang.llvm.org/extra/clang-tidy/",
     license = "Apache-2.0",
     deps = [
-        "core//zlib:zlib",
-        "system//libs/libxml2:libxml2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/libxml2:libxml2",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

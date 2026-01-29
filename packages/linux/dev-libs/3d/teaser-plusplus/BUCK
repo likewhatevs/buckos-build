@@ -15,10 +15,10 @@ cmake_package(
         "-DENABLE_DIAGNOSTIC_PRINT=OFF",
     ],
     deps = [
-        "dev-libs//math/eigen:eigen",
-        "dev-libs//math/pmc:pmc",
-        "dev-libs//parallel/openmp:openmp",
-        "ai//vision/flann:flann",
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/math/eigen:eigen",
+        "//packages/linux/dev-libs/math/pmc:pmc",
+        "//packages/linux/dev-libs/parallel/openmp:openmp",
+        "//packages/linux/ai/vision/flann:flann",
+        "//packages/linux/dev-libs/boost:boost",
     ],
 )

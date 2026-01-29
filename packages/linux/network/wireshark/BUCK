@@ -62,12 +62,12 @@ autotools_package(
     use_defaults = ["ssl", "gnutls", "zlib", "pcre", "xml"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["system//libs/crypto/gnutls:gnutls", "system//libs/crypto/libgcrypt:libgcrypt"],
-        "xml": ["system//libs/data/libxml2:libxml2"],
-        "pcre": ["system//libs/utility/pcre2:pcre2"],
-        "lua": ["lang//lua:lua"],
-        "zlib": ["core//zlib:zlib"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls", "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt"],
+        "xml": ["//packages/linux/system/libs/data/libxml2:libxml2"],
+        "pcre": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
+        "lua": ["//packages/linux/lang/lua:lua"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
 
     use_configure = {
@@ -180,7 +180,7 @@ autotools_package(
     ],
 
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     description = "Network protocol analyzer",

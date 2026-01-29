@@ -47,8 +47,8 @@ autotools_package(
         "--disable-man",
     ],
     deps = [
-        "core//util-linux:util-linux",
-        "system//libs/talloc:talloc",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/libs/talloc:talloc",
     ],
     visibility = ["PUBLIC"],
 )

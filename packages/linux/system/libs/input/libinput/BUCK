@@ -28,8 +28,8 @@ meson_package(
         "-Ddebug-gui=false",
     ],
     deps = [
-        "system//libs/input/libevdev:libevdev",
-        "system//libs/input/mtdev:mtdev",
+        "//packages/linux/system/libs/input/libevdev:libevdev",
+        "//packages/linux/system/libs/input/mtdev:mtdev",
     ],
     visibility = ["PUBLIC"],
 )

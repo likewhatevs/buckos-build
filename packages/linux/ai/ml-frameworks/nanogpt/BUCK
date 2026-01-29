@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/karpathy/nanoGPT/archive/a82b33b525ca9855d705656387698e13eb8e8d4b.tar.gz",
     sha256 = "3396e6573921b28638a389a41054b4c85a12465793be1191033c42f141364a74",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
 )

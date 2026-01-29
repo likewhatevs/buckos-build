@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://github.com/vpodpecan/lemmagen3/archive/refs/tags/v3.5.1.tar.gz",
     sha256 = "5b31c70e94189529c027acb44db48a43e62191cae95bb893a698357e158de6ca",
     deps = [
-        "dev-tools//compilers/cython:cython",
+        "//packages/linux/dev-tools/compilers/cython:cython",
     ],
 )

@@ -11,10 +11,10 @@ download_source(
 autotools_package(
     name = "bindfs",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     src_prepare = """
 autoreconf -fi
@@ -31,7 +31,7 @@ autoreconf -fi
     license = "GPL-2.0",
     configure_args = [],
     deps = [
-        "system//filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
     ],
     visibility = ["PUBLIC"],
 )

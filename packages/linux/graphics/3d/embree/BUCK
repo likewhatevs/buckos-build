@@ -20,7 +20,7 @@ cmake_package(
     use_defaults = ["tbb"],
     deps = [],
     use_deps = {
-        "tbb": ["dev-libs//misc/tbb:tbb"],
+        "tbb": ["//packages/linux/dev-libs/misc/tbb:tbb"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -30,8 +30,8 @@ mkdir -p "$DESTDIR/usr/share/man/man1"
 install -m 0644 Documentation/lkvm.1 "$DESTDIR/usr/share/man/man1/" 2>/dev/null || true
     """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/io/libaio:libaio",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/io/libaio:libaio",
     ],
     visibility = ["PUBLIC"],
 )

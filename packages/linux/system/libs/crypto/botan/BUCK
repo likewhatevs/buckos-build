@@ -40,10 +40,10 @@ cmake_package(
         "lzma": "WITH_LZMA",
     },
     use_deps = {
-        "sqlite": ["databases//sqlite:sqlite"],
-        "zlib": ["core//zlib:zlib"],
-        "bzip2": ["system//libs/compression/bzip2:bzip2"],
-        "lzma": ["system//libs/compression/xz-utils:xz-utils"],
+        "sqlite": ["//packages/linux/databases/sqlite:sqlite"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "bzip2": ["//packages/linux/system/libs/compression/bzip2:bzip2"],
+        "lzma": ["//packages/linux/system/libs/compression/xz-utils:xz-utils"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

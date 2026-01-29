@@ -36,8 +36,8 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 #     use_defaults = ["json", "readline"],
 #
 #     use_deps = {
-#         "readline": ["core//readline:readline"],
-#         "python": ["lang//python:python"],
+#         "readline": ["//packages/linux/core/readline:readline"],
+#         "python": ["//packages/linux/lang/python:python"],
 #     },
 #
 #     use_configure = {
@@ -102,11 +102,11 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 # """,
 #
 #     deps = [
-#         "core//libnl:libnl",
-#         "system//libs/utility/gmp:gmp",
-#         "core//readline:readline",
-#         # "system//libs/network/libmnl:libmnl",  # TODO: Create this package
-#         # "system//libs/network/libnftnl:libnftnl",  # TODO: Create this package
+#         "//packages/linux/core/libnl:libnl",
+#         "//packages/linux/system/libs/utility/gmp:gmp",
+#         "//packages/linux/core/readline:readline",
+#         # "//packages/linux/system/libs/network/libmnl:libmnl",  # TODO: Create this package
+#         # "//packages/linux/system/libs/network/libnftnl:libnftnl",  # TODO: Create this package
 #     ],
 #
 #     description = "Modern Linux packet filtering framework replacing iptables",

@@ -72,12 +72,12 @@ cmake_package(
     use_defaults = ["shared", "aom", "dav1d", "x265", "libde265"],
     deps = [],
     use_deps = {
-        "aom": ["media//video/libaom:libaom"],
-        "dav1d": ["media//video/dav1d:dav1d"],
-        "x265": ["media//video/x265:x265"],
-        "libde265": ["media//video/libde265:libde265"],
-        "jpeg": ["media//image/libjpeg-turbo:libjpeg-turbo"],
-        "png": ["media//image/libpng:libpng"],
+        "aom": ["//packages/linux/media/video/libaom:libaom"],
+        "dav1d": ["//packages/linux/media/video/dav1d:dav1d"],
+        "x265": ["//packages/linux/media/video/x265:x265"],
+        "libde265": ["//packages/linux/media/video/libde265:libde265"],
+        "jpeg": ["//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo"],
+        "png": ["//packages/linux/media/image/libpng:libpng"],
     },
     cmake_args = [
         "-DCMAKE_INSTALL_PREFIX=${PREFIX}",

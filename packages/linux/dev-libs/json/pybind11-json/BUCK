@@ -9,8 +9,8 @@ cmake_package(
     homepage = "https://github.com/pybind/pybind11_json",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//python/pybind11:pybind11",
-        "dev-libs//json/nlohmann-json:nlohmann-json",
+        "//packages/linux/dev-libs/python/pybind11:pybind11",
+        "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

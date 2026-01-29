@@ -21,12 +21,12 @@ autotools_package(
         "--disable-specs",
     ],
     deps = [
-        "graphics//xorg/libX11:libX11",
-        "graphics//xorg/libXext:libXext",
-        "graphics//xorg/libXt:libXt",
-        "graphics//xorg/libXmu:libXmu",
-        "graphics//xorg/libXpm:libXpm",
-        "graphics//xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/libX11:libX11",
+        "//packages/linux/graphics/xorg/libXext:libXext",
+        "//packages/linux/graphics/xorg/libXt:libXt",
+        "//packages/linux/graphics/xorg/libXmu:libXmu",
+        "//packages/linux/graphics/xorg/libXpm:libXpm",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
     ],
     visibility = ["PUBLIC"],
 )

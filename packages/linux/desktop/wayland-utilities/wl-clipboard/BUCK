@@ -13,11 +13,11 @@ meson_package(
     # Exclude bundled subprojects - use system dependencies instead
     exclude_patterns = ["*subprojects*"],
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
-        "system//libs/utility/libffi:libffi",
-        "system//libs/data/expat:expat",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )

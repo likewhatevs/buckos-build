@@ -22,11 +22,11 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:try-tiny",
-        "lang//perl/core:package-stash",
-        "lang//perl/core:module-runtime",
-        "lang//perl/core:class-accessor",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:try-tiny",
+        "//packages/linux/lang/perl/core:package-stash",
+        "//packages/linux/lang/perl/core:module-runtime",
+        "//packages/linux/lang/perl/core:class-accessor",
         ":class-load",
         ":data-visitor",
         ":eval-closure",
@@ -55,9 +55,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:module-runtime",
-        "lang//perl/core:import-into",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:module-runtime",
+        "//packages/linux/lang/perl/core:import-into",
         ":role-tiny",
         ":class-method-modifiers",
         ":sub-quote",
@@ -86,7 +86,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -112,7 +112,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -138,7 +138,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -164,7 +164,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -190,9 +190,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:module-runtime",
-        "lang//perl/core:try-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:module-runtime",
+        "//packages/linux/lang/perl/core:try-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -218,8 +218,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:namespace-clean",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:namespace-clean",
     ],
     visibility = ["PUBLIC"],
 )
@@ -245,8 +245,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:try-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:try-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -272,7 +272,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":moose",
     ],
     visibility = ["PUBLIC"],
@@ -299,7 +299,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":moose",
     ],
     visibility = ["PUBLIC"],
@@ -326,8 +326,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:exporter-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:exporter-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -353,7 +353,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -379,7 +379,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

@@ -8,11 +8,11 @@
 filegroup(
     name = "network",
     srcs = [
-        "system//filesystem/network/nfs-utils:nfs-utils",
-        "system//filesystem/network/cifs-utils:cifs-utils",
-        "system//filesystem/network/sshfs:sshfs",
-        "system//filesystem/network/davfs2:davfs2",
-        "system//filesystem/network/curlftpfs:curlftpfs",
+        "//packages/linux/system/filesystem/network/nfs-utils:nfs-utils",
+        "//packages/linux/system/filesystem/network/cifs-utils:cifs-utils",
+        "//packages/linux/system/filesystem/network/sshfs:sshfs",
+        "//packages/linux/system/filesystem/network/davfs2:davfs2",
+        "//packages/linux/system/filesystem/network/curlftpfs:curlftpfs",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -22,9 +22,9 @@ filegroup(
 filegroup(
     name = "common",
     srcs = [
-        "system//filesystem/network/nfs-utils:nfs-utils",
-        "system//filesystem/network/cifs-utils:cifs-utils",
-        "system//filesystem/network/sshfs:sshfs",
+        "//packages/linux/system/filesystem/network/nfs-utils:nfs-utils",
+        "//packages/linux/system/filesystem/network/cifs-utils:cifs-utils",
+        "//packages/linux/system/filesystem/network/sshfs:sshfs",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

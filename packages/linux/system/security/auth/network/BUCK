@@ -33,7 +33,7 @@ autotools_package(
         cp pam_radius_auth.conf "$OUT/etc/raddb/"
     """,
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )
@@ -61,7 +61,7 @@ autotools_package(
         "--with-pam-module-dir=/lib/security",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )

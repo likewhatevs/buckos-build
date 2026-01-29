@@ -18,11 +18,11 @@ autotools_package(
     use_defaults = ["ssl", "http2", "ipv6"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "http2": ["network//nghttp2:nghttp2"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "http2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
         # TODO: Add brotli when available:
-        # "brotli": ["system//libs/compression/brotli:brotli"],
+        # "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
 
     use_configure = {
@@ -43,8 +43,8 @@ autotools_package(
     ],
 
     deps = [
-        "network//ca-certificates:ca-certificates",
-        "core//zlib:zlib",
+        "//packages/linux/network/ca-certificates:ca-certificates",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     description = "Command line tool and library for transferring data with URLs",

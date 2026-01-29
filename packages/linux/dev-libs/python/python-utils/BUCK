@@ -9,7 +9,7 @@ python_package(
     homepage = "https://github.com/WoLpH/python-utils",
     license = "BSD-3-Clause",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

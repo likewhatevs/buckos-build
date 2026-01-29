@@ -7,10 +7,10 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 autotools_package(
     name = "popt",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -40,10 +40,10 @@ autoreconf -fi
 autotools_package(
     name = "lvm2",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -59,8 +59,8 @@ autoreconf -fi
     iuse = ["udev", "readline", "thin", "cache"],
     use_defaults = ["udev"],
     use_deps = {
-        "udev": ["system//init/eudev:eudev"],
-        "readline": ["core//readline:readline"],
+        "udev": ["//packages/linux/system/init/eudev:eudev"],
+        "readline": ["//packages/linux/core/readline:readline"],
     },
     use_configure = {
         "udev": "--enable-udev_rules --enable-udev_sync",
@@ -81,7 +81,7 @@ autoreconf -fi
         "--enable-pkgconfig",
     ],
     deps = [
-        "system//libs/io/libaio:libaio",
+        "//packages/linux/system/libs/io/libaio:libaio",
     ],
     visibility = ["PUBLIC"],
 )
@@ -89,10 +89,10 @@ autoreconf -fi
 autotools_package(
     name = "cryptsetup",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fi
@@ -107,10 +107,10 @@ autoreconf -fi
     iuse = ["openssl", "gcrypt", "nettle", "nls", "argon2", "ssh-token", "fips", "reencrypt"],
     use_defaults = ["openssl", "argon2", "reencrypt"],
     use_deps = {
-        "openssl": ["system//libs/crypto/openssl:openssl"],
-        "gcrypt": ["system//libs/crypto/libgcrypt:libgcrypt"],
-        "nettle": ["system//libs/crypto/nettle:nettle"],
-        "argon2": ["system//libs/crypto/argon2:argon2"],
+        "openssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gcrypt": ["//packages/linux/system/libs/crypto/libgcrypt:libgcrypt"],
+        "nettle": ["//packages/linux/system/libs/crypto/nettle:nettle"],
+        "argon2": ["//packages/linux/system/libs/crypto/argon2:argon2"],
     },
     use_configure = {
         "openssl": "--with-crypto_backend=openssl",
@@ -140,8 +140,8 @@ autoreconf -fi
     deps = [
         ":popt",
         ":lvm2",
-        "core//util-linux:util-linux",
-        "system//libs/data/json-c:json-c",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/libs/data/json-c:json-c",
     ],
     visibility = ["PUBLIC"],
 )

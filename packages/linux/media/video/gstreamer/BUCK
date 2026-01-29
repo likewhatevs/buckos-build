@@ -30,10 +30,10 @@ meson_package(
     },
     use_defaults = ["tools", "nls"],
     deps = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     use_deps = {
-        "introspection": ["dev-libs//gobject-introspection:gobject-introspection"],
+        "introspection": ["//packages/linux/dev-libs/gobject-introspection:gobject-introspection"],
     },
     meson_args = [
         "-Ddoc=disabled",

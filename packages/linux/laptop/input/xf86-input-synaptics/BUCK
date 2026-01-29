@@ -27,7 +27,7 @@ autotools_package(
         "--localstatedir=/var",
     ],
     deps = [
-        "laptop//input/libevdev:libevdev",
+        "//packages/linux/laptop/input/libevdev:libevdev",
     ],
     visibility = ["PUBLIC"],
 )

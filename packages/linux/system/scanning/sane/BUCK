@@ -51,10 +51,10 @@ autotools_package(
     homepage = "http://www.sane-project.org/",
     license = "GPL-2.0-or-later",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
-        "dev-libs//misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
     ],
     src_prepare = """
 autoreconf -fiv
@@ -74,9 +74,9 @@ autoreconf -fiv
         mkdir -p "$OUT/var/lock/sane"
     """,
     deps = [
-        "system//libs/libusb:libusb",
-        "system//libs/image/libtiff:libtiff",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/libusb:libusb",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
     ],
     visibility = ["PUBLIC"],
 )
@@ -109,8 +109,8 @@ autotools_package(
     """,
     deps = [
         ":sane-backends",
-        "desktop//gtk:gtk4",
-        "dev-libs//glib:glib",
+        "//packages/linux/desktop/gtk:gtk4",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )
@@ -146,8 +146,8 @@ autotools_package(
     """,
     deps = [
         ":sane-backends",
-        "desktop//kde:kf5",
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/kde:kf5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )

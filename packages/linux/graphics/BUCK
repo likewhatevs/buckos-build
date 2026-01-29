@@ -5,12 +5,12 @@
 filegroup(
     name = "editors",
     srcs = [
-        "graphics//editors/gimp:gimp",
-        "graphics//editors/krita:krita",
-        "graphics//editors/inkscape:inkscape",
-        "graphics//editors/darktable:darktable",
-        "graphics//editors/rawtherapee:rawtherapee",
-        "graphics//editors/mypaint:mypaint",
+        "//packages/linux/graphics/editors/gimp:gimp",
+        "//packages/linux/graphics/editors/krita:krita",
+        "//packages/linux/graphics/editors/inkscape:inkscape",
+        "//packages/linux/graphics/editors/darktable:darktable",
+        "//packages/linux/graphics/editors/rawtherapee:rawtherapee",
+        "//packages/linux/graphics/editors/mypaint:mypaint",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -20,7 +20,7 @@ filegroup(
 filegroup(
     name = "3d",
     srcs = [
-        "graphics//3d/blender:blender",
+        "//packages/linux/graphics/3d/blender:blender",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -30,9 +30,9 @@ filegroup(
 filegroup(
     name = "viewers",
     srcs = [
-        "graphics//viewers/feh:feh",
-        "graphics//viewers/imv:imv",
-        "graphics//viewers/geeqie:geeqie",
+        "//packages/linux/graphics/viewers/feh:feh",
+        "//packages/linux/graphics/viewers/imv:imv",
+        "//packages/linux/graphics/viewers/geeqie:geeqie",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -42,10 +42,10 @@ filegroup(
 filegroup(
     name = "screenshot",
     srcs = [
-        "graphics//screenshot/flameshot:flameshot",
-        "graphics//screenshot/scrot:scrot",
-        "graphics//screenshot/grim:grim",
-        "graphics//screenshot/maim:maim",
+        "//packages/linux/graphics/screenshot/flameshot:flameshot",
+        "//packages/linux/graphics/screenshot/scrot:scrot",
+        "//packages/linux/graphics/screenshot/grim:grim",
+        "//packages/linux/graphics/screenshot/maim:maim",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -55,7 +55,7 @@ filegroup(
 filegroup(
     name = "video",
     srcs = [
-        "graphics//video:all",
+        "//packages/linux/graphics/video:all",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -65,7 +65,7 @@ filegroup(
 filegroup(
     name = "video-libraries",
     srcs = [
-        "graphics//video:libraries",
+        "//packages/linux/graphics/video:libraries",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -75,7 +75,7 @@ filegroup(
 filegroup(
     name = "video-players",
     srcs = [
-        "graphics//video:players",
+        "//packages/linux/graphics/video:players",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -85,7 +85,7 @@ filegroup(
 filegroup(
     name = "video-editors",
     srcs = [
-        "graphics//video:editors",
+        "//packages/linux/graphics/video:editors",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -95,7 +95,7 @@ filegroup(
 filegroup(
     name = "video-utilities",
     srcs = [
-        "graphics//video:utilities",
+        "//packages/linux/graphics/video:utilities",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -105,7 +105,7 @@ filegroup(
 filegroup(
     name = "video-recording",
     srcs = [
-        "graphics//video:recording",
+        "//packages/linux/graphics/video:recording",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -115,7 +115,7 @@ filegroup(
 filegroup(
     name = "video-streaming",
     srcs = [
-        "graphics//video:streaming",
+        "//packages/linux/graphics/video:streaming",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -125,7 +125,7 @@ filegroup(
 filegroup(
     name = "animation",
     srcs = [
-        "graphics//animation/synfig:synfig",
+        "//packages/linux/graphics/animation/synfig:synfig",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -135,14 +135,14 @@ filegroup(
 filegroup(
     name = "utilities",
     srcs = [
-        "graphics//utilities/imagemagick:imagemagick",
-        "graphics//utilities/graphicsmagick:graphicsmagick",
-        "graphics//utilities/gpick:gpick",
-        "graphics//utilities/dia:dia",
-        "graphics//utilities/babl:babl",
-        "graphics//utilities/gegl:gegl",
-        "graphics//utilities/libmypaint:libmypaint",
-        "graphics//utilities/slop:slop",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/graphics/utilities/graphicsmagick:graphicsmagick",
+        "//packages/linux/graphics/utilities/gpick:gpick",
+        "//packages/linux/graphics/utilities/dia:dia",
+        "//packages/linux/graphics/utilities/babl:babl",
+        "//packages/linux/graphics/utilities/gegl:gegl",
+        "//packages/linux/graphics/utilities/libmypaint:libmypaint",
+        "//packages/linux/graphics/utilities/slop:slop",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -152,11 +152,11 @@ filegroup(
 filegroup(
     name = "professional",
     srcs = [
-        "graphics//editors/gimp:gimp",
-        "graphics//editors/inkscape:inkscape",
-        "graphics//editors/krita:krita",
-        "graphics//3d/blender:blender",
-        "graphics//video/kdenlive:kdenlive",
+        "//packages/linux/graphics/editors/gimp:gimp",
+        "//packages/linux/graphics/editors/inkscape:inkscape",
+        "//packages/linux/graphics/editors/krita:krita",
+        "//packages/linux/graphics/3d/blender:blender",
+        "//packages/linux/graphics/video/kdenlive:kdenlive",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -166,11 +166,11 @@ filegroup(
 filegroup(
     name = "photography",
     srcs = [
-        "graphics//editors/gimp:gimp",
-        "graphics//editors/darktable:darktable",
-        "graphics//editors/rawtherapee:rawtherapee",
-        "graphics//viewers/geeqie:geeqie",
-        "graphics//utilities/imagemagick:imagemagick",
+        "//packages/linux/graphics/editors/gimp:gimp",
+        "//packages/linux/graphics/editors/darktable:darktable",
+        "//packages/linux/graphics/editors/rawtherapee:rawtherapee",
+        "//packages/linux/graphics/viewers/geeqie:geeqie",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -180,9 +180,9 @@ filegroup(
 filegroup(
     name = "minimal",
     srcs = [
-        "graphics//viewers/feh:feh",
-        "graphics//screenshot/scrot:scrot",
-        "graphics//utilities/imagemagick:imagemagick",
+        "//packages/linux/graphics/viewers/feh:feh",
+        "//packages/linux/graphics/screenshot/scrot:scrot",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -192,9 +192,9 @@ filegroup(
 filegroup(
     name = "wayland",
     srcs = [
-        "graphics//viewers/imv:imv",
-        "graphics//screenshot/grim:grim",
-        "graphics//screenshot/flameshot:flameshot",
+        "//packages/linux/graphics/viewers/imv:imv",
+        "//packages/linux/graphics/screenshot/grim:grim",
+        "//packages/linux/graphics/screenshot/flameshot:flameshot",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

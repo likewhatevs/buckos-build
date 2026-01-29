@@ -31,8 +31,8 @@ autotools_package(
     use_defaults = ["ssl", "ssh"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "ssh": ["system//libs/network/libssh2:libssh2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "ssh": ["//packages/linux/system/libs/network/libssh2:libssh2"],
     },
 
     use_configure = {

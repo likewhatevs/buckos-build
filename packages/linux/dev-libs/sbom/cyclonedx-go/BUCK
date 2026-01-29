@@ -10,7 +10,7 @@ go_package(
     license = "Apache-2.0",
     packages = ["."],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

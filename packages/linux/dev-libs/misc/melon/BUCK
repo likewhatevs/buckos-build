@@ -9,6 +9,6 @@ cmake_package(
         "-DCMAKE_CXX_STANDARD=20",
     ],
     deps = [
-        "dev-libs//misc/range-v3:range-v3",
+        "//packages/linux/dev-libs/misc/range-v3:range-v3",
     ],
 )

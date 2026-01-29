@@ -27,7 +27,7 @@ autotools_package(
         "UDEVDIR=/usr/lib/udev/rules.d",
     ],
     deps = [
-        "system//init/systemd:systemd",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )

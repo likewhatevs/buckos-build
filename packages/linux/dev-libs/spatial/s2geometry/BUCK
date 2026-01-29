@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/google/s2geometry",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//google/abseil-cpp:abseil-cpp",
-        "dev-libs//google/glog:glog",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
+        "//packages/linux/dev-libs/google/glog:glog",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -14,7 +14,7 @@ cmake_package(
         "-DBUILD_POSITION_INDEPENDENT_CODE=ON",
     ],
     deps = [
-        "dev-libs//eigen:eigen",
+        "//packages/linux/dev-libs/eigen:eigen",
     ],
     visibility = ["PUBLIC"],
 )

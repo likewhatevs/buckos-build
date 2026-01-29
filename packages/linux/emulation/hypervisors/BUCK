@@ -3,9 +3,9 @@
 filegroup(
     name = "qemu-full",
     srcs = [
-        "emulation//hypervisors/qemu:qemu",
-        "emulation//hypervisors/qemu:qemu-guest-agent",
-        "emulation//hypervisors/qemu:qemu-img",
+        "//packages/linux/emulation/hypervisors/qemu:qemu",
+        "//packages/linux/emulation/hypervisors/qemu:qemu-guest-agent",
+        "//packages/linux/emulation/hypervisors/qemu:qemu-img",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -14,8 +14,8 @@ filegroup(
 filegroup(
     name = "qemu-minimal",
     srcs = [
-        "emulation//hypervisors/qemu:qemu-img",
-        "emulation//hypervisors/qemu:qemu-user",
+        "//packages/linux/emulation/hypervisors/qemu:qemu-img",
+        "//packages/linux/emulation/hypervisors/qemu:qemu-user",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

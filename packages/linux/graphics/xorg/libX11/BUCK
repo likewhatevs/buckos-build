@@ -27,11 +27,11 @@ autotools_package(
     # Remove .la files that cause libtool path issues
     src_install = "make DESTDIR=\"$DESTDIR\" install && find \"$DESTDIR\" -name '*.la' -delete",
     deps = [
-        "graphics//xorg/xorgproto:xorgproto",
-        "graphics//xorg/xtrans:xtrans",
-        "graphics//xorg/libxcb:libxcb",
-        "graphics//xorg/libXau:libXau",  # Transitive dep for pkg-config
-        "graphics//xorg/libXdmcp:libXdmcp",  # Transitive dep for pkg-config
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/xtrans:xtrans",
+        "//packages/linux/graphics/xorg/libxcb:libxcb",
+        "//packages/linux/graphics/xorg/libXau:libXau",  # Transitive dep for pkg-config
+        "//packages/linux/graphics/xorg/libXdmcp:libXdmcp",  # Transitive dep for pkg-config
     ],
     visibility = ["PUBLIC"],
 )

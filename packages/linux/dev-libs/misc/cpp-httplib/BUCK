@@ -19,9 +19,9 @@ cmake_package(
     use_defaults = ["ssl", "zlib"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "zlib": ["core//zlib:zlib"],
-        "brotli": ["system//libs/compression/brotli:brotli"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

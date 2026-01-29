@@ -19,8 +19,8 @@ autotools_package(
         "--disable-static",
     ],
     deps = [
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/image/libtiff:libtiff",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
     ],
     visibility = ["PUBLIC"],
 )

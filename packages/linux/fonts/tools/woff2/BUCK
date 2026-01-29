@@ -15,7 +15,7 @@ cmake_package(
         "-DBUILD_SHARED_LIBS=ON",
     ],
     deps = [
-        "system//libs/compression/brotli:brotli",
+        "//packages/linux/system/libs/compression/brotli:brotli",
     ],
     visibility = ["PUBLIC"],
 )

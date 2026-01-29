@@ -26,3 +26,10 @@ export_file(
     name = "package_sets.bzl",
     visibility = ["PUBLIC"],
 )
+
+# BXL script for vendoring source archives
+export_file(
+    name = "vendor_sources",
+    src = "vendor_sources.bxl",
+    visibility = ["PUBLIC"],
+)

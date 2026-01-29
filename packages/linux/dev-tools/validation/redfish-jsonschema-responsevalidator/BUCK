@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/DMTF/Redfish-JsonSchema-ResponseValidator/archive/refs/tags/1.0.2.tar.gz",
     sha256 = "7e24113462ce63cf9c1e5a579897c6f7a25d92791cd6d0564bdb6de39ae87c18",
     deps = [
-        "dev-libs//python/jsonschema:jsonschema",
-        "dev-libs//python/requests:requests",
+        "//packages/linux/dev-libs/python/jsonschema:jsonschema",
+        "//packages/linux/dev-libs/python/requests:requests",
     ],
 )

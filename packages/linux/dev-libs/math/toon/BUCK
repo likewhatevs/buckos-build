@@ -17,7 +17,7 @@ autotools_package(
         "--prefix=/usr",
     ],
     deps = [
-        "dev-libs//math/lapack:lapack",
+        "//packages/linux/dev-libs/math/lapack:lapack",
     ],
     visibility = ["PUBLIC"],
 )

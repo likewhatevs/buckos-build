@@ -24,9 +24,9 @@ load("@root//defs:package_defs.bzl", "kernel_build")
 
 kernel_build(
     name = "buckos-kernel",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-default",
+    config_dep = "//packages/linux/kernel/configs:buckos-default",
     visibility = ["PUBLIC"],
 )
 
@@ -34,9 +34,9 @@ kernel_build(
 # Smaller footprint, fewer drivers, faster boot
 kernel_build(
     name = "buckos-kernel-minimal",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-minimal",
+    config_dep = "//packages/linux/kernel/configs:buckos-minimal",
     visibility = ["PUBLIC"],
 )
 
@@ -44,9 +44,9 @@ kernel_build(
 # Optimized for server workloads
 kernel_build(
     name = "buckos-kernel-server",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-server",
+    config_dep = "//packages/linux/kernel/configs:buckos-server",
     visibility = ["PUBLIC"],
 )
 
@@ -54,16 +54,16 @@ kernel_build(
 # Optimized for running inside virtual machines
 kernel_build(
     name = "buckos-kernel-vm",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-vm-guest",
+    config_dep = "//packages/linux/kernel/configs:buckos-vm-guest",
     visibility = ["PUBLIC"],
 )
 
 # Defconfig kernel (for development/testing)
 kernel_build(
     name = "buckos-kernel-defconfig",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
     visibility = ["PUBLIC"],
 )
@@ -73,9 +73,9 @@ kernel_build(
 # Optimized for live system booting and hardware detection
 kernel_build(
     name = "buckos-kernel-live",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-live",
+    config_dep = "//packages/linux/kernel/configs:buckos-live",
     visibility = ["PUBLIC"],
 )
 
@@ -85,9 +85,9 @@ kernel_build(
 # Excludes: Physical hardware drivers (GPU, USB, SATA) not needed in VMs
 kernel_build(
     name = "buckos-kernel-ch",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-ch-guest",
+    config_dep = "//packages/linux/kernel/configs:buckos-ch-guest",
     visibility = ["PUBLIC"],
 )
 
@@ -99,9 +99,9 @@ kernel_build(
 # General purpose ARM64 kernel with virtio and cloud support
 kernel_build(
     name = "buckos-kernel-aarch64",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-aarch64-default",
+    config_dep = "//packages/linux/kernel/configs:buckos-aarch64-default",
     arch = "aarch64",
     cross_toolchain = "toolchains//bootstrap:cross-toolchain-aarch64",
     visibility = ["PUBLIC"],
@@ -111,9 +111,9 @@ kernel_build(
 # Optimized for AWS Graviton, Azure Ampere, and other cloud ARM64 instances
 kernel_build(
     name = "buckos-kernel-aarch64-cloud",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-aarch64-cloud",
+    config_dep = "//packages/linux/kernel/configs:buckos-aarch64-cloud",
     arch = "aarch64",
     cross_toolchain = "toolchains//bootstrap:cross-toolchain-aarch64",
     visibility = ["PUBLIC"],
@@ -123,9 +123,9 @@ kernel_build(
 # Minimal configuration for QEMU testing
 kernel_build(
     name = "buckos-kernel-aarch64-minimal",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.17.10",
-    config_dep = "kernel//configs:buckos-aarch64-minimal",
+    config_dep = "//packages/linux/kernel/configs:buckos-aarch64-minimal",
     arch = "aarch64",
     cross_toolchain = "toolchains//bootstrap:cross-toolchain-aarch64",
     visibility = ["PUBLIC"],

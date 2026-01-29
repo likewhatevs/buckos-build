@@ -12,9 +12,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "launchers",
     srcs = [
-        "gaming//launchers/steam:steam",
-        "gaming//launchers/lutris:lutris",
-        "gaming//launchers/heroic:heroic",
+        "//packages/linux/gaming/launchers/steam:steam",
+        "//packages/linux/gaming/launchers/lutris:lutris",
+        "//packages/linux/gaming/launchers/heroic:heroic",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -28,9 +28,9 @@ filegroup(
 filegroup(
     name = "utilities",
     srcs = [
-        "gaming//utilities/mangohud:mangohud",
-        "gaming//utilities/gamemode:gamemode",
-        "gaming//utilities/gamescope:gamescope",
+        "//packages/linux/gaming/utilities/mangohud:mangohud",
+        "//packages/linux/gaming/utilities/gamemode:gamemode",
+        "//packages/linux/gaming/utilities/gamescope:gamescope",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -44,9 +44,9 @@ filegroup(
 filegroup(
     name = "compatibility",
     srcs = [
-        "gaming//compatibility/wine:wine",
-        "gaming//compatibility/dxvk:dxvk",
-        "gaming//compatibility/vkd3d-proton:vkd3d-proton",
+        "//packages/linux/gaming/compatibility/wine:wine",
+        "//packages/linux/gaming/compatibility/dxvk:dxvk",
+        "//packages/linux/gaming/compatibility/vkd3d-proton:vkd3d-proton",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -60,9 +60,9 @@ filegroup(
 filegroup(
     name = "emulators",
     srcs = [
-        "gaming//emulators/retroarch:retroarch",
-        "gaming//emulators/dolphin:dolphin",
-        "gaming//emulators/pcsx2:pcsx2",
+        "//packages/linux/gaming/emulators/retroarch:retroarch",
+        "//packages/linux/gaming/emulators/dolphin:dolphin",
+        "//packages/linux/gaming/emulators/pcsx2:pcsx2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -76,7 +76,7 @@ filegroup(
 filegroup(
     name = "libraries",
     srcs = [
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -103,11 +103,11 @@ filegroup(
 filegroup(
     name = "gaming-minimal",
     srcs = [
-        "gaming//launchers/steam:steam",
-        "gaming//utilities/mangohud:mangohud",
-        "gaming//utilities/gamemode:gamemode",
-        "gaming//compatibility/wine:wine",
-        "gaming//compatibility/dxvk:dxvk",
+        "//packages/linux/gaming/launchers/steam:steam",
+        "//packages/linux/gaming/utilities/mangohud:mangohud",
+        "//packages/linux/gaming/utilities/gamemode:gamemode",
+        "//packages/linux/gaming/compatibility/wine:wine",
+        "//packages/linux/gaming/compatibility/dxvk:dxvk",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

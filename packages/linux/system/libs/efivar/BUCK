@@ -30,7 +30,7 @@ make DESTDIR=$DESTDIR PREFIX=/usr LIBDIR=/usr/lib64 -C src install
 make DESTDIR=$DESTDIR PREFIX=/usr LIBDIR=/usr/lib64 -C src install-headers
 """,
     deps = [
-        "system//libs/ipc/popt:popt",
+        "//packages/linux/system/libs/ipc/popt:popt",
     ],
     visibility = ["PUBLIC"],
 )

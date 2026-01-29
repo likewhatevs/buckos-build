@@ -36,9 +36,9 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "perl": ["lang//perl:perl"],
-        "python": ["lang//python:python"],
-        "ruby": ["lang//ruby:ruby"],
+        "perl": ["//packages/linux/lang/perl:perl"],
+        "python": ["//packages/linux/lang/python:python"],
+        "ruby": ["//packages/linux/lang/ruby:ruby"],
     },
 
     # Conditional configure arguments
@@ -101,10 +101,10 @@ echo "Found APR at: $APR_DIR (config: $APR_CONFIG)"
     configure_args = [],
 
     deps = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//misc/apr:apr",
-        "dev-libs//misc/apr-util:apr-util",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/misc/apr:apr",
+        "//packages/linux/dev-libs/misc/apr-util:apr-util",
     ],
     visibility = ["PUBLIC"],
 )

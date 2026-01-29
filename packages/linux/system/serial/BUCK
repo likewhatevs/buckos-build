@@ -11,7 +11,7 @@
 filegroup(
     name = "serial",
     srcs = [
-        "system//serial/libserialport:libserialport",
+        "//packages/linux/system/serial/libserialport:libserialport",
     ],
     visibility = ["PUBLIC"],
 )

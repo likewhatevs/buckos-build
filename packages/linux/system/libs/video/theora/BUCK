@@ -23,8 +23,8 @@ autotools_package(
         "--disable-spec",
     ],
     deps = [
-        "system//libs/audio/libogg:libogg",
-        "system//libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
     ],
     visibility = ["PUBLIC"],
 )

@@ -39,8 +39,8 @@ autotools_package(
     },
     use_defaults = ["fts5", "json1", "rtree"],
     deps = [
-        "core//readline:readline",
-        "core//zlib:zlib",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/core/zlib:zlib",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

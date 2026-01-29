@@ -58,7 +58,7 @@ cd ..
 make -C kernel DESTDIR=$OUT install || true
 """,
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

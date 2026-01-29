@@ -165,12 +165,12 @@ ebuild_package(
         done
     """,
     rdepend = [
-        "dev-libs//nspr:nspr",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/nspr:nspr",
+        "//packages/linux/core/zlib:zlib",
     ],
     bdepend = [
-        "dev-libs//nspr:nspr",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/nspr:nspr",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

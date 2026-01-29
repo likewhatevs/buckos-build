@@ -9,9 +9,9 @@ python_package(
     homepage = "https://github.com/sdascoli/boolformer",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
     ],
     visibility = ["PUBLIC"],
 )

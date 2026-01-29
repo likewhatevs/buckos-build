@@ -17,8 +17,8 @@ autotools_package(
         "--disable-specs",
     ],
     deps = [
-        "graphics//xorg/xorgproto:xorgproto",
-        "graphics//xorg/xtrans:xtrans",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/xtrans:xtrans",
     ],
     visibility = ["PUBLIC"],
 )

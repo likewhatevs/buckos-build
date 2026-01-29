@@ -96,9 +96,9 @@ mkdir -p "$DESTDIR/etc/containerd"
 containerd config default > "$DESTDIR/etc/containerd/config.toml" 2>/dev/null || true
     """,
     deps = [
-        "lang//go:go",
-        "emulation//containers/runc:runc",
-        "system//libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/emulation/containers/runc:runc",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],
 )

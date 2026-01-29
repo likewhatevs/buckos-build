@@ -16,8 +16,8 @@ python_package(
     homepage = "https://github.com/NVIDIA/warp",
     license = "Apache-2.0",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
     visibility = ["PUBLIC"],
 )

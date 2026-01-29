@@ -39,9 +39,9 @@ autotools_package(
     use_defaults = ["ssl", "sqlite", "agent", "server", "curl", "ipv6"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "sqlite": ["system//libs/database/sqlite:sqlite"],
-        "curl": ["network//curl:curl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
+        "curl": ["//packages/linux/network/curl:curl"],
     },
 
     use_configure = {

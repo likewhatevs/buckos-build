@@ -9,8 +9,8 @@ cmake_package(
     homepage = "https://github.com/vsg-dev/vsgXchange",
     license = "MIT",
     deps = [
-        "graphics//rendering/VulkanSceneGraph:VulkanSceneGraph",
-        "graphics//rendering/glslang:glslang",
+        "//packages/linux/graphics/rendering/VulkanSceneGraph:VulkanSceneGraph",
+        "//packages/linux/graphics/rendering/glslang:glslang",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

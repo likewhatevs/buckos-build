@@ -46,7 +46,7 @@ cmake_package(
     homepage = "https://graphics.pixar.com/opensubdiv/",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//glew:glew",
+        "//packages/linux/dev-libs/glew:glew",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

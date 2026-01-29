@@ -9,7 +9,7 @@ python_package(
     homepage = "https://github.com/asuiu/streamerate",
     license = "MIT",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

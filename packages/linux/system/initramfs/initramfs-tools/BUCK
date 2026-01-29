@@ -78,10 +78,10 @@ cat > $OUT/etc/initramfs-tools/modules << 'EOF'
 EOF
 """,
     deps = [
-        "system//libs/kmod:kmod",
-        "core//bash:bash",
-        "system//apps/coreutils:coreutils",
-        "core//util-linux:util-linux",
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )

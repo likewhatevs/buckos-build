@@ -30,7 +30,7 @@ cmake_package(
         "sdl": ["LV_USE_SDL=1", "LV_SDL_INCLUDE_PATH=<SDL.h>"],
     },
     use_deps = {
-        "sdl": ["graphics//sdl2:sdl2"],
+        "sdl": ["//packages/linux/graphics/sdl2:sdl2"],
     },
     visibility = ["PUBLIC"],
 )

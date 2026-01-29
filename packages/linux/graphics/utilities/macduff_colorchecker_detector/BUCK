@@ -9,8 +9,8 @@ python_package(
     homepage = "https://github.com/mathandy/python-macduff-colorchecker-detector",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/opencv:opencv",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/opencv:opencv",
     ],
     visibility = ["PUBLIC"],
 )

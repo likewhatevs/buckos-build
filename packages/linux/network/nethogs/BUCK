@@ -27,8 +27,8 @@ make install \
     NCURSES_LIBS="-lncursesw -ltinfow -lstdc++"
 """,
     deps = [
-        "network//libpcap:libpcap",
-        "core//ncurses:ncurses",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

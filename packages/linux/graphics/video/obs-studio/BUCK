@@ -103,22 +103,22 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "core//libffi:libffi",
-        "desktop//qt:qt5",
-        "graphics//video/ffmpeg:ffmpeg",
-        "network//curl:curl",
-        "system//libs/data/jansson:jansson",
-        "graphics//video/x264:x264",
-        # "core//mbedtls:mbedtls",  # TODO: not packaged yet
-        # "core//speexdsp:speexdsp",  # TODO: not packaged yet
-        # "core//rnnoise:rnnoise",  # TODO: not packaged yet
-        "audio//daemons/pipewire:pipewire",
-        "graphics//video/vlc:vlc",
-        # "core//srt:srt",  # TODO: not packaged yet
-        # "core//rist:rist",  # TODO: not packaged yet
-        # "core//luajit:luajit",  # TODO: not packaged yet
-        "lang//python:python",
-        "graphics//rendering/wayland:wayland",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/data/jansson:jansson",
+        "//packages/linux/graphics/video/x264:x264",
+        # "//packages/linux/core/mbedtls:mbedtls",  # TODO: not packaged yet
+        # "//packages/linux/core/speexdsp:speexdsp",  # TODO: not packaged yet
+        # "//packages/linux/core/rnnoise:rnnoise",  # TODO: not packaged yet
+        "//packages/linux/audio/daemons/pipewire:pipewire",
+        "//packages/linux/graphics/video/vlc:vlc",
+        # "//packages/linux/core/srt:srt",  # TODO: not packaged yet
+        # "//packages/linux/core/rist:rist",  # TODO: not packaged yet
+        # "//packages/linux/core/luajit:luajit",  # TODO: not packaged yet
+        "//packages/linux/lang/python:python",
+        "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

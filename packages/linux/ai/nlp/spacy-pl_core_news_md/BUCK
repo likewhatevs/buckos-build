@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://github.com/explosion/spacy-models/releases/download/pl_core_news_md-3.7.0/pl_core_news_md-3.7.0.tar.gz",
     sha256 = "690ab68c3912f69900fe01006d73dcaf28bbcf548d35edfd6eea54d506741c13",
     deps = [
-        "ai//nlp/spacy:spacy",
+        "//packages/linux/ai/nlp/spacy:spacy",
     ],
 )

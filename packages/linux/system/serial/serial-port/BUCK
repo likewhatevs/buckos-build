@@ -10,7 +10,7 @@ simple_binary_package(
     license = "BSL-1.0",
     extract_to = "/usr/include/serial-port",
     deps = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     visibility = ["PUBLIC"],
 )

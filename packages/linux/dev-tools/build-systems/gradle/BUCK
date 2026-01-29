@@ -11,7 +11,7 @@ simple_package(
     homepage = "https://gradle.org/",
     license = "Apache-2.0",
     deps = [
-        "lang//java:openjdk",
+        "//packages/linux/lang/java:openjdk",
     ],
     build_commands = [
         "cp -r * ${PREFIX}/",

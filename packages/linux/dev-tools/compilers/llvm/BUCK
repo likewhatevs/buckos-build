@@ -19,14 +19,14 @@ cmake_package(
     ],
     use_defaults = ["clang", "lld"],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/libxml2:libxml2",
-        "dev-libs//libffi:libffi",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/libxml2:libxml2",
+        "//packages/linux/dev-libs/libffi:libffi",
     ],
     use_deps = {
         "lldb": [
-            "lang//python:python",
-            "system//libs/ncurses:ncurses",
+            "//packages/linux/lang/python:python",
+            "//packages/linux/system/libs/ncurses:ncurses",
         ],
     },
     cmake_args = [

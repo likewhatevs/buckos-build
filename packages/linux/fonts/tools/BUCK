@@ -3,7 +3,7 @@
 filegroup(
     name = "font-editors",
     srcs = [
-        "fonts//tools/fontforge:fontforge",
+        "//packages/linux/fonts/tools/fontforge:fontforge",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -12,9 +12,9 @@ filegroup(
 filegroup(
     name = "font-utilities",
     srcs = [
-        "fonts//tools/fonttools:fonttools",
-        "fonts//tools/woff2:woff2",
-        "fonts//tools/ttfautohint:ttfautohint",
+        "//packages/linux/fonts/tools/fonttools:fonttools",
+        "//packages/linux/fonts/tools/woff2:woff2",
+        "//packages/linux/fonts/tools/ttfautohint:ttfautohint",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

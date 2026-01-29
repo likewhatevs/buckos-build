@@ -15,9 +15,9 @@ download_source(
 autotools_package(
     name = "oath-toolkit",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -45,7 +45,7 @@ autoreconf -fi
         mkdir -p "$OUT/etc/users.oath"
     """,
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )
@@ -61,9 +61,9 @@ download_source(
 autotools_package(
     name = "google-authenticator",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -81,7 +81,7 @@ autoreconf -fi
         "--libdir=/lib/security",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )
@@ -104,8 +104,8 @@ cmake_package(
         "-DBUILD_STATIC_LIBS=OFF",
     ],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/libusb:libusb",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/libusb:libusb",
         ":libcbor",
     ],
     visibility = ["PUBLIC"],
@@ -142,9 +142,9 @@ download_source(
 autotools_package(
     name = "pam-u2f",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -159,7 +159,7 @@ autoreconf -fi
         "--with-pam-dir=/lib/security",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
         ":libfido2",
     ],
     visibility = ["PUBLIC"],
@@ -176,9 +176,9 @@ download_source(
 autotools_package(
     name = "yubikey-manager",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -197,8 +197,8 @@ autoreconf -fi
         ln -sf ../lib/python3/site-packages/bin/ykman "$OUT/usr/bin/ykman" || true
     """,
     deps = [
-        "lang//python:python",
-        "system//security/encryption:pcsc-lite",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/system/security/encryption:pcsc-lite",
         ":libfido2",
     ],
     visibility = ["PUBLIC"],
@@ -215,9 +215,9 @@ download_source(
 autotools_package(
     name = "yubico-pam",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -232,7 +232,7 @@ autoreconf -fi
         "--with-pam-dir=/lib/security",
     ],
     deps = [
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/security/encryption:linux-pam",
         ":ykclient",
         ":ykpers",
     ],
@@ -250,9 +250,9 @@ download_source(
 autotools_package(
     name = "ykclient",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -269,7 +269,7 @@ autoreconf -fi
         "--disable-static",
     ],
     deps = [
-        "network//curl:curl",
+        "//packages/linux/network/curl:curl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -286,9 +286,9 @@ download_source(
 autotools_package(
     name = "ykpers",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi
@@ -305,7 +305,7 @@ autoreconf -fi
         "--disable-static",
     ],
     deps = [
-        "system//security/encryption:libusb",
+        "//packages/linux/system/security/encryption:libusb",
         ":libyubikey",
     ],
     visibility = ["PUBLIC"],
@@ -323,9 +323,9 @@ download_source(
 autotools_package(
     name = "libyubikey",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     src_prepare = """
 autoreconf -fi

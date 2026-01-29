@@ -12,9 +12,9 @@ autotools_package(
     use_defaults = ["ssl", "ncurses", "sqlite"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "ncurses": ["core//ncurses:ncurses"],
-        "sqlite": ["system//libs/database/sqlite:sqlite"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
     },
 
     use_configure = {
@@ -36,8 +36,8 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
-        "core//zlib:zlib",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     description = "Wireless network and device detector, sniffer, wardriving tool",

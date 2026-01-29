@@ -64,8 +64,8 @@ meson_package(
         "-Dgtk_doc=false",
     ],
     deps = [
-        "desktop//gtk:gtk3",
-        "editors//poppler:poppler",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/editors/poppler:poppler",
     ],
     visibility = ["PUBLIC"],
 )

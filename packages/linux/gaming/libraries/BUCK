@@ -6,7 +6,7 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "libraries",
     srcs = [
-        "system//libs/multimedia/sdl2:sdl2",
+        "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

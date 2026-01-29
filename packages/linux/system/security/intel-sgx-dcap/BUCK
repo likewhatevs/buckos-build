@@ -13,8 +13,8 @@ cmake_package(
         "-DBUILD_ATTESTATION_APP=ON",
     ],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//json/rapidjson:rapidjson",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/json/rapidjson:rapidjson",
     ],
     visibility = ["PUBLIC"],
 )

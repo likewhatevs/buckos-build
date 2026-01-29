@@ -6,9 +6,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "emulators",
     srcs = [
-        "gaming//emulators/retroarch:retroarch",
-        "gaming//emulators/dolphin:dolphin",
-        "gaming//emulators/pcsx2:pcsx2",
+        "//packages/linux/gaming/emulators/retroarch:retroarch",
+        "//packages/linux/gaming/emulators/dolphin:dolphin",
+        "//packages/linux/gaming/emulators/pcsx2:pcsx2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -18,7 +18,7 @@ filegroup(
 filegroup(
     name = "retro-emulators",
     srcs = [
-        "gaming//emulators/retroarch:retroarch",
+        "//packages/linux/gaming/emulators/retroarch:retroarch",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -28,8 +28,8 @@ filegroup(
 filegroup(
     name = "modern-emulators",
     srcs = [
-        "gaming//emulators/dolphin:dolphin",
-        "gaming//emulators/pcsx2:pcsx2",
+        "//packages/linux/gaming/emulators/dolphin:dolphin",
+        "//packages/linux/gaming/emulators/pcsx2:pcsx2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -3,8 +3,8 @@
 filegroup(
     name = "gui-browsers",
     srcs = [
-        "www//firefox:firefox",
-        "www//chromium:chromium",
+        "//packages/linux/www/firefox:firefox",
+        "//packages/linux/www/chromium:chromium",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -13,9 +13,9 @@ filegroup(
 filegroup(
     name = "text-browsers",
     srcs = [
-        "www//lynx:lynx",
-        "www//w3m:w3m",
-        "www//links:links",
+        "//packages/linux/www/lynx:lynx",
+        "//packages/linux/www/w3m:w3m",
+        "//packages/linux/www/links:links",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -35,7 +35,7 @@ filegroup(
 filegroup(
     name = "web-servers",
     srcs = [
-        "www//servers:all-web-servers",
+        "//packages/linux/www/servers:all-web-servers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -20,7 +20,7 @@ go_package(
     packages = ["./cmd/age", "./cmd/age-keygen"],
     bins = ["age", "age-keygen"],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -47,7 +47,7 @@ cargo_package(
         "rage-mount",
     ],
     deps = [
-        "lang//rust:rust",
+        "//packages/linux/lang/rust:rust",
     ],
     visibility = ["PUBLIC"],
 )
@@ -237,9 +237,9 @@ make_package(
         "MANDIR=/usr/share/man",
     ],
     deps = [
-        "system//security/gnupg:gnupg",
-        "system//apps/coreutils:coreutils",
-        "core//util-linux:util-linux",
+        "//packages/linux/system/security/gnupg:gnupg",
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )
@@ -270,10 +270,10 @@ make_package(
         "PREFIX=/usr",
     ],
     deps = [
-        "system//security/gnupg:gnupg",
-        "system//security/cryptsetup:cryptsetup",
-        "system//filesystem/native/e2fsprogs:e2fsprogs",
-        "core//util-linux:util-linux",
+        "//packages/linux/system/security/gnupg:gnupg",
+        "//packages/linux/system/security/cryptsetup:cryptsetup",
+        "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",
+        "//packages/linux/core/util-linux:util-linux",
     ],
     visibility = ["PUBLIC"],
 )
@@ -294,8 +294,8 @@ go_package(
     packages = [".", "./gocryptfs-xray"],
     bins = ["gocryptfs", "gocryptfs-xray"],
     deps = [
-        "lang//go:go",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/lang/go:go",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -316,7 +316,7 @@ go_package(
     packages = ["./cmd/fscrypt"],
     bins = ["fscrypt"],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
         ":linux-pam",
     ],
     visibility = ["PUBLIC"],
@@ -370,8 +370,8 @@ make_package(
     license = "GPL-2.0+",
     deps = [
         ":keyutils",
-        "system//security/gnupg:libgcrypt",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/security/gnupg:libgcrypt",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -429,7 +429,7 @@ go_package(
     packages = ["./cmd/sops"],
     bins = ["sops"],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -461,8 +461,8 @@ make_package(
         "TC_NO_GUI=1",
     ],
     deps = [
-        "system//security/cryptsetup:lvm2",
-        "system//security/cryptsetup:cryptsetup",
+        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/security/cryptsetup:cryptsetup",
         ":fuse3",
     ],
     visibility = ["PUBLIC"],
@@ -513,7 +513,7 @@ cargo_package(
         "age-plugin-yubikey",
     ],
     deps = [
-        "lang//rust:rust",
+        "//packages/linux/lang/rust:rust",
         ":pcsc-lite",
     ],
     visibility = ["PUBLIC"],
@@ -568,7 +568,7 @@ make_package(
     homepage = "https://libusb.info/",
     license = "LGPL-2.1+",
     deps = [
-        "system//init/systemd:systemd",
+        "//packages/linux/system/init/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )
@@ -592,8 +592,8 @@ cargo_package(
         "sq",
     ],
     deps = [
-        "lang//rust:rust",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/lang/rust:rust",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
         ":nettle",
     ],
     visibility = ["PUBLIC"],
@@ -646,7 +646,7 @@ make_package(
     """,
     deps = [
         ":pcsc-lite",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -734,8 +734,8 @@ make_package(
             --without-documentation
     """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )
@@ -768,7 +768,7 @@ make_package(
         "SHARED=1",
     ],
     deps = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -806,7 +806,7 @@ make_package(
         ln -sf john "$OUT/usr/bin/unique"
     """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -841,7 +841,7 @@ make_package(
         cp bcrypt.1 "$OUT/usr/share/man/man1/"
     """,
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )
@@ -866,7 +866,7 @@ make_package(
     homepage = "https://github.com/OpenSC/libp11",
     license = "LGPL-2.1+",
     deps = [
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -892,7 +892,7 @@ meson_package(
     meson_args = [],
     deps = [
         ":jose",
-        "system//security/cryptsetup:cryptsetup",
+        "//packages/linux/system/security/cryptsetup:cryptsetup",
     ],
     visibility = ["PUBLIC"],
 )
@@ -917,8 +917,8 @@ meson_package(
     license = "Apache-2.0",
     meson_args = [],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
         ":jansson",
     ],
     visibility = ["PUBLIC"],

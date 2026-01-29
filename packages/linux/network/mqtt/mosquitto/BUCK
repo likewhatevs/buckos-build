@@ -14,9 +14,9 @@ cmake_package(
     use_defaults = ["ssl", "cjson"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "websockets": ["network//libs/libwebsockets:libwebsockets"],
-        "cjson": ["dev-libs//misc/cjson:cjson"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "websockets": ["//packages/linux/network/libs/libwebsockets:libwebsockets"],
+        "cjson": ["//packages/linux/dev-libs/misc/cjson:cjson"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

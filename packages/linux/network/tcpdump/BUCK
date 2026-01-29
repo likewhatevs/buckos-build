@@ -16,14 +16,14 @@ autotools_package(
     use_defaults = ["ssl", "ipv6"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "caps": ["system//libs/ipc/libcap:libcap"],
-        "smi": ["network//libsmi:libsmi"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
+        "smi": ["//packages/linux/network/libsmi:libsmi"],
     },
 
 
     deps = [
-        "network//libpcap:libpcap",
+        "//packages/linux/network/libpcap:libpcap",
     ],
 
     description = "Command-line packet analyzer",

@@ -80,7 +80,7 @@ EOF
         prefix = "/opt/rocm",
     ),
     deps = [
-        "system//gpu/drivers/amd:amd-drivers",
+        "//packages/linux/system/gpu/drivers/amd:amd-drivers",
     ],
     visibility = ["PUBLIC"],
 )

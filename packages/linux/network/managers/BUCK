@@ -73,10 +73,10 @@ meson_package(
         "-Dpolkit=false",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/utility/pcre2:pcre2",
-        "core//libffi:libffi",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

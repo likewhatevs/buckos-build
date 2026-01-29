@@ -15,9 +15,9 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "network//curl:curl",
-        "dev-libs//misc/libmicrohttpd:libmicrohttpd",
-        "dev-libs//orcania:orcania",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/dev-libs/misc/libmicrohttpd:libmicrohttpd",
+        "//packages/linux/dev-libs/orcania:orcania",
     ],
     visibility = ["PUBLIC"],
 )

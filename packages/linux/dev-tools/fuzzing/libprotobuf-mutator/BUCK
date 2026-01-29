@@ -11,6 +11,6 @@ cmake_package(
         "-DCMAKE_CXX_FLAGS=-DHAVE_PTHREAD",
     ],
     deps = [
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
 )

@@ -45,7 +45,7 @@ autotools_package(
         "-doc": "--disable-docs",
     },
     deps = [
-        "media//audio/ogg:ogg",
+        "//packages/linux/media/audio/ogg:ogg",
     ],
     visibility = ["PUBLIC"],
 )

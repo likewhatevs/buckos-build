@@ -15,6 +15,6 @@ cmake_package(
         "-DENABLE_XCB=ON",
     ],
     deps = [
-        "dev-libs//nss:nss",
+        "//packages/linux/dev-libs/nss:nss",
     ],
 )

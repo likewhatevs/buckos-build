@@ -6,8 +6,8 @@ python_package(
     src_uri = "https://github.com/google-research/fast-soft-sort/archive/6a52ce79869ab16e1e0f39149a84f50f8ad648c5.tar.gz",
     sha256 = "6609ce8a167c95be86d11871a1591dd6cb097e0c41a7ca522ffb76199443daa7",
     deps = [
-        "dev-libs//python/numba:numba",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
+        "//packages/linux/dev-libs/python/numba:numba",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
     ],
 )

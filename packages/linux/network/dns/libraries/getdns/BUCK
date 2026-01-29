@@ -49,8 +49,8 @@ cmake_package(
     use_defaults = ["ssl", "idn"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "idn": ["network//dns/libraries/libidn2:libidn2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "idn": ["//packages/linux/network/dns/libraries/libidn2:libidn2"],
     },
 
     use_configure = {
@@ -71,7 +71,7 @@ cmake_package(
     ],
 
     deps = [
-        "network//dns/unbound:unbound",
+        "//packages/linux/network/dns/unbound:unbound",
     ],
 
     description = "Modern asynchronous DNS API",

@@ -32,8 +32,8 @@ autotools_package(
         "CXXFLAGS": "-O2 ${CXXFLAGS:-}",
     },
     deps = [
-        "core//zlib:zlib",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

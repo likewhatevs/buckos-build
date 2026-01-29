@@ -3,8 +3,8 @@
 filegroup(
     name = "conversion-tools",
     srcs = [
-        "audio//utilities/sox:sox",
-        "audio//utilities/abcde:abcde",
+        "//packages/linux/audio/utilities/sox:sox",
+        "//packages/linux/audio/utilities/abcde:abcde",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -21,7 +21,7 @@ filegroup(
 filegroup(
     name = "control-tools",
     srcs = [
-        "audio//utilities/pavucontrol:pavucontrol",
+        "//packages/linux/audio/utilities/pavucontrol:pavucontrol",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -30,7 +30,7 @@ filegroup(
 filegroup(
     name = "synthesis-tools",
     srcs = [
-        "audio//utilities/espeak-ng:espeak-ng",
+        "//packages/linux/audio/utilities/espeak-ng:espeak-ng",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

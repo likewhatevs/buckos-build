@@ -10,7 +10,7 @@ go_package(
     license = "Apache-2.0",
     packages = ["."],
     deps = [
-        "system//security/go-tpm-tools:go-tpm-tools",
+        "//packages/linux/system/security/go-tpm-tools:go-tpm-tools",
     ],
     visibility = ["PUBLIC"],
 )

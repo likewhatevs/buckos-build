@@ -44,7 +44,7 @@ autotools_package(
         "PYTHON=/usr/bin/python3",
     ],
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

@@ -25,7 +25,7 @@ cmake_package(
         "benchmarks": "CPUINFO_BUILD_BENCHMARKS",
     },
     use_deps = {
-        "benchmarks": ["dev-libs//misc/benchmark:benchmark"],
+        "benchmarks": ["//packages/linux/dev-libs/misc/benchmark:benchmark"],
     },
     visibility = ["PUBLIC"],
 )

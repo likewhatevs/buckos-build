@@ -25,9 +25,9 @@ meson_package(
     license = "MIT",
     meson_args = [],
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
     ],
     visibility = ["PUBLIC"],
 )

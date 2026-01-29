@@ -14,10 +14,10 @@ cmake_package(
     homepage = "https://github.com/facebookincubator/dynolog",
     license = "MIT",
     deps = [
-        "dev-libs//logging/glog:glog",
-        "dev-libs//misc/gflags:gflags",
-        "dev-libs//json/nlohmann-json:nlohmann-json",
-        "dev-libs//misc/fmt:fmt",
+        "//packages/linux/dev-libs/logging/glog:glog",
+        "//packages/linux/dev-libs/misc/gflags:gflags",
+        "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

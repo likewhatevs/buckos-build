@@ -6,7 +6,7 @@ cmake_package(
     src_uri = "https://github.com/shacklettbp/madrona/archive/a03101cd5bdee7876c862be1fb47f04111963445.tar.gz",
     sha256 = "0bf1a4b5521fdf3090e46636556869bf2985e7cbd3a2f8a1148e28d9345ec07b",
     deps = [
-        "dev-libs//math/eigen:eigen",
+        "//packages/linux/dev-libs/math/eigen:eigen",
     ],
     cmake_args = [
         "-DMADRONA_ENABLE_TESTS=OFF",

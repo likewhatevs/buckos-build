@@ -43,11 +43,11 @@ meson setup .. --prefix=/usr \\
     -Duse_system_wfconfig=enabled
 """,
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "desktop//sway:wlroots",
-        "desktop//mesa:mesa",
-        "desktop//libinput:libinput",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/desktop/sway:wlroots",
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/desktop/libinput:libinput",
     ],
     visibility = ["PUBLIC"],
 )
@@ -57,9 +57,9 @@ filegroup(
     name = "wayfire-desktop",
     srcs = [
         ":wayfire",
-        "desktop//sway:wlroots",
-        "graphics//rendering/wayland:wayland",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/sway:wlroots",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

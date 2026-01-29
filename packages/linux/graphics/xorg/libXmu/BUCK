@@ -16,10 +16,10 @@ autotools_package(
         "--disable-docs",
     ],
     deps = [
-        "graphics//xorg/libX11:libX11",
-        "graphics//xorg/libXext:libXext",
-        "graphics//xorg/libXt:libXt",
-        "graphics//xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/libX11:libX11",
+        "//packages/linux/graphics/xorg/libXext:libXext",
+        "//packages/linux/graphics/xorg/libXt:libXt",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
     ],
     visibility = ["PUBLIC"],
 )

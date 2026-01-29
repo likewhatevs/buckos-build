@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/Dao-AILab/flash-attention/archive/refs/tags/v2.7.3.tar.gz",
     sha256 = "21a7b82f787d2a33905c45ba10c3275d504c408b744520f7691d9501b7b4c009",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//cuda/cutlass:cutlass",
-        "dev-libs//python/einops:einops",
-        "dev-libs//python/packaging:packaging",
-        "dev-libs//python/ninja:ninja",
-        "dev-libs//python/psutil:psutil",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/cuda/cutlass:cutlass",
+        "//packages/linux/dev-libs/python/einops:einops",
+        "//packages/linux/dev-libs/python/packaging:packaging",
+        "//packages/linux/dev-libs/python/ninja:ninja",
+        "//packages/linux/dev-libs/python/psutil:psutil",
     ],
 )

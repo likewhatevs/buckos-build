@@ -10,8 +10,8 @@ cmake_package(
         "-DCMAKE_CXX_STANDARD=17",
     ],
     deps = [
-        "dev-libs//eigen:eigen",
-        "dev-libs//math/glm:glm",
-        "system//gpu/libraries/cuda-toolkit:cuda-toolkit",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/dev-libs/math/glm:glm",
+        "//packages/linux/system/gpu/libraries/cuda-toolkit:cuda-toolkit",
     ],
 )

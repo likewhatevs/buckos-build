@@ -9,11 +9,11 @@ python_package(
     homepage = "https://github.com/nicodv/kmodes",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
-        "ai//ml-frameworks/scikit-learn:scikit-learn",
-        "dev-libs//python/joblib:joblib",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/ai/ml-frameworks/scikit-learn:scikit-learn",
+        "//packages/linux/dev-libs/python/joblib:joblib",
     ],
     visibility = ["PUBLIC"],
 )

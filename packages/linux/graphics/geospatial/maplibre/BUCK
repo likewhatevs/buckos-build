@@ -11,12 +11,12 @@ cmake_package(
     iuse = ["vulkan", "qt"],
     use_defaults = [],
     deps = [
-        "databases//sqlite:sqlite",
-        "dev-libs//misc/libuv:libuv",
-        "dev-libs//json/rapidjson:rapidjson",
+        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/dev-libs/json/rapidjson:rapidjson",
     ],
     use_deps = {
-        "qt": ["graphics//qt:qt"],
+        "qt": ["//packages/linux/graphics/qt:qt"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

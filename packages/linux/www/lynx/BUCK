@@ -37,9 +37,9 @@ autotools_package(
     use_defaults = ["ssl", "zlib", "ipv6", "nls", "unicode", "ncurses"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "zlib": ["core//zlib:zlib"],
-        "ncurses": ["core//ncurses:ncurses"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
     },
     configure_args = [
         "--enable-default-colors",

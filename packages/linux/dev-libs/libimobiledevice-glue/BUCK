@@ -9,6 +9,6 @@ autotools_package(
         "--disable-static",
     ],
     deps = [
-        "dev-libs//libplist:libplist",
+        "//packages/linux/dev-libs/libplist:libplist",
     ],
 )

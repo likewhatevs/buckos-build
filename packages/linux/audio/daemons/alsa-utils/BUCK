@@ -45,11 +45,11 @@ autotools_package(
         "selinux": "--enable-selinux",
     },
     use_deps = {
-        "ncurses": ["core//ncurses:ncurses"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
     },
     deps = [
-        "audio//daemons/alsa-lib:alsa-lib",
-        "system//init/eudev:eudev",
+        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     visibility = ["PUBLIC"],
 )

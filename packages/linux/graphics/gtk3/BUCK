@@ -15,25 +15,25 @@ meson_package(
     # wayland instead of x11 for Wayland-native apps like swaync
     use_defaults = ["wayland"],
     deps = [
-        "core//glib:glib",
-        "graphics//cairo:cairo",
-        "graphics//pango:pango",
-        "dev-libs//misc/gdk-pixbuf:gdk-pixbuf",
-        "dev-libs//misc/atk:atk",
-        "dev-libs//misc/at-spi2-atk:at-spi2-atk",
-        "dev-libs//misc/epoxy:epoxy",
+        "//packages/linux/core/glib:glib",
+        "//packages/linux/graphics/cairo:cairo",
+        "//packages/linux/graphics/pango:pango",
+        "//packages/linux/dev-libs/misc/gdk-pixbuf:gdk-pixbuf",
+        "//packages/linux/dev-libs/misc/atk:atk",
+        "//packages/linux/dev-libs/misc/at-spi2-atk:at-spi2-atk",
+        "//packages/linux/dev-libs/misc/epoxy:epoxy",
     ],
     use_deps = {
         "x11": [
-            "graphics//x11-libs/libx11:libx11",
-            "graphics//x11-libs/libxi:libxi",
+            "//packages/linux/graphics/x11-libs/libx11:libx11",
+            "//packages/linux/graphics/x11-libs/libxi:libxi",
         ],
         "wayland": [
-            "graphics//rendering/wayland:wayland",
-            "graphics//rendering/wayland-protocols:wayland-protocols",
+            "//packages/linux/graphics/rendering/wayland:wayland",
+            "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
         ],
-        "cups": ["network//printing/cups:cups"],
-        "introspection": ["dev-libs//misc/gobject-introspection:gobject-introspection"],
+        "cups": ["//packages/linux/network/printing/cups:cups"],
+        "introspection": ["//packages/linux/dev-libs/misc/gobject-introspection:gobject-introspection"],
     },
     meson_args = [
         "-Dgtk_doc=false",

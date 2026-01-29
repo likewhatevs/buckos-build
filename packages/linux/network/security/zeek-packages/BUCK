@@ -6,8 +6,8 @@ cmake_package(
     src_uri = "https://github.com/corelight/zeek-spicy-openvpn/archive/refs/tags/v0.1.6.tar.gz",
     sha256 = "ad75104cc238c4b1668d9c7d6e356ce727fa4ad447b9d9e17a9453754921c304",
     deps = [
-        "network//security/zeek:zeek",
-        "network//security/spicy:spicy",
+        "//packages/linux/network/security/zeek:zeek",
+        "//packages/linux/network/security/spicy:spicy",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

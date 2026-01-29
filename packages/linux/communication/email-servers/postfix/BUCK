@@ -65,8 +65,8 @@ for dir in active bounce corrupt defer deferred flush hold incoming maildrop pid
 done
 """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/database/lmdb:lmdb",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/database/lmdb:lmdb",
     ],
     visibility = ["PUBLIC"],
 )

@@ -35,10 +35,10 @@ meson_package(
         "-icu": "-Dicu=disabled",
     },
     use_deps = {
-        "graphite": ["system//libs/font/graphite2:graphite2"],
-        "glib": ["dev-libs//glib:glib"],
-        "cairo": ["system//libs/graphics/cairo:cairo"],
-        "icu": ["system//libs/utility/icu:icu"],
+        "graphite": ["//packages/linux/system/libs/font/graphite2:graphite2"],
+        "glib": ["//packages/linux/dev-libs/glib:glib"],
+        "cairo": ["//packages/linux/system/libs/graphics/cairo:cairo"],
+        "icu": ["//packages/linux/system/libs/utility/icu:icu"],
     },
     meson_args = [
         "-Dfreetype=enabled",
@@ -47,11 +47,11 @@ meson_package(
         "-Ddocs=disabled",
     ],
     deps = [
-        "system//libs/font/freetype:freetype",
-        "core//zlib:zlib",
-        "system//libs/image/libpng:libpng",
-        "system//libs/compression/bzip2:bzip2",
-        "system//libs/data/expat:expat",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )

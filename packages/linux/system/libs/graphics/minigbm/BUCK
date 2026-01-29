@@ -17,7 +17,7 @@ make_package(
     homepage = "https://chromium.googlesource.com/chromiumos/platform/minigbm",
     license = "BSD-3-Clause",
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
     ],
     env = {
         # Disable problematic drivers that require platform-specific headers
@@ -50,7 +50,7 @@ make -j$(nproc) \\
         "LIBDIR=/usr/lib",
     ],
     deps = [
-        "desktop//libdrm:libdrm",
+        "//packages/linux/desktop/libdrm:libdrm",
     ],
     visibility = ["PUBLIC"],
 )

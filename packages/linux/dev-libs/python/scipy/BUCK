@@ -25,11 +25,11 @@ python_package(
     },
     use_defaults = ["openblas"],
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
     use_deps = {
-        "openblas": ["dev-libs//math/openblas:openblas"],
+        "openblas": ["//packages/linux/dev-libs/math/openblas:openblas"],
     },
     build_backend = "meson",
     install_cmd = """

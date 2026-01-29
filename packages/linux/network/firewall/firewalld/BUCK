@@ -21,8 +21,8 @@ autotools_package(
     use_defaults = ["iptables"],  # Use iptables until nftables package is enabled
 
     use_deps = {
-        # "nftables": ["network//firewall/nftables:nftables"],  # TODO: Enable when nftables package is available
-        "iptables": ["network//firewall/iptables:iptables"],
+        # "nftables": ["//packages/linux/network/firewall/nftables:nftables"],  # TODO: Enable when nftables package is available
+        "iptables": ["//packages/linux/network/firewall/iptables:iptables"],
     },
 
     use_configure = {
@@ -72,10 +72,10 @@ chmod 644 "$DESTDIR/etc/firewalld/firewalld.conf"
 """,
 
     deps = [
-        "network//firewall/ipset:ipset",
-        "system//libs/ipc/dbus:dbus",
-        "dev-libs//glib:glib",
-        "lang//python:python",
+        "//packages/linux/network/firewall/ipset:ipset",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/lang/python:python",
     ],
 
     description = "Dynamic firewall daemon with D-Bus interface",

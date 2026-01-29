@@ -61,13 +61,13 @@ autotools_package(
     },
     use_defaults = ["python", "tui"],
     deps = [
-        "core//ncurses:ncurses",
-        "core//readline:readline",
-        "system//libs/utility/gmp:gmp",
-        "system//libs/utility/mpfr:mpfr",
+        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
     ],
     use_deps = {
-        "python": ["lang//python:python"],
+        "python": ["//packages/linux/lang/python:python"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

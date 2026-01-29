@@ -14,10 +14,10 @@ simple_package(
     use_defaults = ["ssl"],
     deps = [],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "ldap": ["network//ldap/openldap:openldap"],
-        "mysql": ["databases//mysql:mysql"],
-        "pgsql": ["databases//postgresql:postgresql"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "ldap": ["//packages/linux/network/ldap/openldap:openldap"],
+        "mysql": ["//packages/linux/databases/mysql:mysql"],
+        "pgsql": ["//packages/linux/databases/postgresql:postgresql"],
     },
     build_commands = [
         "make makefiles CCARGS='-DUSE_TLS -DUSE_SASL_AUTH' AUXLIBS='-lssl -lcrypto'",

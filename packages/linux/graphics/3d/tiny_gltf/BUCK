@@ -13,6 +13,6 @@ cmake_package(
         "-DTINYGLTF_HEADER_ONLY=OFF",
     ],
     deps = [
-        "dev-libs//json/rapidjson:rapidjson",
+        "//packages/linux/dev-libs/json/rapidjson:rapidjson",
     ],
 )

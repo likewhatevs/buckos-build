@@ -17,10 +17,10 @@ autotools_package(
         "--with-appdefaultdir=/etc/X11/app-defaults",
     ],
     deps = [
-        "graphics//xorg/libX11:libX11",
-        "graphics//xorg/libSM:libSM",
-        "graphics//xorg/libICE:libICE",
-        "graphics//xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/libX11:libX11",
+        "//packages/linux/graphics/xorg/libSM:libSM",
+        "//packages/linux/graphics/xorg/libICE:libICE",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
     ],
     visibility = ["PUBLIC"],
 )

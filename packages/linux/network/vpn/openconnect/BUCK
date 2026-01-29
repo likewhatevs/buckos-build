@@ -25,9 +25,9 @@ autotools_package(
     use_defaults = ["ssl", "lz4"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
-        "lz4": ["system//libs/compression/lz4:lz4"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
+        "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
     },
 
     use_configure = {
@@ -68,8 +68,8 @@ mkdir -p "$DESTDIR/etc/vpnc"
 """,
 
     deps = [
-        "system//libs/data/libxml2:libxml2",
-        "core//zlib:zlib",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     description = "Open client for Cisco AnyConnect, Pulse, GlobalProtect VPNs",

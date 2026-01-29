@@ -15,7 +15,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 teensy_loader_cli "$DESTDIR/usr/bin/"
 """,
     deps = [
-        "system//libs/libusb:libusb",
+        "//packages/linux/system/libs/libusb:libusb",
     ],
     visibility = ["PUBLIC"],
 )

@@ -9,8 +9,8 @@ python_package(
     homepage = "https://github.com/KAIR-BAIR/nerfacc",
     license = "MIT",
     deps = [
-        "lang//python:python",
-        "ai//ml-frameworks/pytorch:pytorch",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
     visibility = ["PUBLIC"],
 )

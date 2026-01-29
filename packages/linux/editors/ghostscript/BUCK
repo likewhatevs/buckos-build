@@ -23,9 +23,9 @@ autotools_package(
         "--disable-compile-inits",
     ],
     deps = [
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/image/libpng:libpng",
-        "system//libs/image/libtiff:libtiff",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
     ],
     visibility = ["PUBLIC"],
 )

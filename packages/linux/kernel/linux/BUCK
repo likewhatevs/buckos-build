@@ -9,6 +9,6 @@
 # Alias to the new location for migration
 alias(
     name = "linux",
-    actual = "kernel//buckos-kernel:buckos-kernel",
+    actual = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
     visibility = ["PUBLIC"],
 )

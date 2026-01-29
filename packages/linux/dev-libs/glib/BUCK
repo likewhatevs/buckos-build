@@ -64,12 +64,12 @@ meson_package(
         done
     """,
     bdepend = [
-        "dev-libs//python/packaging:packaging",
+        "//packages/linux/dev-libs/python/packaging:packaging",
     ],
     deps = [
-        "core//libffi:libffi",
-        "core//zlib:zlib",
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     visibility = ["PUBLIC"],
 )

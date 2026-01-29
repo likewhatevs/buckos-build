@@ -20,9 +20,9 @@ autotools_package(
         "--disable-gtk-doc",
     ],
     deps = [
-        "core//util-linux:util-linux",
-        "system//filesystem/management/lvm2:lvm2",
-        "system//init/eudev:eudev",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     visibility = ["PUBLIC"],
 )

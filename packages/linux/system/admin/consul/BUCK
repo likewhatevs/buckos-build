@@ -14,7 +14,7 @@ go_package(
     packages = ["."],
     bins = ["consul"],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

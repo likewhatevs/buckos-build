@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/asmaloney/libE57Format",
     license = "BSL-1.0",
     deps = [
-        "dev-libs//xerces-c:xerces-c",
+        "//packages/linux/dev-libs/xerces-c:xerces-c",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

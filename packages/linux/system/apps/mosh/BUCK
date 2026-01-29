@@ -53,10 +53,10 @@ autotools_package(
         "--sysconfdir=/etc",
     ],
     deps = [
-        "core//ncurses:ncurses",
-        "system//libs/crypto/openssl:openssl",
-        "dev-libs//serialization/protobuf:protobuf",
-        "core//zlib:zlib",
+        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

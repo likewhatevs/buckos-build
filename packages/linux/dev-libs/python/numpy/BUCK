@@ -37,10 +37,10 @@ python_package(
     },
     use_defaults = ["openblas", "simd"],
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     use_deps = {
-        "openblas": ["dev-libs//math/openblas:openblas"],
+        "openblas": ["//packages/linux/dev-libs/math/openblas:openblas"],
     },
     build_backend = "meson",
     build_env = {

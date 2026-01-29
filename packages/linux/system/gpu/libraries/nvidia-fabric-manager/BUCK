@@ -52,7 +52,7 @@ cd "$OUT/usr/lib64"
 [ -f libnvfm.so.1 ] && ln -sf libnvfm.so.1 libnvfm.so || true
 """,
     deps = [
-        "system//gpu/drivers/nvidia:nvidia-drivers",
+        "//packages/linux/system/gpu/drivers/nvidia:nvidia-drivers",
     ],
     visibility = ["PUBLIC"],
 )

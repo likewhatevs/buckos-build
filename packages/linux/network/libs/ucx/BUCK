@@ -18,7 +18,7 @@ autotools_package(
         "--with-rocm=no",
     ],
     deps = [
-        "network//libs/rdma-core:rdma-core",
-        "system//libs/numactl:numactl",
+        "//packages/linux/network/libs/rdma-core:rdma-core",
+        "//packages/linux/system/libs/numactl:numactl",
     ],
 )

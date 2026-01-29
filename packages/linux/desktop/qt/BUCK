@@ -301,52 +301,52 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
     # NOTE: fontconfig/freetype/harfbuzz removed - Qt6 will use bundled versions
     # to avoid pkg-config sysroot path issues during cross-compilation
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//glib:glib",
-        "dev-libs//double-conversion:double-conversion",
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/double-conversion:double-conversion",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
         # GUI deps (using Qt's bundled freetype/harfbuzz)
-        "system//libs/image/libpng:libpng",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "desktop//libdrm:libdrm",
-        "graphics//xorg/libxkbcommon:libxkbcommon",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/graphics/xorg/libxkbcommon:libxkbcommon",
         # Transitive dependencies needed for linking:
         # - expat: needed by Mesa's libEGL
         # - libffi: needed by wayland
         # - openssl: needed by Qt6Network for SSL/TLS
-        "core//expat:expat",
-        "core//libffi:libffi",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/core/expat:expat",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 
     # USE-conditional dependencies
     use_deps = {
         "X": [
-            "graphics//xorg/libX11:libX11",
-            "graphics//xorg/libxcb:libxcb",
-            "graphics//xorg/xcb-util-cursor:xcb-util-cursor",
-            "graphics//xorg/xcb-util-image:xcb-util-image",
-            "graphics//xorg/xcb-util-keysyms:xcb-util-keysyms",
-            "graphics//xorg/xcb-util-renderutil:xcb-util-renderutil",
-            "graphics//xorg/xcb-util-wm:xcb-util-wm",
-            "graphics//xorg/libICE:libICE",
-            "graphics//xorg/libSM:libSM",
+            "//packages/linux/graphics/xorg/libX11:libX11",
+            "//packages/linux/graphics/xorg/libxcb:libxcb",
+            "//packages/linux/graphics/xorg/xcb-util-cursor:xcb-util-cursor",
+            "//packages/linux/graphics/xorg/xcb-util-image:xcb-util-image",
+            "//packages/linux/graphics/xorg/xcb-util-keysyms:xcb-util-keysyms",
+            "//packages/linux/graphics/xorg/xcb-util-renderutil:xcb-util-renderutil",
+            "//packages/linux/graphics/xorg/xcb-util-wm:xcb-util-wm",
+            "//packages/linux/graphics/xorg/libICE:libICE",
+            "//packages/linux/graphics/xorg/libSM:libSM",
         ],
         "wayland": [
-            "graphics//rendering/wayland:wayland",
-            "graphics//rendering/wayland-protocols:wayland-protocols",
+            "//packages/linux/graphics/rendering/wayland:wayland",
+            "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
         ],
         "opengl": [
-            "desktop//mesa:mesa",
+            "//packages/linux/desktop/mesa:mesa",
         ],
         "ssl": [
-            "system//libs/crypto/openssl:openssl",
+            "//packages/linux/system/libs/crypto/openssl:openssl",
         ],
         "sqlite": [
-            "databases//sqlite:sqlite",
+            "//packages/linux/databases/sqlite:sqlite",
         ],
         "dbus": [
-            "system//libs/ipc/dbus:dbus",
+            "//packages/linux/system/libs/ipc/dbus:dbus",
         ],
     },
 
@@ -396,12 +396,12 @@ binary_package(
         make install
     """,
     deps = [
-        "desktop//libdrm:libdrm",
-        "fonts//libraries/fontconfig:fontconfig",
-        "fonts//libraries/freetype:freetype",
-        "fonts//libraries/harfbuzz:harfbuzz",
-        "dev-libs//glib:glib",
-        "dev-libs//double-conversion:double-conversion",
+        "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
+        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/fonts/libraries/harfbuzz:harfbuzz",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/double-conversion:double-conversion",
     ],
     visibility = ["PUBLIC"],
 )

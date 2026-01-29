@@ -14,7 +14,7 @@ go_package(
         "./fuse",
     ],
     deps = [
-        "system//libs/libfuse:libfuse",
+        "//packages/linux/system/libs/libfuse:libfuse",
     ],
     visibility = ["PUBLIC"],
 )

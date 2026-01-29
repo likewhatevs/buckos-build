@@ -36,8 +36,8 @@ autotools_package(
     },
 
     use_deps = {
-        "qt5": ["dev-libs//qt5:qt5"],
-        "python": ["lang//python:python"],
+        "qt5": ["//packages/linux/dev-libs/qt5:qt5"],
+        "python": ["//packages/linux/lang/python:python"],
     },
 
     configure_args = [
@@ -60,8 +60,8 @@ autotools_package(
 """,
 
     deps = [
-        "system//security/gnupg:gnupg",
-        "system//libs/crypto/libgpg-error:libgpg-error",
+        "//packages/linux/system/security/gnupg:gnupg",
+        "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
     ],
     visibility = ["PUBLIC"],
 )

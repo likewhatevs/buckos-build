@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/IssamLaradji/sps/archive/refs/heads/master.tar.gz",
     sha256 = "9372a41aebbca3a26f4259020383b73e5d143b92c7acd65246321d32aa11ab44",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
 )

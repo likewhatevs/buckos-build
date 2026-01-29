@@ -97,19 +97,19 @@ mkdir -p "$DESTDIR/usr/share/fish/vendor_completions.d"
 ./bin/podman completion fish > "$DESTDIR/usr/share/fish/vendor_completions.d/podman.fish" || true
 """,
     rdepend = [
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//libs/crypto/gpgme:gpgme",
-        "system//containers/runtime:crun",
-        "system//containers/runtime:conmon",
-        "system//containers/network:cni-plugins",
-        "system//containers/network:netavark",
-        "system//containers/network:aardvark-dns",
-        "system//containers/podman:containers-common",
-        "system//containers/storage:fuse-overlayfs",
-        "system//containers/network:slirp4netns",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
+        "//packages/linux/system/containers/runtime:crun",
+        "//packages/linux/system/containers/runtime:conmon",
+        "//packages/linux/system/containers/network:cni-plugins",
+        "//packages/linux/system/containers/network:netavark",
+        "//packages/linux/system/containers/network:aardvark-dns",
+        "//packages/linux/system/containers/podman:containers-common",
+        "//packages/linux/system/containers/storage:fuse-overlayfs",
+        "//packages/linux/system/containers/network:slirp4netns",
     ],
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -144,15 +144,15 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 ./bin/buildah completion bash > "$DESTDIR/usr/share/bash-completion/completions/buildah" || true
 """,
     rdepend = [
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//libs/crypto/gpgme:gpgme",
-        "system//containers/runtime:crun",
-        "system//containers/podman:containers-common",
-        "system//containers/storage:fuse-overlayfs",
-        "system//containers/network:slirp4netns",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
+        "//packages/linux/system/containers/runtime:crun",
+        "//packages/linux/system/containers/podman:containers-common",
+        "//packages/linux/system/containers/storage:fuse-overlayfs",
+        "//packages/linux/system/containers/network:slirp4netns",
     ],
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -187,11 +187,11 @@ mkdir -p "$DESTDIR/usr/share/bash-completion/completions"
 ./bin/skopeo completion bash > "$DESTDIR/usr/share/bash-completion/completions/skopeo" || true
 """,
     rdepend = [
-        "system//libs/crypto/gpgme:gpgme",
-        "system//containers/podman:containers-common",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
+        "//packages/linux/system/containers/podman:containers-common",
     ],
     bdepend = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )
@@ -217,10 +217,10 @@ mkdir -p "$DESTDIR/usr/lib/python3/dist-packages"
 install -m 755 podman_compose.py "$DESTDIR/usr/bin/podman-compose"
 """,
     rdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
         # TODO: pyyaml package needs to be created
-        # "dev-libs//python/pyyaml:pyyaml",
-        "system//containers/podman:podman",
+        # "//packages/linux/dev-libs/python/pyyaml:pyyaml",
+        "//packages/linux/system/containers/podman:podman",
     ],
     visibility = ["PUBLIC"],
 )

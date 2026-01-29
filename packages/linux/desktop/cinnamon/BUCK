@@ -47,7 +47,7 @@ cd build
 meson setup .. --prefix=/usr
 """,
     deps = [
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     visibility = ["PUBLIC"],
 )
@@ -72,7 +72,7 @@ cd build
 meson setup .. --prefix=/usr
 """,
     deps = [
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     visibility = ["PUBLIC"],
 )
@@ -83,8 +83,8 @@ filegroup(
     srcs = [
         ":cinnamon",
         ":muffin",
-        "desktop//lightdm:lightdm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/lightdm:lightdm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

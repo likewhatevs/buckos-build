@@ -37,7 +37,7 @@ autotools_package(
         "--enable-large-config",
     ],
     deps = [
-        "dev-libs//misc/libatomic_ops:libatomic_ops",
+        "//packages/linux/dev-libs/misc/libatomic_ops:libatomic_ops",
     ],
     visibility = ["PUBLIC"],
 )

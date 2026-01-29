@@ -47,9 +47,9 @@ autotools_package(
         "--disable-bdjava-jar",
     ],
     deps = [
-        "system//libs/data/libxml2:libxml2",
-        "system//libs/font/freetype:freetype",
-        "system//libs/font/fontconfig:fontconfig",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )

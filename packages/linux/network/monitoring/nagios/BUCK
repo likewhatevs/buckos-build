@@ -14,8 +14,8 @@ autotools_package(
     use_defaults = ["ssl", "perl", "web"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "perl": ["lang//perl:perl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "perl": ["//packages/linux/lang/perl:perl"],
     },
 
     use_configure = {
@@ -38,7 +38,7 @@ autotools_package(
     ],
 
     deps = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
 
     description = "Network monitoring and management system",

@@ -16,6 +16,6 @@ cmake_package(
         "-DSCN_BENCHMARKS=OFF",
     ],
     deps = [
-        "dev-libs//misc/fast_float:fast_float",
+        "//packages/linux/dev-libs/misc/fast_float:fast_float",
     ],
 )

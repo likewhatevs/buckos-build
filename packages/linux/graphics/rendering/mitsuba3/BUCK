@@ -11,14 +11,14 @@ cmake_package(
     iuse = ["python", "embree", "cuda", "llvm"],
     use_defaults = ["python", "embree"],
     deps = [
-        "graphics//3d/openexr:openexr",
-        "dev-libs//misc/asmjit:asmjit",
-        "media//libs/libpng:libpng",
-        "media//libs/libjpeg-turbo:libjpeg-turbo",
-        "dev-libs//parsers/pugixml:pugixml",
+        "//packages/linux/graphics/3d/openexr:openexr",
+        "//packages/linux/dev-libs/misc/asmjit:asmjit",
+        "//packages/linux/media/libs/libpng:libpng",
+        "//packages/linux/media/libs/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/dev-libs/parsers/pugixml:pugixml",
     ],
     use_deps = {
-        "embree": ["graphics//3d/embree:embree"],
+        "embree": ["//packages/linux/graphics/3d/embree:embree"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

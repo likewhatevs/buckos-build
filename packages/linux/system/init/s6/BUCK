@@ -68,8 +68,8 @@ fi
     ${USE_CONFIGURE_FLAGS}
 """,
     deps = [
-        "system//init/skalibs:skalibs",
-        "system//init/execline:execline",
+        "//packages/linux/system/init/skalibs:skalibs",
+        "//packages/linux/system/init/execline:execline",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

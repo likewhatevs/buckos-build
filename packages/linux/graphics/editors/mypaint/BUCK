@@ -29,13 +29,13 @@ python setup.py build
 python setup.py install --prefix=/usr --root=$OUT
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "dev-libs//glib:glib",
-        "lang//python:python",
-        "graphics//utilities/libmypaint:libmypaint",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/graphics/utilities/libmypaint:libmypaint",
     ],
     bdepend = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

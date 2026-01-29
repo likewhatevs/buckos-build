@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/archinetai/a-unet/archive/refs/tags/v0.0.16.tar.gz",
     sha256 = "8dd5e5b9f0d46b09e43c531d9fd4d7b6ca3e1dfe83a09f8bc59dda39f2efd270",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/einops:einops",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/einops:einops",
     ],
 )

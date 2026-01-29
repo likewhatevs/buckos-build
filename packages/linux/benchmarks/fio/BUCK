@@ -46,11 +46,11 @@ autotools_package(
     use_defaults = ["zlib"],
     deps = [],
     use_deps = {
-        "zlib": ["core//zlib:zlib"],
-        "libaio": ["core//libaio"],
-        "numa": ["core//numactl"],
-        "http": ["network//curl:curl"],
-        "rdma": ["network//rdma-core:rdma-core"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "libaio": ["//packages/linux/core/libaio"],
+        "numa": ["//packages/linux/core/numactl"],
+        "http": ["//packages/linux/network/curl:curl"],
+        "rdma": ["//packages/linux/network/rdma-core:rdma-core"],
     },
     src_configure = "./configure --prefix=/usr --disable-native",
     use_configure = {

@@ -22,7 +22,7 @@ cmake_package(
         "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     ],
     deps = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )

@@ -18,7 +18,7 @@ make_package(
     src_compile = "make -j$(nproc)",
     src_install = "make install DESTDIR=\"$DESTDIR\" PREFIX=/usr",
     deps = [
-        "network//libpcap:libpcap",
+        "//packages/linux/network/libpcap:libpcap",
     ],
     visibility = ["PUBLIC"],
 )

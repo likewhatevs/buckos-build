@@ -9,11 +9,11 @@ python_package(
     homepage = "https://github.com/Netflix/sureal",
     license = "Apache-2.0",
     deps = [
-        "lang//python:python",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/matplotlib:matplotlib",
-        "dev-libs//python/pandas:pandas",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/matplotlib:matplotlib",
+        "//packages/linux/dev-libs/python/pandas:pandas",
     ],
     visibility = ["PUBLIC"],
 )

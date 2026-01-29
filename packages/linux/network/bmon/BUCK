@@ -30,9 +30,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 #     },
 #
 #     deps = [
-#         "core//libnl:libnl",
-#         "core//ncurses:ncurses",
-#         # "dev-libs//libconfuse:libconfuse",  # TODO: Create this package
+#         "//packages/linux/core/libnl:libnl",
+#         "//packages/linux/core/ncurses:ncurses",
+#         # "//packages/linux/dev-libs/libconfuse:libconfuse",  # TODO: Create this package
 #     ],
 #
 #     env = {

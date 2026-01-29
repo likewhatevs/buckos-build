@@ -13,9 +13,9 @@ cmake_package(
         "-DCMAKE_BUILD_TYPE=release",
     ],
     deps = [
-        "system//libs/bpf/libbpf:libbpf",
-        "core//libnl:libnl",
-        "dev-tools//dev-utils/bison:bison",
-        "dev-tools//dev-utils/flex:flex",
+        "//packages/linux/system/libs/bpf/libbpf:libbpf",
+        "//packages/linux/core/libnl:libnl",
+        "//packages/linux/dev-tools/dev-utils/bison:bison",
+        "//packages/linux/dev-tools/dev-utils/flex:flex",
     ],
 )

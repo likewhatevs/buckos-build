@@ -38,8 +38,8 @@ meson_package(
         "-Dprefix=/usr",
     ],
     deps = [
-        "desktop//gtk:gtk3",
-        "dev-libs//glib:glib",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )

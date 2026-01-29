@@ -36,8 +36,8 @@ autotools_package(
         "--localstatedir=/var",
     ],
     deps = [
-        "core//ncurses:ncurses",
-        "core//libnl:libnl",
+        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/core/libnl:libnl",
     ],
     visibility = ["PUBLIC"],
 )

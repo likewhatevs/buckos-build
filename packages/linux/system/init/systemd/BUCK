@@ -81,8 +81,8 @@ FUZZ_STUB
     ],
     use_defaults = ["pam", "acl", "lz4", "xz", "zstd"],
     use_deps = {
-        "pam": ["system//security/auth/pam:pam"],
-        "acl": ["system//libs/ipc/acl:acl"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
+        "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
     },
     use_meson = {
         "apparmor": "-Dapparmor=enabled",
@@ -219,10 +219,10 @@ FUZZ_STUB
         "-Dacl=auto",
     ],
     bdepend = [
-        "dev-tools//dev-utils/gperf:gperf",  # Perfect hash generator (build-time)
-        "lang//python:python",  # Python for meson
-        "lang//python/jinja2:jinja2",  # Jinja2 templating (required by meson)
-        "lang//python/jinja2:markupsafe",  # Required by jinja2
+        "//packages/linux/dev-tools/dev-utils/gperf:gperf",  # Perfect hash generator (build-time)
+        "//packages/linux/lang/python:python",  # Python for meson
+        "//packages/linux/lang/python/jinja2:jinja2",  # Jinja2 templating (required by meson)
+        "//packages/linux/lang/python/jinja2:markupsafe",  # Required by jinja2
     ],
     src_install = """
 # Install with meson
@@ -235,21 +235,21 @@ find "$DESTDIR/usr/lib/systemd/system" -name "*.service" -type f -exec sed -i 's
 echo "Fixed kmod paths in systemd unit files"
 """,
     deps = [
-        "core//util-linux:util-linux",  # libmount, libblkid
-        "core//zlib:zlib",
-        "system//libs/ipc/libseccomp:libseccomp",  # Required for seccomp support
-        "system//libs/compression/lz4:lz4",  # For lz4 compression
-        "system//libs/compression/xz:xz",  # For liblzma (xz compression)
-        "system//libs/compression/zstd:zstd",  # For zstd compression
-        "system//libs/ipc/libcap:libcap",  # Required - POSIX capabilities
-        "system//libs/kmod:kmod",  # For systemd-modules-load
+        "//packages/linux/core/util-linux:util-linux",  # libmount, libblkid
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",  # Required for seccomp support
+        "//packages/linux/system/libs/compression/lz4:lz4",  # For lz4 compression
+        "//packages/linux/system/libs/compression/xz:xz",  # For liblzma (xz compression)
+        "//packages/linux/system/libs/compression/zstd:zstd",  # For zstd compression
+        "//packages/linux/system/libs/ipc/libcap:libcap",  # Required - POSIX capabilities
+        "//packages/linux/system/libs/kmod:kmod",  # For systemd-modules-load
         # For LUKS/dm-crypt support (cryptsetup and its dependencies)
-        "system//security/cryptsetup:cryptsetup",
-        "system//security/cryptsetup:lvm2",  # devmapper
-        "system//init/eudev:eudev",  # libudev (needed by lvm2/devmapper)
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/data/json-c:json-c",
-        "system//libs/crypto/argon2:argon2",
+        "//packages/linux/system/security/cryptsetup:cryptsetup",
+        "//packages/linux/system/security/cryptsetup:lvm2",  # devmapper
+        "//packages/linux/system/init/eudev:eudev",  # libudev (needed by lvm2/devmapper)
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/data/json-c:json-c",
+        "//packages/linux/system/libs/crypto/argon2:argon2",
     ],
     visibility = ["PUBLIC"],
 )

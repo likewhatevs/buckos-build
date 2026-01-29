@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://github.com/python-ivi/python-ivi/archive/refs/tags/v0.14.9.tar.gz",
     sha256 = "c1b0c4fffb34387ae86f1fabb5f0b1873c1a34291131dfcdaf2c5b683075752b",
     deps = [
-        "dev-libs//python/numpy:numpy",
+        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
 )

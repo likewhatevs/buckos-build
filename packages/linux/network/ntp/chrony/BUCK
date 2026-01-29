@@ -60,10 +60,10 @@ autotools_package(
     },
     use_defaults = ["nts", "cmdmon", "ntp"],
     deps = [
-        "system//libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
     ],
     use_deps = {
-        "nts": ["system//libs/crypto/nettle:nettle"],
+        "nts": ["//packages/linux/system/libs/crypto/nettle:nettle"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

@@ -44,9 +44,9 @@ make
 make install DESTDIR="$DESTDIR" PREFIX=/usr
 """,
     rdepend = [
-        "core//bash:bash",
-        "dev-tools//vcs/git:git",
-        "system//security/gnupg:gnupg",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/dev-tools/vcs/git:git",
+        "//packages/linux/system/security/gnupg:gnupg",
     ],
     visibility = ["PUBLIC"],
 )

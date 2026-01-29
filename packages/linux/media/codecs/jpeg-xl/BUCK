@@ -22,8 +22,8 @@ cmake_package(
         "png",
     ],
     deps = [
-        "dev-libs//compression/brotli:brotli",
-        "dev-libs//misc/highway:highway",
+        "//packages/linux/dev-libs/compression/brotli:brotli",
+        "//packages/linux/dev-libs/misc/highway:highway",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -46,10 +46,10 @@ cmake_package(
         "openexr": "JPEGXL_ENABLE_OPENEXR",
     },
     use_deps = {
-        "gif": ["media//libraries/giflib:giflib"],
-        "jpeg": ["media//libraries/libjpeg-turbo:libjpeg-turbo"],
-        "png": ["media//libraries/libpng:libpng"],
-        "openexr": ["graphics//3d/openexr:openexr"],
+        "gif": ["//packages/linux/media/libraries/giflib:giflib"],
+        "jpeg": ["//packages/linux/media/libraries/libjpeg-turbo:libjpeg-turbo"],
+        "png": ["//packages/linux/media/libraries/libpng:libpng"],
+        "openexr": ["//packages/linux/graphics/3d/openexr:openexr"],
     },
     visibility = ["PUBLIC"],
 )

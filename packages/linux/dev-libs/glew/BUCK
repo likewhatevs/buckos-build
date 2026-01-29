@@ -37,15 +37,15 @@ ebuild_package(
 
     use_deps = {
         "X": [
-            "graphics//xorg/libX11:libX11",
-            "graphics//xorg/libXext:libXext",
-            "desktop//mesa:mesa",
+            "//packages/linux/graphics/xorg/libX11:libX11",
+            "//packages/linux/graphics/xorg/libXext:libXext",
+            "//packages/linux/desktop/mesa:mesa",
         ],
         "egl": [
-            "desktop//mesa:mesa",
+            "//packages/linux/desktop/mesa:mesa",
         ],
         "osmesa": [
-            "desktop//mesa:mesa",
+            "//packages/linux/desktop/mesa:mesa",
         ],
     },
 

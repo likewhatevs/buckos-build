@@ -165,7 +165,7 @@ done
 ''',
 
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
     ],
     visibility = ["PUBLIC"],
 )

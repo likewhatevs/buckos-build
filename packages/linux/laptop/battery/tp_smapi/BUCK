@@ -127,7 +127,7 @@ install -m 644 *.ko "$DESTDIR/lib/modules/$KRELEASE/extra/"
 ''',
 
     bdepend = [
-        "kernel//buckos-kernel:buckos-kernel",
+        "//packages/linux/kernel/buckos-kernel:buckos-kernel",
     ],
     visibility = ["PUBLIC"],
 )

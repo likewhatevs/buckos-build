@@ -5,7 +5,7 @@ autotools_package(
     name = "indent",
     # GNU release tarball includes pre-generated configure script
     bdepend = [
-        "dev-tools//documentation/texinfo:texinfo",
+        "//packages/linux/dev-tools/documentation/texinfo:texinfo",
     ],
     src_prepare = "",
     version = "2.2.13",

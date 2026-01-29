@@ -31,8 +31,8 @@ cmake_package(
     homepage = "https://github.com/rui314/mold",
     license = "MIT",
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )
@@ -120,9 +120,9 @@ binary_package(
         make DESTDIR=$OUT install
     """,
     deps = [
-        "dev-tools//build-systems/cmake:cmake",
-        "core//llvm:llvm",
-        "core//zlib:zlib",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
+        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

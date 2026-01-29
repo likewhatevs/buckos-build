@@ -11,9 +11,9 @@ go_package(
     license = "MIT",
     packages = ["."],
     deps = [
-        "dev-libs//go/go-runewidth:go-runewidth",
-        "dev-libs//go/go-wordwrap:go-wordwrap",
-        "dev-libs//go/termbox-go:termbox-go",
+        "//packages/linux/dev-libs/go/go-runewidth:go-runewidth",
+        "//packages/linux/dev-libs/go/go-wordwrap:go-wordwrap",
+        "//packages/linux/dev-libs/go/termbox-go:termbox-go",
     ],
     visibility = ["PUBLIC"],
 )

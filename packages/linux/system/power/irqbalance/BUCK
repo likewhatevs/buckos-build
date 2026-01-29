@@ -49,8 +49,8 @@ autotools_package(
         "--with-systemd",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "core//libnl:libnl",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/core/libnl:libnl",
     ],
     visibility = ["PUBLIC"],
 )

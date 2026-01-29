@@ -29,8 +29,8 @@ autotools_package(
     use_defaults = ["ssl", "threads", "ipv6", "idn"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "idn": ["network//dns/libraries/libidn2:libidn2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "idn": ["//packages/linux/network/dns/libraries/libidn2:libidn2"],
     },
 
     use_configure = {
@@ -74,8 +74,8 @@ autotools_package(
     ],
 
     deps = [
-        "core//zlib:zlib",
-        "dev-libs//misc/libuv:libuv",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/misc/libuv:libuv",
     ],
 
     description = "BIND - Berkeley Internet Name Domain (DNS server)",

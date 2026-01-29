@@ -9,7 +9,7 @@ cmake_package(
         "-DBUILD_SHARED_LIBS=OFF",
     ],
     deps = [
-        "ai//vision/opencv3:opencv3",
+        "//packages/linux/ai/vision/opencv3:opencv3",
     ],
     maintainers = ["buckos"],
 )

@@ -19,7 +19,7 @@ cmake_package(
         "-DNS3_NATIVE_OPTIMIZATIONS=OFF",
     ],
     deps = [
-        "dev-libs//libxml2:libxml2",
-        "databases//sqlite:sqlite",
+        "//packages/linux/dev-libs/libxml2:libxml2",
+        "//packages/linux/databases/sqlite:sqlite",
     ],
 )

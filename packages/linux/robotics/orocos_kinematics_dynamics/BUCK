@@ -14,7 +14,7 @@ cmake_package(
         "-DENABLE_EXAMPLES=OFF",
     ],
     deps = [
-        "robotics//eigen3:eigen3",
+        "//packages/linux/robotics/eigen3:eigen3",
     ],
     visibility = ["PUBLIC"],
 )

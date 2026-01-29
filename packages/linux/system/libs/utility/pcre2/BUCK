@@ -26,8 +26,8 @@ autotools_package(
         "--enable-jit",
     ],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/bzip2:bzip2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
     ],
     visibility = ["PUBLIC"],
 )

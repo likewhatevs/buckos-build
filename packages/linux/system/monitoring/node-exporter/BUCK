@@ -11,7 +11,7 @@ simple_package(
     homepage = "https://prometheus.io/",
     license = "Apache-2.0",
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     build_commands = [
         "make build",

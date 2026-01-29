@@ -29,11 +29,11 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        # "system//libs/glm:glm",  # TODO: not packaged yet,
-        "system//libs/utility/icu:icu",
-        # "core//libxext:libxext",  # TODO: X11 libs not packaged yet
-        "desktop//mesa:mesa",
-        # "dev-libs//glew:glew",  # TODO: glew package doesn't exist yet
+        # "//packages/linux/system/libs/glm:glm",  # TODO: not packaged yet,
+        "//packages/linux/system/libs/utility/icu:icu",
+        # "//packages/linux/core/libxext:libxext",  # TODO: X11 libs not packaged yet
+        "//packages/linux/desktop/mesa:mesa",
+        # "//packages/linux/dev-libs/glew:glew",  # TODO: glew package doesn't exist yet
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

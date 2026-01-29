@@ -6,6 +6,6 @@ python_package(
     src_uri = "https://github.com/deep-spin/entmax/archive/refs/tags/v1.1.tar.gz",
     sha256 = "537b936cc10891901a9849afc3d9f16ad7ffad6efb3b209f444911186820d14e",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
 )

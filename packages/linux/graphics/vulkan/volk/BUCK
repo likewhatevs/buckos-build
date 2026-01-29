@@ -15,6 +15,6 @@ cmake_package(
         "-DVOLK_PULL_IN_VULKAN=OFF",
     ],
     deps = [
-        "graphics//vulkan/vulkan-headers:vulkan-headers",
+        "//packages/linux/graphics/vulkan/vulkan-headers:vulkan-headers",
     ],
 )

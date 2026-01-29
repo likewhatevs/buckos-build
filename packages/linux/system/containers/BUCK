@@ -12,9 +12,9 @@ load("@root//defs:use_flags.bzl", "set_use_flags")
 filegroup(
     name = "container-runtime",
     srcs = [
-        "system//containers/runtime:crun",
-        "system//containers/runtime:runc",
-        "system//containers/runtime:conmon",
+        "//packages/linux/system/containers/runtime:crun",
+        "//packages/linux/system/containers/runtime:runc",
+        "//packages/linux/system/containers/runtime:conmon",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -24,10 +24,10 @@ filegroup(
 filegroup(
     name = "container-networking",
     srcs = [
-        "system//containers/network:cni-plugins",
-        "system//containers/network:netavark",
-        "system//containers/network:aardvark-dns",
-        "system//containers/network:slirp4netns",
+        "//packages/linux/system/containers/network:cni-plugins",
+        "//packages/linux/system/containers/network:netavark",
+        "//packages/linux/system/containers/network:aardvark-dns",
+        "//packages/linux/system/containers/network:slirp4netns",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -37,8 +37,8 @@ filegroup(
 filegroup(
     name = "container-storage",
     srcs = [
-        "system//containers/storage:fuse-overlayfs",
-        "system//containers/podman:containers-common",
+        "//packages/linux/system/containers/storage:fuse-overlayfs",
+        "//packages/linux/system/containers/podman:containers-common",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -48,10 +48,10 @@ filegroup(
 filegroup(
     name = "podman-tools",
     srcs = [
-        "system//containers/podman:podman",
-        "system//containers/podman:buildah",
-        "system//containers/podman:skopeo",
-        "system//containers/podman:podman-compose",
+        "//packages/linux/system/containers/podman:podman",
+        "//packages/linux/system/containers/podman:buildah",
+        "//packages/linux/system/containers/podman:skopeo",
+        "//packages/linux/system/containers/podman:podman-compose",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -61,10 +61,10 @@ filegroup(
 filegroup(
     name = "container-utilities",
     srcs = [
-        "system//containers/utils:umoci",
-        "system//containers/utils:dive",
-        "system//containers/utils:ctop",
-        "system//containers/utils:lazydocker",
+        "//packages/linux/system/containers/utils:umoci",
+        "//packages/linux/system/containers/utils:dive",
+        "//packages/linux/system/containers/utils:ctop",
+        "//packages/linux/system/containers/utils:lazydocker",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -74,7 +74,7 @@ filegroup(
 filegroup(
     name = "container-security",
     srcs = [
-        "system//containers/utils:trivy",
+        "//packages/linux/system/containers/utils:trivy",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -90,7 +90,7 @@ filegroup(
         ":podman-tools",
         ":container-utilities",
         ":container-security",
-        "system//containers/utils:docker-credential-helpers",
+        "//packages/linux/system/containers/utils:docker-credential-helpers",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

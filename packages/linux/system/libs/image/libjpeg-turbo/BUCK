@@ -39,7 +39,7 @@ cmake_package(
     },
 
     # use_deps = {
-    #     "java": ["lang//openjdk:openjdk"],  # TODO: not packaged yet
+    #     "java": ["//packages/linux/lang/openjdk:openjdk"],  # TODO: not packaged yet
     # },
 
     cmake_args = [

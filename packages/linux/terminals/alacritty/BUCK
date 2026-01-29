@@ -19,9 +19,9 @@ cargo_package(
     license = "Apache-2.0",
     cargo_args = [],
     deps = [
-        "system//libs/font/freetype:freetype",
-        "system//libs/font/fontconfig:fontconfig",
-        "dev-libs//text/expat:expat",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/dev-libs/text/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )

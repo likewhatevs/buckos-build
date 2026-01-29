@@ -6,8 +6,8 @@ python_package(
     src_uri = "https://github.com/NVlabs/nvdiffrast/archive/refs/tags/v0.3.3.tar.gz",
     sha256 = "0d61d557ec190fcee6ad643d93c869df1a46f96e26ac53cc0f1f5056c02440d5",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "graphics//libglvnd:libglvnd",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/graphics/libglvnd:libglvnd",
     ],
 )

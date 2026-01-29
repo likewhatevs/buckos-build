@@ -12,8 +12,8 @@ autotools_package(
         "--enable-ngram-fsts",
     ],
     deps = [
-        "dev-libs//google/gflags:gflags",
-        "dev-libs//google/glog:glog",
+        "//packages/linux/dev-libs/google/gflags:gflags",
+        "//packages/linux/dev-libs/google/glog:glog",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

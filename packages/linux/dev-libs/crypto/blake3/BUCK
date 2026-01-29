@@ -30,7 +30,7 @@ cmake_package(
         "-static-libs": "-DBUILD_SHARED_LIBS=ON",
     },
     use_deps = {
-        "tbb": ["dev-libs//misc/tbb:tbb"],
+        "tbb": ["//packages/linux/dev-libs/misc/tbb:tbb"],
     },
     visibility = ["PUBLIC"],
 )

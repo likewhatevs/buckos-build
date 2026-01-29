@@ -23,7 +23,7 @@ dune build
 dune install --prefix=${DESTDIR}/usr
 """,
     bdepend = [
-        "lang//ocaml:ocaml",
+        "//packages/linux/lang/ocaml:ocaml",
     ],
     visibility = ["PUBLIC"],
 )

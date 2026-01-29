@@ -12,7 +12,7 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "dev-libs//eigen:eigen",
+        "//packages/linux/dev-libs/eigen:eigen",
     ],
     visibility = ["PUBLIC"],
 )

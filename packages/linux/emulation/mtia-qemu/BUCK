@@ -56,8 +56,8 @@ meson_package(
         "-Dfdt=enabled",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "core//zlib:zlib",
-        "dev-tools//compilers/dtc:dtc",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-tools/compilers/dtc:dtc",
     ],
 )

@@ -6,10 +6,10 @@ python_package(
     src_uri = "https://github.com/mistralai/mistral-inference/archive/refs/tags/v1.1.0.tar.gz",
     sha256 = "36c37a6af57bde9c3f75e7efafb1fbe6827e70454bbf43641df0b22beb48be23",
     deps = [
-        "ai//ml-frameworks/xformers:xformers",
-        "dev-libs//python/simple-parsing:simple-parsing",
-        "dev-libs//python/fire:fire",
-        "ai//ml-frameworks/mistral-common:mistral-common",
-        "dev-libs//python/safetensors:safetensors",
+        "//packages/linux/ai/ml-frameworks/xformers:xformers",
+        "//packages/linux/dev-libs/python/simple-parsing:simple-parsing",
+        "//packages/linux/dev-libs/python/fire:fire",
+        "//packages/linux/ai/ml-frameworks/mistral-common:mistral-common",
+        "//packages/linux/dev-libs/python/safetensors:safetensors",
     ],
 )

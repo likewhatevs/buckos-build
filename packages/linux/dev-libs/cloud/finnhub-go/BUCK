@@ -11,7 +11,7 @@ go_package(
     license = "Apache-2.0",
     packages = ["."],
     deps = [
-        "dev-libs//cloud/golang-oauth2:golang-oauth2",
+        "//packages/linux/dev-libs/cloud/golang-oauth2:golang-oauth2",
     ],
     visibility = ["PUBLIC"],
 )

@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/maria-korosteleva/Garment-Pattern-Generator/archive/fad3400699feda0f99df56fdcc31a804c117eb9a.tar.gz",
     sha256 = "4251717b5abf30c6307445486b718062c72631c3b8757d81ce8d313bb6fe84df",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/scipy:scipy",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/scipy:scipy",
     ],
 )

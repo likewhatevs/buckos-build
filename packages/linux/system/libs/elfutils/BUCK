@@ -49,7 +49,7 @@ autotools_package(
         "zstd": "--with-zstd",
     },
     use_deps = {
-        "valgrind": ["dev-tools//profilers/valgrind:valgrind"],
+        "valgrind": ["//packages/linux/dev-tools/profilers/valgrind:valgrind"],
     },
     configure_args = [
         "--prefix=/usr",
@@ -57,9 +57,9 @@ autotools_package(
         "--enable-libdebuginfod=dummy",
     ],
     deps = [
-        "system//libs/compression/zlib:zlib",
-        "system//libs/compression/bzip2:bzip2",
-        "system//libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/zlib:zlib",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/compression/xz:xz",
     ],
     visibility = ["PUBLIC"],
 )

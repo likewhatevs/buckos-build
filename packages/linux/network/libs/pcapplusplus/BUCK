@@ -13,7 +13,7 @@ cmake_package(
     iuse = [],
     use_defaults = [],
     deps = [
-        "network//libs/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

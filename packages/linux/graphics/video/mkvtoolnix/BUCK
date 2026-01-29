@@ -37,7 +37,7 @@ autotools_package(
         "pch": "--enable-pch",
     },
     use_deps = {
-        "gui": ["desktop//qt:qt5"],
+        "gui": ["//packages/linux/desktop/qt:qt5"],
     },
     configure_args = [
         "--prefix=/usr",
@@ -48,16 +48,16 @@ autotools_package(
 DESTDIR=$OUT rake install
 """,
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "dev-libs//boost:boost",
-        "core//zlib:zlib",
-        "dev-libs//pugixml:pugixml",
-        "system//libs/audio/flac:flac",
-        "system//libs/audio/libvorbis:libvorbis",
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-libs/pugixml:pugixml",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
     ],
     bdepend = [
-        "dev-tools//build-systems/pkg-config:pkg-config",
-        "lang//ruby:ruby",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+        "//packages/linux/lang/ruby:ruby",
     ],
     visibility = ["PUBLIC"],
 )

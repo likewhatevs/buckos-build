@@ -65,8 +65,8 @@ CONFIG
 touch "$DESTDIR/etc/smtpd/aliases"
 """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//security/linux-pam:linux-pam",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/security/linux-pam:linux-pam",
     ],
     visibility = ["PUBLIC"],
 )

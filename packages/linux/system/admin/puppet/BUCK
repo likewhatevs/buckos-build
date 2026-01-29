@@ -24,7 +24,7 @@ gem build puppet.gemspec
 gem install --install-dir "$DESTDIR/usr/lib/ruby/gems" puppet-*.gem
 """,
     rdepend = [
-        "lang//ruby:ruby",
+        "//packages/linux/lang/ruby:ruby",
     ],
     visibility = ["PUBLIC"],
 )

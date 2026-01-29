@@ -35,8 +35,8 @@ autotools_package(
     },
     use_defaults = ["systemd"],
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
-        "cryptsetup": ["system//security/cryptsetup:cryptsetup"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
+        "cryptsetup": ["//packages/linux/system/security/cryptsetup:cryptsetup"],
     },
     pre_configure = """
 # dracut uses a custom configure script (not autotools)
@@ -187,21 +187,21 @@ ls -la "$DESTDIR/usr/bin/"
 ls -la "$DESTDIR/usr/lib/dracut/" | head -20
 """,
     deps = [
-        "system//libs/kmod:kmod",
-        "core//bash:bash",
-        "system//apps/coreutils:coreutils",
-        "core//util-linux:util-linux",
-        "system//libs/compression/xz:xz",
-        "system//apps/findutils:findutils",
-        "editors//sed:sed",
-        "system//libs/compression/gzip:gzip",
-        "editors//grep:grep",
-        "system//libs/compression/zstd:zstd",  # Required for compression
-        "system//init/eudev:eudev",  # Required for udev support
-        "core//zlib:zlib",  # Required by dracut-install
-        "lang//gcc:gcc",  # Required for libgcc_s.so.1
-        "lang//rust:rust",  # Required for building dracut-cpio
-        "system//libs/cpio:cpio",  # Required for building initramfs archives
+        "//packages/linux/system/libs/kmod:kmod",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/apps/findutils:findutils",
+        "//packages/linux/editors/sed:sed",
+        "//packages/linux/system/libs/compression/gzip:gzip",
+        "//packages/linux/editors/grep:grep",
+        "//packages/linux/system/libs/compression/zstd:zstd",  # Required for compression
+        "//packages/linux/system/init/eudev:eudev",  # Required for udev support
+        "//packages/linux/core/zlib:zlib",  # Required by dracut-install
+        "//packages/linux/lang/gcc:gcc",  # Required for libgcc_s.so.1
+        "//packages/linux/lang/rust:rust",  # Required for building dracut-cpio
+        "//packages/linux/system/libs/cpio:cpio",  # Required for building initramfs archives
     ],
     visibility = ["PUBLIC"],
 )

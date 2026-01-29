@@ -43,9 +43,9 @@ meson_package(
         "-Dextensions=true",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//filesystem/gvfs:gvfs",
-        "desktop//gtk+-3:gtk+-3.0",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/filesystem/gvfs:gvfs",
+        "//packages/linux/desktop/gtk+-3:gtk+-3.0",
     ],
     visibility = ["PUBLIC"],
 )
@@ -66,9 +66,9 @@ make_package(
     homepage = "https://docs.xfce.org/xfce/thunar/start",
     license = "GPL-2.0-or-later",
     deps = [
-        "dev-libs//glib:glib",
-        "system//filesystem/gvfs:gvfs",
-        "desktop//xfce:libxfce4ui",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/filesystem/gvfs:gvfs",
+        "//packages/linux/desktop/xfce:libxfce4ui",
     ],
     visibility = ["PUBLIC"],
 )
@@ -110,7 +110,7 @@ make_package(
     homepage = "https://github.com/lxde/libfm",
     license = "GPL-2.0-or-later",
     deps = [
-        "dev-libs//glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
     ],
     visibility = ["PUBLIC"],
 )
@@ -130,8 +130,8 @@ meson_package(
         "-Dselinux=false",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//filesystem/gvfs:gvfs",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/filesystem/gvfs:gvfs",
     ],
     visibility = ["PUBLIC"],
 )
@@ -152,8 +152,8 @@ make_package(
     homepage = "https://mate-desktop.org/",
     license = "GPL-2.0-or-later",
     deps = [
-        "dev-libs//glib:glib",
-        "system//filesystem/gvfs:gvfs",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/filesystem/gvfs:gvfs",
     ],
     visibility = ["PUBLIC"],
 )
@@ -178,7 +178,7 @@ make_package(
         python setup.py install --prefix=/usr --root="$OUT"
     """,
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )
@@ -205,7 +205,7 @@ make_package(
         cp lf "$OUT/usr/bin/"
     """,
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

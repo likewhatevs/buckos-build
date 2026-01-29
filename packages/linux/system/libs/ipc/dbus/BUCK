@@ -22,7 +22,7 @@ autotools_package(
         "-static-libs": "--disable-static",
     },
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     configure_args = [
         "--with-system-socket=/run/dbus/system_bus_socket",
@@ -31,7 +31,7 @@ autotools_package(
         "--runstatedir=/run",
     ],
     deps = [
-        "system//libs/data/expat:expat",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )

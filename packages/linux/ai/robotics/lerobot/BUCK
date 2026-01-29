@@ -6,10 +6,10 @@ python_package(
     src_uri = "https://files.pythonhosted.org/packages/2e/a2/2c04103e737097030018bd4f2971ae70ec7b8adfa5afcada8d5b4373358a/lerobot-0.1.0.tar.gz",
     sha256 = "2a5a3cd93b5eeb86245974882928d45ab764d5313810add9b01f24440ccddbee",
     deps = [
-        "dev-libs//python/torch:torch",
-        "dev-libs//python/torchvision:torchvision",
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/opencv-python:opencv-python",
-        "dev-libs//python/h5py:h5py",
+        "//packages/linux/dev-libs/python/torch:torch",
+        "//packages/linux/dev-libs/python/torchvision:torchvision",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/opencv-python:opencv-python",
+        "//packages/linux/dev-libs/python/h5py:h5py",
     ],
 )

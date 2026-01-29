@@ -12,7 +12,7 @@ go_package(
     bins = ["ipsw"],
     packages = ["./cmd/ipsw"],
     deps = [
-        "system//libs/libusb:libusb",
+        "//packages/linux/system/libs/libusb:libusb",
     ],
     visibility = ["PUBLIC"],
 )

@@ -17,7 +17,7 @@ autotools_package(
     use_defaults = [],  # libmnl not yet packaged, disable netlink by default
 
     use_deps = {
-        "netlink": ["core//libnl:libnl"],
+        "netlink": ["//packages/linux/core/libnl:libnl"],
     },
 
     use_configure = {

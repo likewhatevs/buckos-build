@@ -15,8 +15,8 @@ autotools_package(
     use_defaults = ["ssl", "ipv6"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "lua": ["lang//lua:lua"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "lua": ["//packages/linux/lang/lua:lua"],
     },
 
 
@@ -25,7 +25,7 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
+        "//packages/linux/network/libpcap:libpcap",
     ],
 
     description = "Network exploration tool and security/port scanner",

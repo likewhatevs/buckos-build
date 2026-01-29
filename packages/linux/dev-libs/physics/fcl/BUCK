@@ -12,13 +12,13 @@ cmake_package(
     iuse = ["octomap", "tests"],
     use_defaults = [],
     deps = [
-        "dev-libs//eigen:eigen",
-        "dev-libs//physics/libccd:libccd",
+        "//packages/linux/dev-libs/eigen:eigen",
+        "//packages/linux/dev-libs/physics/libccd:libccd",
     ],
     use_deps = {
         # octomap is an optional dependency for octree collision detection
         # Uncomment when octomap package is available
-        # "octomap": ["dev-libs//3d/octomap:octomap"],
+        # "octomap": ["//packages/linux/dev-libs/3d/octomap:octomap"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

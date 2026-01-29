@@ -22,10 +22,10 @@ cmake_package(
     iuse = ["ssl", "streaming"],
     use_defaults = ["ssl"],
     deps = [
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
     cmake_args = [
         "-DNATS_BUILD_STREAMING=ON",

@@ -16,9 +16,9 @@ cmake_package(
     license = "BSD-3-Clause",
     cmake_args = [],
     deps = [
-        "core//libffi:libffi",
-        "graphics//rendering/wayland:wayland",
-        "graphics//rendering/wayland-protocols:wayland-protocols",
+        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
     ],
     visibility = ["PUBLIC"],
 )

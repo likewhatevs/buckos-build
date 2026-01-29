@@ -37,7 +37,7 @@ autotools_package(
         "--disable-python",
     ],
     deps = [
-        "lang//ocaml:ocaml",
+        "//packages/linux/lang/ocaml:ocaml",
     ],
     visibility = ["PUBLIC"],
 )

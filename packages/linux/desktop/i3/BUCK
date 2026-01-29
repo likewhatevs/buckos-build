@@ -25,7 +25,7 @@ meson_package(
         "-Dmans=false",
     ],
     deps = [
-        "graphics//xorg/startup-notification:startup-notification",
+        "//packages/linux/graphics/xorg/startup-notification:startup-notification",
     ],
     visibility = ["PUBLIC"],
 )
@@ -35,8 +35,8 @@ filegroup(
     name = "i3-desktop",
     srcs = [
         ":i3",
-        "desktop//lightdm:lightdm",
-        "desktop//mesa:mesa",
+        "//packages/linux/desktop/lightdm:lightdm",
+        "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "root//platforms:linux-target",
     visibility = ["PUBLIC"],

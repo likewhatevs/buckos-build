@@ -13,7 +13,7 @@ autotools_package(
     use_defaults = ["ssl", "dane", "ecdsa"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
     },
 
     use_configure = {
@@ -41,7 +41,7 @@ fi
 """,
 
     deps = [
-        "network//dns/libraries/ldns:ldns",
+        "//packages/linux/network/dns/libraries/ldns:ldns",
     ],
 
     description = "DNS utility programs from ldns (drill, ldns-*)",

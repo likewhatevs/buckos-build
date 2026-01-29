@@ -12,10 +12,10 @@ cmake_package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "dev-libs//serialization/protozero:protozero",
-        "graphics//geospatial/gdal:gdal",
-        "graphics//geospatial/libosmium:libosmium",
-        "graphics//geospatial/geos:geos",
+        "//packages/linux/dev-libs/serialization/protozero:protozero",
+        "//packages/linux/graphics/geospatial/gdal:gdal",
+        "//packages/linux/graphics/geospatial/libosmium:libosmium",
+        "//packages/linux/graphics/geospatial/geos:geos",
     ],
     visibility = ["PUBLIC"],
 )

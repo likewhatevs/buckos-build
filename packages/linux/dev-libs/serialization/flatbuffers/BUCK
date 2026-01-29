@@ -17,7 +17,7 @@ cmake_package(
     },
     deps = [],
     use_deps = {
-        "python": ["lang//python:python"],
+        "python": ["//packages/linux/lang/python:python"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

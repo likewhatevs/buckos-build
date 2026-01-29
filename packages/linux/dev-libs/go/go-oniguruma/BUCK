@@ -10,7 +10,7 @@ go_package(
     homepage = "https://github.com/go-enry/go-oniguruma",
     license = "MIT",
     deps = [
-        "dev-libs//text/oniguruma:oniguruma",
+        "//packages/linux/dev-libs/text/oniguruma:oniguruma",
     ],
     visibility = ["PUBLIC"],
 )

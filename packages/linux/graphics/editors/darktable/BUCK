@@ -111,15 +111,15 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "desktop//gtk:gtk3",
-        "system//libs/database/sqlite:sqlite",
-        "network//curl:curl",
-        "dev-libs//exiv2:exiv2",
-        "system//libs/graphics/lcms2:lcms2",
-        "dev-libs//pugixml:pugixml",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
+        "//packages/linux/network/curl:curl",
+        "//packages/linux/dev-libs/exiv2:exiv2",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
+        "//packages/linux/dev-libs/pugixml:pugixml",
     ],
     bdepend = [
-        "dev-tools//dev-utils/intltool:intltool",
+        "//packages/linux/dev-tools/dev-utils/intltool:intltool",
     ],
     visibility = ["PUBLIC"],
 )

@@ -14,10 +14,10 @@ autotools_package(
 
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "lua": ["dev-tools//lua"],
-        "zlib": ["core//zlib:zlib"],
-        "nghttp2": ["network//nghttp2:nghttp2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "lua": ["//packages/linux/dev-tools/lua"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "nghttp2": ["//packages/linux/network/nghttp2:nghttp2"],
     },
 
 
@@ -35,8 +35,8 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
-        "dev-libs//glib:glib",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/dev-libs/glib:glib",
     ],
 
     description = "Command-line network protocol analyzer",

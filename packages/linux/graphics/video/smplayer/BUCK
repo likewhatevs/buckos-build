@@ -37,11 +37,11 @@ sed -i 's|PREFIX=/usr/local|PREFIX=/usr|' Makefile
 DESTDIR=$OUT PREFIX=/usr make install
 """,
     deps = [
-        "graphics//video/mpv:mpv",
-        "desktop//qt:qt5",
+        "//packages/linux/graphics/video/mpv:mpv",
+        "//packages/linux/desktop/qt:qt5",
     ],
     bdepend = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )

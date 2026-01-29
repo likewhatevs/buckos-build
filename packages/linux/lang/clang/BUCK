@@ -24,8 +24,8 @@ cmake -G Ninja -S "$S/clang" -B "$S/build" \
 """,
     cmake_args = [],
     deps = [
-        "core//llvm:llvm",
-        "core//zlib:zlib",
+        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

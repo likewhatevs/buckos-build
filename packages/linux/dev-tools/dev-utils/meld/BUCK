@@ -11,7 +11,7 @@ meson_package(
     homepage = "https://meldmerge.org/",
     license = "GPL-2+",
     deps = [
-        "lang//python:python3",
+        "//packages/linux/lang/python:python3",
     ],
     meson_args = [
         "-Dbyte-compile=false",

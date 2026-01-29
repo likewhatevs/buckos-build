@@ -25,7 +25,7 @@ autotools_package(
         "--disable-static",
     ],
     deps = [
-        "system//libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libogg:libogg",
     ],
     # Remove .la files that break cross-compilation with libtool
     post_install = """

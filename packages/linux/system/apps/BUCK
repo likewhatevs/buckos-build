@@ -10,13 +10,13 @@
 
 alias(
     name = "coreutils",
-    actual = "system//apps/coreutils:coreutils",
+    actual = "//packages/linux/system/apps/coreutils:coreutils",
     visibility = ["PUBLIC"],
 )
 
 alias(
     name = "shadow",
-    actual = "system//apps/shadow:shadow",
+    actual = "//packages/linux/system/apps/shadow:shadow",
     visibility = ["PUBLIC"],
 )
 
@@ -27,8 +27,8 @@ alias(
 filegroup(
     name = "cron-packages",
     srcs = [
-        "system//apps/cronie:cronie",
-        "system//apps/dcron:dcron",
+        "//packages/linux/system/apps/cronie:cronie",
+        "//packages/linux/system/apps/dcron:dcron",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -37,11 +37,11 @@ filegroup(
 filegroup(
     name = "monitoring-packages",
     srcs = [
-        "system//apps/htop:htop",
-        "system//apps/lsof:lsof",
-        "system//apps/strace:strace",
-        "system//apps/psmisc:psmisc",
-        "core//procps-ng:procps-ng",
+        "//packages/linux/system/apps/htop:htop",
+        "//packages/linux/system/apps/lsof:lsof",
+        "//packages/linux/system/apps/strace:strace",
+        "//packages/linux/system/apps/psmisc:psmisc",
+        "//packages/linux/core/procps-ng:procps-ng",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -50,8 +50,8 @@ filegroup(
 filegroup(
     name = "privilege-packages",
     srcs = [
-        "system//apps/sudo:sudo",
-        "system//apps/doas:doas",
+        "//packages/linux/system/apps/sudo:sudo",
+        "//packages/linux/system/apps/doas:doas",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -60,9 +60,9 @@ filegroup(
 filegroup(
     name = "multiplexer-packages",
     srcs = [
-        "system//apps/tmux:tmux",
-        "system//apps/screen:screen",
-        "system//apps/mosh:mosh",
+        "//packages/linux/system/apps/tmux:tmux",
+        "//packages/linux/system/apps/screen:screen",
+        "//packages/linux/system/apps/mosh:mosh",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -71,9 +71,9 @@ filegroup(
 filegroup(
     name = "logging-packages",
     srcs = [
-        "system//apps/rsyslog:rsyslog",
-        "system//apps/logrotate:logrotate",
-        "system//apps/lnav:lnav",
+        "//packages/linux/system/apps/rsyslog:rsyslog",
+        "//packages/linux/system/apps/logrotate:logrotate",
+        "//packages/linux/system/apps/lnav:lnav",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -82,7 +82,7 @@ filegroup(
 filegroup(
     name = "entropy-packages",
     srcs = [
-        "system//apps/haveged:haveged",
+        "//packages/linux/system/apps/haveged:haveged",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -91,7 +91,7 @@ filegroup(
 filegroup(
     name = "process-monitoring-packages",
     srcs = [
-        "system//apps/monit:monit",
+        "//packages/linux/system/apps/monit:monit",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -100,11 +100,11 @@ filegroup(
 filegroup(
     name = "bpf-packages",
     srcs = [
-        "system//libs/bpf/libbpf:libbpf",
-        "system//apps/bpf/bpftool:bpftool",
-        "system//apps/bpf/bpftrace:bpftrace",
-        "system//apps/bpf/bpftop:bpftop",
-        "system//apps/bpf/scx-scheds:scx-scheds",
+        "//packages/linux/system/libs/bpf/libbpf:libbpf",
+        "//packages/linux/system/apps/bpf/bpftool:bpftool",
+        "//packages/linux/system/apps/bpf/bpftrace:bpftrace",
+        "//packages/linux/system/apps/bpf/bpftop:bpftop",
+        "//packages/linux/system/apps/bpf/scx-scheds:scx-scheds",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -113,13 +113,13 @@ filegroup(
 filegroup(
     name = "utility-packages",
     srcs = [
-        "core//file:file",
-        "system//apps/which:which",
-        "system//apps/tree:tree",
-        "core//less:less",
-        "system//apps/findutils:findutils",
-        "system//apps/coreutils:coreutils",
-        "system//apps/tar:tar",
+        "//packages/linux/core/file:file",
+        "//packages/linux/system/apps/which:which",
+        "//packages/linux/system/apps/tree:tree",
+        "//packages/linux/core/less:less",
+        "//packages/linux/system/apps/findutils:findutils",
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/system/apps/tar:tar",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -128,7 +128,7 @@ filegroup(
 filegroup(
     name = "user-management-packages",
     srcs = [
-        "system//apps/shadow:shadow",
+        "//packages/linux/system/apps/shadow:shadow",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -147,9 +147,9 @@ filegroup(
         ":entropy-packages",
         ":process-monitoring-packages",
         ":bpf-packages",
-        "system//apps/rsync:rsync",
-        "system//apps/acpid:acpid",
-        "system//apps/at:at",
+        "//packages/linux/system/apps/rsync:rsync",
+        "//packages/linux/system/apps/acpid:acpid",
+        "//packages/linux/system/apps/at:at",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -23,7 +23,7 @@ cmake_package(
         "-DALSOFT_BACKEND_PIPEWIRE=ON",
     ],
     deps = [
-        "system//libs/audio/alsa-lib:alsa-lib",
+        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
     ],
     visibility = ["PUBLIC"],
 )

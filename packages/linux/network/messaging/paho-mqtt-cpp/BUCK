@@ -11,6 +11,6 @@ cmake_package(
         "-DPAHO_WITH_SSL=ON",
     ],
     deps = [
-        "network//messaging/paho-mqtt-c:paho-mqtt-c",
+        "//packages/linux/network/messaging/paho-mqtt-c:paho-mqtt-c",
     ],
 )

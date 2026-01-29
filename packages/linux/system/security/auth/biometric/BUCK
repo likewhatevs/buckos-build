@@ -28,9 +28,9 @@ meson_package(
         "-introspection": "-Dintrospection=false",
     },
     deps = [
-        "dev-libs//glib:glib",
-        "system//init/eudev:eudev",
-        "system//security/encryption:libusb",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/init/eudev:eudev",
+        "//packages/linux/system/security/encryption:libusb",
         ":nss",
         ":pixman",
     ],
@@ -55,10 +55,10 @@ meson_package(
         "-Dpam=true",
     ],
     deps = [
-        "system//libs/ipc/dbus:dbus",
-        "system//security/encryption:linux-pam",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/security/encryption:linux-pam",
         ":libfprint",
-        "system//security/auth/privilege:polkit",
+        "//packages/linux/system/security/auth/privilege:polkit",
     ],
     visibility = ["PUBLIC"],
 )
@@ -96,7 +96,7 @@ make_package(
         cp -L bin/* "$OUT/usr/bin/" || true
     """,
     deps = [
-        "system//libs/database/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         ":nspr",
     ],
     visibility = ["PUBLIC"],

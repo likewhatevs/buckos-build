@@ -28,14 +28,14 @@ autotools_package(
     ],
     use_defaults = ["shared", "alsa"],
     deps = [
-        "system//libs/pthreads:pthreads",
+        "//packages/linux/system/libs/pthreads:pthreads",
     ],
     use_deps = {
-        "dbus": ["system//dbus:dbus"],
-        "alsa": ["media//audio/alsa-lib:alsa-lib"],
-        "opus": ["media//audio/opus:opus"],
-        "samplerate": ["media//audio/libsamplerate:libsamplerate"],
-        "readline": ["system//libs/readline:readline"],
+        "dbus": ["//packages/linux/system/dbus:dbus"],
+        "alsa": ["//packages/linux/media/audio/alsa-lib:alsa-lib"],
+        "opus": ["//packages/linux/media/audio/opus:opus"],
+        "samplerate": ["//packages/linux/media/audio/libsamplerate:libsamplerate"],
+        "readline": ["//packages/linux/system/libs/readline:readline"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

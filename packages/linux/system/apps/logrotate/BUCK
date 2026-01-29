@@ -17,8 +17,8 @@ autotools_package(
     iuse = ["acl", "cron", "selinux"],
     use_defaults = [],
     use_deps = {
-        "selinux": ["system//security/selinux:selinux"],
-        "acl": ["system//libs/ipc/acl:acl"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
+        "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
     },
     use_configure = {
         "-acl": "--without-acl",
@@ -33,7 +33,7 @@ autotools_package(
         "--with-state-file-path=/var/lib/logrotate/status",
     ],
     deps = [
-        "system//libs/ipc/popt:popt",
+        "//packages/linux/system/libs/ipc/popt:popt",
     ],
     visibility = ["PUBLIC"],
 )

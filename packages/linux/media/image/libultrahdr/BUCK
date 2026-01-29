@@ -17,7 +17,7 @@ cmake_package(
         "-DCMAKE_CXX_FLAGS=-DUHDR_WRITE_XMP -DUHDR_WRITE_ISO",
     ],
     deps = [
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
     ],
     visibility = ["PUBLIC"],
 )

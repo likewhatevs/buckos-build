@@ -13,8 +13,8 @@ cmake_package(
     iuse = ["static-analyzer", "tools-extra"],
     use_defaults = ["static-analyzer", "tools-extra"],
     deps = [
-        "core//zlib:zlib",
-        "system//libs/libxml2:libxml2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/libxml2:libxml2",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

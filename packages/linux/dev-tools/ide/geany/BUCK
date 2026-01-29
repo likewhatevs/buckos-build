@@ -57,7 +57,7 @@ autotools_package(
     ],
 
     deps = [
-        "graphics//gtk3:gtk3",
+        "//packages/linux/graphics/gtk3:gtk3",
     ],
     visibility = ["PUBLIC"],
 )

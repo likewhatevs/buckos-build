@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://github.com/google/jpegli",
     license = "BSD-3-Clause",
     deps = [
-        "dev-libs//misc/highway:highway",
-        "media//image/libjpeg-turbo:libjpeg-turbo",
-        "media//image/libpng:libpng",
+        "//packages/linux/dev-libs/misc/highway:highway",
+        "//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/media/image/libpng:libpng",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

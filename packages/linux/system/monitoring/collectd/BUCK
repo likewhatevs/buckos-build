@@ -14,7 +14,7 @@ autotools_package(
     use_defaults = ["curl"],
     deps = [],
     use_deps = {
-        "curl": ["system//libs/network/curl:curl"],
+        "curl": ["//packages/linux/system/libs/network/curl:curl"],
     },
     configure_args = [
         "--prefix=${PREFIX}",

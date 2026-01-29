@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://kheafield.com/code/kenlm/",
     license = "LGPL-2.1",
     deps = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -9,7 +9,7 @@ python_package(
     homepage = "https://docs.powertools.aws.dev/lambda/python/",
     license = "MIT",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

@@ -6,8 +6,8 @@ python_package(
     src_uri = "https://github.com/DMTF/Redfish-Service-Validator/archive/refs/tags/1.4.1.tar.gz",
     sha256 = "518434332bf45451cc7be74a72301b51d201326a020d715d7c58437478a0140a",
     deps = [
-        "dev-libs//python/beautifulsoup4:beautifulsoup4",
-        "dev-libs//python/lxml:lxml",
-        "dev-libs//python/requests:requests",
+        "//packages/linux/dev-libs/python/beautifulsoup4:beautifulsoup4",
+        "//packages/linux/dev-libs/python/lxml:lxml",
+        "//packages/linux/dev-libs/python/requests:requests",
     ],
 )

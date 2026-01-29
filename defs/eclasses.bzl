@@ -97,7 +97,7 @@ DESTDIR="$DESTDIR" cmake --install "$S/build"
 cd "$S/build"
 ctest --output-on-failure
 ''',
-    "bdepend": ["dev-tools//build-systems/cmake:cmake", "dev-tools//build-systems/ninja:ninja"],
+    "bdepend": ["//packages/linux/dev-tools/build-systems/cmake:cmake", "//packages/linux/dev-tools/build-systems/ninja:ninja"],
     "exports": ["cmake-utils_src_configure", "cmake-utils_src_compile", "cmake-utils_src_install"],
 }
 
@@ -124,7 +124,7 @@ DESTDIR="$DESTDIR" meson install -C "${BUILD_DIR:-build}"
     "src_test": '''
 meson test -C "${BUILD_DIR:-build}" --print-errorlogs
 ''',
-    "bdepend": ["dev-tools//build-systems/meson:meson", "dev-tools//build-systems/ninja:ninja"],
+    "bdepend": ["//packages/linux/dev-tools/build-systems/meson:meson", "//packages/linux/dev-tools/build-systems/ninja:ninja"],
     "exports": ["meson_src_configure", "meson_src_compile", "meson_src_install"],
 }
 
@@ -184,7 +184,7 @@ elif make -q test 2>/dev/null; then
     make test
 fi
 ''',
-    "bdepend": ["dev-tools//build-systems/autoconf:autoconf", "dev-tools//build-systems/automake:automake", "dev-tools//build-systems/libtool:libtool"],
+    "bdepend": ["//packages/linux/dev-tools/build-systems/autoconf:autoconf", "//packages/linux/dev-tools/build-systems/automake:automake", "//packages/linux/dev-tools/build-systems/libtool:libtool"],
     "exports": ["eautoreconf", "econf", "emake", "einstall"],
 }
 
@@ -231,7 +231,7 @@ export PYTHON="${PYTHON:-python3}"
 $PYTHON -m pytest -v
 ''',
     "bdepend": [],
-    "rdepend": ["lang//python:python"],
+    "rdepend": ["//packages/linux/lang/python:python"],
     "exports": ["python_get_sitedir", "python_domodule", "python_newscript"],
 }
 
@@ -281,7 +281,7 @@ for impl in ${PYTHON_COMPAT:-python3}; do
 done
 ''',
     "bdepend": [],
-    "rdepend": ["lang//python:python"],
+    "rdepend": ["//packages/linux/lang/python:python"],
     "exports": ["python_foreach_impl", "python_setup"],
 }
 
@@ -366,7 +366,7 @@ if [ -f Rakefile ]; then
 fi
 ''',
     "bdepend": [],
-    "rdepend": ["lang//ruby:ruby"],
+    "rdepend": ["//packages/linux/lang/ruby:ruby"],
     "exports": ["ruby_src_compile", "ruby_src_install"],
 }
 
@@ -402,7 +402,8 @@ CARGO_CONFIG_EOF
 fi
 ''',
     "src_compile": '''
-cargo build --release \\
+# Unset CARGO_BUILD_RUSTC_WRAPPER to avoid sccache path length issues in buck-out
+CARGO_BUILD_RUSTC_WRAPPER="" cargo build --release \\
     --jobs ${MAKEOPTS:-$(nproc)} \\
     ${CARGO_NET_OFFLINE:+--offline} \\
     ${CARGO_BUILD_FLAGS:-}
@@ -713,8 +714,8 @@ else
     make test
 fi
 ''',
-    "bdepend": ["lang//perl:perl"],
-    "rdepend": ["lang//perl:perl"],
+    "bdepend": ["//packages/linux/lang/perl:perl"],
+    "rdepend": ["//packages/linux/lang/perl:perl"],
     "exports": ["perl_src_configure", "perl_src_compile", "perl_src_install"],
 }
 
@@ -803,8 +804,8 @@ if [ -f package.json ] && grep -q '"test"' package.json; then
     npm test ${NPM_TEST_ARGS:-}
 fi
 ''',
-    "bdepend": ["lang//nodejs:nodejs"],
-    "rdepend": ["lang//nodejs:nodejs"],
+    "bdepend": ["//packages/linux/lang/nodejs:nodejs"],
+    "rdepend": ["//packages/linux/lang/nodejs:nodejs"],
     "exports": ["npm_src_configure", "npm_src_compile", "npm_src_install"],
 }
 
@@ -1105,7 +1106,7 @@ fi
 # Run Maven tests
 mvn test ${MVN_OFFLINE:-} ${MVN_EXTRA_ARGS:-}
 ''',
-    "bdepend": ["dev-tools//build-systems/maven:maven"],
+    "bdepend": ["//packages/linux/dev-tools/build-systems/maven:maven"],
     "rdepend": [],
     "exports": ["maven_src_configure", "maven_src_compile", "maven_src_install"],
 }

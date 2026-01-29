@@ -43,12 +43,12 @@ Example usage:
 
         # Package masks (prevent installation)
         package_mask = [
-            "dev-libs//openssl:1.1",  # Mask old OpenSSL
+            "//packages/linux/dev-libs/openssl:1.1",  # Mask old OpenSSL
         ],
 
         # Package unmasks (allow masked packages)
         package_unmask = [
-            "lang//rust",  # Allow unstable Rust
+            "//packages/linux/lang/rust",  # Allow unstable Rust
         ],
 
         # Accept specific keywords

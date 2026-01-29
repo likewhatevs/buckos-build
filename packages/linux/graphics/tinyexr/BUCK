@@ -10,6 +10,6 @@ cmake_package(
         "-DTINYEXR_USE_MINIZ=OFF",
     ],
     deps = [
-        "dev-libs//compression/zlib:zlib",
+        "//packages/linux/dev-libs/compression/zlib:zlib",
     ],
 )

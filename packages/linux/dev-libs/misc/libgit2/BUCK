@@ -36,10 +36,10 @@ cmake_package(
         "-DUSE_HTTPS=OpenSSL",
     ],
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "system//libs/network/libssh2:libssh2",
-        "core//zlib:zlib",
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/network/libssh2:libssh2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     visibility = ["PUBLIC"],
 )

@@ -60,7 +60,7 @@ meson_package(
     license = "MIT",
     meson_args = [],
     deps = [
-        "graphics//xorg/libpciaccess:libpciaccess",
+        "//packages/linux/graphics/xorg/libpciaccess:libpciaccess",
     ],
     visibility = ["PUBLIC"],
 )

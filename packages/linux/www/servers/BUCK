@@ -3,9 +3,9 @@
 filegroup(
     name = "http-servers",
     srcs = [
-        "www//servers/nginx:nginx",
-        "www//servers/caddy:caddy",
-        "www//servers/lighttpd:lighttpd",
+        "//packages/linux/www/servers/nginx:nginx",
+        "//packages/linux/www/servers/caddy:caddy",
+        "//packages/linux/www/servers/lighttpd:lighttpd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -14,10 +14,10 @@ filegroup(
 filegroup(
     name = "reverse-proxies",
     srcs = [
-        "www//servers/nginx:nginx",
-        "www//servers/haproxy:haproxy",
-        "www//servers/traefik:traefik",
-        "www//servers/caddy:caddy",
+        "//packages/linux/www/servers/nginx:nginx",
+        "//packages/linux/www/servers/haproxy:haproxy",
+        "//packages/linux/www/servers/traefik:traefik",
+        "//packages/linux/www/servers/caddy:caddy",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -26,8 +26,8 @@ filegroup(
 filegroup(
     name = "lightweight",
     srcs = [
-        "www//servers/caddy:caddy",
-        "www//servers/lighttpd:lighttpd",
+        "//packages/linux/www/servers/caddy:caddy",
+        "//packages/linux/www/servers/lighttpd:lighttpd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,7 +36,7 @@ filegroup(
 filegroup(
     name = "proxy-servers",
     srcs = [
-        "www//servers/squid:squid",
+        "//packages/linux/www/servers/squid:squid",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -45,12 +45,12 @@ filegroup(
 filegroup(
     name = "all-web-servers",
     srcs = [
-        "www//servers/nginx:nginx",
-        "www//servers/caddy:caddy",
-        "www//servers/lighttpd:lighttpd",
-        "www//servers/haproxy:haproxy",
-        "www//servers/traefik:traefik",
-        "www//servers/squid:squid",
+        "//packages/linux/www/servers/nginx:nginx",
+        "//packages/linux/www/servers/caddy:caddy",
+        "//packages/linux/www/servers/lighttpd:lighttpd",
+        "//packages/linux/www/servers/haproxy:haproxy",
+        "//packages/linux/www/servers/traefik:traefik",
+        "//packages/linux/www/servers/squid:squid",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

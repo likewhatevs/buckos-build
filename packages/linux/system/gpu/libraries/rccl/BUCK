@@ -21,7 +21,7 @@ cmake_package(
         "-DTRACE=OFF",
     ],
     deps = [
-        "system//gpu/libraries/rocm:rocm",
+        "//packages/linux/system/gpu/libraries/rocm:rocm",
     ],
     visibility = ["PUBLIC"],
 )

@@ -38,9 +38,9 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "readline": ["core//readline:readline"],
-        "ncurses": ["core//ncurses:ncurses"],
-        "python": ["lang//python:python"],
+        "readline": ["//packages/linux/core/readline:readline"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "python": ["//packages/linux/lang/python:python"],
     },
 
     # Conditional configure arguments
@@ -90,7 +90,7 @@ autotools_package(
     ],
 
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

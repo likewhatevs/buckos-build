@@ -21,9 +21,9 @@ autotools_package(
     use_defaults = ["ssl", "zlib", "lzo"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "zlib": ["core//zlib:zlib"],
-        "lzo": ["system//libs/compression/lzo:lzo"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "lzo": ["//packages/linux/system/libs/compression/lzo:lzo"],
     },
 
     use_configure = {

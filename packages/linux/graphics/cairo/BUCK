@@ -26,15 +26,15 @@ meson_package(
     ],
     use_defaults = ["png", "svg", "pdf", "glib"],
     deps = [
-        "graphics//freetype:freetype",
-        "graphics//fontconfig:fontconfig",
-        "dev-libs//misc/pixman:pixman",
+        "//packages/linux/graphics/freetype:freetype",
+        "//packages/linux/graphics/fontconfig:fontconfig",
+        "//packages/linux/dev-libs/misc/pixman:pixman",
     ],
     use_deps = {
-        "png": ["media//image/libpng:libpng"],
-        "x11": ["graphics//x11-libs/libx11:libx11"],
-        "xcb": ["graphics//x11-libs/libxcb:libxcb"],
-        "glib": ["core//glib:glib"],
+        "png": ["//packages/linux/media/image/libpng:libpng"],
+        "x11": ["//packages/linux/graphics/x11-libs/libx11:libx11"],
+        "xcb": ["//packages/linux/graphics/x11-libs/libxcb:libxcb"],
+        "glib": ["//packages/linux/core/glib:glib"],
     },
     meson_args = [
         "-Dtests=disabled",

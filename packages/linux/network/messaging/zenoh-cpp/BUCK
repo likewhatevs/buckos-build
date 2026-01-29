@@ -13,6 +13,6 @@ cmake_package(
         "-DZENOHCXX_EXAMPLES_PROTOBUF=OFF",
     ],
     deps = [
-        "network//messaging/zenoh-c:zenoh-c",
+        "//packages/linux/network/messaging/zenoh-c:zenoh-c",
     ],
 )

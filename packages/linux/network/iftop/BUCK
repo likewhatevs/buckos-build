@@ -19,14 +19,14 @@ autotools_package(
     ],
 
     deps = [
-        "network//libpcap:libpcap",
-        "core//ncurses:ncurses",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/core/ncurses:ncurses",
     ],
 
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
 
     autoreconf = True,

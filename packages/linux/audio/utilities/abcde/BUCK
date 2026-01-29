@@ -36,10 +36,10 @@ make_package(
     ],
     use_defaults = ["flac", "vorbis", "mp3", "opus"],
     use_deps = {
-        "flac": ["system//libs/audio/flac:flac"],
-        "vorbis": ["system//libs/audio/libvorbis:libvorbis"],
-        "mp3": ["system//libs/audio/lame:lame"],
-        "opus": ["system//libs/audio/opus:opus"],
+        "flac": ["//packages/linux/system/libs/audio/flac:flac"],
+        "vorbis": ["//packages/linux/system/libs/audio/libvorbis:libvorbis"],
+        "mp3": ["//packages/linux/system/libs/audio/lame:lame"],
+        "opus": ["//packages/linux/system/libs/audio/opus:opus"],
     },
     deps = [
     ],

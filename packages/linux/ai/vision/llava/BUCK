@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/haotian-liu/LLaVA/archive/v1.0.2.tar.gz",
     sha256 = "4562d7f5ce1c31d8daf21ff80f8c755c573017a187e5c00d261b230a6f72b419",
     deps = [
-        "dev-libs//python/numpy:numpy",
-        "dev-libs//python/sentencepiece:sentencepiece",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/dev-libs/python/sentencepiece:sentencepiece",
     ],
 )

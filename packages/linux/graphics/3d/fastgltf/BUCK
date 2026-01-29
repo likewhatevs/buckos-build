@@ -24,7 +24,7 @@ cmake_package(
     ],
     use_defaults = [],
     deps = [
-        "dev-libs//json/simdjson:simdjson",
+        "//packages/linux/dev-libs/json/simdjson:simdjson",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -22,7 +22,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -48,7 +48,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":dbi",
     ],
     visibility = ["PUBLIC"],
@@ -87,9 +87,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":dbi",
-        "databases//postgresql:postgresql",
+        "//packages/linux/databases/postgresql:postgresql",
     ],
     visibility = ["PUBLIC"],
 )
@@ -115,7 +115,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":dbi",
     ],
     visibility = ["PUBLIC"],
@@ -142,11 +142,11 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":dbi",
-        "lang//perl/oop:moo",
-        "lang//perl/core:try-tiny",
-        "lang//perl/core:namespace-clean",
+        "//packages/linux/lang/perl/oop:moo",
+        "//packages/linux/lang/perl/core:try-tiny",
+        "//packages/linux/lang/perl/core:namespace-clean",
     ],
     visibility = ["PUBLIC"],
 )
@@ -172,8 +172,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/oop:moo",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/oop:moo",
     ],
     visibility = ["PUBLIC"],
 )
@@ -199,7 +199,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":dbi",
     ],
     visibility = ["PUBLIC"],
@@ -226,8 +226,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/web:mojolicious",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/web:mojolicious",
         ":dbd-pg",
     ],
     visibility = ["PUBLIC"],
@@ -254,8 +254,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/web:mojolicious",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/web:mojolicious",
         ":dbd-sqlite",
     ],
     visibility = ["PUBLIC"],
@@ -282,8 +282,8 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:try-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:try-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -309,9 +309,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/oop:moo",
-        "lang//perl/oop:type-tiny",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/oop:moo",
+        "//packages/linux/lang/perl/oop:type-tiny",
     ],
     visibility = ["PUBLIC"],
 )
@@ -340,7 +340,7 @@ autotools_package(
     # is generated but dispatch_key.c compiles before it's ready
     src_compile = "make -j1",
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )

@@ -3,9 +3,9 @@
 filegroup(
     name = "core-graphics",
     srcs = [
-        "system//libs/graphics/pixman:pixman",
-        "system//libs/graphics/cairo:cairo",
-        "system//libs/graphics/lcms2:lcms2",
+        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

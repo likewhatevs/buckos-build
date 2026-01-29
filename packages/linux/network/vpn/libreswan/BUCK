@@ -26,8 +26,8 @@ autotools_package(
     use_defaults = ["ssl", "curl", "systemd"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "curl": ["network//curl:curl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "curl": ["//packages/linux/network/curl:curl"],
     },
 
     use_configure = {
@@ -67,7 +67,7 @@ mkdir -p "$DESTDIR/var/run/pluto"
 """,
 
     deps = [
-        "core//libnl:libnl",
+        "//packages/linux/core/libnl:libnl",
     ],
 
     description = "IPsec implementation with IKEv1 and IKEv2 support",

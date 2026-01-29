@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/Wan-Video/Wan2.2/archive/refs/heads/main.tar.gz",
     sha256 = "214cbdf14307317c5d5beb881baba9e91f4c34117bef914e8092689442cc47fe",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/numpy:numpy",
-        "graphics//bitmap/opencv:opencv",
-        "dev-libs//python/pillow:pillow",
-        "dev-libs//python/tqdm:tqdm",
-        "ai//nlp/transformers:transformers",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/numpy:numpy",
+        "//packages/linux/graphics/bitmap/opencv:opencv",
+        "//packages/linux/dev-libs/python/pillow:pillow",
+        "//packages/linux/dev-libs/python/tqdm:tqdm",
+        "//packages/linux/ai/nlp/transformers:transformers",
     ],
 )

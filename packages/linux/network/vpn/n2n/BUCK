@@ -12,8 +12,8 @@ autotools_package(
     use_defaults = ["ssl", "zlib"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "zlib": ["core//zlib:zlib"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
 
     use_configure = {},
@@ -35,7 +35,7 @@ mkdir -p "$DESTDIR/etc/n2n"
 """,
 
     bdepend = [
-        "dev-tools//build-systems/cmake:cmake",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
     ],
 
     description = "Peer-to-peer VPN daemon",

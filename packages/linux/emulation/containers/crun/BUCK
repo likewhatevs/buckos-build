@@ -49,12 +49,12 @@ autotools_package(
         "--with-python-bindings",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/libcap:libcap",
-        "system//libs/data/yajl:yajl",
-        "system//libs/ipc/libseccomp:libseccomp",
-        "system//init/systemd:systemd",
-        "lang//python:python",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/data/yajl:yajl",
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/init/systemd:systemd",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

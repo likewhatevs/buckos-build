@@ -33,10 +33,10 @@ meson_package(
         "-man": "-Dman=false",
     },
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/dbus:dbus",
-        # "core//polkit:polkit",  # TODO: not packaged yet
-        "laptop//battery/upower:upower",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        # "//packages/linux/core/polkit:polkit",  # TODO: not packaged yet
+        "//packages/linux/laptop/battery/upower:upower",
     ],
     visibility = ["PUBLIC"],
 )

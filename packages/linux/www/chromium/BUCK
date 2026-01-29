@@ -75,14 +75,14 @@ WRAPPER
     """,
     deps = use_dep(
         {
-            "glib": ["dev-libs//glib:glib"],
-            "gtk": ["desktop//gtk:gtk3"],
+            "glib": ["//packages/linux/dev-libs/glib:glib"],
+            "gtk": ["//packages/linux/desktop/gtk:gtk3"],
             # TODO: nss and nspr packages need to be created
-            # "nss": ["network//nss:nss"],
-            # "nspr": ["network//nspr:nspr"],
-            "python": ["lang//python:python"],
-            "nodejs": ["lang//nodejs:nodejs"],
-            "gn": ["dev-tools//build-systems/gn:gn"],
+            # "nss": ["//packages/linux/network/nss:nss"],
+            # "nspr": ["//packages/linux/network/nspr:nspr"],
+            "python": ["//packages/linux/lang/python:python"],
+            "nodejs": ["//packages/linux/lang/nodejs:nodejs"],
+            "gn": ["//packages/linux/dev-tools/build-systems/gn:gn"],
         },
         ["glib", "gtk", "python", "nodejs", "gn"],
     ),

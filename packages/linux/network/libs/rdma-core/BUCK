@@ -32,6 +32,6 @@ cmake_package(
         "-DENABLE_STATIC=1",
     ],
     deps = [
-        "network//libs/libnl:libnl",
+        "//packages/linux/network/libs/libnl:libnl",
     ],
 )

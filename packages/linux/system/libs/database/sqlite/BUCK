@@ -49,11 +49,11 @@ autotools_package(
     },
     # gawk needed for configure script (host gawk has ncurses dependency)
     bdepend = [
-        "editors//gawk:gawk",
+        "//packages/linux/editors/gawk:gawk",
     ],
     deps = [
-        "core//zlib:zlib",
-        "core//readline:readline",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/readline:readline",
     ],
     visibility = ["PUBLIC"],
 )

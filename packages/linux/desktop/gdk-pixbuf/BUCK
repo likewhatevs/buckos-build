@@ -37,10 +37,10 @@ meson_package(
         "-Dman=false",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/image/libpng:libpng",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//libs/image/libtiff:libtiff",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
     ],
     visibility = ["PUBLIC"],
 )

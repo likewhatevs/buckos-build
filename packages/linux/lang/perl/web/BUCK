@@ -22,7 +22,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -48,11 +48,11 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/oop:moo",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/oop:moo",
         ":plack",
-        "lang//perl/data:yaml",
-        "lang//perl/data:json-maybexs",
+        "//packages/linux/lang/perl/data:yaml",
+        "//packages/linux/lang/perl/data:json-maybexs",
     ],
     visibility = ["PUBLIC"],
 )
@@ -78,10 +78,10 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/oop:moose",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/oop:moose",
         ":plack",
-        "lang//perl/network:lwp",
+        "//packages/linux/lang/perl/network:lwp",
     ],
     visibility = ["PUBLIC"],
 )
@@ -107,9 +107,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
-        "lang//perl/core:try-tiny",
-        "lang//perl/network:http-message",
+        "//packages/linux/lang/perl:perl",
+        "//packages/linux/lang/perl/core:try-tiny",
+        "//packages/linux/lang/perl/network:http-message",
         ":uri",
     ],
     visibility = ["PUBLIC"],
@@ -136,7 +136,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -162,7 +162,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -188,7 +188,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":uri",
     ],
     visibility = ["PUBLIC"],
@@ -215,7 +215,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":html-parser",
     ],
     visibility = ["PUBLIC"],
@@ -242,7 +242,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
@@ -268,10 +268,10 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":html-tree",
         ":uri",
-        "lang//perl/network:lwp",
+        "//packages/linux/lang/perl/network:lwp",
     ],
     visibility = ["PUBLIC"],
 )
@@ -297,7 +297,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":plack",
     ],
     visibility = ["PUBLIC"],
@@ -324,9 +324,9 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":plack",
-        "lang//perl/async:anyevent",
+        "//packages/linux/lang/perl/async:anyevent",
     ],
     visibility = ["PUBLIC"],
 )
@@ -352,7 +352,7 @@ autotools_package(
     src_configure = "",
     configure_args = [],
     deps = [
-        "lang//perl:perl",
+        "//packages/linux/lang/perl:perl",
         ":uri",
     ],
     visibility = ["PUBLIC"],

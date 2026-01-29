@@ -9,7 +9,7 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "lang//swift:swift",
+        "//packages/linux/lang/swift:swift",
         "//third-party/protobuf:protobuf",
     ],
     visibility = ["PUBLIC"],

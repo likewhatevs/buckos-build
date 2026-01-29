@@ -11,7 +11,7 @@ cmake_package(
         "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
     ],
     deps = [
-        "system//libs/libusb:libusb",
-        "dev-libs//misc/cjson:cjson",
+        "//packages/linux/system/libs/libusb:libusb",
+        "//packages/linux/dev-libs/misc/cjson:cjson",
     ],
 )

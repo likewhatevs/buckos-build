@@ -13,10 +13,10 @@ python_package(
     homepage = "https://jliljebl.github.io/flowblade/",
     license = "GPL-3.0-or-later",
     deps = [
-        "graphics//video/ffmpeg:ffmpeg",
-        "desktop//gtk:gtk3",
-        "lang//python:python",
-        # "core//frei0r:frei0r",  # TODO: not packaged yet,
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/lang/python:python",
+        # "//packages/linux/core/frei0r:frei0r",  # TODO: not packaged yet,
     ],
     visibility = ["PUBLIC"],
 )

@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/epezent/implot",
     license = "MIT",
     deps = [
-        "graphics//rendering/imgui:imgui",
+        "//packages/linux/graphics/rendering/imgui:imgui",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

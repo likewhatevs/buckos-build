@@ -27,15 +27,15 @@ cmake_package(
     },
     use_defaults = ["wayland", "xcb", "xlib", "lz4", "zstd"],
     deps = [
-        "dev-libs//json/nlohmann-json:nlohmann-json",
-        "system//libs/compression/zlib:zlib",
+        "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
+        "//packages/linux/system/libs/compression/zlib:zlib",
     ],
     use_deps = {
-        "lz4": ["dev-libs//compression/lz4:lz4"],
-        "zstd": ["dev-libs//compression/zstd:zstd"],
-        "xcb": ["graphics//xorg/libxcb:libxcb"],
-        "wayland": ["graphics//rendering/wayland:wayland"],
-        "xlib": ["graphics//xorg/lib/libx11:libx11"],
+        "lz4": ["//packages/linux/dev-libs/compression/lz4:lz4"],
+        "zstd": ["//packages/linux/dev-libs/compression/zstd:zstd"],
+        "xcb": ["//packages/linux/graphics/xorg/libxcb:libxcb"],
+        "wayland": ["//packages/linux/graphics/rendering/wayland:wayland"],
+        "xlib": ["//packages/linux/graphics/xorg/lib/libx11:libx11"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

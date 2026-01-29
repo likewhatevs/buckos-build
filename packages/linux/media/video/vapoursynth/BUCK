@@ -10,6 +10,6 @@ autotools_package(
         "--enable-shared",
     ],
     deps = [
-        "dev-libs//python:python3",
+        "//packages/linux/dev-libs/python:python3",
     ],
 )

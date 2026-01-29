@@ -30,8 +30,8 @@ binary_package(
         ./target/release/himalaya completion fish > "$OUT/usr/share/fish/vendor_completions.d/himalaya.fish"
     """,
     deps = [
-        "lang//rust:rust",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/lang/rust:rust",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     visibility = ["PUBLIC"],
 )

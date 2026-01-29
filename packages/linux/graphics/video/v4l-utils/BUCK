@@ -26,9 +26,9 @@ meson_package(
         "-Dv4l-utils=true",
     ],
     deps = [
-        "desktop//qt:qt5",
-        "system//libs/image/libjpeg-turbo:libjpeg-turbo",
-        "system//init/eudev:eudev",
+        "//packages/linux/desktop/qt:qt5",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     maintainers = ["buckos"],
     visibility = ["PUBLIC"],

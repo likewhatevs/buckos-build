@@ -49,13 +49,13 @@ autotools_package(
     homepage = "https://apr.apache.org/",
     license = "Apache-2.0",
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
     deps = [
-        "dev-libs//misc/apr:apr",
-        "core//expat:expat",
+        "//packages/linux/dev-libs/misc/apr:apr",
+        "//packages/linux/core/expat:expat",
     ],
     # apr-1-config should be in PATH from the apr dependency
     src_prepare = """

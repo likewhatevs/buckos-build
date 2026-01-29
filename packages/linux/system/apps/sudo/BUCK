@@ -34,11 +34,11 @@ autotools_package(
     ],
     use_defaults = [],
     use_deps = {
-        "pam": ["system//security/auth/pam:pam"],
-        "selinux": ["system//security/selinux:selinux"],
-        "ldap": ["system//security/auth/directory/openldap:openldap"],
-        "nls": ["system//libs/i18n:gettext"],
-        "sssd": ["system//security/auth/sssd:sssd"],
+        "pam": ["//packages/linux/system/security/auth/pam:pam"],
+        "selinux": ["//packages/linux/system/security/selinux:selinux"],
+        "ldap": ["//packages/linux/system/security/auth/directory/openldap:openldap"],
+        "nls": ["//packages/linux/system/libs/i18n:gettext"],
+        "sssd": ["//packages/linux/system/security/auth/sssd:sssd"],
     },
     use_configure = {
         "-gcrypt": "--without-gcrypt",

@@ -20,8 +20,8 @@ autotools_package(
     use_defaults = [],
 
     use_deps = {
-        "dbus": ["system//libs/ipc/dbus:dbus"],
-        "usb": ["core//libusb"],
+        "dbus": ["//packages/linux/system/libs/ipc/dbus:dbus"],
+        "usb": ["//packages/linux/core/libusb"],
     },
 
 

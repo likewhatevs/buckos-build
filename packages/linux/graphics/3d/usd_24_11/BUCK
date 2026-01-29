@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/PixarAnimationStudios/USD",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//misc/tbb:tbb",
+        "//packages/linux/dev-libs/misc/tbb:tbb",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

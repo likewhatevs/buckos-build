@@ -13,6 +13,6 @@ cmake_package(
         "-DUSE_EXTERNAL_GLFW=ON",
     ],
     deps = [
-        "graphics//rendering/glfw:glfw",
+        "//packages/linux/graphics/rendering/glfw:glfw",
     ],
 )

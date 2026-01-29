@@ -9,7 +9,7 @@ load("@root//defs:package_defs.bzl", "kernel_build")
 # Kernel with default config (for development/testing)
 kernel_build(
     name = "linux-defconfig",
-    source = "kernel//src:linux-src",
+    source = "//packages/linux/kernel/src:linux-src",
     version = "6.12.6",
     visibility = ["PUBLIC"],
 )

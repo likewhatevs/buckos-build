@@ -41,7 +41,7 @@ if [ -f "$DESTDIR/usr/lib64/libbsd.la" ]; then
 fi
 """,
     deps = [
-        "core//libmd:libmd",  # Required for hash functions
+        "//packages/linux/core/libmd:libmd",  # Required for hash functions
     ],
     visibility = ["PUBLIC"],
 )

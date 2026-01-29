@@ -69,10 +69,10 @@ binary_package(
         ls -la $OUT/usr/bin/
     """,
     deps = [
-        "core//zlib:zlib",
-        "dev-tools//dev-utils/elfutils:elfutils",
-        "system//libs/bpf/libbpf:libbpf",
-        "lang//rust:rust",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/dev-tools/dev-utils/elfutils:elfutils",
+        "//packages/linux/system/libs/bpf/libbpf:libbpf",
+        "//packages/linux/lang/rust:rust",
     ],
     visibility = ["PUBLIC"],
 )

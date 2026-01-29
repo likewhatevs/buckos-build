@@ -30,12 +30,12 @@ cmake_package(
     ],
     use_defaults = ["bzip2", "lzma", "zlib", "zstd"],
     deps = [
-        "dev-libs//compression/bzip2:bzip2",
-        "dev-libs//compression/lz4:lz4",
-        "dev-libs//compression/lzma:lzma",
-        "system//libs/compression/lzo:lzo",
-        "dev-libs//compression/zstd:zstd",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/compression/bzip2:bzip2",
+        "//packages/linux/dev-libs/compression/lz4:lz4",
+        "//packages/linux/dev-libs/compression/lzma:lzma",
+        "//packages/linux/system/libs/compression/lzo:lzo",
+        "//packages/linux/dev-libs/compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

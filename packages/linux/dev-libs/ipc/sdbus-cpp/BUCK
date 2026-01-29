@@ -16,7 +16,7 @@ cmake_package(
         "-DBUILD_DOC=OFF",
     ],
     deps = [
-        "system//libs/systemd:systemd",
+        "//packages/linux/system/libs/systemd:systemd",
     ],
     visibility = ["PUBLIC"],
 )

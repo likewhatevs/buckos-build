@@ -47,7 +47,7 @@ cmake_package(
         "-DWITH_XC_SSHAGENT=ON",
     ],
     deps = [
-        "desktop//qt:qt5",
+        "//packages/linux/desktop/qt:qt5",
     ],
     visibility = ["PUBLIC"],
 )

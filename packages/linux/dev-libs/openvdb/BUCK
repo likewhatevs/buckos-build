@@ -82,7 +82,7 @@ cmake_package(
         "-DUSE_BLOSC=OFF",
     ],
     deps = [
-        "dev-libs//boost:boost",
+        "//packages/linux/dev-libs/boost:boost",
     ],
     visibility = ["PUBLIC"],
 )

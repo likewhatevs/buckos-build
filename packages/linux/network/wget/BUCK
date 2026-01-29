@@ -16,14 +16,14 @@ autotools_package(
     use_defaults = ["ssl", "ipv6"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "gnutls": ["system//libs/crypto/gnutls:gnutls"],
-        "pcre": ["system//libs/utility/pcre2:pcre2"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
+        "pcre": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
     },
 
 
     deps = [
-        "network//ca-certificates:ca-certificates",
+        "//packages/linux/network/ca-certificates:ca-certificates",
     ],
 
     description = "Network utility to retrieve files from the web",

@@ -9,11 +9,11 @@ python_package(
     homepage = "https://github.com/facebookresearch/frankmocap",
     license = "BSD",
     deps = [
-        "lang//python:python",
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//vision/pytorch3d:pytorch3d",
-        "ai//vision/detectron2:detectron2",
-        "ai//vision/opencv:opencv",
+        "//packages/linux/lang/python:python",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/vision/pytorch3d:pytorch3d",
+        "//packages/linux/ai/vision/detectron2:detectron2",
+        "//packages/linux/ai/vision/opencv:opencv",
     ],
     visibility = ["PUBLIC"],
 )

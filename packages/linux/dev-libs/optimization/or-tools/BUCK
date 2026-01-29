@@ -9,10 +9,10 @@ cmake_package(
     homepage = "https://github.com/google/or-tools",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//google/abseil-cpp:abseil-cpp",
-        "dev-libs//google/glog:glog",
-        "dev-libs//serialization/protobuf:protobuf",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/google/abseil-cpp:abseil-cpp",
+        "//packages/linux/dev-libs/google/glog:glog",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
+        "//packages/linux/core/zlib:zlib",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

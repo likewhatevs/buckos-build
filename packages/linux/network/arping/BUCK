@@ -14,8 +14,8 @@ autotools_package(
     homepage = "https://github.com/ThomasHabets/arping",
     license = "GPL-2.0-or-later",
     deps = [
-        "network//libpcap:libpcap",
-        "network//libnet:libnet",
+        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libnet:libnet",
     ],
     visibility = ["PUBLIC"],
 )

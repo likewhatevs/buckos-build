@@ -17,7 +17,7 @@ cmake_package(
     deps = [
         # SPIRV-Tools requires SPIRV-Headers
         # TODO: Add spirv-headers package dependency when available
-        # "graphics//rendering/spirv-headers:spirv-headers",
+        # "//packages/linux/graphics/rendering/spirv-headers:spirv-headers",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

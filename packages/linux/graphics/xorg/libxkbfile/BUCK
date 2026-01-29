@@ -15,8 +15,8 @@ autotools_package(
         "--libdir=/usr/lib64",
     ],
     deps = [
-        "graphics//xorg/libX11:libX11",
-        "graphics//xorg/xorgproto:xorgproto",
+        "//packages/linux/graphics/xorg/libX11:libX11",
+        "//packages/linux/graphics/xorg/xorgproto:xorgproto",
     ],
     visibility = ["PUBLIC"],
 )

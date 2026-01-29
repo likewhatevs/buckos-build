@@ -23,12 +23,12 @@ autotools_package(
     iuse = ["ssl", "ipv6", "nls", "unicode", "image", "ncurses"],
     use_defaults = ["ssl", "ipv6", "nls", "unicode", "ncurses"],
     deps = [
-        "dev-libs//misc/boehm-gc:boehm-gc",
+        "//packages/linux/dev-libs/misc/boehm-gc:boehm-gc",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "ncurses": ["core//ncurses:ncurses"],
-        "zlib": ["core//zlib:zlib"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
     },
     configure_args = [
         "--disable-w3mmailer",

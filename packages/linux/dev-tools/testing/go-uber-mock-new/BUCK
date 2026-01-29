@@ -12,7 +12,7 @@ go_package(
     # Build mockgen binary from mockgen subdirectory
     packages = ["./mockgen/..."],
     deps = [
-        "lang//go:go",
+        "//packages/linux/lang/go:go",
     ],
     visibility = ["PUBLIC"],
 )

@@ -17,8 +17,8 @@ cmake_package(
         "-DNVSHMEM_BUILD_PYTHON_LIB=OFF",
     ],
     deps = [
-        "system//gpu/libraries/nccl:nccl",
-        "network//libs/rdma-core:rdma-core",
+        "//packages/linux/system/gpu/libraries/nccl:nccl",
+        "//packages/linux/network/libs/rdma-core:rdma-core",
     ],
     visibility = ["PUBLIC"],
 )

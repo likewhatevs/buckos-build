@@ -27,7 +27,7 @@ mkdir -p "$DESTDIR/usr/bin"
 install -m 755 inxi "$DESTDIR/usr/bin/inxi"
 """,
     deps = [
-        "core//bash:bash",
+        "//packages/linux/core/bash:bash",
     ],
     visibility = ["PUBLIC"],
 )

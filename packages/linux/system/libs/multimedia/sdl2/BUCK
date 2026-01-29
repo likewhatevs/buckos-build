@@ -31,10 +31,10 @@ autotools_package(
         "-static-libs": "-DSDL_SHARED=ON -DSDL_STATIC=OFF",
     },
     use_deps = {
-        "alsa": ["system//libs/audio/alsa-lib:alsa-lib"],
-        "wayland": ["core//libffi:libffi", "graphics//rendering/wayland:wayland"],
-        "opengl": ["desktop//mesa:mesa"],
-        "vulkan": ["desktop//mesa:mesa"],
+        "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
+        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "opengl": ["//packages/linux/desktop/mesa:mesa"],
+        "vulkan": ["//packages/linux/desktop/mesa:mesa"],
     },
     configure_args = [],
     pre_configure = """

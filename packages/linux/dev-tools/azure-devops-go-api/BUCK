@@ -7,6 +7,6 @@ go_package(
     sha256 = "22b1fd72d39808081b7f6d94b4414620db5baaeb2e94b6bedc020ece09132382",
     packages = ["./azuredevops/v7/..."],
     deps = [
-        "dev-libs//go/google-uuid:google-uuid",
+        "//packages/linux/dev-libs/go/google-uuid:google-uuid",
     ],
 )

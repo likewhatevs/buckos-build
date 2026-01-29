@@ -27,9 +27,9 @@ ebuild_package(
     homepage = "https://www.haproxy.org/",
     license = "GPL-2.0",
     rdepend = [
-        "system//libs/crypto/openssl:openssl",
-        "core//zlib:zlib",
-        "system//libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     src_configure = "true",
     src_compile = """

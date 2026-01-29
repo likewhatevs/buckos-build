@@ -13,6 +13,6 @@ cmake_package(
         "-DSTDGPU_BACKEND=STDGPU_BACKEND_CUDA",
     ],
     deps = [
-        "dev-libs//cuda:cuda",
+        "//packages/linux/dev-libs/cuda:cuda",
     ],
 )

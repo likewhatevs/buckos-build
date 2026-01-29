@@ -54,9 +54,9 @@ autotools_package(
 make -j${MAKEOPTS:-$(nproc)}
 ''',
     deps = [
-        "system//libs/talloc:talloc",
-        "system//libs/tdb:tdb",
-        "system//libs/tevent:tevent",
+        "//packages/linux/system/libs/talloc:talloc",
+        "//packages/linux/system/libs/tdb:tdb",
+        "//packages/linux/system/libs/tevent:tevent",
     ],
     visibility = ["PUBLIC"],
 )

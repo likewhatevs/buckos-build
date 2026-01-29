@@ -13,8 +13,8 @@ meson_package(
     homepage = "https://android.googlesource.com/platform/hardware/google/gfxstream",
     license = "Apache-2.0 OR MIT",
     deps = [
-        "emulation//aemu:aemu",
-        "desktop//libdrm:libdrm",
+        "//packages/linux/emulation/aemu:aemu",
+        "//packages/linux/desktop/libdrm:libdrm",
     ],
     meson_args = [
         "-Dbuildtype=release",

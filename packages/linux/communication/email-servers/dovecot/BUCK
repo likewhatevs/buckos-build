@@ -30,13 +30,13 @@ autotools_package(
     iuse = ["ldap", "sqlite", "zlib", "bzip2", "lz4", "zstd", "solr", "lucene"],
     use_defaults = ["sqlite", "zlib", "bzip2", "lz4", "zstd"],
     use_deps = {
-        "ldap": ["network//ldap/openldap:openldap"],
-        "sqlite": ["system//libs/database/sqlite:sqlite"],
-        "zlib": ["core//zlib:zlib"],
-        "bzip2": ["system//libs/compression/bzip2:bzip2"],
-        "lz4": ["system//libs/compression/lz4:lz4"],
-        "zstd": ["system//libs/compression/zstd:zstd"],
-        "solr": ["core//expat:expat"],
+        "ldap": ["//packages/linux/network/ldap/openldap:openldap"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
+        "zlib": ["//packages/linux/core/zlib:zlib"],
+        "bzip2": ["//packages/linux/system/libs/compression/bzip2:bzip2"],
+        "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
+        "solr": ["//packages/linux/core/expat:expat"],
     },
     use_configure = {
         "ldap": "--with-ldap=plugin",
@@ -74,9 +74,9 @@ mkdir -p "$DESTDIR/var/run/dovecot"
 cp -r doc/example-config/* "$DESTDIR/etc/dovecot/"
 """,
     deps = [
-        "system//libs/crypto/openssl:openssl",
-        "dev-tools//dev-utils/flex:flex",
-        "dev-tools//dev-utils/bison:bison",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/dev-tools/dev-utils/flex:flex",
+        "//packages/linux/dev-tools/dev-utils/bison:bison",
     ],
     visibility = ["PUBLIC"],
 )

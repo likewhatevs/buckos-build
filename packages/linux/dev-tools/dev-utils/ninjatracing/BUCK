@@ -7,6 +7,6 @@ simple_binary_package(
     sha256 = "b845038f04cd5f872fbb9e1a50a1494ee890388059e86eb6c31ec38bd05a3d6f",
     bins = ["ninjatracing"],
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
 )

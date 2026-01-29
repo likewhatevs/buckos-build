@@ -29,8 +29,8 @@ cmake_package(
         "-DNO_BENCHMARKS=ON",
     ],
     deps = [
-        "system//libs/bpf/libbpf:libbpf",
-        "core//libnl:libnl",
+        "//packages/linux/system/libs/bpf/libbpf:libbpf",
+        "//packages/linux/core/libnl:libnl",
     ],
     visibility = ["PUBLIC"],
 )

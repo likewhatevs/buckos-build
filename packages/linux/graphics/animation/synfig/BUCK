@@ -30,15 +30,15 @@ cd synfig-core/build
 DESTDIR=$OUT make install
 """,
     deps = [
-        # "dev-libs//libsigcpp:libsigcpp",  # TODO: not packaged yet
-        "system//libs/data/libxml2:libxml2",
-        # "dev-libs//mlt:mlt",  # TODO: not packaged yet
-        "graphics//video/ffmpeg:ffmpeg",
-        "graphics//utilities/imagemagick:imagemagick",
-        "dev-libs//boost:boost",
-        "dev-libs//fftw:fftw",
-        "system//libs/graphics/cairo:cairo",
-        "fonts//libraries/pango:pango",
+        # "//packages/linux/dev-libs/libsigcpp:libsigcpp",  # TODO: not packaged yet
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        # "//packages/linux/dev-libs/mlt:mlt",  # TODO: not packaged yet
+        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/dev-libs/boost:boost",
+        "//packages/linux/dev-libs/fftw:fftw",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
+        "//packages/linux/fonts/libraries/pango:pango",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],
@@ -67,8 +67,8 @@ DESTDIR=$OUT make install
 """,
     deps = [
         ":synfig-core",
-        "desktop//gtk:gtk3",
-        # "dev-libs//libsigcpp:libsigcpp",  # TODO: not packaged yet
+        "//packages/linux/desktop/gtk:gtk3",
+        # "//packages/linux/dev-libs/libsigcpp:libsigcpp",  # TODO: not packaged yet
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

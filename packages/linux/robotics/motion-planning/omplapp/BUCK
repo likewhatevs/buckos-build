@@ -12,11 +12,11 @@ cmake_package(
         "-DOMPL_BUILD_PYBINDINGS=OFF",
     ],
     deps = [
-        "dev-libs//math/eigen:eigen",
-        "dev-libs//misc/boost:boost",
-        "robotics//motion-planning/ompl:ompl",
-        "robotics//collision/fcl:fcl",
-        "graphics//3d/assimp:assimp",
-        "dev-libs//misc/libccd:libccd",
+        "//packages/linux/dev-libs/math/eigen:eigen",
+        "//packages/linux/dev-libs/misc/boost:boost",
+        "//packages/linux/robotics/motion-planning/ompl:ompl",
+        "//packages/linux/robotics/collision/fcl:fcl",
+        "//packages/linux/graphics/3d/assimp:assimp",
+        "//packages/linux/dev-libs/misc/libccd:libccd",
     ],
 )

@@ -6,10 +6,10 @@ python_package(
     src_uri = "https://github.com/Velocidex/pyvelociraptor/archive/02c0a89c908d334d84e3e71ca0bc1a7c02b651db.tar.gz",
     sha256 = "d4d4b78ff32d7711414b7f31ff34b30b2b16ed30a0b3e10ca40761a15e6e1558",
     deps = [
-        "dev-libs//python/grpcio:grpcio",
-        "dev-libs//python/grpcio-tools:grpcio-tools",
-        "dev-libs//python/pyyaml:pyyaml",
-        "dev-libs//python/cryptography:cryptography",
+        "//packages/linux/dev-libs/python/grpcio:grpcio",
+        "//packages/linux/dev-libs/python/grpcio-tools:grpcio-tools",
+        "//packages/linux/dev-libs/python/pyyaml:pyyaml",
+        "//packages/linux/dev-libs/python/cryptography:cryptography",
     ],
     maintainers = ["buckos"],
 )

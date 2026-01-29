@@ -6,8 +6,8 @@
 filegroup(
     name = "modern-firewalls",
     srcs = [
-        # # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available  # TODO: Uncomment when nftables package is enabled
-        "network//firewall/firewalld:firewalld",
+        # # "//packages/linux/network/firewall/nftables:nftables",  # TODO: Enable when nftables package is available  # TODO: Uncomment when nftables package is enabled
+        "//packages/linux/network/firewall/firewalld:firewalld",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -17,8 +17,8 @@ filegroup(
 filegroup(
     name = "legacy-firewalls",
     srcs = [
-        "network//firewall/iptables:iptables",
-        "network//firewall/ipset:ipset",
+        "//packages/linux/network/firewall/iptables:iptables",
+        "//packages/linux/network/firewall/ipset:ipset",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -28,9 +28,9 @@ filegroup(
 filegroup(
     name = "firewall-frontends",
     srcs = [
-        "network//firewall/ufw:ufw",
-        "network//firewall/firewalld:firewalld",
-        "network//firewall/ferm:ferm",
+        "//packages/linux/network/firewall/ufw:ufw",
+        "//packages/linux/network/firewall/firewalld:firewalld",
+        "//packages/linux/network/firewall/ferm:ferm",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -40,8 +40,8 @@ filegroup(
 filegroup(
     name = "firewall-tools",
     srcs = [
-        "network//firewall/ferm:ferm",
-        "network//firewall/ipset:ipset",
+        "//packages/linux/network/firewall/ferm:ferm",
+        "//packages/linux/network/firewall/ipset:ipset",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -51,9 +51,9 @@ filegroup(
 filegroup(
     name = "netfilter-core",
     srcs = [
-        # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available
-        "network//firewall/iptables:iptables",
-        "network//firewall/ipset:ipset",
+        # "//packages/linux/network/firewall/nftables:nftables",  # TODO: Enable when nftables package is available
+        "//packages/linux/network/firewall/iptables:iptables",
+        "//packages/linux/network/firewall/ipset:ipset",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -63,7 +63,7 @@ filegroup(
 filegroup(
     name = "minimal-firewall",
     srcs = [
-        # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available
+        # "//packages/linux/network/firewall/nftables:nftables",  # TODO: Enable when nftables package is available
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -73,12 +73,12 @@ filegroup(
 filegroup(
     name = "all-firewalls",
     srcs = [
-        # "network//firewall/nftables:nftables",  # TODO: Enable when nftables package is available
-        "network//firewall/iptables:iptables",
-        "network//firewall/firewalld:firewalld",
-        "network//firewall/ufw:ufw",
-        "network//firewall/ipset:ipset",
-        "network//firewall/ferm:ferm",
+        # "//packages/linux/network/firewall/nftables:nftables",  # TODO: Enable when nftables package is available
+        "//packages/linux/network/firewall/iptables:iptables",
+        "//packages/linux/network/firewall/firewalld:firewalld",
+        "//packages/linux/network/firewall/ufw:ufw",
+        "//packages/linux/network/firewall/ipset:ipset",
+        "//packages/linux/network/firewall/ferm:ferm",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

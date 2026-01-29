@@ -6,11 +6,11 @@ python_package(
     src_uri = "https://github.com/sunwei925/simplevqa/archive/017edda50e8cdbeb48113a001dbb9af0dbd2030b.tar.gz",
     sha256 = "d673cd0d93d9f76e4d51c2a06b4cc51273578bdba77369f213c7ad8ef65def51",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "dev-libs//python/torchvision:torchvision",
-        "dev-libs//python/opencv-python:opencv-python",
-        "dev-libs//python/scipy:scipy",
-        "dev-libs//python/pandas:pandas",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/dev-libs/python/torchvision:torchvision",
+        "//packages/linux/dev-libs/python/opencv-python:opencv-python",
+        "//packages/linux/dev-libs/python/scipy:scipy",
+        "//packages/linux/dev-libs/python/pandas:pandas",
     ],
     maintainers = ["buckos"],
 )

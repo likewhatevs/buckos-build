@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/pulp/pulpcore/archive/refs/tags/3.92.0.tar.gz",
     sha256 = "6948c8aef00512682db598bbbee4fcef58df41a6e26d4f258c6f485f6744b616",
     deps = [
-        "dev-libs//serialization/protobuf:protobuf",
+        "//packages/linux/dev-libs/serialization/protobuf:protobuf",
     ],
     maintainers = ["buckos"],
 )

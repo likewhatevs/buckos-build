@@ -30,7 +30,7 @@ cmake_package(
         "-DLIBIGL_WITH_PYTHON=OFF",
     ],
     deps = [
-        "dev-libs//eigen:eigen",
+        "//packages/linux/dev-libs/eigen:eigen",
     ],
     visibility = ["PUBLIC"],
 )

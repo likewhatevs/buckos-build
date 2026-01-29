@@ -32,7 +32,7 @@ binary_package(
         ln -sf libdto.so.1.0 $OUT/usr/lib64/libdto.so
     """,
     deps = [
-        "system//libs/numactl:numactl",
+        "//packages/linux/system/libs/numactl:numactl",
     ],
     visibility = ["PUBLIC"],
 )

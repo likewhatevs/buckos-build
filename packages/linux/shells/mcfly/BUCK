@@ -13,7 +13,7 @@ cargo_package(
     license = "MIT",
     cargo_args = [],
     deps = [
-        "system//libs/database/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
     visibility = ["PUBLIC"],
 )

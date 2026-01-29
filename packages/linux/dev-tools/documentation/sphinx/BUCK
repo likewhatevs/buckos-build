@@ -42,7 +42,7 @@ python_package(
     homepage = "https://www.sphinx-doc.org/",
     license = "BSD-2-Clause",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

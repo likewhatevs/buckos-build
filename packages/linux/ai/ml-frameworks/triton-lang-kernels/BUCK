@@ -6,7 +6,7 @@ python_package(
     src_uri = "https://github.com/triton-lang/kernels/archive/eeeebdd8be7d13629de22d600621e6234057eed3.tar.gz",
     sha256 = "ba589f4eff4c02a0678077c202535a271ada368be525f8e5dbd0bb49cade3974",
     deps = [
-        "ai//ml-frameworks/pytorch:pytorch",
-        "ai//ml-frameworks/triton:triton",
+        "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
+        "//packages/linux/ai/ml-frameworks/triton:triton",
     ],
 )

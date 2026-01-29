@@ -20,12 +20,12 @@ autotools_package(
         "-python": "--disable-python",
     },
     use_deps = {
-        "python": ["lang//python:python"],
+        "python": ["//packages/linux/lang/python:python"],
     },
     configure_args = [],
     deps = [],
     bdepend = [
-        "dev-tools//dev-utils/gperf:gperf",
+        "//packages/linux/dev-tools/dev-utils/gperf:gperf",
     ],
     visibility = ["PUBLIC"],
 )

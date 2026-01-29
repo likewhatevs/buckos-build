@@ -25,7 +25,7 @@ autotools_package(
         "-threads": "--disable-threads",
     },
     use_deps = {
-        "nls": ["dev-libs//misc/gettext:gettext"],
+        "nls": ["//packages/linux/dev-libs/misc/gettext:gettext"],
     },
     configure_args = [
         "--prefix=/usr",

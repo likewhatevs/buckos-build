@@ -25,7 +25,7 @@ cmake_package(
     use_defaults = ["cli", "shared", "asm", "pic"],
     deps = [],
     use_deps = {
-        "numa": ["system//libs/numa:numactl"],
+        "numa": ["//packages/linux/system/libs/numa:numactl"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

@@ -42,9 +42,9 @@ meson_package(
         "-vala": "-Dvapi=false",
     },
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/dbus:dbus",
-        "system//security/auth/privilege:polkit",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/security/auth/privilege:polkit",
     ],
     visibility = ["PUBLIC"],
 )
@@ -77,10 +77,10 @@ meson_package(
         "-Dargyllcms_sensor=false",
     ],
     deps = [
-        "dev-libs//glib:glib",
-        "system//libs/ipc/dbus:dbus",
-        "system//security/auth/privilege:polkit",
-        "system//libs/graphics/lcms2:lcms2",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/security/auth/privilege:polkit",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
     ],
     visibility = ["PUBLIC"],
 )
@@ -107,8 +107,8 @@ meson_package(
     ],
     deps = [
         ":colord",
-        "desktop//gtk:gtk3",
-        "desktop//gtk:gtk4",
+        "//packages/linux/desktop/gtk:gtk3",
+        "//packages/linux/desktop/gtk:gtk4",
     ],
     visibility = ["PUBLIC"],
 )

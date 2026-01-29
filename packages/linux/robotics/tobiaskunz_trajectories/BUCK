@@ -9,6 +9,6 @@ cmake_package(
         "-DCMAKE_CXX_FLAGS=-Wno-unused-variable -Wno-reorder -Wno-unused-function",
     ],
     deps = [
-        "robotics//eigen3:eigen3",
+        "//packages/linux/robotics/eigen3:eigen3",
     ],
 )

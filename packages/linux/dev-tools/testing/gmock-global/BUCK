@@ -11,7 +11,7 @@ simple_package(
     homepage = "https://github.com/apriorit/gmock-global",
     license = "MIT",
     deps = [
-        "dev-tools//testing:googletest",
+        "//packages/linux/dev-tools/testing:googletest",
     ],
     build_commands = [
         "install -Dm644 gmock-global.h ${PREFIX}/include/gmock-global.h",

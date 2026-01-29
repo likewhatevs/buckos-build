@@ -13,15 +13,15 @@ autotools_package(
     iuse = ["ssl", "ipv6", "ldap", "pam", "sasl", "snmp", "icap", "ecap"],
     use_defaults = ["ssl", "ipv6"],
     deps = [
-        "system//libs/security/libcap:libcap",
-        "dev-libs//xml/libxml2:libxml2",
-        "dev-libs//expat:expat",
+        "//packages/linux/system/libs/security/libcap:libcap",
+        "//packages/linux/dev-libs/xml/libxml2:libxml2",
+        "//packages/linux/dev-libs/expat:expat",
     ],
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "ldap": ["network//ldap/openldap:openldap"],
-        "pam": ["system//libs/auth/pam:pam"],
-        "sasl": ["system//libs/auth/cyrus-sasl:cyrus-sasl"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "ldap": ["//packages/linux/network/ldap/openldap:openldap"],
+        "pam": ["//packages/linux/system/libs/auth/pam:pam"],
+        "sasl": ["//packages/linux/system/libs/auth/cyrus-sasl:cyrus-sasl"],
     },
     configure_args = [
         "--prefix=/usr",

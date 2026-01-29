@@ -10,9 +10,9 @@ cmake_package(
     homepage = "https://github.com/rapidsai/cugraph",
     license = "Apache-2.0",
     deps = [
-        "dev-libs//cuda/rmm:rmm",
-        "dev-libs//cuda/rapidsai-raft:rapidsai-raft",
-        "dev-libs//cuda/cucollections:cucollections",
+        "//packages/linux/dev-libs/cuda/rmm:rmm",
+        "//packages/linux/dev-libs/cuda/rapidsai-raft:rapidsai-raft",
+        "//packages/linux/dev-libs/cuda/cucollections:cucollections",
     ],
     pre_configure = """
 cd cpp

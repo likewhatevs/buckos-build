@@ -14,7 +14,7 @@ cargo_package(
         "--features=default",
     ],
     deps = [
-        "system//init/eudev:eudev",
+        "//packages/linux/system/init/eudev:eudev",
     ],
     visibility = ["PUBLIC"],
 )

@@ -12,9 +12,9 @@ autotools_package(
     use_defaults = ["ssl", "readline", "ncurses"],
 
     use_deps = {
-        "ssl": ["system//libs/crypto/openssl:openssl"],
-        "readline": ["core//readline:readline"],
-        "ncurses": ["core//ncurses:ncurses"],
+        "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
+        "readline": ["//packages/linux/core/readline:readline"],
+        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
     },
 
     use_configure = {},
@@ -37,11 +37,11 @@ mkdir -p "$DESTDIR/var/lib/softether"
 """,
 
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
 
     bdepend = [
-        "dev-tools//build-systems/cmake:cmake",
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
     ],
 
     description = "Multi-protocol VPN software (SSL-VPN, L2TP, IPsec, OpenVPN)",

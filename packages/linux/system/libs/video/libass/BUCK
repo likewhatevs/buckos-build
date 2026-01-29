@@ -28,10 +28,10 @@ autotools_package(
         "--enable-shared",
     ],
     deps = [
-        "system//libs/font/freetype:freetype",
-        "system//libs/font/fontconfig:fontconfig",
-        "system//libs/font/harfbuzz:harfbuzz",
-        "system//libs/font/fribidi:fribidi",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
+        "//packages/linux/system/libs/font/fribidi:fribidi",
     ],
     visibility = ["PUBLIC"],
 )

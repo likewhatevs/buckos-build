@@ -11,7 +11,7 @@ cmake_package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "dev-libs//misc/cpuinfo:cpuinfo",
+        "//packages/linux/dev-libs/misc/cpuinfo:cpuinfo",
     ],
     visibility = ["PUBLIC"],
 )

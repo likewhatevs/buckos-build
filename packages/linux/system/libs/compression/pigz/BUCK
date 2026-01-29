@@ -27,7 +27,7 @@ install -Dm755 unpigz "$DESTDIR/usr/bin/unpigz"
 install -Dm644 pigz.1 "$DESTDIR/usr/share/man/man1/pigz.1"
 """,
     deps = [
-        "core//zlib:zlib",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

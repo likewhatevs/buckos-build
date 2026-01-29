@@ -26,7 +26,7 @@ autotools_package(
     ],
     use_defaults = [],
     use_deps = {
-        "systemd": ["system//init/systemd:systemd"],
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     use_configure = {
         "-debug": "--disable-debug",
@@ -53,8 +53,8 @@ autotools_package(
         "--sysconfdir=/etc",
     ],
     deps = [
-        "core//ncurses:ncurses",
-        "system//libs/utility/libevent:libevent",
+        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/libs/utility/libevent:libevent",
     ],
     visibility = ["PUBLIC"],
 )

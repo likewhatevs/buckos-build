@@ -27,14 +27,14 @@ cp -r src/*.h "$DESTDIR/usr/include/usockets/"
 """,
 
     bdepend = [
-        "dev-libs//misc/libuv:libuv",
-        "system//libs/crypto/openssl:openssl",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
     ],
     rdepend = [
-        "dev-libs//misc/libuv:libuv",
-        "system//libs/crypto/openssl:openssl",
-        "core//zlib:zlib",
+        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],
 )

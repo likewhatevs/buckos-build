@@ -55,9 +55,9 @@ autotools_package(
         "--disable-ssh-token",
     ],
     deps = [
-        "core//util-linux:util-linux",
-        "system//libs/crypto/openssl:openssl",
-        "system//filesystem/management/lvm2:lvm2",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
     ],
     visibility = ["PUBLIC"],
 )

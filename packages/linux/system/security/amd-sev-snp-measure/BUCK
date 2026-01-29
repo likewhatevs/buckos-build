@@ -9,7 +9,7 @@ python_package(
     homepage = "https://github.com/virtee/sev-snp-measure",
     license = "Apache-2.0",
     deps = [
-        "lang//python:python",
+        "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],
 )

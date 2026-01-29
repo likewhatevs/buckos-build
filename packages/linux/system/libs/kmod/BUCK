@@ -66,9 +66,9 @@ done
 find $DESTDIR -name "*.la" -delete
 """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/xz:xz",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )
@@ -94,9 +94,9 @@ for tool in insmod rmmod lsmod modprobe modinfo depmod; do
 done
 """,
     deps = [
-        "core//zlib:zlib",
-        "system//libs/compression/xz:xz",
-        "system//libs/compression/zstd:zstd",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

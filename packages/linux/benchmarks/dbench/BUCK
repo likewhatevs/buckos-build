@@ -22,12 +22,12 @@ ebuild_package(
     homepage = "https://samba.org/ftp/tridge/dbench/",
     license = "GPL-3.0",
     depend = [
-        "system//libs/ipc/popt:popt",
+        "//packages/linux/system/libs/ipc/popt:popt",
     ],
     bdepend = [
-        "dev-tools//build-systems/autoconf:autoconf",
-        "dev-tools//build-systems/automake:automake",
-        "dev-tools//build-systems/libtool:libtool",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
     ],
 
     src_prepare = '''

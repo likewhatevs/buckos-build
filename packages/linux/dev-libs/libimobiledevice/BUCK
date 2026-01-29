@@ -19,8 +19,8 @@ autotools_package(
         "--with-openssl",
     ],
     deps = [
-        "dev-libs//libimobiledevice-glue:libimobiledevice-glue",
-        "dev-libs//libplist:libplist",
-        "system//libs/crypto/openssl:openssl",
+        "//packages/linux/dev-libs/libimobiledevice-glue:libimobiledevice-glue",
+        "//packages/linux/dev-libs/libplist:libplist",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 )

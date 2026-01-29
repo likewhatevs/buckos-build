@@ -41,7 +41,7 @@ mkdir -p "$DESTDIR/etc/vpnc"
 """,
 
     deps = [
-        "system//libs/crypto/libgcrypt:libgcrypt",
+        "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
     ],
 
     description = "Cisco VPN client compatible with vpnc",

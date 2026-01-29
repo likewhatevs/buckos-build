@@ -18,15 +18,15 @@ autotools_package(
     iuse = ["jemalloc"],
     use_defaults = [],
     bdepend = [
-        "dev-tools//documentation/sphinx:sphinx",
+        "//packages/linux/dev-tools/documentation/sphinx:sphinx",
     ],
     deps = [
-        "system//libs/utility/pcre2:pcre2",
-        "core//readline:readline",
-        "core//ncurses:ncurses",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/core/readline:readline",
+        "//packages/linux/core/ncurses:ncurses",
     ],
     use_deps = {
-        "jemalloc": ["dev-libs//misc/jemalloc:jemalloc"],
+        "jemalloc": ["//packages/linux/dev-libs/misc/jemalloc:jemalloc"],
     },
     configure_args = [
         "--prefix=/usr",
