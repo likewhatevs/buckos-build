@@ -20,11 +20,12 @@ ebuild_package(
     homepage = "https://palletsprojects.com/p/markupsafe/",
     license = "BSD-3-Clause",
     src_compile = """
-        python3 -m pip install --no-deps --target="$S/install" .
+        # Pure Python install - copy package directly to avoid pip/setuptools deps
+        true
     """,
     src_install = """
         mkdir -p "$DESTDIR/usr/lib/python3.12/site-packages"
-        cp -r "$S/install"/* "$DESTDIR/usr/lib/python3.12/site-packages/"
+        cp -r "$S/src/markupsafe" "$DESTDIR/usr/lib/python3.12/site-packages/"
     """,
     bdepend = [
         "//packages/linux/lang/python:python",
@@ -47,11 +48,12 @@ ebuild_package(
     homepage = "https://palletsprojects.com/p/jinja/",
     license = "BSD-3-Clause",
     src_compile = """
-        python3 -m pip install --no-deps --target="$S/install" .
+        # Pure Python install - copy package directly to avoid pip/setuptools deps
+        true
     """,
     src_install = """
         mkdir -p "$DESTDIR/usr/lib/python3.12/site-packages"
-        cp -r "$S/install"/* "$DESTDIR/usr/lib/python3.12/site-packages/"
+        cp -r "$S/src/jinja2" "$DESTDIR/usr/lib/python3.12/site-packages/"
     """,
     bdepend = [
         "//packages/linux/lang/python:python",
@@ -78,11 +80,12 @@ ebuild_package(
     homepage = "https://www.makotemplates.org/",
     license = "MIT",
     src_compile = """
-        python3 -m pip install --no-deps --target="$S/install" .
+        # Pure Python install - copy package directly to avoid pip/setuptools deps
+        true
     """,
     src_install = """
         mkdir -p "$DESTDIR/usr/lib/python3.12/site-packages"
-        cp -r "$S/install"/* "$DESTDIR/usr/lib/python3.12/site-packages/"
+        cp -r "$S/mako" "$DESTDIR/usr/lib/python3.12/site-packages/"
     """,
     bdepend = [
         "//packages/linux/lang/python:python",

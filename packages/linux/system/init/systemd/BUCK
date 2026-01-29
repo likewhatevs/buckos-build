@@ -79,7 +79,7 @@ FUZZ_STUB
         "xz",
         "zstd",
     ],
-    use_defaults = ["pam", "acl", "lz4", "xz", "zstd"],
+    use_defaults = ["pam", "acl", "kmod", "lzma", "lz4", "xz", "zstd", "kernel-install"],
     use_deps = {
         "pam": ["//packages/linux/system/security/auth/pam:pam"],
         "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
@@ -87,8 +87,8 @@ FUZZ_STUB
     use_meson = {
         "apparmor": "-Dapparmor=enabled",
         "-apparmor": "-Dapparmor=disabled",
-        "boot": "-Dgnu-efi=enabled",
-        "-boot": "-Dgnu-efi=disabled",
+        "boot": "-Dbootloader=enabled",
+        "-boot": "-Dbootloader=disabled",
         "bpf": "-Dbpf-framework=enabled",
         "-bpf": "-Dbpf-framework=disabled",
         "cgroup-hybrid": "-Ddefault-hierarchy=hybrid",
@@ -154,26 +154,16 @@ FUZZ_STUB
         "-Dsysconfdir=/etc",
         "-Dmode=release",
         # Disable features not needed (feature type: enabled/disabled/auto)
+        # Note: features controlled by use_meson are set via use_defaults, NOT here
         "-Dselinux=disabled",
         "-Daudit=disabled",
-        "-Dlibcryptsetup=enabled",
         "-Dgcrypt=disabled",
-        "-Dp11kit=disabled",
-        "-Dlibfido2=disabled",
-        "-Dtpm2=disabled",
-        "-Dqrencode=disabled",
-        "-Dmicrohttpd=disabled",
-        "-Dlibcurl=disabled",
-        "-Delfutils=disabled",
         # Compression support
         "-Dzlib=enabled",
         "-Dbzip2=disabled",
-        "-Dxz=enabled",
         "-Dlz4=enabled",
         "-Dzstd=enabled",
         "-Ddefault-compression=zstd",
-        # Enable kmod support for systemd-modules-load (required for initramfs)
-        "-Dkmod=enabled",
         # Minimal components
         "-Dstandalone-binaries=true",
         "-Dstatic-libsystemd=false",
@@ -187,7 +177,6 @@ FUZZ_STUB
         "-Dslow-tests=false",
         "-Dfuzz-tests=false",
         # Disable network components not needed for base install
-        "-Dresolve=false",
         "-Dtimesyncd=false",
         "-Dnetworkd=false",
         # Essential boot/init components (required for initramfs and system boot)
@@ -198,7 +187,6 @@ FUZZ_STUB
         "-Dhibernate=true",      # hibernate/suspend support
         "-Dldconfig=true",       # ldconfig support
         "-Defi=true",            # EFI support
-        "-Dkernel-install=true", # kernel-install helper
         # Keep essential components (boolean type: true/false)
         "-Dlogind=true",
         "-Dhostnamed=true",
@@ -209,8 +197,6 @@ FUZZ_STUB
         "-Dcoredump=false",
         "-Dpstore=false",
         "-Doomd=false",
-        "-Dimportd=disabled",
-        "-Dhomed=disabled",
         "-Dportabled=false",
         "-Dsysext=false",
         "-Duserdb=false",
@@ -228,11 +214,22 @@ FUZZ_STUB
 # Install with meson
 meson install -C build --destdir "$DESTDIR"
 
-# Fix hardcoded build paths in systemd unit files
-# Meson's find_program() finds dependencies at build paths, which don't exist at runtime
-echo "Fixing hardcoded build paths in systemd unit files..."
-find "$DESTDIR/usr/lib/systemd/system" -name "*.service" -type f -exec sed -i 's|/home/daniel/git/buckos-build/buck-out/[^/]*/[^/]*/[^/]*/[^/]*/packages/linux/system/libs/kmod/__kmod__/kmod/usr/bin/kmod|/usr/bin/kmod|g' {} \;
-echo "Fixed kmod paths in systemd unit files"
+# Fix ALL hardcoded build paths in systemd files
+# Meson's find_program() resolves dependencies to their build-time paths
+# (e.g. /data/.../buck-out/.../util-linux/__util-linux__/util-linux/bin/mount)
+# These must be converted to runtime paths (e.g. /bin/mount)
+echo "Fixing hardcoded build paths in all systemd files..."
+fix_count=0
+find "$DESTDIR" -type f | while read -r f; do
+    if grep -q 'buck-out' "$f" 2>/dev/null; then
+        # Pattern: <anything>/buck-out/<anything>/__<target>__/<output-dir>/<actual-path>
+        # Replace with: /<actual-path>
+        sed -i -E 's|[^ "=]*/buck-out/[^ "=]*__[^/]+__/[^/]+/|/|g' "$f"
+        fix_count=$((fix_count + 1))
+        echo "  Fixed: ${f#$DESTDIR}"
+    fi
+done
+echo "Fixed hardcoded build paths in $fix_count files"
 """,
     deps = [
         "//packages/linux/core/util-linux:util-linux",  # libmount, libblkid
@@ -243,11 +240,13 @@ echo "Fixed kmod paths in systemd unit files"
         "//packages/linux/system/libs/compression/zstd:zstd",  # For zstd compression
         "//packages/linux/system/libs/ipc/libcap:libcap",  # Required - POSIX capabilities
         "//packages/linux/system/libs/kmod:kmod",  # For systemd-modules-load
-        # For LUKS/dm-crypt support (cryptsetup and its dependencies)
-        "//packages/linux/system/security/cryptsetup:cryptsetup",
-        "//packages/linux/system/security/cryptsetup:lvm2",  # devmapper
+        # cryptsetup/LUKS disabled for now (popt build issue)
+        # "//packages/linux/system/security/cryptsetup:cryptsetup",
+        # "//packages/linux/system/security/cryptsetup:lvm2",  # devmapper
         "//packages/linux/system/init/eudev:eudev",  # libudev (needed by lvm2/devmapper)
         "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
+        "//packages/linux/system/libs/ipc/attr:attr",  # libattr needed by libacl
         "//packages/linux/system/libs/data/json-c:json-c",
         "//packages/linux/system/libs/crypto/argon2:argon2",
     ],

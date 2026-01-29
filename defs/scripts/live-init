@@ -202,19 +202,22 @@ EOF
 switch_root() {
     log "Switching to live root filesystem..."
 
-    # Clean up
+    # Clean up initramfs mounts before switch_root
+    # switch_root needs to be able to remove the old root contents
+    umount /dev/pts 2>/dev/null || true
     cd /mnt/root
 
-    # Find init in new root
-    INIT="/sbin/init"
-    if [ ! -x "/mnt/root$INIT" ]; then
-        if [ -x "/mnt/root/lib/systemd/systemd" ]; then
-            INIT="/lib/systemd/systemd"
-        elif [ -x "/mnt/root/usr/lib/systemd/systemd" ]; then
-            INIT="/usr/lib/systemd/systemd"
-        elif [ -x "/mnt/root/bin/init" ]; then
-            INIT="/bin/init"
-        fi
+    # Find init in new root - prefer systemd if available
+    if [ -x "/mnt/root/usr/lib/systemd/systemd" ]; then
+        INIT="/usr/lib/systemd/systemd"
+    elif [ -x "/mnt/root/lib/systemd/systemd" ]; then
+        INIT="/lib/systemd/systemd"
+    elif [ -x "/mnt/root/sbin/init" ]; then
+        INIT="/sbin/init"
+    elif [ -x "/mnt/root/bin/init" ]; then
+        INIT="/bin/init"
+    else
+        INIT="/sbin/init"
     fi
 
     log "Using init: $INIT"
@@ -254,6 +257,7 @@ main() {
     echo ""
 
     mount_essential
+    parse_cmdline
 
     if ! find_boot_device; then
         error "Could not find live boot media!"
@@ -275,6 +279,7 @@ main() {
 
 # Parse kernel command line for options
 parse_cmdline() {
+    [ -f /proc/cmdline ] || return 0
     for arg in $(cat /proc/cmdline); do
         case "$arg" in
             live)
@@ -293,5 +298,4 @@ parse_cmdline() {
 }
 
 # Run main
-parse_cmdline
 main

@@ -39,7 +39,7 @@ fi
 chmod -R u+w . 2>/dev/null || find . -exec chmod u+w {} + 2>/dev/null || true
 """,
 
-    # libcap doesn't use autotools - it's pure Makefile-based
+    # libcap doesn't use autotools - pure Makefile-based build
     src_configure = '''
 # No configure step - Makefile-based build
 true
@@ -49,7 +49,8 @@ true
 make -j$(nproc) \\
     prefix=/usr \\
     lib=lib \\
-    RAISE_SETFCAP=no
+    RAISE_SETFCAP=no \\
+    PAM_CAP=no
 ''',
 
     src_install = '''
@@ -57,6 +58,7 @@ make DESTDIR="$DESTDIR" \\
     prefix=/usr \\
     lib=lib \\
     RAISE_SETFCAP=no \\
+    PAM_CAP=no \\
     install
 ''',
 

@@ -657,12 +657,12 @@ done
 # - For regular builds: Set LD_LIBRARY_PATH with non-toolchain library paths so that
 #   build tools (python3, etc.) from dependencies can find their shared libraries.
 if [ -n "$DEP_LIBPATH" ]; then
+    IFS=':' read -ra LIBPATH_PARTS <<< "$DEP_LIBPATH"
     if [ "$CROSS_COMPILING" != "true" ]; then
         # Filter out paths that would break host tools:
         # - /tools/lib paths (bootstrap cross-compiled libraries)
         # - Paths containing libc.so (cross-compiled glibc)
         HOST_LIBPATH=""
-        IFS=':' read -ra LIBPATH_PARTS <<< "$DEP_LIBPATH"
         for libpath in "${LIBPATH_PARTS[@]}"; do
             if [[ "$libpath" == */tools/lib* ]]; then
                 continue  # Skip bootstrap toolchain paths
@@ -675,8 +675,27 @@ if [ -n "$DEP_LIBPATH" ]; then
         if [ -n "$HOST_LIBPATH" ]; then
             export LD_LIBRARY_PATH="${HOST_LIBPATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
         fi
+    else
+        # Cross-compilation: most dep libraries are cross-compiled against BuckOS
+        # glibc and will break host tools if loaded. Only expose host-compatible
+        # libraries: Python (built with use_bootstrap=False, linked to host glibc).
+        HOST_LIBPATH=""
+        for libpath in "${LIBPATH_PARTS[@]}"; do
+            if ls "$libpath"/libpython*.so* >/dev/null 2>&1; then
+                HOST_LIBPATH="${HOST_LIBPATH:+$HOST_LIBPATH:}$libpath"
+            fi
+        done
+        if [ -n "$HOST_LIBPATH" ]; then
+            export LD_LIBRARY_PATH="${HOST_LIBPATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        fi
     fi
-    export LIBRARY_PATH="${DEP_LIBPATH}"
+    # Only set LIBRARY_PATH for non-cross builds. During cross-compilation,
+    # the cross-compiler uses --sysroot and LDFLAGS for library paths.
+    # Setting LIBRARY_PATH globally would leak cross-compiled library paths
+    # to host tools (gcc, ld) used for build-time code generators.
+    if [ "$CROSS_COMPILING" != "true" ]; then
+        export LIBRARY_PATH="${DEP_LIBPATH}"
+    fi
     DEP_LDFLAGS=""
     IFS=':' read -ra LIB_DIRS <<< "$DEP_LIBPATH"
     for lib_dir in "${LIB_DIRS[@]}"; do

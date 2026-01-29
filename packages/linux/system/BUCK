@@ -646,6 +646,8 @@ rootfs(
         "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
+        # Init system
+        "//packages/linux/system/init/systemd:systemd",
         # Device management and session
         "//packages/linux/system/init/eudev:eudev",
         "//packages/linux/system/libs/libseat:libseat",

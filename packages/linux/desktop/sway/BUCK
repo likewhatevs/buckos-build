@@ -90,6 +90,8 @@ meson_package(
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/system/libs/font/fribidi:fribidi",
         "//packages/linux/desktop/sway:wlroots",
+        "//packages/linux/system/libs/libseat:libseat",  # Transitive dep via wlroots - needed for pkg-config resolution
+        "//packages/linux/system/libs/input/mtdev:mtdev",  # Transitive dep via libinput - needed for linking
     ],
     visibility = ["PUBLIC"],
 )
@@ -125,6 +127,8 @@ meson_package(
         "//packages/linux/desktop/libinput:libinput",
         "//packages/linux/desktop/libdrm:libdrm",
         "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/libs/libseat:libseat",  # Session management (required for DRM access)
+        "//packages/linux/system/init/eudev:eudev",  # libudev - required for session support (libseat + libudev = session)
     ],
     visibility = ["PUBLIC"],
 )

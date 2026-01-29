@@ -81,6 +81,7 @@ echo "depends bli part_gpt" > grub-core/extra_deps.lst
         "--with-platform=efi",
         "--disable-werror",
         "--disable-rpath",
+        "--disable-shim-lock",  # Don't require shim for Secure Boot (unsigned ISO)
     ],
     deps = [
         "//packages/linux/system/libs/compression/xz:xz",
