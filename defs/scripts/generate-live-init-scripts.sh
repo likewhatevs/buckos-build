@@ -17,6 +17,8 @@ mkdir -p "$OUT/sbin"
 mkdir -p "$OUT/etc/sddm.conf.d"
 mkdir -p "$OUT/etc/xdg/autostart"
 mkdir -p "$OUT/usr/share/applications"
+mkdir -p "$OUT/etc/systemd/system/getty@tty1.service.d"
+mkdir -p "$OUT/etc/systemd/system/multi-user.target.wants"
 
 # Create inittab for busybox init (live environment)
 cat > "$OUT/etc/inittab" << 'INITTAB'
@@ -172,9 +174,11 @@ PASSWD
 cat > "$OUT/etc/group" << 'GROUP'
 root:x:0:
 wheel:x:10:root,live
-audio:x:11:live
-video:x:12:live
-input:x:13:live
+audio:x:11:live,root
+video:x:12:live,root
+input:x:13:live,root
+seat:x:985:root
+render:x:986:root
 live:x:1000:
 nobody:x:65534:
 sddm:x:990:
@@ -360,5 +364,76 @@ chmod +x "$OUT/sbin/sway-init"
 
 # Create /sbin/init symlink to sway-init for live boot
 ln -sf sway-init "$OUT/sbin/init"
+
+# =============================================================================
+# Systemd configuration for live boot (when systemd is PID 1)
+# =============================================================================
+
+# Getty autologin on tty1 - auto-login as root for live session
+cat > "$OUT/etc/systemd/system/getty@tty1.service.d/autologin.conf" << 'GETTYCONF'
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
+Type=idle
+GETTYCONF
+
+# Seatd service for session management (needed by sway/wlroots)
+cat > "$OUT/etc/systemd/system/seatd.service" << 'SEATD'
+[Unit]
+Description=Seat management daemon
+Documentation=man:seatd(1)
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/seatd -g seat
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+SEATD
+
+# Enable seatd at boot
+ln -sf ../seatd.service "$OUT/etc/systemd/system/multi-user.target.wants/seatd.service"
+
+# Create root's profile to auto-start sway on tty1
+mkdir -p "$OUT/root"
+cat > "$OUT/root/.bash_profile" << 'ROOTPROFILE'
+# Auto-start Sway on tty1 in live session
+if [ "$(tty)" = "/dev/tty1" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+    export XDG_RUNTIME_DIR=/run/user/0
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chmod 0700 "$XDG_RUNTIME_DIR"
+    export XDG_SESSION_TYPE=wayland
+    export QT_QPA_PLATFORM=wayland
+    export GDK_BACKEND=wayland
+
+    echo ""
+    echo "======================================"
+    echo "  Welcome to BuckOS Live"
+    echo "======================================"
+    echo ""
+
+    if [ -e /dev/dri/card0 ]; then
+        echo "Starting Sway Wayland compositor..."
+        exec sway
+    else
+        echo "No display detected (no /dev/dri/card0)"
+        echo "Dropping to shell. Type 'sway' to try manually."
+    fi
+fi
+ROOTPROFILE
+
+# Disable systemd-firstboot (live system is pre-configured)
+# Create the machine-id and locale so firstboot doesn't trigger
+mkdir -p "$OUT/etc"
+echo "buckos-live" > "$OUT/etc/machine-id"
+echo "LANG=C.UTF-8" > "$OUT/etc/locale.conf"
+echo "UTC" > "$OUT/etc/timezone"
+ln -sf /usr/share/zoneinfo/UTC "$OUT/etc/localtime" 2>/dev/null || true
+
+# Mask systemd-firstboot so it never runs on live system
+mkdir -p "$OUT/etc/systemd/system"
+ln -sf /dev/null "$OUT/etc/systemd/system/systemd-firstboot.service"
 
 echo "Live init scripts generated successfully in $OUT"
