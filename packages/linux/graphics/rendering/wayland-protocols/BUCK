@@ -16,15 +16,69 @@ meson_package(
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/system/libs/utility/libffi:libffi",
     ],
+    # Native wayland-scanner must run on build machine, use exec_bdepend
     exec_bdepend = [
-        "//packages/linux/graphics/rendering/wayland:wayland-host",  # Host wayland-scanner for build
-    ],
-    # Patch meson.build to use find_program instead of pkg-config dependency
-    patches = [
-        "patches/0001-use-find_program-for-wayland-scanner.patch",
+        "//packages/linux/graphics/rendering/wayland:wayland-scanner",
     ],
     meson_args = [
         "-Dtests=false",
     ],
+    # Set up environment to find native wayland-scanner
+    pre_configure = '''
+# Find native wayland-scanner from exec_bdepends
+IFS=':' read -ra DEP_ARRAY <<< "${EXEC_BDEP_BASE_DIRS:-}"
+SCANNER_PKG_CONFIG_PATH=""
+for dep_dir in "${DEP_ARRAY[@]}"; do
+    if [ -x "$dep_dir/usr/bin/wayland-scanner" ]; then
+        export WAYLAND_SCANNER="$dep_dir/usr/bin/wayland-scanner"
+        SCANNER_DIR="$dep_dir/usr/bin"
+        SCANNER_PKG_CONFIG_PATH="$dep_dir/usr/lib64/pkgconfig"
+        echo "Found native wayland-scanner: $WAYLAND_SCANNER"
+        break
+    fi
+done
+
+if [ -z "$WAYLAND_SCANNER" ]; then
+    # Fallback to host wayland-scanner
+    if [ -x "/usr/bin/wayland-scanner" ]; then
+        export WAYLAND_SCANNER="/usr/bin/wayland-scanner"
+        SCANNER_DIR="/usr/bin"
+        SCANNER_PKG_CONFIG_PATH="/usr/lib64/pkgconfig"
+        echo "Using host wayland-scanner: $WAYLAND_SCANNER"
+    else
+        echo "ERROR: Could not find native wayland-scanner" >&2
+        echo "EXEC_BDEP_BASE_DIRS: $EXEC_BDEP_BASE_DIRS" >&2
+        exit 1
+    fi
+fi
+
+# Add scanner to PATH
+export PATH="$SCANNER_DIR:$PATH"
+
+# Set PKG_CONFIG_PATH_FOR_BUILD for native package lookups
+if [ -n "$SCANNER_PKG_CONFIG_PATH" ]; then
+    export PKG_CONFIG_PATH_FOR_BUILD="$SCANNER_PKG_CONFIG_PATH${PKG_CONFIG_PATH_FOR_BUILD:+:$PKG_CONFIG_PATH_FOR_BUILD}"
+    echo "PKG_CONFIG_PATH_FOR_BUILD: $PKG_CONFIG_PATH_FOR_BUILD"
+fi
+
+# Create meson native file
+cat > native.ini << EOF
+[binaries]
+wayland-scanner = '$WAYLAND_SCANNER'
+
+[built-in options]
+pkg_config_path = ['$SCANNER_PKG_CONFIG_PATH']
+EOF
+''',
+    src_configure = '''
+rm -rf "${BUILD_DIR:-build}"
+
+meson setup "${BUILD_DIR:-build}" \
+    --prefix="${EPREFIX:-/usr}" \
+    --libdir="${LIBDIR:-lib64}" \
+    --buildtype="${MESON_BUILD_TYPE:-release}" \
+    --native-file=native.ini \
+    -Dtests=false
+''',
     visibility = ["PUBLIC"],
 )

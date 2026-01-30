@@ -91,13 +91,40 @@ fi
 
     src_configure = """
 # OpenSSL uses ./config not ./configure
-./config \\
-    --prefix=/usr \\
-    --openssldir=/etc/ssl \\
-    --libdir=lib \\
-    shared \\
-    zlib-dynamic \\
-    threads
+# For cross-compilation, detect target from CC or CHOST
+if [ -n "${CHOST}" ]; then
+    # CHOST is set - use it to determine OpenSSL target
+    case "${CHOST}" in
+        aarch64*|arm64*)
+            OPENSSL_TARGET="linux-aarch64"
+            ;;
+        x86_64*)
+            OPENSSL_TARGET="linux-x86_64"
+            ;;
+        *)
+            # Let config auto-detect
+            OPENSSL_TARGET=""
+            ;;
+    esac
+fi
+
+if [ -n "$OPENSSL_TARGET" ]; then
+    ./Configure $OPENSSL_TARGET \\
+        --prefix=/usr \\
+        --openssldir=/etc/ssl \\
+        --libdir=lib \\
+        shared \\
+        zlib-dynamic \\
+        threads
+else
+    ./config \\
+        --prefix=/usr \\
+        --openssldir=/etc/ssl \\
+        --libdir=lib \\
+        shared \\
+        zlib-dynamic \\
+        threads
+fi
 """,
 
     src_compile = """

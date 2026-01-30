@@ -1673,30 +1673,72 @@ ROOTFS="$1"
 shift
 
 # Create base directory structure
-# Note: lib64 is created as a symlink below for aarch64 compatibility
-mkdir -p "$ROOTFS"/{bin,sbin,lib,usr/{bin,sbin,lib},etc,var,tmp,proc,sys,dev,run,root,home}
+# Note: Don't create /bin, /sbin, /lib, /lib64 here - baselayout provides them as symlinks (merged-usr)
+mkdir -p "$ROOTFS"/{usr/{bin,sbin,lib},etc,var,tmp,proc,sys,dev,run,root,home}
+
+# Function to recursively merge package directories
+merge_package() {
+    local src="$1"
+    local dst="$ROOTFS"
+
+    # If src is a symlink to a directory, follow it
+    if [ -L "$src" ]; then
+        src="$(readlink -f "$src")"
+    fi
+
+    if [ ! -d "$src" ]; then
+        return
+    fi
+
+    # Check if this looks like a package directory (has usr/, lib/, bin/, etc.)
+    # If it does, merge its contents directly
+    if [ -d "$src/usr" ] || [ -d "$src/bin" ] || [ -d "$src/lib" ] || [ -d "$src/etc" ]; then
+        # Handle merged-usr: if package has /bin, /sbin, or /lib and destination has them as symlinks,
+        # copy the contents into the symlink target instead of trying to replace the symlink
+        # Use tar to properly merge directory trees (handles nested directories correctly)
+        # --keep-directory-symlink preserves symlinks like /lib -> /usr/lib
+        tar -C "$src" -c . | tar -C "$dst" -x --keep-directory-symlink 2>/dev/null || true
+    else
+        # This is a meta-package directory with subdirs that are package names
+        # Recursively process each subdirectory
+        for subdir in "$src"/*; do
+            if [ -d "$subdir" ] || [ -L "$subdir" ]; then
+                merge_package "$subdir"
+            fi
+        done
+    fi
+}
 
 # Copy packages
 for pkg_dir in "$@"; do
-    if [ -d "$pkg_dir" ]; then
-        cp -a "$pkg_dir"/* "$ROOTFS"/ 2>/dev/null || true
+    if [ -d "$pkg_dir" ] || [ -L "$pkg_dir" ]; then
+        merge_package "$pkg_dir"
     fi
 done
 
-# Fix lib64 for aarch64: merge lib64 contents into lib and create symlinks
-# Some packages install to lib64 (x86_64 convention) but aarch64 uses lib
-if [ -d "$ROOTFS/lib64" ] && [ ! -L "$ROOTFS/lib64" ]; then
-    # Move lib64 contents to lib
-    cp -a "$ROOTFS/lib64/"* "$ROOTFS/lib/" 2>/dev/null || true
-    rm -rf "$ROOTFS/lib64"
-    ln -sf lib "$ROOTFS/lib64"
+# Fix merged-usr layout: if /bin, /sbin, /lib ended up as directories instead of symlinks,
+# move their contents to /usr and recreate symlinks
+if [ -d "$ROOTFS/bin" ] && [ ! -L "$ROOTFS/bin" ]; then
+    mkdir -p "$ROOTFS/usr/bin"
+    cp -a "$ROOTFS/bin/"* "$ROOTFS/usr/bin/" 2>/dev/null || true
+    rm -rf "$ROOTFS/bin"
+    ln -s usr/bin "$ROOTFS/bin"
 fi
-if [ -d "$ROOTFS/usr/lib64" ] && [ ! -L "$ROOTFS/usr/lib64" ]; then
-    # Move usr/lib64 contents to usr/lib
-    cp -a "$ROOTFS/usr/lib64/"* "$ROOTFS/usr/lib/" 2>/dev/null || true
-    rm -rf "$ROOTFS/usr/lib64"
-    ln -sf lib "$ROOTFS/usr/lib64"
+if [ -d "$ROOTFS/sbin" ] && [ ! -L "$ROOTFS/sbin" ]; then
+    mkdir -p "$ROOTFS/usr/sbin"
+    cp -a "$ROOTFS/sbin/"* "$ROOTFS/usr/sbin/" 2>/dev/null || true
+    rm -rf "$ROOTFS/sbin"
+    ln -s usr/sbin "$ROOTFS/sbin"
 fi
+if [ -d "$ROOTFS/lib" ] && [ ! -L "$ROOTFS/lib" ]; then
+    mkdir -p "$ROOTFS/usr/lib"
+    cp -a "$ROOTFS/lib/"* "$ROOTFS/usr/lib/" 2>/dev/null || true
+    rm -rf "$ROOTFS/lib"
+    ln -s usr/lib "$ROOTFS/lib"
+fi
+
+# Note: lib64 handling removed - on x86_64, /lib64/ld-linux-x86-64.so.2 must exist
+# aarch64-specific builds should handle lib64 merging in their own assembly if needed
 
 # Create compatibility symlinks for /bin -> /usr/bin
 # Many scripts expect common utilities in /bin (especially /bin/sh)
@@ -1709,6 +1751,12 @@ done
 # Set permissions
 chmod 1777 "$ROOTFS/tmp"
 chmod 755 "$ROOTFS/root"
+
+# Run ldconfig to generate dynamic linker cache (ld.so.cache)
+# This ensures shared libraries are found at boot time
+if [ -f "$ROOTFS/etc/ld.so.conf" ]; then
+    ldconfig -r "$ROOTFS" 2>/dev/null || true
+fi
 """
 
     script = ctx.actions.write("assemble.sh", script_content, is_executable = True)
@@ -4933,7 +4981,9 @@ def ebuild_package(
 
     # Handle bdepend - it might be a select() or a list
     # If it's a select, we can't modify it, so wrap it in a list concatenation
-    is_bdepend_select = type(bdepend) == "selector"
+    # Check if bdepend is a select by checking the type name
+    bdepend_type = str(type(bdepend))
+    is_bdepend_select = "select" in bdepend_type.lower()
     if is_bdepend_select:
         # bdepend is already a select - use it directly, add toolchain separately
         final_bdepend = bdepend

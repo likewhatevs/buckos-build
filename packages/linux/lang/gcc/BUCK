@@ -109,3 +109,73 @@ binary_package(
     ],
     visibility = ["PUBLIC"],
 )
+
+# =============================================================================
+# GCC Runtime Libraries - C/C++ runtime for target systems
+# =============================================================================
+# Provides ONLY the runtime libraries (libstdc++, libgcc_s) for installation
+# in target rootfs. Extracts from bootstrap-toolchain and installs to /usr/lib64.
+
+load("//defs:package_defs.bzl", "ebuild_package")
+
+ebuild_package(
+    name = "gcc-runtime",
+    source = ":gcc-src",  # Dummy source
+    version = "14.3.0",
+    category = "lang/runtime",
+    slot = "0",
+    description = "GCC runtime libraries (libstdc++, libgcc_s) for C/C++ applications",
+    homepage = "https://gcc.gnu.org/",
+    license = "GPL-3.0",
+
+    src_configure = "true",
+    src_compile = "true",
+
+    src_install = '''
+# Extract runtime libraries from bootstrap-toolchain and install to /usr/lib64
+mkdir -p "$DESTDIR/usr/lib64"
+
+# Find the bootstrap-toolchain in dependencies
+IFS=':' read -ra DEP_ARRAY <<< "$DEP_BASE_DIRS"
+for dep_dir in "${DEP_ARRAY[@]}"; do
+    if [ -f "$dep_dir/tools/.bootstrap-toolchain" ]; then
+        echo "Found bootstrap-toolchain at: $dep_dir"
+
+        # Copy libstdc++ runtime libraries
+        if [ -f "$dep_dir/tools/lib/libstdc++.so.6" ]; then
+            cp -a "$dep_dir/tools/lib/libstdc++.so.6"* "$DESTDIR/usr/lib64/"
+            echo "Installed libstdc++.so.6 to /usr/lib64/"
+        fi
+
+        # Copy libgcc_s runtime library
+        if [ -f "$dep_dir/tools/lib/libgcc_s.so.1" ]; then
+            cp -a "$dep_dir/tools/lib/libgcc_s.so.1"* "$DESTDIR/usr/lib64/"
+            echo "Installed libgcc_s.so.1 to /usr/lib64/"
+        fi
+
+        # Create symlinks
+        cd "$DESTDIR/usr/lib64"
+        [ -f libstdc++.so.6 ] && ln -sf libstdc++.so.6 libstdc++.so
+        [ -f libgcc_s.so.1 ] && ln -sf libgcc_s.so.1 libgcc_s.so
+
+        break
+    fi
+done
+
+# Verify libraries were installed
+if [ ! -f "$DESTDIR/usr/lib64/libstdc++.so.6" ]; then
+    echo "ERROR: libstdc++.so.6 not found!"
+    exit 1
+fi
+if [ ! -f "$DESTDIR/usr/lib64/libgcc_s.so.1" ]; then
+    echo "ERROR: libgcc_s.so.1 not found!"
+    exit 1
+fi
+
+echo "GCC runtime libraries installed successfully"
+ls -lh "$DESTDIR/usr/lib64/"libstdc++* "$DESTDIR/usr/lib64/"libgcc_s*
+''',
+
+    depend = ["toolchains//bootstrap:bootstrap-toolchain"],
+    visibility = ["PUBLIC"],
+)

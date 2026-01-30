@@ -7,9 +7,9 @@ load("//defs:use_flags.bzl", "set_use_flags")
 
 autotools_package(
     name = "iproute2",
-    version = "6.6.0",
-    src_uri = "https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.6.0.tar.xz",
-    sha256 = "8738c804afd09f0bf756937f0c3de23117832a98d8cbbf50386cf5005cd613ce",
+    version = "6.1.0",
+    src_uri = "https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.1.0.tar.xz",
+    sha256 = "5ce12a0fec6b212725ef218735941b2dab76244db7e72646a76021b0537b43ab",
     signature_required = False,
 
     # Only enable caps by default - elf has transitive dependency issues with pkg-config
@@ -61,8 +61,26 @@ sed -i 's/^check_elf$/echo "no" # check_elf disabled/' configure
 """,
 
     pre_configure = """
-# iproute2 uses a different build system - just run configure
+# iproute2 uses a different build system - run its configure first
 ./configure
+
+# Disable features that require missing libraries by patching config.mk
+# SELinux - not available
+sed -i 's/HAVE_SELINUX:=y/HAVE_SELINUX:=n/' config.mk
+sed -i '/-lselinux/d' config.mk
+sed -i '/-DHAVE_SELINUX/d' config.mk
+
+# ELF/BPF - libelf not available
+sed -i 's/HAVE_ELF:=y/HAVE_ELF:=n/' config.mk
+sed -i '/-lelf/d' config.mk
+sed -i '/-DHAVE_ELF/d' config.mk
+
+# libbpf - not available
+sed -i 's/HAVE_LIBBPF:=y/HAVE_LIBBPF:=n/' config.mk
+sed -i '/-lbpf/d' config.mk
+sed -i '/-DHAVE_LIBBPF/d' config.mk
+
+echo "Config.mk patched to disable SELinux, ELF, and libbpf support"
 """,
 
     # Skip autotools configure - already done in pre_configure

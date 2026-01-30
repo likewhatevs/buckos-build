@@ -31,5 +31,10 @@ autotools_package(
         "--disable-static",
         "--disable-gssapi",
     ],
+    src_install = '''
+make DESTDIR="$DESTDIR" install
+# Remove .la files to prevent libtool absolute path issues in cross-compilation
+find "$DESTDIR" -name '*.la' -delete
+''',
     visibility = ["PUBLIC"],
 )

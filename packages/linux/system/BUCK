@@ -69,17 +69,60 @@ FSTAB
 # Create passwd
 cat > $OUT/etc/passwd << 'PASSWD'
 root:x:0:0:root:/root:/bin/sh
+bin:x:1:1:bin:/dev/null:/bin/false
+daemon:x:2:2:daemon:/dev/null:/bin/false
+messagebus:x:81:81:System Message Bus:/dev/null:/bin/false
+systemd-journal:x:190:190:systemd Journal:/dev/null:/bin/false
+systemd-network:x:192:192:systemd Network Management:/dev/null:/bin/false
+systemd-resolve:x:193:193:systemd Resolver:/dev/null:/bin/false
+systemd-timesync:x:194:194:systemd Time Synchronization:/dev/null:/bin/false
 nobody:x:65534:65534:Nobody:/:/bin/false
 PASSWD
 # Create group
 cat > $OUT/etc/group << 'GROUP'
 root:x:0:
+bin:x:1:
+daemon:x:2:
+sys:x:3:
+adm:x:4:
+tty:x:5:
+disk:x:6:
+lp:x:7:
+mem:x:8:
+kmem:x:9:
 wheel:x:10:root
+cdrom:x:11:
+mail:x:12:
+man:x:15:
+dialout:x:18:
+floppy:x:19:
+games:x:20:
+utmp:x:22:
+tape:x:26:
+video:x:27:
+audio:x:29:
+messagebus:x:81:
+input:x:97:
+kvm:x:78:
+render:x:109:
+sgx:x:106:
+users:x:100:
+systemd-journal:x:190:
+systemd-network:x:192:
+systemd-resolve:x:193:
+systemd-timesync:x:194:
 nobody:x:65534:
 GROUP
 # Create shadow (empty password for root - LOGIN REQUIRES SETTING PASSWORD)
 cat > $OUT/etc/shadow << 'SHADOW'
 root::0:0:99999:7:::
+bin:!:0:0:99999:7:::
+daemon:!:0:0:99999:7:::
+messagebus:!:0:0:99999:7:::
+systemd-journal:!:0:0:99999:7:::
+systemd-network:!:0:0:99999:7:::
+systemd-resolve:!:0:0:99999:7:::
+systemd-timesync:!:0:0:99999:7:::
 nobody:!:0:0:99999:7:::
 SHADOW
 chmod 640 $OUT/etc/shadow
@@ -144,15 +187,17 @@ genrule(
     out = "baselayout",
     cmd = """
 mkdir -p $OUT
-# Create FHS directory structure
-mkdir -p $OUT/bin
-mkdir -p $OUT/sbin
-mkdir -p $OUT/lib
-mkdir -p $OUT/lib64
+# Create merged-usr FHS directory structure
+# First create the real directories in /usr
 mkdir -p $OUT/usr/bin
 mkdir -p $OUT/usr/sbin
 mkdir -p $OUT/usr/lib
 mkdir -p $OUT/usr/lib64
+# Then create symlinks from / to /usr (merged-usr layout)
+ln -s usr/bin $OUT/bin
+ln -s usr/sbin $OUT/sbin
+ln -s usr/lib $OUT/lib
+ln -s usr/lib64 $OUT/lib64
 mkdir -p $OUT/usr/share
 mkdir -p $OUT/usr/include
 mkdir -p $OUT/usr/local/bin
@@ -161,7 +206,6 @@ mkdir -p $OUT/usr/local/lib
 mkdir -p $OUT/etc
 mkdir -p $OUT/var/log
 mkdir -p $OUT/var/tmp
-mkdir -p $OUT/var/run
 mkdir -p $OUT/var/lock
 mkdir -p $OUT/tmp
 mkdir -p $OUT/proc
@@ -173,10 +217,32 @@ mkdir -p $OUT/home
 mkdir -p $OUT/mnt
 mkdir -p $OUT/opt
 mkdir -p $OUT/boot
+# Create /var/run as symlink to /run (modern systemd requirement)
+ln -s /run $OUT/var/run
 # Set permissions
 chmod 1777 $OUT/tmp
 chmod 1777 $OUT/var/tmp
 chmod 700 $OUT/root
+
+# Create /etc/shells - list of valid login shells
+cat > $OUT/etc/shells << 'SHELLS'
+/bin/sh
+/bin/bash
+/usr/bin/sh
+/usr/bin/bash
+SHELLS
+
+# Create locale.conf - UTF-8 locale required for KDE and GUI applications
+cat > $OUT/etc/locale.conf << 'LOCALECONF'
+LANG=en_US.UTF-8
+LC_COLLATE=C
+LOCALECONF
+
+# Create locale.gen for locale generation
+cat > $OUT/etc/locale.gen << 'LOCALEGEN'
+en_US.UTF-8 UTF-8
+en_US ISO-8859-1
+LOCALEGEN
 """,
     visibility = ["PUBLIC"],
 )
@@ -185,6 +251,171 @@ filegroup(
     name = "baselayout",
     srcs = [":baselayout-gen"],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Live ISO Configuration Targets
+# =============================================================================
+
+# DBus session policy for live environment
+genrule(
+    name = "live-dbus-policy-gen",
+    out = "live-dbus-policy",
+    cmd = """
+mkdir -p $OUT/etc/dbus-1/system.d
+
+cat > $OUT/etc/dbus-1/system.d/10-allow-session-creation.conf << 'DBUSEOF'
+<?xml version="1.0"?>
+<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+        "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+        <!-- Allow all users to create sessions via pam_systemd -->
+        <policy context="default">
+                <allow send_destination="org.freedesktop.login1"
+                       send_interface="org.freedesktop.login1.Manager"
+                       send_member="CreateSession"/>
+                <allow send_destination="org.freedesktop.login1"
+                       send_interface="org.freedesktop.login1.Manager"
+                       send_member="CreateSessionWithPIDFD"/>
+        </policy>
+</busconfig>
+DBUSEOF
+""",
+    visibility = ["PUBLIC"],
+)
+
+# SDDM configuration for live environment
+genrule(
+    name = "live-sddm-config-gen",
+    out = "live-sddm-config",
+    cmd = """
+mkdir -p $OUT/etc/sddm.conf.d
+cat > $OUT/etc/sddm.conf.d/autologin.conf << 'SDDMEOF'
+[Autologin]
+User=live
+Session=plasma.desktop
+SDDMEOF
+""",
+    visibility = ["PUBLIC"],
+)
+
+# Users and groups for live environment
+genrule(
+    name = "live-users-gen",
+    out = "live-users",
+    cmd = """
+mkdir -p $OUT/etc
+mkdir -p $OUT/home/live
+mkdir -p $OUT/var/empty
+
+echo "buckos-live" > $OUT/etc/hostname
+
+cat > $OUT/etc/passwd << 'PASSWDEOF'
+root:x:0:0:root:/root:/bin/bash
+polkitd:x:87:87:PolicyKit Daemon:/var/empty:/sbin/nologin
+live:x:1000:1000:Live User:/home/live:/bin/bash
+PASSWDEOF
+
+cat > $OUT/etc/group << 'GROUPEOF'
+root:x:0:
+polkitd:x:87:
+live:x:1000:
+GROUPEOF
+
+cat > $OUT/etc/shadow << 'SHADOWEOF'
+root:$6$buckos$fd.d0QE6ZS9SwcbOsmWW2EU6mLA1ornIaRnsvK0/EJC2uF5LSXnKWG3Jrb6E3ehDFriHsZdTqd00B6XwMfc48/:19000:0:99999:7:::
+polkitd:!:19000::::::
+live:$6$live$DGwTyJOHVdGXnIgakdVYF1yqVFI2k5.sn.mrenraSfBaEVrgfoJsHHqnGjq52SMkEo.KOT3SAoEGgtnPYZOFl1:19000:0:99999:7:::
+SHADOWEOF
+chmod 640 $OUT/etc/shadow
+chmod 755 $OUT/home/live
+chmod 755 $OUT/var/empty
+""",
+    visibility = ["PUBLIC"],
+)
+
+# Systemd tmpfiles configuration for live environment
+genrule(
+    name = "live-tmpfiles-gen",
+    out = "live-tmpfiles",
+    cmd = """
+mkdir -p $OUT/etc/tmpfiles.d
+cat > $OUT/etc/tmpfiles.d/live-session.conf << 'TMPFILESEOF'
+# Session tracking files for PAM
+f /run/utmp 0644 root root -
+f /var/log/wtmp 0644 root root -
+f /var/log/lastlog 0644 root root -
+TMPFILESEOF
+""",
+    visibility = ["PUBLIC"],
+)
+
+# Desktop installer shortcut
+genrule(
+    name = "live-desktop-gen",
+    out = "live-desktop",
+    cmd = """
+mkdir -p $OUT/home/live/Desktop
+cat > $OUT/home/live/Desktop/Install-BuckOS.desktop << 'DESKTOPEOF'
+[Desktop Entry]
+Type=Application
+Name=Install BuckOS
+Comment=Install BuckOS to your computer
+Exec=pkexec /usr/bin/buckos-installer
+Icon=system-software-install
+Terminal=false
+Categories=System;
+DESKTOPEOF
+chmod 755 $OUT/home/live/Desktop/Install-BuckOS.desktop
+chown -R 1000:1000 $OUT/home/live 2>/dev/null || true
+""",
+    visibility = ["PUBLIC"],
+)
+
+# SSH configuration for live environment
+genrule(
+    name = "live-ssh-config-gen",
+    out = "live-ssh-config",
+    cmd = """
+mkdir -p $OUT/etc/ssh/sshd_config.d
+cat > $OUT/etc/ssh/sshd_config.d/live.conf << 'SSHDEOF'
+# Allow root login for live environment only
+PermitRootLogin yes
+SSHDEOF
+""",
+    visibility = ["PUBLIC"],
+)
+
+# Systemd services for live environment
+genrule(
+    name = "live-systemd-config-gen",
+    out = "live-systemd-config",
+    cmd = """
+mkdir -p $OUT/etc/systemd/system
+mkdir -p $OUT/etc/systemd/system/multi-user.target.wants
+mkdir -p $OUT/etc/systemd/system/graphical.target.wants
+mkdir -p $OUT/etc/systemd/system/sockets.target.wants
+
+# Set graphical.target as default
+ln -sf /usr/lib/systemd/system/graphical.target $OUT/etc/systemd/system/default.target
+
+# Enable DBus (required for systemd-logind and KDE)
+ln -sf /usr/lib/systemd/system/dbus.service $OUT/etc/systemd/system/multi-user.target.wants/dbus.service
+ln -sf /usr/lib/systemd/system/dbus.socket $OUT/etc/systemd/system/sockets.target.wants/dbus.socket
+
+# Enable polkit (required for systemd-logind authorization)
+ln -sf /usr/lib/systemd/system/polkit.service $OUT/etc/systemd/system/multi-user.target.wants/polkit.service
+
+# Enable systemd-logind (required for loginctl and PAM sessions)
+ln -sf /usr/lib/systemd/system/systemd-logind.service $OUT/etc/systemd/system/multi-user.target.wants/systemd-logind.service
+
+# Enable SDDM display manager
+ln -sf /usr/lib/systemd/system/sddm.service $OUT/etc/systemd/system/graphical.target.wants/sddm.service
+
+# Enable sshd for remote access
+ln -sf /usr/lib/systemd/system/sshd.service $OUT/etc/systemd/system/multi-user.target.wants/sshd.service
+""",
     visibility = ["PUBLIC"],
 )
 
@@ -218,7 +449,8 @@ rootfs(
         # Networking
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/network/curl:curl",
-        "//packages/linux/network/openssh:openssh",
+        # TODO: OpenSSH 9.9p1 has build issues with cross-compilation (arc4random, strlcpy)
+        # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
     ],
@@ -505,7 +737,8 @@ rootfs(
         # Editors
         "//packages/linux/editors/vim:vim",
         # SSH for remote development
-        "//packages/linux/network/openssh:openssh",
+        # TEMPORARILY DISABLED for aarch64 cross-compilation (Fix #22)
+        # "//packages/linux/network/openssh:openssh",
     ],
     visibility = ["PUBLIC"],
 )
@@ -573,13 +806,26 @@ filegroup(
 # Live Root Filesystem - Full desktop environment
 # =============================================================================
 
-# Live rootfs with KDE Plasma desktop
+# Live rootfs with KDE Plasma desktop (systemd-only, no eudev)
 rootfs(
     name = "buckos-live-kde-rootfs",
     packages = [
         ":live-init-scripts-gen",
         ":baselayout-gen",
-        # Core system (from buckos-rootfs)
+        ":live-dbus-policy-gen",
+        ":live-sddm-config-gen",
+        ":live-users-gen",
+        ":live-tmpfiles-gen",
+        ":live-desktop-gen",
+        ":live-ssh-config-gen",
+        ":live-systemd-config-gen",
+        # C/C++ runtime (required for all dynamically-linked binaries)
+        "//packages/linux/core/glibc:glibc",
+        "//packages/linux/lang/gcc:gcc-runtime",  # Provides libstdc++.so.6, libgcc_s.so.1 for C++ apps
+
+        # Core system utilities
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/editors/grep:grep",
         "//packages/linux/system/libs/cpio:cpio",
         "//packages/linux/core/util-linux:util-linux",
         "//packages/linux/core/zlib:zlib",
@@ -587,29 +833,100 @@ rootfs(
         "//packages/linux/system/terminal/readline:readline",
         "//packages/linux/core/bash:bash",
         "//packages/linux/core/less:less",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/system/libs/compression/bzip2:bzip2",
         "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/libs/compression/lz4:lz4",
+        "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/core/procps-ng:procps-ng",
         "//packages/linux/core/file:file",
         "//packages/linux/system/apps/shadow:shadow",
+        # PAM runtime dependencies (required for login/authentication)
+        "//packages/linux/system/libs/ipc/libtirpc:libtirpc",
+        "//packages/linux/system/libs/network/libnsl:libnsl",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/network/curl:curl",
-        "//packages/linux/network/openssh:openssh",
+        # TEMPORARILY DISABLED for aarch64 cross-compilation (Fix #22)
+        # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
+        "//packages/linux/system/libs/kmod:kmod",  # Provides modprobe, lsmod, etc.
+
+        # Security and capabilities (required by systemd)
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/ipc/attr:attr",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
+        "//packages/linux/system/libs/crypto/argon2:argon2",
+        "//packages/linux/system/security/auth/privilege:polkit",  # Required for systemd-logind session creation
+
+        # Init system (systemd includes udevd, so no separate eudev needed)
+        "//packages/linux/system/init/systemd:systemd",
+
+        # Device management and session
+        # Note: eudev removed - systemd provides systemd-udevd
+        "//packages/linux/system/libs/libseat:libseat",
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/libs/kmod:kmod",
+
         # Graphics stack
         "//packages/linux/desktop/mesa:mesa",
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
         "//packages/linux/system/libs/input/libinput:libinput",
         "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/system/security/auth/biometric:pixman",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
+        "//packages/linux/system/libs/data/expat:expat",
+        "//packages/linux/system/libs/data/json-c:json-c",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/dev-libs/glib:glib",
+
+        # Input handling
+        "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
+        "//packages/linux/system/libs/input/libevdev:libevdev",
+
+        # Font rendering and fonts
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
+        # TEMPORARILY DISABLED for aarch64 cross-compilation (Fix #23 - x86 SSE2 flags)
+        # "//packages/linux/system/libs/font/graphite2:graphite2",
+        "//packages/linux/system/libs/font/fribidi:fribidi",
+        "//packages/linux/fonts/libraries/pango:pango",
+        "//packages/linux/fonts/collections/dejavu-fonts:dejavu-fonts",
+        "//packages/linux/fonts/collections/liberation-fonts:liberation-fonts",
+
         # KDE Plasma Desktop
         "//packages/linux/desktop/kde:kde-plasma",
         "//packages/linux/desktop/kde/apps:konsole",
         "//packages/linux/desktop/kde/apps:dolphin",
         "//packages/linux/desktop/kde/apps:kate",
+        # KDE/Graphics libraries (explicit dependencies - not auto-pulled from filegroup)
+        "//packages/linux/desktop/kde:libplasma",
+        "//packages/linux/desktop/kde:plasma5support",
+        "//packages/linux/desktop/kde:kdecoration2",
+        "//packages/linux/desktop/kde:kwayland",
+        "//packages/linux/desktop/kde:kscreenlocker",
+        "//packages/linux/desktop/kde:kglobalacceld",
+        "//packages/linux/desktop/kde:layer-shell-qt",
+        "//packages/linux/graphics/libepoxy:libepoxy",
+        # Graphics/Display libraries required by KWin
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
+        "//packages/linux/graphics/xorg/libxcvt:libxcvt",
+        "//packages/linux/graphics/utilities/libdisplay-info:libdisplay-info",
+        "//packages/linux/graphics/xorg/xcb-util-cursor:xcb-util-cursor",
+        "//packages/linux/graphics/xorg/xcb-util-image:xcb-util-image",
+        "//packages/linux/graphics/xorg/xcb-util-renderutil:xcb-util-renderutil",
+
         # Display Manager
         "//packages/linux/desktop/sddm:sddm",
+
+        # Audio (PipeWire with systemd support)
+        "//packages/linux/audio/daemons/pipewire:pipewire",
+        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
+
         # Development tools (for post-install)
         "//packages/linux/dev-tools/vcs/git:git",
         "//packages/linux/editors/vim:vim",
@@ -646,7 +963,8 @@ rootfs(
         "//packages/linux/system/libs/network/libnsl:libnsl",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/network/curl:curl",
-        "//packages/linux/network/openssh:openssh",
+        # TODO: OpenSSH 9.9p1 has build issues with cross-compilation (arc4random, strlcpy)
+        # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
         "//packages/linux/network/net-tools:net-tools",
@@ -676,7 +994,8 @@ rootfs(
         "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/font/fontconfig:fontconfig",
         "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
-        "//packages/linux/system/libs/font/graphite2:graphite2",
+        # TEMPORARILY DISABLED for aarch64 cross-compilation (Fix #23 - x86 SSE2 flags)
+        # "//packages/linux/system/libs/font/graphite2:graphite2",
         "//packages/linux/system/libs/font/fribidi:fribidi",
         "//packages/linux/fonts/libraries/pango:pango",
         "//packages/linux/system/libs/font/fcft:fcft",
@@ -713,7 +1032,7 @@ initramfs(
 # Live Installer ISO Images
 # =============================================================================
 
-# Live ISO with KDE Plasma desktop
+# Live ISO with KDE Plasma desktop (hybrid BIOS+UEFI boot)
 iso_image(
     name = "buckos-live-installer-kde-iso",
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
@@ -721,7 +1040,7 @@ iso_image(
     rootfs = ":buckos-live-kde-rootfs",
     boot_mode = "hybrid",
     volume_label = "BUCKOS_LIVE",
-    kernel_args = "quiet splash rdinit=/init",
+    kernel_args = "console=tty0 console=ttyS0,115200 init=/init quiet systemd.unified_cgroup_hierarchy=1",
     visibility = ["PUBLIC"],
 )
 
@@ -737,7 +1056,20 @@ iso_image(
     visibility = ["PUBLIC"],
 )
 
-# Main live installer ISO (defaults to KDE)
+# Live ISO with KDE Plasma desktop for aarch64 (UEFI boot)
+iso_image(
+    name = "buckos-live-installer-kde-iso-aarch64",
+    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
+    initramfs = ":buckos-live-initramfs",
+    rootfs = ":buckos-live-kde-rootfs",
+    boot_mode = "uefi",  # ARM boards typically use UEFI
+    volume_label = "BUCKOS_LIVE_ARM64",
+    kernel_args = "console=tty0 console=ttyAMA0,115200 init=/init quiet systemd.unified_cgroup_hierarchy=1",
+    default_target_platform = "//platforms:linux-aarch64-target",
+    visibility = ["PUBLIC"],
+)
+
+# Main live installer ISO (defaults to KDE x86_64)
 alias(
     name = "buckos-live-installer-iso",
     actual = ":buckos-live-installer-kde-iso",
@@ -803,13 +1135,15 @@ genrule(
     default_target_platform = "//platforms:linux-aarch64-target",
     cmd = """
 mkdir -p $OUT
-# Create FHS directory structure for ARM64
-mkdir -p $OUT/bin
-mkdir -p $OUT/sbin
-mkdir -p $OUT/lib
+# Create merged-usr FHS directory structure for ARM64
+# First create the real directories in /usr
 mkdir -p $OUT/usr/bin
 mkdir -p $OUT/usr/sbin
 mkdir -p $OUT/usr/lib
+# Then create symlinks from / to /usr (merged-usr layout)
+ln -s usr/bin $OUT/bin
+ln -s usr/sbin $OUT/sbin
+ln -s usr/lib $OUT/lib
 mkdir -p $OUT/usr/share
 mkdir -p $OUT/usr/include
 mkdir -p $OUT/usr/local/bin
@@ -877,7 +1211,8 @@ rootfs(
         # Networking
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/network/curl:curl",
-        "//packages/linux/network/openssh:openssh",
+        # TODO: OpenSSH 9.9p1 has build issues with cross-compilation (arc4random, strlcpy)
+        # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
         "//packages/linux/network/net-tools:net-tools",
@@ -1061,7 +1396,8 @@ rootfs(
         "//packages/linux/system/libs/network/libnsl:libnsl",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/network/curl:curl",
-        "//packages/linux/network/openssh:openssh",
+        # TODO: OpenSSH 9.9p1 has build issues with cross-compilation (arc4random, strlcpy)
+        # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
         "//packages/linux/network/net-tools:net-tools",

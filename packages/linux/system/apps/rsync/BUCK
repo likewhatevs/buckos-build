@@ -27,7 +27,8 @@ autotools_package(
         "xxhash",
         "zstd",
     ],
-    use_defaults = ["acl", "xattr"],
+    # TEMPORARILY DISABLED acl for aarch64 cross-compilation (Fix #26 - acl/libattr linking issue)
+    use_defaults = ["xattr"],
     use_deps = {
         "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
         "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],

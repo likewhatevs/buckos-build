@@ -109,11 +109,105 @@ _MESON_ECLASS = {
     "name": "meson",
     "description": "Support for meson-based packages",
     "src_configure": '''
-meson setup "${BUILD_DIR:-build}" \\
-    --prefix="${EPREFIX:-/usr}" \\
-    --libdir="${LIBDIR:-lib64}" \\
-    --buildtype="${MESON_BUILD_TYPE:-release}" \\
-    ${MESON_EXTRA_ARGS:-}
+# Wipe build directory first to ensure clean configuration
+# This must happen BEFORE generating cross-file
+if [ -d "${BUILD_DIR:-build}" ]; then
+    echo "Build directory exists, wiping for clean reconfiguration..."
+    rm -rf "${BUILD_DIR:-build}"
+fi
+
+# Generate meson cross-file when cross-compiling
+MESON_CROSS_FILE=""
+if [ "${CROSS_COMPILING:-false}" = "true" ] && [ -n "${CC:-}" ]; then
+    MESON_CROSS_FILE="${BUILD_DIR:-build}/cross-file.ini"
+    mkdir -p "${BUILD_DIR:-build}"
+
+    # Build c_args and cpp_args from CFLAGS/CXXFLAGS
+    # Split CFLAGS into array for proper meson format
+    MESON_C_ARGS=""
+    for flag in ${CFLAGS:-}; do
+        if [ -n "$MESON_C_ARGS" ]; then
+            MESON_C_ARGS="${MESON_C_ARGS}, '${flag}'"
+        else
+            MESON_C_ARGS="'${flag}'"
+        fi
+    done
+
+    MESON_CXX_ARGS=""
+    for flag in ${CXXFLAGS:-}; do
+        if [ -n "$MESON_CXX_ARGS" ]; then
+            MESON_CXX_ARGS="${MESON_CXX_ARGS}, '${flag}'"
+        else
+            MESON_CXX_ARGS="'${flag}'"
+        fi
+    done
+
+    MESON_LINK_ARGS=""
+    for flag in ${LDFLAGS:-}; do
+        if [ -n "$MESON_LINK_ARGS" ]; then
+            MESON_LINK_ARGS="${MESON_LINK_ARGS}, '${flag}'"
+        else
+            MESON_LINK_ARGS="'${flag}'"
+        fi
+    done
+
+    # Detect target architecture from CHOST or compiler
+    MESON_CPU_FAMILY="x86_64"
+    MESON_CPU="x86_64"
+    MESON_ENDIAN="little"
+
+    TARGET_ARCH="${CHOST:-$(${CC:-gcc} -dumpmachine)}"
+    case "$TARGET_ARCH" in
+        aarch64*|arm64*)
+            MESON_CPU_FAMILY="aarch64"
+            MESON_CPU="aarch64"
+            ;;
+        x86_64*|amd64*)
+            MESON_CPU_FAMILY="x86_64"
+            MESON_CPU="x86_64"
+            ;;
+        arm*)
+            MESON_CPU_FAMILY="arm"
+            MESON_CPU="arm"
+            ;;
+        riscv64*)
+            MESON_CPU_FAMILY="riscv64"
+            MESON_CPU="riscv64"
+            ;;
+    esac
+
+    cat > "$MESON_CROSS_FILE" << CROSSEOF
+[binaries]
+c = '${CC}'
+cpp = '${CXX}'
+ar = '${AR:-ar}'
+strip = '${STRIP:-strip}'
+pkgconfig = 'pkg-config'
+
+[built-in options]
+c_args = [${MESON_C_ARGS}]
+cpp_args = [${MESON_CXX_ARGS}]
+c_link_args = [${MESON_LINK_ARGS}]
+cpp_link_args = [${MESON_LINK_ARGS}]
+
+[host_machine]
+system = 'linux'
+cpu_family = '$MESON_CPU_FAMILY'
+cpu = '$MESON_CPU'
+endian = '$MESON_ENDIAN'
+CROSSEOF
+    echo "Generated meson cross-file: $MESON_CROSS_FILE"
+    cat "$MESON_CROSS_FILE"
+fi
+
+# Build meson command with optional cross-file
+MESON_CMD="meson setup \\"${BUILD_DIR:-build}\\" --prefix=\\"\${EPREFIX:-/usr}\\" --libdir=\\"\${LIBDIR:-lib64}\\" --buildtype=\\"\${MESON_BUILD_TYPE:-release}\\""
+if [ -n "$MESON_CROSS_FILE" ]; then
+    MESON_CMD="$MESON_CMD --cross-file=\\"$MESON_CROSS_FILE\\""
+fi
+MESON_CMD="$MESON_CMD \${MESON_EXTRA_ARGS:-}"
+
+eval $MESON_CMD
 ''',
     "src_compile": '''
 meson compile -C "${BUILD_DIR:-build}" -j${MAKEOPTS:-$(nproc)}
@@ -176,6 +270,10 @@ make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-}
 ''',
     "src_install": '''
 make DESTDIR="$DESTDIR" ${EXTRA_EMAKE:-} install
+# Remove .la files to prevent libtool absolute path issues in cross-compilation (CLAUDE.md #8)
+# Libtool .la files contain absolute paths like /usr/lib64/libfoo.so which point to host libraries
+# during cross-compilation, causing "file in wrong format" linker errors
+find "$DESTDIR" -name '*.la' -type f -delete 2>/dev/null || true
 ''',
     "src_test": '''
 if make -q check 2>/dev/null; then

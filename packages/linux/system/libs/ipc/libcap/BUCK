@@ -46,9 +46,16 @@ true
 ''',
 
     src_compile = '''
+# libcap's Makefile needs explicit CC and binutils tools for cross-compilation
+# Otherwise it finds host tools which generate/expect wrong arch
 make -j$(nproc) \\
     prefix=/usr \\
     lib=lib \\
+    CC="${CC:-gcc}" \\
+    BUILD_CC=gcc \\
+    AR="${AR:-ar}" \\
+    RANLIB="${RANLIB:-ranlib}" \\
+    OBJCOPY="${OBJCOPY:-objcopy}" \\
     RAISE_SETFCAP=no \\
     PAM_CAP=no
 ''',

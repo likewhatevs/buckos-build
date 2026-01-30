@@ -140,15 +140,36 @@ if [ -z "$_BSD_INC" ]; then
         fi
     done
 fi
+
+# Find GCC's internal include directory for stdatomic.h
+_GCC_INC=""
+if [ -n "${BOOTSTRAP_SYSROOT:-}" ]; then
+    for _gcc_inc in "$BOOTSTRAP_SYSROOT"/lib/gcc/*/*/include; do
+        if [ -f "$_gcc_inc/stdatomic.h" ]; then
+            _GCC_INC="$_gcc_inc"
+            echo "Found GCC include directory: $_GCC_INC"
+            break
+        fi
+    done
+fi
+
 if [ -n "$_BSD_INC" ]; then
     echo "src_compile: Found libbsd overlay at: $_BSD_INC"
-    # PREPEND overlay path so it's searched BEFORE sysroot/toolchain includes
+    # PREPEND overlay path but KEEP the existing CPPFLAGS which includes sysroot paths
+    # Also add GCC include directory for stdatomic.h
+    _EXTRA_INC=""
+    [ -n "$_GCC_INC" ] && _EXTRA_INC="-isystem $_GCC_INC"
     make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} \
-        CPPFLAGS="-isystem $_BSD_INC -DLIBBSD_OVERLAY ${CPPFLAGS:-}" \
-        CFLAGS="-isystem $_BSD_INC -DLIBBSD_OVERLAY ${CFLAGS:-}"
+        CPPFLAGS="-isystem $_BSD_INC -DLIBBSD_OVERLAY $_EXTRA_INC ${CPPFLAGS:-}" \
+        CFLAGS="-isystem $_BSD_INC -DLIBBSD_OVERLAY $_EXTRA_INC ${CFLAGS:-}" \
+        LIBS="${LIBS:-} -lbsd"
 else
     echo "WARNING: libbsd overlay not found in src_compile, building without it"
-    make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-}
+    _EXTRA_INC=""
+    [ -n "$_GCC_INC" ] && _EXTRA_INC="-isystem $_GCC_INC"
+    make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} \
+        CPPFLAGS="$_EXTRA_INC ${CPPFLAGS:-}" \
+        LIBS="${LIBS:-} -lbsd"
 fi
 """,
     deps = [

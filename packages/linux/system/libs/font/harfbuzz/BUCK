@@ -21,7 +21,8 @@ meson_package(
         "static-libs",
         "truetype",
     ],
-    use_defaults = ["graphite"],
+    # TEMPORARILY DISABLED graphite for aarch64 (Fix #23 - graphite2 has x86 SSE2 issues)
+    use_defaults = [],
     use_meson = {
         "static-libs": "-Ddefault_library=static",
         "-static-libs": "-Ddefault_library=shared",

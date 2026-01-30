@@ -99,17 +99,21 @@ for f in obj/build/dynamic/libzstd.so.*; do
 done
 
 # Create symlinks for shared library
-FULL_SO=$(ls obj/build/dynamic/libzstd.so.* 2>/dev/null | grep -v '\.so\.[0-9]*$' | head -1)
-if [ -n "$FULL_SO" ]; then
+# Find the actual library file (e.g., libzstd.so.1.5.6)
+FULL_SO=$(ls obj/build/dynamic/libzstd.so.*.*.* 2>/dev/null | head -1)
+if [ -n "$FULL_SO" ] && [ -f "$FULL_SO" ]; then
     BASENAME=$(basename "$FULL_SO")
     # Extract major version (e.g., libzstd.so.1.5.6 -> 1)
-    MAJOR=$(echo "$BASENAME" | sed 's/libzstd.so.\([0-9]*\).*/\1/')
-    # Create versioned symlink (libzstd.so.1)
+    MAJOR=$(echo "$BASENAME" | sed 's/libzstd\.so\.\([0-9]\+\)\..*/\1/')
+    echo "Creating symlinks for $BASENAME (major version: $MAJOR)"
+    # Create versioned symlink (libzstd.so.1 -> libzstd.so.1.5.6)
     ln -sf "$BASENAME" "$DESTDIR/usr/$LIBDIR/libzstd.so.$MAJOR"
     echo "Created symlink: libzstd.so.$MAJOR -> $BASENAME"
-    # Create unversioned symlink (libzstd.so)
+    # Create unversioned symlink (libzstd.so -> libzstd.so.1.5.6)
     ln -sf "$BASENAME" "$DESTDIR/usr/$LIBDIR/libzstd.so"
     echo "Created symlink: libzstd.so -> $BASENAME"
+else
+    echo "WARNING: Could not find shared library file libzstd.so.*.*.* in obj/build/dynamic/"
 fi
 
 install -m644 zstd.h zdict.h zstd_errors.h "$DESTDIR/usr/include/"

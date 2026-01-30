@@ -27,9 +27,9 @@ meson_package(
         "//packages/linux/dev-libs/python/mako:mako",
         "//packages/linux/dev-libs/python/markupsafe:markupsafe",
     ],
-    # wayland-host provides wayland-scanner for host (exec_bdepend builds for host platform)
+    # wayland-scanner provides native wayland-scanner for host (exec_bdepend builds for host platform)
     exec_bdepend = [
-        "//packages/linux/graphics/rendering/wayland:wayland-host",
+        "//packages/linux/graphics/rendering/wayland:wayland-scanner",
     ],
     # Set PYTHONPATH to find mako from bdepends
     # Also set up wayland-scanner from exec_bdepend (HOST_TOOL_DIRS)
@@ -110,11 +110,61 @@ if [ -f native.ini ]; then
     cat native.ini
 fi
 
+# For cross-compilation: generate cross-file to tell meson about target architecture
+CROSS_FILE_ARG=""
+if [ "${CROSS_COMPILING:-false}" = "true" ] && [ -n "${CC:-}" ]; then
+    # Detect target architecture from CHOST or compiler
+    MESON_CPU_FAMILY="x86_64"
+    MESON_CPU="x86_64"
+    MESON_ENDIAN="little"
+
+    TARGET_ARCH="${CHOST:-$(${CC:-gcc} -dumpmachine)}"
+    case "$TARGET_ARCH" in
+        aarch64*|arm64*)
+            MESON_CPU_FAMILY="aarch64"
+            MESON_CPU="aarch64"
+            ;;
+        x86_64*|amd64*)
+            MESON_CPU_FAMILY="x86_64"
+            MESON_CPU="x86_64"
+            ;;
+        arm*)
+            MESON_CPU_FAMILY="arm"
+            MESON_CPU="arm"
+            ;;
+        riscv64*)
+            MESON_CPU_FAMILY="riscv64"
+            MESON_CPU="riscv64"
+            ;;
+    esac
+
+    # Generate meson cross-file
+    cat > cross.ini << CROSSEOF
+[binaries]
+c = '${CC}'
+cpp = '${CXX}'
+ar = '${AR:-ar}'
+strip = '${STRIP:-strip}'
+pkgconfig = 'pkg-config'
+
+[host_machine]
+system = 'linux'
+cpu_family = '$MESON_CPU_FAMILY'
+cpu = '$MESON_CPU'
+endian = '$MESON_ENDIAN'
+CROSSEOF
+
+    CROSS_FILE_ARG="--cross-file=cross.ini"
+    echo "Using cross.ini for cross-compilation"
+    cat cross.ini
+fi
+
 meson setup "${BUILD_DIR:-build}" \
     --prefix="${EPREFIX:-/usr}" \
     --libdir="${LIBDIR:-lib64}" \
     --buildtype="${MESON_BUILD_TYPE:-release}" \
     $NATIVE_FILE_ARG \
+    $CROSS_FILE_ARG \
     ${MESON_EXTRA_ARGS:-}
 ''',
     use_meson = {
@@ -125,8 +175,8 @@ meson setup "${BUILD_DIR:-build}" \
         "vulkan": "-Dvulkan-drivers=intel,amd",
         "-vulkan": "-Dvulkan-drivers=",
         # LLVM support for llvmpipe and radeonsi
-        "llvm": "-Dllvm=enabled -Dgallium-drivers=nouveau,iris,swrast,llvmpipe,virgl",
-        "-llvm": "-Dllvm=disabled -Dgallium-drivers=nouveau,iris,swrast,virgl",
+        "llvm": "-Dllvm=enabled -Dgallium-drivers=iris,swrast,llvmpipe,virgl",
+        "-llvm": "-Dllvm=disabled -Dgallium-drivers=iris,swrast,virgl",
     },
     use_deps = {
         # X11 dependencies for GLX and DRI

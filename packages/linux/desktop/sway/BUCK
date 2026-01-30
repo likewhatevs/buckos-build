@@ -39,9 +39,9 @@ meson_package(
         "zsh-completion",
     ],
     use_defaults = [],  # No xwayland for pure Wayland build
-    # wayland-host provides wayland-scanner for host (exec_bdepend builds for host platform)
+    # wayland-scanner provides wayland-scanner for host (exec_bdepend builds for host platform)
     exec_bdepend = [
-        "//packages/linux/graphics/rendering/wayland:wayland-host",
+        "//packages/linux/graphics/rendering/wayland:wayland-scanner",
     ],
     # Python mako is needed for code generation
     bdepend = [
@@ -197,9 +197,9 @@ meson_package(
     patches = [
         "patches/0001-wlroots-use-find_program-for-wayland-scanner.patch",
     ],
-    # wayland-host provides wayland-scanner for host (exec_bdepend builds for host platform)
+    # wayland-scanner provides wayland-scanner for host (exec_bdepend builds for host platform)
     exec_bdepend = [
-        "//packages/linux/graphics/rendering/wayland:wayland-host",
+        "//packages/linux/graphics/rendering/wayland:wayland-scanner",
     ],
     # Work around pkg-config path resolution issues in cross-compilation
     # where Mesa's dri.pc references libdrm but the resolved include path

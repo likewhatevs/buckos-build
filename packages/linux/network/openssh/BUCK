@@ -87,23 +87,74 @@ autoreconf -fi
         "xmss": "--enable-xmss",
     },
 
-    configure_args = [
-        "--sysconfdir=/etc/ssh",
-        "--with-ssl-dir=/usr",
-        "--with-zlib=/usr",
-        "--disable-strip",
-        "--with-privsep-user=nobody",
-        "--with-privsep-path=/var/empty",
-        # Disable hardening flags that cause issues (matches Gentoo)
-        "--without-hardening",
-        "--without-pie",
-        "--without-stackprotect",
-    ],
+    # For cross-compilation: Point OpenSSH to the actual OpenSSL dependency directory
+    src_configure = '''
+# For cross-compilation: --build is the build machine, --host is the target
+BUILD_SYSTEM=$(./config.guess 2>/dev/null || echo x86_64-pc-linux-gnu)
+HOST_SYSTEM=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+
+# Find OpenSSL dependency directory from DEP_BASE_DIRS
+OPENSSL_DIR=""
+IFS=':' read -ra DEP_ARRAY <<< "${DEP_BASE_DIRS:-}"
+for dep in "${DEP_ARRAY[@]}"; do
+    if [ -d "$dep/usr/include/openssl" ] && [ -f "$dep/usr/include/openssl/opensslv.h" ]; then
+        OPENSSL_DIR="$dep/usr"
+        echo "Found OpenSSL at: $OPENSSL_DIR"
+        break
+    fi
+done
+
+if [ -z "$OPENSSL_DIR" ]; then
+    echo "ERROR: Could not find OpenSSL dependency"
+    exit 1
+fi
+
+# Explicitly add OpenSSL include and library paths FIRST in CPPFLAGS/LDFLAGS
+# PREPEND (not append) so OpenSSL dependency headers are found before any host headers
+export CPPFLAGS="-I$OPENSSL_DIR/include ${CPPFLAGS:-}"
+export LDFLAGS="-L$OPENSSL_DIR/lib64 ${LDFLAGS:-}"
+
+# Provide cache variables to skip OpenSSL detection issues in cross-compilation
+export ac_cv_header_openssl_opensslv_h=yes
+export ac_cv_lib_crypto_EVP_CIPHER_CTX_new=yes
+
+./configure --prefix=/usr --libdir=/usr/lib64 --build=$BUILD_SYSTEM --host=$HOST_SYSTEM \
+    --sysconfdir=/etc/ssh \
+    --with-ssl-dir="$OPENSSL_DIR" \
+    --with-zlib=/usr \
+    --disable-strip \
+    --with-privsep-user=nobody \
+    --with-privsep-path=/var/empty \
+    --without-hardening \
+    --without-pie \
+    --without-stackprotect \
+    ${EXTRA_ECONF:-}
+''',
+
+    configure_args = [],
+
+    # For aarch64: Ensure OpenSSL headers from dependency are used during compilation
+    src_compile = '''
+# Find OpenSSL dependency directory again
+OPENSSL_DIR=""
+IFS=':' read -ra DEP_ARRAY <<< "${DEP_BASE_DIRS:-}"
+for dep in "${DEP_ARRAY[@]}"; do
+    if [ -d "$dep/usr/include/openssl" ]; then
+        OPENSSL_DIR="$dep/usr"
+        break
+    fi
+done
+
+# PREPEND OpenSSL include path to CFLAGS to override any system paths
+make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} \\
+    CFLAGS="-I$OPENSSL_DIR/include $CFLAGS"
+''',
 
     # Cross-compilation requires explicit definition of BSD compat functions
     # Force openssh to use its bundled openbsd-compat implementations
+    # For aarch64: ssize_t is int but %zd expects long int, causing format warnings
     env = {
-        "CFLAGS": "-O2",
+        "CFLAGS": "-O2 -Wno-deprecated-declarations -Wno-error=format",
         # Tell configure to use openbsd-compat for these functions
         "ac_cv_func_strlcpy": "no",
         "ac_cv_func_strlcat": "no",
@@ -111,6 +162,7 @@ autoreconf -fi
         "ac_cv_func_arc4random_buf": "no",
         "ac_cv_func_arc4random_uniform": "no",
         "ac_cv_func_arc4random_stir": "no",
+        "ac_cv_func_explicit_bzero": "no",
     },
 
     deps = ["//packages/linux/core/zlib:zlib"],
@@ -121,6 +173,25 @@ mkdir -p "$DESTDIR/var/empty"
 chmod 755 "$DESTDIR/var/empty"
 # Create ssh config directory
 mkdir -p "$DESTDIR/etc/ssh"
+
+# Create systemd service file for sshd
+mkdir -p "$DESTDIR/usr/lib/systemd/system"
+cat > "$DESTDIR/usr/lib/systemd/system/sshd.service" << 'SSHD_SERVICE'
+[Unit]
+Description=OpenSSH Daemon
+After=network.target
+
+[Service]
+Type=notify
+ExecStart=/usr/sbin/sshd -D
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+SSHD_SERVICE
 """,
 
     description = "OpenSSH SSH connectivity tools",

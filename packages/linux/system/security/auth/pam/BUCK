@@ -52,6 +52,10 @@ ebuild_package(
     license = "BSD-3-Clause",
 
     src_configure = '''
+# For cross-compilation: --build is the build machine, --host is the target
+BUILD_SYSTEM=$(./build-aux/config.guess 2>/dev/null || echo x86_64-pc-linux-gnu)
+HOST_SYSTEM=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+
 ./configure \\
     --prefix=/usr \\
     --sysconfdir=/etc \\
@@ -59,7 +63,9 @@ ebuild_package(
     --sbindir=/usr/sbin \\
     --enable-securedir=/lib/security \\
     --disable-nls \\
-    --disable-db
+    --disable-db \\
+    --build=$BUILD_SYSTEM \\
+    --host=$HOST_SYSTEM
 ''',
 
     src_compile = '''

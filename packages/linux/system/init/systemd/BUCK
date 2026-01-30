@@ -38,6 +38,9 @@ FUZZ_STUB
         # The meson.build has 'if not meson.is_cross_build()' but meson doesn't detect cross-build
         # because we're not using a meson cross-file. Patch to always skip this step.
         sed -i "s/if not meson.is_cross_build()/if false  # disabled for cross-build/" meson.build
+
+        # Disable SystemTap tracing - sysroot has old sys/sdt.h without STAP_PROBEV support
+        sed -i 's/#if HAVE_SYS_SDT_H/#if 0 \/\/ HAVE_SYS_SDT_H disabled - old sdt.h/' src/udev/udev-trace.h
     """,
     description = "System and service manager",
     homepage = "https://systemd.io/",
@@ -84,7 +87,8 @@ FUZZ_STUB
         "xz",
         "zstd",
     ],
-    use_defaults = ["pam", "acl", "kmod", "lzma", "lz4", "xz", "zstd", "kernel-install"],
+    # TEMPORARILY DISABLED acl for aarch64 cross-compilation (Fix #26 - acl/libattr linking issue)
+    use_defaults = ["pam", "kmod", "lzma", "lz4", "xz", "zstd", "kernel-install"],
     use_deps = {
         "pam": ["//packages/linux/system/security/auth/pam:pam"],
         "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
@@ -248,16 +252,16 @@ for bin in systemd systemctl journalctl; do
     fi
 done
 
-# Fix ALL hardcoded build paths in systemd files
+# Fix hardcoded build paths in systemd TEXT files only
 # Meson's find_program() resolves dependencies to their build-time paths
 # (e.g. /data/.../buck-out/.../util-linux/__util-linux__/util-linux/bin/mount)
 # These must be converted to runtime paths (e.g. /bin/mount)
-# IMPORTANT: Only process text files, NOT binaries (sed corrupts binaries)
-echo "Fixing hardcoded build paths in all systemd files..."
+# IMPORTANT: Skip ELF binaries - sed corrupts them by changing file size
+echo "Fixing hardcoded build paths in systemd text files..."
 fix_count=0
 find "$DESTDIR" -type f | while read -r f; do
-    # Skip binary files (ELF executables and shared libraries)
-    if file "$f" 2>/dev/null | grep -qE "ELF|executable|shared object"; then
+    # Skip ELF binaries (magic bytes: 7f 45 4c 46)
+    if head -c 4 "$f" 2>/dev/null | grep -q $'\\x7fELF'; then
         continue
     fi
     if grep -q 'buck-out' "$f" 2>/dev/null; then
@@ -269,6 +273,14 @@ find "$DESTDIR" -type f | while read -r f; do
     fi
 done
 echo "Fixed hardcoded build paths in $fix_count files"
+
+# Create /sbin/udevd symlink for compatibility
+# systemd's udevd is accessed via udevadm (multi-call binary like busybox)
+mkdir -p "$DESTDIR/sbin"
+ln -sf /usr/bin/udevadm "$DESTDIR/sbin/udevd"
+
+# Create /sbin/init symlink to systemd
+ln -sf /usr/lib/systemd/systemd "$DESTDIR/sbin/init"
 """,
     deps = [
         "//packages/linux/core/util-linux:util-linux",  # libmount, libblkid
@@ -282,7 +294,7 @@ echo "Fixed hardcoded build paths in $fix_count files"
         # cryptsetup/LUKS disabled for now (popt build issue)
         # "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         # "//packages/linux/system/security/cryptsetup:lvm2",  # devmapper
-        # eudev removed - systemd provides its own libudev and udevd
+        # Note: eudev removed - systemd builds its own libudev
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
         "//packages/linux/system/libs/ipc/attr:attr",  # libattr needed by libacl

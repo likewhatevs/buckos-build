@@ -227,10 +227,28 @@ fi
 # Set PATH: cross-compiler first, then HOST tools
 # NOTE: We intentionally exclude DEP_PATH from executable PATH because
 # cross-compiled Stage 2 tools cannot run on the host (glibc mismatch)
-export PATH="$TOOLCHAIN_PATH:/usr/bin:/bin"
+
+# Also add target-specific bin directories (e.g., tools/aarch64-buckos-linux-gnu/bin/)
+# GCC looks for unprefixed tools (as, ld) in <prefix>/<target>/bin/ relative to its installation
+# Since cross-gcc and cross-binutils are in separate Buck output dirs, we need these in PATH
+TARGET_BIN_PATHS=""
+for dep_dir in "${DEP_DIRS_ARRAY[@]}"; do
+    if [[ "$dep_dir" != /* ]]; then
+        dep_dir="$(cd "$dep_dir" 2>/dev/null && pwd)" || continue
+    fi
+    if [ -d "$dep_dir/tools/${BUCKOS_TARGET}/bin" ]; then
+        TARGET_BIN_PATHS="${TARGET_BIN_PATHS:+$TARGET_BIN_PATHS:}$dep_dir/tools/${BUCKOS_TARGET}/bin"
+        echo "Found target-specific tools at: $dep_dir/tools/${BUCKOS_TARGET}/bin"
+    fi
+done
+
+export PATH="$TOOLCHAIN_PATH${TARGET_BIN_PATHS:+:$TARGET_BIN_PATHS}:/usr/bin:/bin"
 
 echo "Stage 2 PATH setup:"
 echo "  Cross-compiler: $TOOLCHAIN_PATH"
+if [ -n "$TARGET_BIN_PATHS" ]; then
+    echo "  Target tools: $TARGET_BIN_PATHS"
+fi
 echo "  Build tools: /usr/bin, /bin (HOST)"
 echo "  NOTE: Cross-compiled deps (DEP_PATH) are for linking only, not execution"
 

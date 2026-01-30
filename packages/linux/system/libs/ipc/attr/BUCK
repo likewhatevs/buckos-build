@@ -35,11 +35,16 @@ true
 ''',
 
     src_configure = '''
+# For cross-compilation: --build is the build machine, --host is the target
+# Use config.guess to detect build system, and $CHOST or gcc for target
+BUILD_SYSTEM=$(./build-aux/config.guess 2>/dev/null || echo x86_64-pc-linux-gnu)
+HOST_SYSTEM=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+
 ./configure \\
     --prefix=/usr \\
     --libdir=/usr/lib64 \\
-    --build=$(gcc -dumpmachine) \\
-    --host=$(gcc -dumpmachine) \\
+    --build=$BUILD_SYSTEM \\
+    --host=$HOST_SYSTEM \\
     --disable-static \\
     --disable-nls
 ''',

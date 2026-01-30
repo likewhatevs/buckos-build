@@ -10,10 +10,58 @@ download_source(
     signature_required = False,
 )
 
+# Native ICU build for cross-compilation tools (icupkg, etc.)
+ebuild_package(
+    name = "icu-native",
+    bdepend = [],
+    src_prepare = "",
+    source = ":icu-src",
+    version = "75.1",
+    description = "ICU native build for cross-compilation tools",
+    homepage = "https://icu.unicode.org/",
+    license = "Unicode-3.0",
+    # Build with host toolchain
+    src_configure = """
+cd source
+# Use host compiler for native build - completely reset environment
+unset CC CXX AR RANLIB LD STRIP CPP
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
+unset PKG_CONFIG_PATH PKG_CONFIG_SYSROOT_DIR
+unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH
+export CC=/usr/bin/gcc
+export CXX=/usr/bin/g++
+export CPP="/usr/bin/gcc -E"
+export AR=/usr/bin/ar
+export RANLIB=/usr/bin/ranlib
+export LD=/usr/bin/ld
+export STRIP=/usr/bin/strip
+# Ensure host tools are in PATH first
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+./configure \\
+    --prefix=/usr \\
+    --libdir=/usr/lib64 \\
+    --disable-samples \\
+    --disable-tests
+""",
+    src_compile = """
+cd source
+make -j$(nproc)
+""",
+    src_install = """
+cd source
+make DESTDIR="$DESTDIR" install
+""",
+    visibility = ["PUBLIC"],
+)
+
 ebuild_package(
     name = "icu",
     # No autotools bdepend - ICU has its own configure
     bdepend = [],
+    # Native ICU provides host tools (icupkg, etc.) for cross-compilation
+    exec_bdepend = [
+        ":icu-native",
+    ],
     # No autoreconf - ICU uses its own configure system
     src_prepare = "",
     source = ":icu-src",
@@ -31,13 +79,68 @@ ebuild_package(
     homepage = "https://icu.unicode.org/",
     license = "Unicode-3.0",
     # ICU configure is in source/ subdirectory
+    # Use --with-cross-build to point to native ICU for tools
     src_configure = """
 cd source
-./configure \\
-    --prefix=/usr \\
-    --libdir=/usr/lib64 \\
-    --disable-samples \\
-    --disable-tests
+
+# Find the native ICU build directory from exec_bdepend
+echo "EXEC_BDEP_BASE_DIRS=${EXEC_BDEP_BASE_DIRS:-<empty>}"
+ICU_CROSS_BUILD=""
+IFS=':' read -ra _EXEC_BDEP_ARRAY <<< "${EXEC_BDEP_BASE_DIRS:-}"
+echo "Found ${#_EXEC_BDEP_ARRAY[@]} exec_bdepend paths"
+for _dep in "${_EXEC_BDEP_ARRAY[@]}"; do
+    echo "Checking exec_bdepend path: $_dep"
+
+    # Try multiple possible locations for the native ICU build
+    # 1. Direct path: $_dep/source/source
+    if [ -d "$_dep/source/source" ] && [ -f "$_dep/source/source/bin/icupkg" ]; then
+        ICU_CROSS_BUILD="$_dep/source/source"
+        echo "Found native ICU build at: $ICU_CROSS_BUILD"
+        break
+    fi
+
+    # 2. Parent directory: $_dep/../source/source (if _dep is install prefix)
+    if [ -d "$_dep/../source/source" ] && [ -f "$_dep/../source/source/bin/icupkg" ]; then
+        ICU_CROSS_BUILD="$(cd "$_dep/../source/source" && pwd)"
+        echo "Found native ICU build in parent at: $ICU_CROSS_BUILD"
+        break
+    fi
+
+    # 3. Fallback: search for icupkg anywhere under $_dep or parent
+    for _search_root in "$_dep" "$_dep/.."; do
+        if [ -d "$_search_root" ]; then
+            for _icupkg in $(find "$_search_root" -path "*/source/bin/icupkg" -type f 2>/dev/null | head -1); do
+                if [ -n "$_icupkg" ]; then
+                    # Remove /bin/icupkg to get source directory
+                    ICU_CROSS_BUILD="${_icupkg%/bin/icupkg}"
+                    echo "Found native ICU build via search at: $ICU_CROSS_BUILD"
+                    break 3
+                fi
+            done
+        fi
+    done
+done
+
+if [ -z "$ICU_CROSS_BUILD" ]; then
+    echo "WARNING: Could not find native ICU build, attempting without cross-build"
+    ./configure \\
+        --prefix=/usr \\
+        --libdir=/usr/lib64 \\
+        --disable-samples \\
+        --disable-tests \\
+        --build=$(./config.guess 2>/dev/null || echo x86_64-pc-linux-gnu) \\
+        --host=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+else
+    echo "Using native ICU from: $ICU_CROSS_BUILD"
+    ./configure \\
+        --prefix=/usr \\
+        --libdir=/usr/lib64 \\
+        --disable-samples \\
+        --disable-tests \\
+        --with-cross-build="$ICU_CROSS_BUILD" \\
+        --build=$(./config.guess 2>/dev/null || echo x86_64-pc-linux-gnu) \\
+        --host=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+fi
 """,
     src_compile = """
 cd source

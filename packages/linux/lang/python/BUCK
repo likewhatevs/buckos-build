@@ -21,8 +21,8 @@ autotools_package(
 
     # Default USE flags
     # Note: PGO disabled due to linking issues with __gcov_* symbols during cross-compile
-    # Note: readline disabled to avoid LD_LIBRARY_PATH leakage from target libs to host tools
-    use_defaults = ["sqlite", "ssl"],  # ncurses, readline disabled
+    # Note: readline disabled due to library path pollution causing GLIBC mismatch in host tools
+    use_defaults = ["sqlite", "ssl"],  # readline, ncurses disabled due to cross-compilation issues
 
     # Conditional dependencies
     use_deps = {

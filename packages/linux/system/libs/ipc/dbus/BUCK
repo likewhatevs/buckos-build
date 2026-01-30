@@ -8,11 +8,11 @@ autotools_package(
     sha256 = "ba1f21d2bd9d339da2d4aa8780c09df32fea87998b73da24f49ab9df1e36a50f",
     signature_sha256 = "5f292cd0603c3d736026ed3f4d1c1937847981669c1f0a389083518f013e1081",
     signature_required = False,
-    description = "Message bus system",
+    description = "Message bus system",  # Cache: 2026-02-04 systemd-enabled
     homepage = "https://www.freedesktop.org/wiki/Software/dbus/",
     license = "AFL-2.1",
     iuse = ["systemd", "doc", "static-libs"],
-    use_defaults = ["systemd"],  # Enable systemd integration for dbus.socket/dbus.service
+    use_defaults = ["systemd"],  # systemd enabled for proper init system support
     use_configure = {
         "systemd": "--enable-systemd",
         "-systemd": "--disable-systemd",
