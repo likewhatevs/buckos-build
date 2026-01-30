@@ -113,7 +113,7 @@ DESTDIR=$OUT make install
     deps = [
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/system/libs/database/sqlite:sqlite",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/dev-libs/exiv2:exiv2",
         "//packages/linux/system/libs/graphics/lcms2:lcms2",
         "//packages/linux/dev-libs/pugixml:pugixml",

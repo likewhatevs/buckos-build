@@ -14,7 +14,7 @@ cmake_package(
     use_defaults = ["s3"],
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/core/zlib:zlib",
     ],
     cmake_args = [

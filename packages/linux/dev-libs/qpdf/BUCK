@@ -16,7 +16,7 @@ autotools_package(
     sha256 = "e8f8f7f09fe3b9d1f98907e4a0cb7fddb4f0f9b8084e7e3201a571334e686c8c",
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
     ],
     visibility = ["PUBLIC"],
 )

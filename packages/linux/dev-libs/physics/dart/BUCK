@@ -15,7 +15,7 @@ cmake_package(
         "//packages/linux/dev-libs/eigen:eigen",
         "//packages/linux/dev-libs/3d/assimp:assimp",
         "//packages/linux/dev-libs/physics/fcl:fcl",
-        "//packages/linux/dev-libs/logging/fmt:fmt",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
         "//packages/linux/dev-libs/json/tinyxml2:tinyxml2",
     ],
 )

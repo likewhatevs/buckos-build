@@ -23,13 +23,13 @@ cmake_package(
     deps = [
         "//packages/linux/databases/mysql:mysql",
         "//packages/linux/dev-libs/misc/libaio:libaio",
-        "//packages/linux/dev-libs/misc/libevent:libevent",
+        "//packages/linux/system/libs/utility/libevent:libevent",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/compression/lz4:lz4",
     ],
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "zstd": ["//packages/linux/dev-libs/compression/zstd:zstd"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
     },
     cmake_args = [
         "-DBUILD_CONFIG=xtrabackup_release",

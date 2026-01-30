@@ -67,7 +67,7 @@ filegroup(
     srcs = [
         "//packages/linux/dev-libs/text/oniguruma:oniguruma",
         "//packages/linux/dev-libs/text/re2:re2",
-        "//packages/linux/dev-libs/text/libunistring:libunistring",
+        "//packages/linux/system/security/auth/directory:libunistring",
         "//packages/linux/dev-libs/text/utf8proc:utf8proc",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -167,7 +167,7 @@ filegroup(
     name = "cpp-utility-libs",
     srcs = [
         "//packages/linux/dev-libs/misc/fmt:fmt",
-        "//packages/linux/dev-libs/misc/spdlog:spdlog",
+        "//packages/linux/dev-libs/logging/spdlog:spdlog",
         "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
     ],
     default_target_platform = "//platforms:linux-target",

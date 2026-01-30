@@ -290,7 +290,7 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/desktop/kde:kf5",
         "//packages/linux/desktop/qt:qt5",
         "//packages/linux/graphics/rendering/wayland:wayland",
@@ -334,8 +334,8 @@ DESTDIR=$OUT make install
     deps = [
         "//packages/linux/desktop/kde:kf5",
         "//packages/linux/desktop/qt:qt5",
-        "//packages/linux/dev-libs/gmp:gmp",
-        "//packages/linux/dev-libs/mpfr:mpfr",
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
     ],
     bdepend = [],
     visibility = ["PUBLIC"],

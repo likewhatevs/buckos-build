@@ -33,7 +33,7 @@ autotools_package(
         make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} all-am
     """,
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

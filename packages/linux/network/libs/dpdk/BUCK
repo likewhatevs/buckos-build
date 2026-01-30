@@ -31,10 +31,10 @@ meson_package(
 
     deps = [
         "//packages/linux/system/libs/numactl:numactl",
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/dev-libs/json/json-c:json-c",
+        "//packages/linux/system/libs/data/json-c:json-c",
         "//packages/linux/system/libs/libelf:libelf",
     ],
 

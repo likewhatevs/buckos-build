@@ -66,7 +66,7 @@ autotools_package(
     },
     use_defaults = [],
     use_deps = {
-        "splash": ["//packages/linux/graphics/utilities/imagemagick:imagemagick"],
+        "splash": ["//packages/linux/media/image/imagemagick:imagemagick"],
     },
     pre_configure = """
 # Create extra_deps.lst to avoid build error (from Gentoo ebuild)
@@ -85,7 +85,7 @@ echo "depends bli part_gpt" > grub-core/extra_deps.lst
     ],
     deps = [
         "//packages/linux/system/libs/compression/xz:xz",
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/init/eudev:eudev",
         # Note: bash and sed are runtime deps for grub-mkconfig, not build deps
     ],
@@ -211,7 +211,7 @@ autotools_package(
     iuse = ["splash"],
     use_defaults = [],
     use_deps = {
-        "splash": ["//packages/linux/graphics/utilities/imagemagick:imagemagick"],
+        "splash": ["//packages/linux/media/image/imagemagick:imagemagick"],
     },
     pre_configure = """
 # Create extra_deps.lst to avoid build error (from Gentoo ebuild)
@@ -229,7 +229,7 @@ echo "depends bli part_gpt" > grub-core/extra_deps.lst
     ],
     deps = [
         "//packages/linux/system/libs/compression/xz:xz",
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/init/eudev:eudev",
         # Note: bash and sed are runtime deps for grub-mkconfig, not build deps
     ],

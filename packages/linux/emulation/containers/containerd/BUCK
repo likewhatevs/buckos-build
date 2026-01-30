@@ -97,7 +97,7 @@ containerd config default > "$DESTDIR/etc/containerd/config.toml" 2>/dev/null ||
     """,
     deps = [
         "//packages/linux/lang/go:go",
-        "//packages/linux/emulation/containers/runc:runc",
+        "//packages/linux/system/containers/runc:runc",
         "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     visibility = ["PUBLIC"],

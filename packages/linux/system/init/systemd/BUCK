@@ -241,7 +241,7 @@ echo "Fixed hardcoded build paths in $fix_count files"
         "//packages/linux/system/libs/ipc/libcap:libcap",  # Required - POSIX capabilities
         "//packages/linux/system/libs/kmod:kmod",  # For systemd-modules-load
         # cryptsetup/LUKS disabled for now (popt build issue)
-        # "//packages/linux/system/security/cryptsetup:cryptsetup",
+        # "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         # "//packages/linux/system/security/cryptsetup:lvm2",  # devmapper
         "//packages/linux/system/init/eudev:eudev",  # libudev (needed by lvm2/devmapper)
         "//packages/linux/system/libs/crypto/openssl:openssl",

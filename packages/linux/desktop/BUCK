@@ -17,7 +17,7 @@ filegroup(
         "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
         "//packages/linux/desktop/mesa:mesa",
         "//packages/linux/desktop/libdrm:libdrm",
-        "//packages/linux/desktop/libinput:libinput",
+        "//packages/linux/system/libs/input/libinput:libinput",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

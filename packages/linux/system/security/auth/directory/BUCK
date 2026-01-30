@@ -205,39 +205,7 @@ autoreconf -fi
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/security/encryption:linux-pam",
-        ":lmdb",
-    ],
-    visibility = ["PUBLIC"],
-)
-
-# LMDB - Lightning Memory-Mapped Database
-download_source(
-    name = "lmdb-src",
-    src_uri = "https://github.com/openldap/openldap/archive/refs/tags/LMDB_0.9.32.tar.gz",
-    sha256 = "c0937223bba3c37c896809883a3c9b43049354578b239d6ed2476236a87f40c9",
-    signature_required = False,
-)
-
-autotools_package(
-    name = "lmdb",
-    # LMDB uses simple Makefile, not autotools - no autoreconf needed
-    bdepend = [],
-    src_prepare = "",
-    source = ":lmdb-src",
-    version = "0.9.32",
-    description = "Lightning Memory-Mapped Database",
-    homepage = "https://symas.com/lmdb/",
-    license = "OLDAP-2.8",
-    src_configure = "true",
-    src_compile = """
-        cd libraries/liblmdb
-        make -j$(nproc) prefix=/usr
-    """,
-    src_install = """
-        cd libraries/liblmdb
-        make install DESTDIR="$DESTDIR" prefix=/usr
-    """,
-    deps = [
+        "//packages/linux/system/libs/database/lmdb:lmdb",
     ],
     visibility = ["PUBLIC"],
 )
@@ -299,47 +267,17 @@ autoreconf -fi
         ":openldap",
         ":cyrus-sasl",
         ":libunistring",
-        ":talloc",
+        "//packages/linux/system/libs/talloc:talloc",
         ":tdb",
         ":tevent",
-        ":ldb",
+        "//packages/linux/system/libs/ldb:ldb",
         ":ding-libs",
     ],
     visibility = ["PUBLIC"],
 )
 
-# Samba libraries (talloc, tdb, tevent, ldb) needed by SSSD
-download_source(
-    name = "talloc-src",
-    src_uri = "https://www.samba.org/ftp/talloc/talloc-2.4.2.tar.gz",
-    sha256 = "85ecf9e465e20f98f9950a52e9a411e14320bc555fa257d87697b7e7a9b1d8a6",
-    signature_required = False,
-)
-
-autotools_package(
-    name = "talloc",
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
-        "//packages/linux/dev-tools/build-systems/automake:automake",
-        "//packages/linux/dev-tools/build-systems/libtool:libtool",
-        "//packages/linux/dev-libs/misc/gettext:gettext",
-    ],
-    src_prepare = """
-autoreconf -fi
-""",
-    source = ":talloc-src",
-    version = "2.4.2",
-    description = "Hierarchical memory pool system",
-    homepage = "https://talloc.samba.org/",
-    license = "LGPL-3.0+",
-    pre_configure = """
-        ./configure --prefix=/usr --sysconfdir=/etc --disable-python
-    """,
-    configure_args = [],
-    deps = [
-    ],
-    visibility = ["PUBLIC"],
-)
+# Samba libraries (tdb, tevent) needed by SSSD
+# talloc, ldb, lmdb now in system/libs/
 
 download_source(
     name = "tdb-src",
@@ -401,43 +339,7 @@ autoreconf -fi
     """,
     configure_args = [],
     deps = [
-        ":talloc",
-    ],
-    visibility = ["PUBLIC"],
-)
-
-download_source(
-    name = "ldb-src",
-    src_uri = "https://www.samba.org/ftp/ldb/ldb-2.8.1.tar.gz",
-    sha256 = "b68ce6eb0ccd2870fa3c8c334f2028b5d16606fd41308696c17b71959f7bf59f",
-    signature_required = False,
-)
-
-autotools_package(
-    name = "ldb",
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
-        "//packages/linux/dev-tools/build-systems/automake:automake",
-        "//packages/linux/dev-tools/build-systems/libtool:libtool",
-        "//packages/linux/dev-libs/misc/gettext:gettext",
-    ],
-    src_prepare = """
-autoreconf -fi
-""",
-    source = ":ldb-src",
-    version = "2.8.1",
-    description = "LDAP-like embedded database",
-    homepage = "https://ldb.samba.org/",
-    license = "LGPL-3.0+",
-    pre_configure = """
-        ./configure --prefix=/usr --sysconfdir=/etc --disable-python
-    """,
-    configure_args = [],
-    deps = [
-        ":talloc",
-        ":tdb",
-        ":tevent",
-        ":lmdb",
+        "//packages/linux/system/libs/talloc:talloc",
     ],
     visibility = ["PUBLIC"],
 )

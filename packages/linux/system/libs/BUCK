@@ -38,7 +38,7 @@ filegroup(
 filegroup(
     name = "graphics-libs",
     srcs = [
-        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/system/libs/graphics/cairo:cairo",
     ],
     default_target_platform = "//platforms:linux-target",

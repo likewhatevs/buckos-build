@@ -102,7 +102,7 @@ autotools_package(
         "wavpack": "--with-wavpack",
     },
     use_deps = {
-        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
         "pulseaudio": ["//packages/linux/audio/daemons/pulseaudio:pulseaudio"],
         "flac": ["//packages/linux/system/libs/audio/flac:flac"],
         "vorbis": ["//packages/linux/system/libs/audio/libvorbis:libvorbis", "//packages/linux/system/libs/audio/libogg:libogg"],

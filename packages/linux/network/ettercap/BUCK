@@ -26,7 +26,7 @@ cmake_package(
     use_defaults = ["ncurses", "plugins"],
 
     use_deps = {
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
         "gtk": ["//packages/linux/desktop/gtkgtk3"],
     },
 
@@ -46,7 +46,7 @@ cmake_package(
     ],
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 

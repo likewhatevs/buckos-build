@@ -58,7 +58,7 @@ autotools_package(
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
         "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
-        "http2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "http2": ["//packages/linux/system/libs/network/nghttp2:nghttp2"],
         "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
         "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
@@ -121,7 +121,7 @@ autotools_package(
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
         "gnutls": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
-        "http2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "http2": ["//packages/linux/system/libs/network/nghttp2:nghttp2"],
         "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
     },
     use_configure = {

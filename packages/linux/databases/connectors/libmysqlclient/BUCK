@@ -41,7 +41,7 @@ cmake_package(
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
-        "zstd": ["//packages/linux/dev-libs/compression/zstd:zstd"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
     },
 
     # Base CMake arguments (always applied)

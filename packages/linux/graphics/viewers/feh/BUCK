@@ -15,7 +15,7 @@ make_package(
     deps = [
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/core/file:file",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/graphics/xorg:x11-extended",
         "//packages/linux/graphics/xorg/libXinerama:libXinerama",
     ],

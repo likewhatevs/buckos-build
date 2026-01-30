@@ -71,7 +71,7 @@ autotools_package(
 
     # ncurses is required for terminal handling
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
 
     # No src_prepare needed - official tarball has pre-generated configure

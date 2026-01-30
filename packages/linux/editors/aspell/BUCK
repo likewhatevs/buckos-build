@@ -33,7 +33,7 @@ autotools_package(
         "--enable-compile-in-filters",
     ],
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

@@ -32,7 +32,7 @@ cmake_package(
     ],
     use_deps = {
         "lz4": ["//packages/linux/dev-libs/compression/lz4:lz4"],
-        "zstd": ["//packages/linux/dev-libs/compression/zstd:zstd"],
+        "zstd": ["//packages/linux/system/libs/compression/zstd:zstd"],
         "xcb": ["//packages/linux/graphics/xorg/libxcb:libxcb"],
         "wayland": ["//packages/linux/graphics/rendering/wayland:wayland"],
         "xlib": ["//packages/linux/graphics/xorg/lib/libx11:libx11"],

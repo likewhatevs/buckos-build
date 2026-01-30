@@ -35,7 +35,7 @@ done
 dodoc README.md LICENSE 2>/dev/null || true
 """,
     rdepend = [
-        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )

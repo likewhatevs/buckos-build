@@ -33,8 +33,8 @@ DESTDIR=$OUT make install
 """,
     deps = [
         "//packages/linux/system/libs/data/libxml2:libxml2",
-        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
-        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/media/image/imagemagick:imagemagick",
+        "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/font/fribidi:fribidi",
     ],
     bdepend = [

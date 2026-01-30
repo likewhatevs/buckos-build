@@ -42,7 +42,7 @@ DESTDIR=$OUT make install
         "//packages/linux/desktop/kde:kf5",
         "//packages/linux/desktop/qt:qt5",
         # "//packages/linux/dev-libs/mlt:mlt",  # TODO: not packaged yet
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         # "//packages/linux/core/frei0r:frei0r",  # TODO: not packaged yet,
         "//packages/linux/graphics/video/v4l-utils:v4l-utils",
         # "//packages/linux/core/rttr:rttr",  # TODO: not packaged yet,

@@ -20,7 +20,7 @@ cmake_package(
     use_defaults = ["ssl"],
 
     deps = [
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
     ],
 
     use_deps = {

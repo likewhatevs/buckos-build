@@ -49,7 +49,7 @@ autotools_package(
     deps = [
         ":spice-protocol",
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/audio/opus:opus",
         "//packages/linux/system/libs/compression/lz4:lz4",
@@ -89,7 +89,7 @@ meson_package(
         ":spice-protocol",
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/system/libs/compression/lz4:lz4",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
     ],

@@ -95,7 +95,7 @@ make DESTDIR="$DESTDIR" install
 """,
 
     rdepend = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
 
     bdepend = [

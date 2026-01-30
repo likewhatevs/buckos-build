@@ -10,7 +10,7 @@ autotools_package(
     license = "Apache-2.0",
     signature_required = False,
     deps = [
-        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/utility/libuv:libuv",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],

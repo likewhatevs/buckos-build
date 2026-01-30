@@ -26,9 +26,9 @@ filegroup(
 filegroup(
     name = "essential",
     srcs = [
-        "//packages/linux/fonts/libraries/freetype:freetype",
-        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
-        "//packages/linux/fonts/libraries/harfbuzz:harfbuzz",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
         "//packages/linux/fonts/collections:essential-fonts",
     ],
     default_target_platform = "//platforms:linux-target",

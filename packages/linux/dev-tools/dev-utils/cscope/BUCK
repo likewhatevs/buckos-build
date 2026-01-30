@@ -14,7 +14,7 @@ autotools_package(
     iuse = ["emacs", "ncurses"],
     use_defaults = ["ncurses"],
     use_deps = {
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
     },
     use_configure = {
         "-emacs": "--disable-emacs",

@@ -10,7 +10,7 @@ python_package(
         "//packages/linux/dev-libs/python/hidapi:hidapi",
         "//packages/linux/dev-libs/python/imageio:imageio",
         "//packages/linux/dev-libs/text/lxml:lxml",
-        "//packages/linux/ai/physics/mujoco:mujoco",
+        "//packages/linux/dev-libs/physics/mujoco:mujoco",
         "//packages/linux/dev-libs/python/numba:numba",
         "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/graphics/opencv:opencv",

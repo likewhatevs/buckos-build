@@ -12,7 +12,7 @@ cmake_package(
     ],
     deps = [
         "//packages/linux/dev-libs/math/eigen:eigen",
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/dev-libs/logging/glog:glog",
     ],
 )

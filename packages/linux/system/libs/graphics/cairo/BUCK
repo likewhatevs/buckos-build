@@ -45,7 +45,7 @@ meson setup .. --prefix=/usr \
     $CONFIGURE_ARGS
 """,
     deps = [
-        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/font/fontconfig:fontconfig",
         "//packages/linux/core/zlib:zlib",

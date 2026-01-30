@@ -26,8 +26,8 @@ autoreconf -fiv
 """,
     configure_args = [],
     deps = [
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/security/encryption:fuse3",
+        "//packages/linux/system/libs/network/curl:curl",
     ],
     visibility = ["PUBLIC"],
 )

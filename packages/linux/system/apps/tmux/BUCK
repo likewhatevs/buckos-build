@@ -53,7 +53,7 @@ autotools_package(
         "--sysconfdir=/etc",
     ],
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
         "//packages/linux/system/libs/utility/libevent:libevent",
     ],
     visibility = ["PUBLIC"],

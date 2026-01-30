@@ -38,7 +38,7 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         # "//packages/linux/core/jsoncpp:jsoncpp",  # TODO: not packaged yet
         # "//packages/linux/core/zeromq:zeromq",  # TODO: not packaged yet,
         "//packages/linux/desktop/qt:qt5",

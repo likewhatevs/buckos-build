@@ -164,7 +164,7 @@ echo 'g docker - -' > "$DESTDIR/usr/lib/sysusers.d/docker.conf"
     deps = [
         "//packages/linux/lang/go:go",
         "//packages/linux/emulation/containers/containerd:containerd",
-        "//packages/linux/emulation/containers/runc:runc",
+        "//packages/linux/system/containers/runc:runc",
         "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
         "//packages/linux/network/firewall/iptables:iptables",
     ],

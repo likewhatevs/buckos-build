@@ -20,7 +20,7 @@ cmake_package(
         "-DUSE_LIBB2=OFF",
     ],
     deps = [
-        "//packages/linux/system/libs/ipc/popt:popt",
+        "//packages/linux/system/security/cryptsetup:popt",
     ],
     visibility = ["PUBLIC"],
 )

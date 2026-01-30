@@ -30,7 +30,7 @@ autotools_package(
     deps = [
         "//packages/linux/system/security/encryption:linux-pam",
         "//packages/linux/core/util-linux:util-linux",
-        "//packages/linux/system/security/cryptsetup:cryptsetup",
+        "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
     ],
     visibility = ["PUBLIC"],
 )

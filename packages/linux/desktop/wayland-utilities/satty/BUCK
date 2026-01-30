@@ -11,7 +11,7 @@ cargo_package(
     license = "MPL-2.0",
     bins = ["satty"],
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/desktop/wayland-utilities/grim:grim",
         "//packages/linux/desktop/wayland-utilities/slurp:slurp",
     ],

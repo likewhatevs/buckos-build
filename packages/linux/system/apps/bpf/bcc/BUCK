@@ -43,10 +43,10 @@ cmake_package(
     ],
     deps = [
         "//packages/linux/system/libs/bpf/libbpf:libbpf",
-        "//packages/linux/dev-tools/dev-utils/elfutils:elfutils",
+        "//packages/linux/system/libs/elfutils:elfutils",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/core/llvm:llvm",
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
     ],
     visibility = ["PUBLIC"],
 )

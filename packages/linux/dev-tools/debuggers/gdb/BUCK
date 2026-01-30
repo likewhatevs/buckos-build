@@ -38,8 +38,8 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "readline": ["//packages/linux/core/readline:readline"],
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "readline": ["//packages/linux/system/terminal/readline:readline"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
         "python": ["//packages/linux/lang/python:python"],
     },
 

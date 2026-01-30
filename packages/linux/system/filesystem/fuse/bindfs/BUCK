@@ -31,7 +31,7 @@ autoreconf -fi
     license = "GPL-2.0",
     configure_args = [],
     deps = [
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/security/encryption:fuse3",
     ],
     visibility = ["PUBLIC"],
 )

@@ -8,7 +8,7 @@ meson_package(
     deps = [
         "//packages/linux/dev-libs/libbpf:libbpf",
         "//packages/linux/system/libs/elfutils:elfutils",
-        "//packages/linux/dev-libs/compression/zstd:zstd",
+        "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/dev-libs/compression/zlib:zlib",
         "//packages/linux/dev-tools/compilers/clang:clang",
     ],

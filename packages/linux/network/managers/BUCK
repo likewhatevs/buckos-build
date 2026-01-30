@@ -75,7 +75,7 @@ meson_package(
     deps = [
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/system/libs/utility/pcre2:pcre2",
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],

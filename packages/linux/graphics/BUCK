@@ -44,7 +44,7 @@ filegroup(
     srcs = [
         "//packages/linux/graphics/screenshot/flameshot:flameshot",
         "//packages/linux/graphics/screenshot/scrot:scrot",
-        "//packages/linux/graphics/screenshot/grim:grim",
+        "//packages/linux/desktop/wayland-utilities/grim:grim",
         "//packages/linux/graphics/screenshot/maim:maim",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -135,7 +135,7 @@ filegroup(
 filegroup(
     name = "utilities",
     srcs = [
-        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/media/image/imagemagick:imagemagick",
         "//packages/linux/graphics/utilities/graphicsmagick:graphicsmagick",
         "//packages/linux/graphics/utilities/gpick:gpick",
         "//packages/linux/graphics/utilities/dia:dia",
@@ -170,7 +170,7 @@ filegroup(
         "//packages/linux/graphics/editors/darktable:darktable",
         "//packages/linux/graphics/editors/rawtherapee:rawtherapee",
         "//packages/linux/graphics/viewers/geeqie:geeqie",
-        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/media/image/imagemagick:imagemagick",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -182,7 +182,7 @@ filegroup(
     srcs = [
         "//packages/linux/graphics/viewers/feh:feh",
         "//packages/linux/graphics/screenshot/scrot:scrot",
-        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/media/image/imagemagick:imagemagick",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -193,7 +193,7 @@ filegroup(
     name = "wayland",
     srcs = [
         "//packages/linux/graphics/viewers/imv:imv",
-        "//packages/linux/graphics/screenshot/grim:grim",
+        "//packages/linux/desktop/wayland-utilities/grim:grim",
         "//packages/linux/graphics/screenshot/flameshot:flameshot",
     ],
     default_target_platform = "//platforms:linux-target",

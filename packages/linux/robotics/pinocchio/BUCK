@@ -10,7 +10,7 @@ cmake_package(
     license = "BSD-2-Clause",
     deps = [
         "//packages/linux/dev-libs/misc/boost:boost",
-        "//packages/linux/robotics/eigen3:eigen3",
+        "//packages/linux/dev-libs/eigen3:eigen3",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

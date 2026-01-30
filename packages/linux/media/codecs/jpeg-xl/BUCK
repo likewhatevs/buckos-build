@@ -22,7 +22,7 @@ cmake_package(
         "png",
     ],
     deps = [
-        "//packages/linux/dev-libs/compression/brotli:brotli",
+        "//packages/linux/system/libs/compression/brotli:brotli",
         "//packages/linux/dev-libs/misc/highway:highway",
     ],
     cmake_args = [

@@ -36,11 +36,11 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr \\
     -DNO_SYSTEMD=ON
 """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
         "//packages/linux/desktop/mesa:mesa",
-        "//packages/linux/desktop/libinput:libinput",
+        "//packages/linux/system/libs/input/libinput:libinput",
     ],
     visibility = ["PUBLIC"],
 )

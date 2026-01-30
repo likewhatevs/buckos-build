@@ -13,7 +13,7 @@ autotools_package(
 
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
         "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
     },
 
@@ -36,7 +36,7 @@ autotools_package(
     ],
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/core/zlib:zlib",
     ],
 

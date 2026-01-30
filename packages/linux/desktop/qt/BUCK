@@ -303,19 +303,19 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/dev-libs/double-conversion:double-conversion",
+        "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
         "//packages/linux/system/libs/utility/pcre2:pcre2",
         # GUI deps (using Qt's bundled freetype/harfbuzz)
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
         "//packages/linux/desktop/libdrm:libdrm",
-        "//packages/linux/graphics/xorg/libxkbcommon:libxkbcommon",
+        "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
         # Transitive dependencies needed for linking:
         # - expat: needed by Mesa's libEGL
         # - libffi: needed by wayland
         # - openssl: needed by Qt6Network for SSL/TLS
-        "//packages/linux/core/expat:expat",
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/data/expat:expat",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 
@@ -343,7 +343,7 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
             "//packages/linux/system/libs/crypto/openssl:openssl",
         ],
         "sqlite": [
-            "//packages/linux/databases/sqlite:sqlite",
+            "//packages/linux/system/libs/database/sqlite:sqlite",
         ],
         "dbus": [
             "//packages/linux/system/libs/ipc/dbus:dbus",
@@ -397,11 +397,11 @@ binary_package(
     """,
     deps = [
         "//packages/linux/desktop/libdrm:libdrm",
-        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
-        "//packages/linux/fonts/libraries/freetype:freetype",
-        "//packages/linux/fonts/libraries/harfbuzz:harfbuzz",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/dev-libs/double-conversion:double-conversion",
+        "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
     ],
     visibility = ["PUBLIC"],
 )

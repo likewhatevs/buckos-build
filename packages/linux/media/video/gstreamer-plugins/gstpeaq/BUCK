@@ -9,7 +9,7 @@ autotools_package(
     homepage = "https://github.com/HSU-ANT/gstpeaq",
     license = "GPL-2.0",
     deps = [
-        "//packages/linux/media/video/gstreamer:gstreamer",
+        "//packages/linux/graphics/video/gstreamer:gstreamer",
     ],
     configure_args = [
         "--disable-static",

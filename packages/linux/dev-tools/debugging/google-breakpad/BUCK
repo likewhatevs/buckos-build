@@ -84,7 +84,7 @@ binary_package(
         make install DESTDIR="$OUT"
     """,
     deps = [
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
     ],
     visibility = ["PUBLIC"],
 )

@@ -23,7 +23,7 @@ autotools_package(
 
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "TCP/IP packet assembler and analyzer for network testing",

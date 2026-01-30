@@ -43,11 +43,11 @@ meson setup .. --prefix=/usr \\
     -Duse_system_wfconfig=enabled
 """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/desktop/sway:wlroots",
         "//packages/linux/desktop/mesa:mesa",
-        "//packages/linux/desktop/libinput:libinput",
+        "//packages/linux/system/libs/input/libinput:libinput",
     ],
     visibility = ["PUBLIC"],
 )

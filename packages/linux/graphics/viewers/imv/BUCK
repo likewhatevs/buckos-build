@@ -76,7 +76,7 @@ cd build
 DESTDIR=$OUT meson install
 """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
         # "//packages/linux/core/freeimage:freeimage",  # TODO: not packaged yet,
         "//packages/linux/system/libs/image/libpng:libpng",

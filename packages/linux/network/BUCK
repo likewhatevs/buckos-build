@@ -22,7 +22,7 @@ alias(
 
 alias(
     name = "curl",
-    actual = "//packages/linux/network/curl:curl",
+    actual = "//packages/linux/system/libs/network/curl:curl",
     visibility = ["PUBLIC"],
 )
 
@@ -41,7 +41,7 @@ filegroup(
     srcs = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/network/ca-certificates:ca-certificates",
-        "//packages/linux/network/nghttp2:nghttp2",
+        "//packages/linux/system/libs/network/nghttp2:nghttp2",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -54,7 +54,7 @@ filegroup(
 filegroup(
     name = "transfer-utils",
     srcs = [
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/network/wget:wget",
         "//packages/linux/network/aria2:aria2",
         "//packages/linux/system/apps/rsync:rsync",
@@ -154,7 +154,7 @@ filegroup(
 filegroup(
     name = "packet-capture",
     srcs = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/network/tcpdump:tcpdump",
         "//packages/linux/network/ngrep:ngrep",
         "//packages/linux/network/tshark:tshark",
@@ -182,7 +182,7 @@ filegroup(
         "//packages/linux/network/mtr:mtr",
         "//packages/linux/network/fping:fping",
         "//packages/linux/network/arping:arping",
-        "//packages/linux/network/iperf3:iperf3",
+        "//packages/linux/benchmarks/iperf3:iperf3",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

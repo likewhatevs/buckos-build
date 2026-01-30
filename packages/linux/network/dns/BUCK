@@ -11,7 +11,7 @@
 filegroup(
     name = "dns-libraries",
     srcs = [
-        "//packages/linux/network/dns/libraries/c-ares:c-ares",
+        "//packages/linux/system/libs/network/c-ares:c-ares",
         "//packages/linux/network/dns/libraries/ldns:ldns",
         "//packages/linux/network/dns/libraries/getdns:getdns",
         "//packages/linux/network/dns/libraries/libidn:libidn",
@@ -152,7 +152,7 @@ filegroup(
     srcs = [
         "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
         "//packages/linux/network/dns/tools/bind-tools:bind-tools",
-        "//packages/linux/network/dns/libraries/c-ares:c-ares",
+        "//packages/linux/system/libs/network/c-ares:c-ares",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

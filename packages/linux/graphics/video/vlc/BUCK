@@ -365,9 +365,9 @@ autotools_package(
     },
     use_deps = {
         "qt5": ["//packages/linux/desktop/qt:qt5"],
-        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
         "pulseaudio": ["//packages/linux/audio/daemons/pulseaudio:pulseaudio"],
-        "ffmpeg": ["//packages/linux/graphics/video/ffmpeg:ffmpeg"],
+        "ffmpeg": ["//packages/linux/media/video/ffmpeg:ffmpeg"],
         "vaapi": ["//packages/linux/graphics/video/libva:libva"],
         "vdpau": ["//packages/linux/graphics/video/vdpau:vdpau"],
         "ssl": ["//packages/linux/system/libs/crypto/gnutls:gnutls"],
@@ -377,9 +377,9 @@ autotools_package(
 DESTDIR=$OUT make install
 """,
     deps = [
-        "//packages/linux/graphics/video/x264:x264",
-        "//packages/linux/graphics/video/x265:x265",
-        "//packages/linux/graphics/video/libvpx:libvpx",
+        "//packages/linux/media/video/x264:x264",
+        "//packages/linux/media/video/x265:x265",
+        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/media/video/dav1d:dav1d",
         "//packages/linux/graphics/video/aom:aom",
         "//packages/linux/system/libs/audio/opus:opus",

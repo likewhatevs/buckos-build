@@ -290,7 +290,7 @@ autotools_package(
     ],
     deps = [
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/system/libs/compression/lzo:lzo",

@@ -67,7 +67,7 @@ meson_package(
         "//packages/linux/dev-libs/python/packaging:packaging",
     ],
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],

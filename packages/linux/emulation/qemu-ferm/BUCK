@@ -57,7 +57,7 @@ meson_package(
     ],
     deps = [
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/system/libs/graphics/pixman:pixman",
+        "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],

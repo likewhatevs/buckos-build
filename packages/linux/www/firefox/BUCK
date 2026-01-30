@@ -68,7 +68,7 @@ MOZCONFIG
             "rust": ["//packages/linux/lang/rust:rust"],
             # "cbindgen": ["//packages/linux/lang/cbindgen:cbindgen"],
             "nodejs": ["//packages/linux/lang/nodejs:nodejs"],
-            "ncurses": ["//packages/linux/core/ncurses:ncurses"],  # For Python curses module (libtinfow)
+            "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],  # For Python curses module (libtinfow)
         },
         ["zlib", "gtk", "python", "rust", "nodejs", "ncurses"],
     ),

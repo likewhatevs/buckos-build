@@ -29,7 +29,7 @@ binary_package(
     """,
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/dev-tools/dev-utils/elfutils:elfutils",
+        "//packages/linux/system/libs/elfutils:elfutils",
         "//packages/linux/system/libs/bpf/libbpf:libbpf",
     ],
     visibility = ["PUBLIC"],

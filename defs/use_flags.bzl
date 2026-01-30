@@ -23,7 +23,7 @@ Example usage:
         use_deps = {
             "ssl": ["//packages/linux/dev-libs/openssl"],
             "gnutls": ["//packages/linux/system/libs/crypto/gnutls"],
-            "http2": ["//packages/linux/network/nghttp2"],
+            "http2": ["//packages/linux/system/libs/network/nghttp2"],
             "zstd": ["//packages/linux/system/libs/compression/zstd"],
             "brotli": ["//packages/linux/system/libs/compression/brotli"],
         },

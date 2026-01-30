@@ -10,13 +10,13 @@ filegroup(
     srcs = [
         "//packages/linux/system/filesystem/management/parted:parted",
         "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         "//packages/linux/system/filesystem/management/dmraid:dmraid",
         "//packages/linux/system/filesystem/management/multipath-tools:multipath-tools",
         "//packages/linux/system/filesystem/management/hdparm:hdparm",
-        "//packages/linux/system/filesystem/management/nvme-cli:nvme-cli",
+        "//packages/linux/system/power/nvme-cli:nvme-cli",
         "//packages/linux/system/filesystem/management/smartmontools:smartmontools",
         "//packages/linux/system/filesystem/management/udisks2:udisks2",
         "//packages/linux/system/filesystem/management/quota:quota",
@@ -41,7 +41,7 @@ filegroup(
 filegroup(
     name = "volume-management",
     srcs = [
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/dmraid:dmraid",
         "//packages/linux/system/filesystem/management/multipath-tools:multipath-tools",
@@ -65,7 +65,7 @@ filegroup(
     name = "disk-utilities",
     srcs = [
         "//packages/linux/system/filesystem/management/hdparm:hdparm",
-        "//packages/linux/system/filesystem/management/nvme-cli:nvme-cli",
+        "//packages/linux/system/power/nvme-cli:nvme-cli",
         "//packages/linux/system/filesystem/management/smartmontools:smartmontools",
         "//packages/linux/system/filesystem/management/udisks2:udisks2",
         "//packages/linux/system/filesystem/management/quota:quota",
@@ -81,7 +81,7 @@ filegroup(
     srcs = [
         "//packages/linux/system/filesystem/management/parted:parted",
         "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         "//packages/linux/system/filesystem/management/smartmontools:smartmontools",
     ],

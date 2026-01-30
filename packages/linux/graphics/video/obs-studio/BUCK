@@ -103,12 +103,12 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/desktop/qt:qt5",
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/system/libs/data/jansson:jansson",
-        "//packages/linux/graphics/video/x264:x264",
+        "//packages/linux/media/video/x264:x264",
         # "//packages/linux/core/mbedtls:mbedtls",  # TODO: not packaged yet
         # "//packages/linux/core/speexdsp:speexdsp",  # TODO: not packaged yet
         # "//packages/linux/core/rnnoise:rnnoise",  # TODO: not packaged yet

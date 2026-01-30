@@ -38,7 +38,7 @@ autotools_package(
         "-demos": "-Ddemos=false",
     },
     use_deps = {
-        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "wayland": ["//packages/linux/system/libs/utility/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
         "cups": ["//packages/linux/system/printing/cups:cups"],
         "colord": ["//packages/linux/system/color/colord:colord"],
     },
@@ -51,9 +51,9 @@ meson setup .. --prefix=/usr \
 """,
     deps = [
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/fonts/libraries/pango:pango",
-        "//packages/linux/desktop/cairo:cairo",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
         "//packages/linux/desktop/gdk-pixbuf:gdk-pixbuf",
     ],
     visibility = ["PUBLIC"],
@@ -100,7 +100,7 @@ autotools_package(
         "-demos": "-Dbuild-demos=false",
     },
     use_deps = {
-        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "wayland": ["//packages/linux/system/libs/utility/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
         "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],
         "colord": ["//packages/linux/system/color/colord:colord"],
         "cups": ["//packages/linux/system/printing/cups:cups"],
@@ -114,9 +114,9 @@ meson setup .. --prefix=/usr \
 """,
     deps = [
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/fonts/libraries/pango:pango",
-        "//packages/linux/desktop/cairo:cairo",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
         "//packages/linux/desktop/gdk-pixbuf:gdk-pixbuf",
     ],
     visibility = ["PUBLIC"],

@@ -73,15 +73,15 @@ cmake_package(
     use_defaults = ["tbb", "eigen", "ffmpeg"],
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/media/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
-        "//packages/linux/media/image/libtiff:libtiff",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
         "//packages/linux/system/libs/image/libwebp:libwebp",
     ],
     use_deps = {
         "tbb": ["//packages/linux/dev-libs/misc/tbb:tbb"],
         "eigen": ["//packages/linux/dev-libs/eigen:eigen"],
-        "ffmpeg": ["//packages/linux/graphics/video/ffmpeg:ffmpeg"],
+        "ffmpeg": ["//packages/linux/media/video/ffmpeg:ffmpeg"],
         "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],
         "python": ["//packages/linux/lang/python:python"],
     },

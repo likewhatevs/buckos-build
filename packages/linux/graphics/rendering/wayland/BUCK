@@ -12,8 +12,8 @@ meson_package(
     homepage = "https://gitlab.freedesktop.org/wayland/wayland",
     license = "MIT",
     deps = [
-        "//packages/linux/core/libffi:libffi",
-        "//packages/linux/core/expat:expat",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     meson_args = [
         "-Ddocumentation=false",

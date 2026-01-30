@@ -8,7 +8,7 @@ autotools_package(
 
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
-        "//packages/linux/dev-libs/misc/libevent:libevent",
+        "//packages/linux/system/libs/utility/libevent:libevent",
         "//packages/linux/core/zlib:zlib",
     ],
 

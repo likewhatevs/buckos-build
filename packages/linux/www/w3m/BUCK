@@ -27,7 +27,7 @@ autotools_package(
     ],
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
     },
     configure_args = [

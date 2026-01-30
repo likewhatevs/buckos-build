@@ -66,7 +66,7 @@ autotools_package(
 
     use_deps = {
         "openssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "gmp": ["//packages/linux/dev-libs/gmp:gmp"],
+        "gmp": ["//packages/linux/system/libs/utility/gmp:gmp"],
     },
 
     configure_args = [

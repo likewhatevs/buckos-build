@@ -46,7 +46,7 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
         "systemd": ["//packages/linux/system/init:systemd"],
         "udev": ["//packages/linux/system/init/eudev:eudev"],
     },

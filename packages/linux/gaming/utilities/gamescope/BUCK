@@ -75,7 +75,7 @@ This allows gamescope to set real-time scheduling for better performance.
 EOF
     """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],

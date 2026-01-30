@@ -23,7 +23,7 @@ cmake_package(
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/compression/bzip2:bzip2",
-        "//packages/linux/dev-libs/compression/zstd:zstd",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

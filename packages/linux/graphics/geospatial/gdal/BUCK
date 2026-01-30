@@ -71,15 +71,15 @@ autotools_package(
 
     # Conditional dependencies based on USE flags
     use_deps = {
-        "curl": ["//packages/linux/network/curl:curl"],
-        "expat": ["//packages/linux/core/expat:expat"],
+        "curl": ["//packages/linux/system/libs/network/curl:curl"],
+        "expat": ["//packages/linux/system/libs/data/expat:expat"],
         # "geos": ["//packages/linux/graphics/geospatial/geos:geos"],  # Not yet available
         "hdf5": ["//packages/linux/dev-libs/misc/hdf5:hdf5"],
         "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
-        "png": ["//packages/linux/media/image/libpng:libpng"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
         # "proj": ["//packages/linux/graphics/geospatial/proj:proj"],  # Not yet available
-        "sqlite": ["//packages/linux/databases/sqlite:sqlite"],
-        "tiff": ["//packages/linux/media/image/libtiff:libtiff"],
+        "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
+        "tiff": ["//packages/linux/system/libs/image/libtiff:libtiff"],
         "xml2": ["//packages/linux/core/libxml2:libxml2"],
     },
 

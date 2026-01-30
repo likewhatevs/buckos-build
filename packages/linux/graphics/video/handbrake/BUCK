@@ -66,10 +66,10 @@ cd build
 DESTDIR=$OUT make install
 """,
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
-        "//packages/linux/graphics/video/x264:x264",
-        "//packages/linux/graphics/video/x265:x265",
-        "//packages/linux/graphics/video/libvpx:libvpx",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/x264:x264",
+        "//packages/linux/media/video/x265:x265",
+        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/media/video/dav1d:dav1d",
         "//packages/linux/system/libs/audio/opus:opus",
         "//packages/linux/system/libs/audio/lame:lame",

@@ -31,7 +31,7 @@ autoreconf -fi
         "--disable-crypto",
     ],
     deps = [
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/security/encryption:fuse3",
     ],
     visibility = ["PUBLIC"],
 )

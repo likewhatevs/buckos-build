@@ -51,7 +51,7 @@ meson_package(
         "//packages/linux/lang/python:python",  # Python for meson
     ],
     deps = [
-        "//packages/linux/core/ncurses:ncurses",  # For termcap
+        "//packages/linux/system/terminal/ncurses:ncurses",  # For termcap
     ],
     visibility = ["PUBLIC"],
 )

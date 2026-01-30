@@ -10,7 +10,7 @@ cmake_package(
     license = "BSD-3-Clause",
     deps = [
         "//packages/linux/dev-libs/math/eigen:eigen",
-        "//packages/linux/dev-libs/misc/ceres-solver:ceres-solver",
+        "//packages/linux/dev-libs/math/ceres-solver:ceres-solver",
         "//packages/linux/dev-libs/misc/glog:glog",
         "//packages/linux/dev-libs/misc/boost:boost",
     ],

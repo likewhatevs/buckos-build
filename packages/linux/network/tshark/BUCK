@@ -17,7 +17,7 @@ autotools_package(
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
         "lua": ["//packages/linux/dev-tools/lua"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
-        "nghttp2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "nghttp2": ["//packages/linux/system/libs/network/nghttp2:nghttp2"],
     },
 
 
@@ -35,7 +35,7 @@ autotools_package(
     ],
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/dev-libs/glib:glib",
     ],
 

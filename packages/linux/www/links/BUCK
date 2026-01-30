@@ -46,7 +46,7 @@ autotools_package(
     ],
     use_defaults = ["ssl", "zlib", "bzip2", "lzma", "X", "fb", "javascript"],
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],

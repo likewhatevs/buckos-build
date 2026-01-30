@@ -72,7 +72,7 @@ filegroup(
     name = "acpi-tools",
     srcs = [
         "//packages/linux/system/power/acpica-tools:acpica-tools",
-        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/system/apps/acpid:acpid",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

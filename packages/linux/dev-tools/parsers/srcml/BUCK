@@ -9,9 +9,9 @@ cmake_package(
     homepage = "https://www.srcml.org",
     license = "GPL-2.0",
     deps = [
-        "//packages/linux/dev-libs/archive/libarchive:libarchive",
+        "//packages/linux/system/libs/compression/libarchive:libarchive",
         "//packages/linux/system/libs/data/libxml2:libxml2",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/dev-libs/boost:boost",
         "//packages/linux/system/libs/data/libxslt:libxslt",
     ],

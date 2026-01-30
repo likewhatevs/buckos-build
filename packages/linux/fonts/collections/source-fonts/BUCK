@@ -42,7 +42,7 @@ done
 dodoc LICENSE.md README.md 2>/dev/null || true
 """,
     rdepend = [
-        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )
@@ -65,7 +65,7 @@ done
 dodoc LICENSE.md README.md 2>/dev/null || true
 """,
     rdepend = [
-        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )
@@ -88,7 +88,7 @@ done
 dodoc LICENSE.md README.md 2>/dev/null || true
 """,
     rdepend = [
-        "//packages/linux/fonts/libraries/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )

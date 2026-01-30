@@ -10,9 +10,9 @@ cmake_package(
     license = "BSD",
     deps = [
         "//packages/linux/dev-libs/compression/zlib:zlib",
-        "//packages/linux/dev-libs/text/icu:icu",
+        "//packages/linux/system/libs/utility/icu:icu",
         "//packages/linux/graphics/rendering/opengl:opengl",
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

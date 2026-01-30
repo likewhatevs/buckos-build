@@ -16,7 +16,7 @@ cmake_package(
     license = "GPL-3.0",
     cmake_args = [],
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     visibility = ["PUBLIC"],

@@ -82,7 +82,7 @@ meson_package(
     homepage = "https://gitlab.freedesktop.org/wayland/weston",
     license = "MIT",
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/graphics/utilities/pixman:pixman",
         "//packages/linux/dev-libs/misc/xkbcommon:xkbcommon",
@@ -90,7 +90,7 @@ meson_package(
         "//packages/linux/dev-libs/libevdev:libevdev",
         "//packages/linux/system/libs/drm:libdrm",
         "//packages/linux/desktop/mesa:mesa",
-        "//packages/linux/graphics/libraries/lcms2:lcms2",
+        "//packages/linux/system/libs/graphics/lcms2:lcms2",
     ],
     meson_args = [
         "-Dbackend-drm=true",

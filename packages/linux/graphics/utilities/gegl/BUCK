@@ -104,7 +104,7 @@ DESTDIR=$OUT meson install
         # "//packages/linux/core/librsvg:librsvg",  # TODO: not packaged yet
         "//packages/linux/system/libs/image/libwebp:libwebp",
         # "//packages/linux/editors/poppler:poppler",  # TODO: wrong path
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
     ],
     bdepend = [
         "//packages/linux/lang/vala:vala",

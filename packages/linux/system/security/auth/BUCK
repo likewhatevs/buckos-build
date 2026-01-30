@@ -21,7 +21,7 @@ filegroup(
     name = "core-auth",
     srcs = [
         "//packages/linux/system/security/encryption:linux-pam",
-        "//packages/linux/system/security/auth/core:shadow",
+        "//packages/linux/system/apps/shadow:shadow",
         "//packages/linux/system/apps/sudo:sudo",
         "//packages/linux/system/apps/doas:doas",
     ],
@@ -86,7 +86,7 @@ filegroup(
     name = "password-quality",
     srcs = [
         "//packages/linux/system/security/auth/password:libpwquality",
-        "//packages/linux/system/security/auth/password:cracklib",
+        "//packages/linux/system/security/cracklib:cracklib",
         "//packages/linux/system/security/auth/password:passwdqc",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -163,10 +163,10 @@ filegroup(
     name = "essential",
     srcs = [
         "//packages/linux/system/security/encryption:linux-pam",
-        "//packages/linux/system/security/auth/core:shadow",
+        "//packages/linux/system/apps/shadow:shadow",
         "//packages/linux/system/apps/sudo:sudo",
         "//packages/linux/system/security/auth/password:libpwquality",
-        "//packages/linux/system/security/auth/password:cracklib",
+        "//packages/linux/system/security/cracklib:cracklib",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

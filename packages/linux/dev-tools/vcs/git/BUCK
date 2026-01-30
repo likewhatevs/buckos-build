@@ -25,7 +25,7 @@ autotools_package(
 
     # Conditional dependencies
     use_deps = {
-        "curl": ["//packages/linux/network/curl:curl"],
+        "curl": ["//packages/linux/system/libs/network/curl:curl"],
         "perl": ["//packages/linux/lang/perl:perl"],
         "python": ["//packages/linux/lang/python:python"],
         "pcre2": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
