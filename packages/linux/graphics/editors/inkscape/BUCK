@@ -94,7 +94,7 @@ DESTDIR=$OUT make install
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/system/libs/data/libxml2:libxml2",
         "//packages/linux/system/libs/data/libxslt:libxslt",
-        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/media/image/imagemagick:imagemagick",
         "//packages/linux/dev-libs/boost:boost",
     ],
     bdepend = [

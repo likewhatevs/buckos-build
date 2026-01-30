@@ -16,7 +16,7 @@ meson_package(
     license = "GPL-3.0",
     meson_args = [],
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/lang/vala:vala",
@@ -25,7 +25,7 @@ meson_package(
         # glib's transitive dependencies
         "//packages/linux/system/libs/utility/pcre2:pcre2",
         # GTK3 for the GUI
-        "//packages/linux/graphics/gtk3:gtk3",
+        "//packages/linux/desktop/gtk:gtk3",
     ],
     visibility = ["PUBLIC"],
 )

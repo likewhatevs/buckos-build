@@ -100,7 +100,7 @@ alias(
 
 alias(
     name = "ripgrep",
-    actual = "//packages/linux/editors/ripgrep:ripgrep",
+    actual = "//packages/linux/dev-tools/dev-utils/ripgrep:ripgrep",
     visibility = ["PUBLIC"],
 )
 

@@ -38,7 +38,7 @@ meson_package(
 
     # Conditional dependencies based on USE flags
     use_deps = {
-        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
         "bluetooth": ["//packages/linux/system/bluetooth/bluez:bluez"],
         "dbus": ["//packages/linux/system/libs/ipc/dbus:dbus"],
         "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],

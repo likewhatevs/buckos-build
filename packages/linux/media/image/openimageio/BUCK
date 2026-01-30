@@ -65,9 +65,9 @@ cmake_package(
     use_defaults = ["shared", "tools"],
     deps = [
         "//packages/linux/dev-libs/boost:boost",
-        "//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo",
-        "//packages/linux/media/image/libpng:libpng",
-        "//packages/linux/media/image/libtiff:libtiff",
+        "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
+        "//packages/linux/system/libs/image/libpng:libpng",
+        "//packages/linux/system/libs/image/libtiff:libtiff",
         "//packages/linux/system/libs/image/libwebp:libwebp",
     ],
     use_deps = {

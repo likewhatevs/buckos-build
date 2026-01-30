@@ -75,7 +75,7 @@ autotools_package(
 
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/utility/libuv:libuv",
     ],
 
     description = "BIND - Berkeley Internet Name Domain (DNS server)",

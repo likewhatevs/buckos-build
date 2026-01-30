@@ -73,7 +73,7 @@ meson setup .. --prefix=/usr \\
     -Dplymouth=disabled
 """,
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     visibility = ["PUBLIC"],

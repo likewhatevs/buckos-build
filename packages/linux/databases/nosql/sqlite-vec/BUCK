@@ -17,7 +17,7 @@ simple_package(
     homepage = "https://github.com/asg017/sqlite-vec",
     license = "MIT OR Apache-2.0",
     deps = [
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
     build_cmd = """
 # Build the SQLite extension

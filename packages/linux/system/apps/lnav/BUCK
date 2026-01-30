@@ -22,8 +22,8 @@ autotools_package(
     ],
     use_defaults = ["ncurses", "readline", "sqlite", "pcre2"],
     use_deps = {
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
-        "readline": ["//packages/linux/core/readline:readline"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
+        "readline": ["//packages/linux/system/terminal/readline:readline"],
         "sqlite": ["//packages/linux/system/libs/database/sqlite:sqlite"],
         "pcre2": ["//packages/linux/system/libs/utility/pcre2:pcre2"],
     },

@@ -48,7 +48,7 @@ autotools_package(
 DESTDIR=$OUT rake install
 """,
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/dev-libs/boost:boost",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/pugixml:pugixml",

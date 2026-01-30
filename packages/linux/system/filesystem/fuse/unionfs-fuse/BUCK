@@ -16,7 +16,7 @@ make_package(
     homepage = "https://github.com/rpodgorny/unionfs-fuse",
     license = "BSD-3-Clause",
     deps = [
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/security/encryption:fuse3",
     ],
     visibility = ["PUBLIC"],
 )

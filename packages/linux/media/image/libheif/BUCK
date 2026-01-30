@@ -76,8 +76,8 @@ cmake_package(
         "dav1d": ["//packages/linux/media/video/dav1d:dav1d"],
         "x265": ["//packages/linux/media/video/x265:x265"],
         "libde265": ["//packages/linux/media/video/libde265:libde265"],
-        "jpeg": ["//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo"],
-        "png": ["//packages/linux/media/image/libpng:libpng"],
+        "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
     },
     cmake_args = [
         "-DCMAKE_INSTALL_PREFIX=${PREFIX}",

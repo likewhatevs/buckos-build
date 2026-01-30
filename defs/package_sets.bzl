@@ -118,7 +118,7 @@ BASE_PACKAGES = SYSTEM_PACKAGES + [
     "//packages/linux/core/ncurses:ncurses",
     "//packages/linux/core/less:less",
     "//packages/linux/core/libffi:libffi",
-    "//packages/linux/core/expat:expat",
+    "//packages/linux/system/libs/data/expat:expat",
 
     # Shell and terminal
     "//packages/linux/core/bash:bash",
@@ -651,7 +651,7 @@ STAGE3_PACKAGE_SETS = {
         "packages": [
             # Additional core libraries
             "//packages/linux/core/libffi:libffi",
-            "//packages/linux/core/expat:expat",
+            "//packages/linux/system/libs/data/expat:expat",
             # Networking basics
             "//packages/linux/system/libs/crypto/openssl:openssl",
             "//packages/linux/network/curl:curl",

@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/vlarsson/poselib",
     license = "BSD-3-Clause",
     deps = [
-        "//packages/linux/ai/ml-frameworks/eigen3:eigen3",
+        "//packages/linux/dev-libs/eigen3:eigen3",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

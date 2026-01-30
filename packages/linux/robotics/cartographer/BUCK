@@ -11,10 +11,10 @@ cmake_package(
     homepage = "https://github.com/cartographer-project/cartographer",
     license = "Apache-2.0",
     deps = [
-        "//packages/linux/robotics/ceres-solver:ceres-solver",
-        "//packages/linux/robotics/eigen3:eigen3",
+        "//packages/linux/dev-libs/math/ceres-solver:ceres-solver",
+        "//packages/linux/dev-libs/eigen3:eigen3",
         "//packages/linux/dev-libs/serialization/protobuf:protobuf",
-        "//packages/linux/graphics/cairo:cairo",
+        "//packages/linux/system/libs/graphics/cairo:cairo",
         "//packages/linux/dev-libs/misc/boost:boost",
         "//packages/linux/system/libs/glog:glog",
         "//packages/linux/dev-libs/misc/gflags:gflags",

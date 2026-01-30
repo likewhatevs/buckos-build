@@ -32,8 +32,8 @@ autotools_package(
     ],
     use_deps = {
         "dbus": ["//packages/linux/system/dbus:dbus"],
-        "alsa": ["//packages/linux/media/audio/alsa-lib:alsa-lib"],
-        "opus": ["//packages/linux/media/audio/opus:opus"],
+        "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
+        "opus": ["//packages/linux/system/libs/audio/opus:opus"],
         "samplerate": ["//packages/linux/media/audio/libsamplerate:libsamplerate"],
         "readline": ["//packages/linux/system/libs/readline:readline"],
     },

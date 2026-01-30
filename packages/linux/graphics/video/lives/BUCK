@@ -27,7 +27,7 @@ autotools_package(
 DESTDIR=$OUT make install
 """,
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/desktop/gtk:gtk3",
         # "//packages/linux/core/frei0r:frei0r",  # TODO: not packaged yet,
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",

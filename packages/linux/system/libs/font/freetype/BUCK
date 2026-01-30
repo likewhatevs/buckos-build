@@ -58,7 +58,7 @@ autotools_package(
     use_deps = {
         "bzip2": ["//packages/linux/system/libs/compression/bzip2:bzip2"],
         "png": ["//packages/linux/system/libs/image/libpng:libpng"],
-        "harfbuzz": ["//packages/linux/fonts/libraries/harfbuzz:harfbuzz"],
+        "harfbuzz": ["//packages/linux/system/libs/font/harfbuzz:harfbuzz"],
         "brotli": ["//packages/linux/system/libs/compression/brotli:brotli"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
     },

@@ -50,7 +50,7 @@ autotools_package(
         "perl": ["//packages/linux/lang/perl:perl"],
         "ruby": ["//packages/linux/lang/ruby:ruby"],
         "lua": ["//packages/linux/lang/lua:lua"],
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
     },
 
     # Conditional configure arguments

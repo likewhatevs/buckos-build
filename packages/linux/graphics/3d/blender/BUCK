@@ -221,10 +221,10 @@ mkdir -p $OUT/usr/share/icons/hicolor/scalable/apps
         "//packages/linux/desktop/mesa:mesa",
         "//packages/linux/dev-libs/openexr:openexr",
         "//packages/linux/system/libs/image/openjpeg:openjpeg",
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
-        "//packages/linux/dev-libs/fftw:fftw",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
+        "//packages/linux/dev-libs/math/fftw:fftw",
         # "//packages/linux/dev-libs/opencolorio:opencolorio",  # TODO: not packaged yet
-        "//packages/linux/dev-libs/openimageio:openimageio",
+        "//packages/linux/media/image/openimageio:openimageio",
         "//packages/linux/dev-libs/openvdb:openvdb",
         "//packages/linux/dev-libs/alembic:alembic",
         "//packages/linux/system/libs/multimedia/sdl2:sdl2",

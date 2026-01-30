@@ -47,7 +47,7 @@ autotools_package(
         "//packages/linux/dev-tools/build-systems/intltool:intltool",
     ],
     deps = [
-        "//packages/linux/core/libffi:libffi",
+        "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/graphics/rendering/wayland:wayland",
     ],
     visibility = ["PUBLIC"],

@@ -15,7 +15,7 @@ binary_package(
     homepage = "https://github.com/felt/tippecanoe",
     license = "BSD-2-Clause",
     deps = [
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/core/zlib:zlib",
     ],
     install_script = """

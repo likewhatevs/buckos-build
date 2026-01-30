@@ -23,8 +23,8 @@ cmake_package(
     ],
     deps = [
         "//packages/linux/dev-libs/boost:boost",
-        "//packages/linux/dev-libs/gmp:gmp",
-        "//packages/linux/dev-libs/mpfr:mpfr",
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
     ],
     visibility = ["PUBLIC"],
 )

@@ -28,7 +28,7 @@ autotools_package(
     ],
 
     deps = [
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
     ],
 
     description = "High-speed web-based traffic analysis and flow collection",

@@ -43,10 +43,10 @@ meson_package(
         "-examples": "-Dexamples=disabled",
     },
     use_deps = {
-        "alsa": ["//packages/linux/audio/daemons/alsa-lib:alsa-lib"],
+        "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
         "bluetooth": ["//packages/linux/system/bluetooth/bluez:bluez"],
         "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],
-        "ffmpeg": ["//packages/linux/graphics/video/ffmpeg:ffmpeg"],
+        "ffmpeg": ["//packages/linux/media/video/ffmpeg:ffmpeg"],
         "systemd": ["//packages/linux/system/init/systemd:systemd"],
     },
     meson_args = [

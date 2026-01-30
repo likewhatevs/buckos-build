@@ -5,10 +5,10 @@
 filegroup(
     name = "libraries",
     srcs = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
-        "//packages/linux/graphics/video/x264:x264",
-        "//packages/linux/graphics/video/x265:x265",
-        "//packages/linux/graphics/video/libvpx:libvpx",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/x264:x264",
+        "//packages/linux/media/video/x265:x265",
+        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/media/video/dav1d:dav1d",
         "//packages/linux/graphics/video/aom:aom",
         "//packages/linux/graphics/video/gstreamer:gstreamer",
@@ -94,10 +94,10 @@ filegroup(
 filegroup(
     name = "essential-codecs",
     srcs = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
-        "//packages/linux/graphics/video/x264:x264",
-        "//packages/linux/graphics/video/x265:x265",
-        "//packages/linux/graphics/video/libvpx:libvpx",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/x264:x264",
+        "//packages/linux/media/video/x265:x265",
+        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/media/video/dav1d:dav1d",
         "//packages/linux/graphics/video/aom:aom",
     ],
@@ -123,7 +123,7 @@ filegroup(
 filegroup(
     name = "minimal",
     srcs = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/graphics/video/mpv:mpv",
         "//packages/linux/graphics/video/yt-dlp:yt-dlp",
     ],
@@ -162,7 +162,7 @@ filegroup(
     name = "streaming",
     srcs = [
         "//packages/linux/graphics/video/obs-studio:obs-studio",
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/graphics/video/gstreamer:gstreamer",
         "//packages/linux/graphics/video/v4l-utils:v4l-utils",
     ],

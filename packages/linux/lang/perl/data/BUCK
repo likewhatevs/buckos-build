@@ -234,7 +234,7 @@ autotools_package(
     configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
-        "//packages/linux/core/expat:expat",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )

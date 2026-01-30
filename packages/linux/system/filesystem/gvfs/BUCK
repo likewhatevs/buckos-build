@@ -116,7 +116,7 @@ meson_package(
     deps = [
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/system/libs/ipc/dbus:dbus",
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/security/encryption:fuse3",
         "//packages/linux/system/filesystem/management/udisks2:udisks2",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/dev-libs/libsecret:libsecret",

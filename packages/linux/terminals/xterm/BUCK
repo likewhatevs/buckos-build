@@ -59,7 +59,7 @@ autotools_package(
         "//packages/linux/graphics/xorg/libXaw:libXaw",
         "//packages/linux/graphics/xorg/libXmu:libXmu",
         "//packages/linux/graphics/xorg/libXt:libXt",
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
 
     visibility = ["PUBLIC"],

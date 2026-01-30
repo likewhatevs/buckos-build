@@ -81,7 +81,7 @@ autotools_package(
     ],
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/system/libs/utility/pcre2:pcre2",
         "//packages/linux/system/libs/data/yaml:yaml",
         "//packages/linux/system/libs/data/jansson:jansson",

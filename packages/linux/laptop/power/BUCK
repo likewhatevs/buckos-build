@@ -16,7 +16,7 @@ filegroup(
 filegroup(
     name = "acpi-tools",
     srcs = [
-        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/system/apps/acpid:acpid",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -92,7 +92,7 @@ filegroup(
     name = "power-essential",
     srcs = [
         "//packages/linux/laptop/power/tlp:tlp",
-        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/system/apps/acpid:acpid",
         "//packages/linux/laptop/power/cpupower:cpupower",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -158,7 +158,7 @@ filegroup(
     name = "all-power",
     srcs = [
         "//packages/linux/laptop/power/tlp:tlp",
-        "//packages/linux/laptop/power/acpid:acpid",
+        "//packages/linux/system/apps/acpid:acpid",
         "//packages/linux/laptop/power/thermald:thermald",
         "//packages/linux/laptop/power/cpupower:cpupower",
         "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",

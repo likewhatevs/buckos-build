@@ -33,7 +33,7 @@ cmake_package(
         "-DDISABLE_OSC=ON",
     ],
     deps = [
-        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "//packages/linux/system/libs/audio/flac:flac",
         "//packages/linux/system/libs/audio/libvorbis:libvorbis",
         "//packages/linux/system/libs/audio/libogg:libogg",

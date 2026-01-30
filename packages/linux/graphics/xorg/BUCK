@@ -176,7 +176,7 @@ filegroup(
         ":x11-core",
         "//packages/linux/graphics/xorg/xkeyboard-config:xkeyboard-config",
         "//packages/linux/graphics/xorg/libxkbfile:libxkbfile",
-        "//packages/linux/graphics/xorg/libxkbcommon:libxkbcommon",
+        "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

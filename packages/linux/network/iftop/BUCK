@@ -19,8 +19,8 @@ autotools_package(
     ],
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/network/libs/libpcap:libpcap",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
 
     bdepend = [

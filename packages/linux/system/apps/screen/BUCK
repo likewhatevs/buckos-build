@@ -47,7 +47,7 @@ autotools_package(
     ],
     env = {"CFLAGS": "-std=gnu17 -O2"},
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

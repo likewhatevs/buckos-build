@@ -18,7 +18,7 @@ cmake_package(
         "//packages/linux/dev-libs/google/glog:glog",
         "//packages/linux/dev-libs/google/gflags:gflags",
         "//packages/linux/dev-libs/math/ceres-solver:ceres-solver",
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/dev-libs/glew:glew",
         "//packages/linux/media/image/openimageio:openimageio",
         "//packages/linux/graphics/rendering/opengl:opengl",
@@ -27,7 +27,7 @@ cmake_package(
         "cgal": ["//packages/linux/dev-libs/cgal:cgal"],
         "gui": ["//packages/linux/graphics/qt:qt"],
         "download": [
-            "//packages/linux/network/curl:curl",
+            "//packages/linux/system/libs/network/curl:curl",
             "//packages/linux/system/libs/crypto/openssl:openssl",
         ],
         "tests": ["//packages/linux/dev-tools/testing/googletest:googletest"],

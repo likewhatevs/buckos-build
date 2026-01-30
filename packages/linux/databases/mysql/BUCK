@@ -33,7 +33,7 @@ cmake_package(
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

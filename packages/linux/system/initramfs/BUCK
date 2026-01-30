@@ -86,7 +86,7 @@ filegroup(
     srcs = [
         "//packages/linux/system/libs/kmod:kmod",
         "//packages/linux/system/init/eudev:eudev",
-        "//packages/linux/core/cpio:cpio",
+        "//packages/linux/system/libs/cpio:cpio",
         "//packages/linux/core/util-linux:util-linux",
         "//packages/linux/system/apps/coreutils:coreutils",
     ],
@@ -105,7 +105,7 @@ filegroup(
         # Device management
         "//packages/linux/system/init/eudev:eudev",
         # Filesystem tools
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         # Bootloader

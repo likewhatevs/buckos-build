@@ -20,7 +20,7 @@ autotools_package(
     deps = [
         "//packages/linux/system/libs/kmod:kmod",
         "//packages/linux/core/util-linux:util-linux",
-        "//packages/linux/dev-libs/json/json-c:json-c",
+        "//packages/linux/system/libs/data/json-c:json-c",
         "//packages/linux/system/init/eudev:eudev",
     ],
 )

@@ -19,7 +19,7 @@ filegroup(
 filegroup(
     name = "bluetooth-tools",
     srcs = [
-        "//packages/linux/network/wireless/bluez:bluez",
+        "//packages/linux/laptop/wireless/bluez:bluez",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -73,7 +73,7 @@ autotools_package(
 
     use_deps = {
         "ssl": ["system//libs/crypto/openssl:openssl"],
-        "http2": ["//packages/linux/network/nghttp2:nghttp2"],
+        "http2": ["//packages/linux/system/libs/network/nghttp2:nghttp2"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
         "zstd": ["//packages/linux/core/zstd:zstd"],
     },

@@ -17,7 +17,7 @@ cmake_package(
         "-DCMAKE_INSTALL_PREFIX=/usr",
     ],
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/graphics/video/gstreamer:gstreamer",
         "//packages/linux/desktop/qt:qt5",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",

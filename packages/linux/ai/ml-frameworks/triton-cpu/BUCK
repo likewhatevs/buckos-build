@@ -13,7 +13,7 @@ cmake_package(
         "-DCMAKE_CXX_STANDARD=17",
     ],
     deps = [
-        "//packages/linux/dev-tools/compilers/llvm:llvm",
+        "//packages/linux/core/llvm:llvm",
         "//packages/linux/dev-libs/python/pybind11:pybind11",
     ],
     signature_required = False,

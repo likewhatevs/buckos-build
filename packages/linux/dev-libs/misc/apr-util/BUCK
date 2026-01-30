@@ -55,7 +55,7 @@ autotools_package(
     ],
     deps = [
         "//packages/linux/dev-libs/misc/apr:apr",
-        "//packages/linux/core/expat:expat",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     # apr-1-config should be in PATH from the apr dependency
     src_prepare = """

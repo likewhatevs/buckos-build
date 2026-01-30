@@ -20,6 +20,6 @@ cmake_package(
     ],
     deps = [
         "//packages/linux/dev-libs/libxml2:libxml2",
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
 )

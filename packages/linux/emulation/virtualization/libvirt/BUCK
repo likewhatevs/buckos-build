@@ -166,7 +166,7 @@ autotools_package(
         "//packages/linux/system/libs/data/yajl:yajl",
         "//packages/linux/system/libs/ipc/libtirpc:libtirpc",
         "//packages/linux/system/libs/crypto/gnutls:gnutls",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/system/init/eudev:eudev",
         "//packages/linux/system/security/auth/privilege:polkit",
         "//packages/linux/system/security/audit:audit",

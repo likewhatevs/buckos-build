@@ -21,7 +21,7 @@ cargo_package(
     deps = [
         "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/font/fontconfig:fontconfig",
-        "//packages/linux/dev-libs/text/expat:expat",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     visibility = ["PUBLIC"],
 )

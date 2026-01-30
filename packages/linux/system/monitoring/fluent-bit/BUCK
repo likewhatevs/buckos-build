@@ -36,7 +36,7 @@ cmake_package(
         "tls": ["//packages/linux/system/libs/crypto/openssl:openssl"],
         "yaml": ["//packages/linux/system/libs/data/yaml:yaml"],
         "systemd": ["//packages/linux/system/systemd:systemd"],
-        "jemalloc": ["//packages/linux/dev-libs/misc/jemalloc:jemalloc"],
+        "jemalloc": ["//packages/linux/dev-libs/allocators/jemalloc:jemalloc"],
     },
     cmake_args = [
         "-DCMAKE_BUILD_TYPE=Release",

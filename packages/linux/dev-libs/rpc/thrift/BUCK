@@ -25,7 +25,7 @@ cmake_package(
     ],
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "libevent": ["//packages/linux/dev-libs/misc/libevent:libevent"],
+        "libevent": ["//packages/linux/system/libs/utility/libevent:libevent"],
         "python": ["//packages/linux/lang/python:python"],
     },
     cmake_args = [

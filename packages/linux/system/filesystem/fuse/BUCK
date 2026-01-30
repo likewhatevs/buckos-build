@@ -8,7 +8,7 @@
 filegroup(
     name = "fuse",
     srcs = [
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/security/encryption:fuse3",
         "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
         "//packages/linux/system/filesystem/fuse/exfat-fuse:exfat-fuse",
         "//packages/linux/system/filesystem/fuse/bindfs:bindfs",
@@ -25,7 +25,7 @@ filegroup(
 filegroup(
     name = "common",
     srcs = [
-        "//packages/linux/system/filesystem/fuse/fuse3:fuse3",
+        "//packages/linux/system/security/encryption:fuse3",
         "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
     ],
     default_target_platform = "//platforms:linux-target",

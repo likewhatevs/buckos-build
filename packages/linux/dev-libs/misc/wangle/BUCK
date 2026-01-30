@@ -17,7 +17,7 @@ cmake_package(
         "//packages/linux/dev-libs/boost:boost",
         "//packages/linux/dev-libs/google/glog:glog",
         "//packages/linux/dev-libs/google/gflags:gflags",
-        "//packages/linux/dev-libs/misc/libevent:libevent",
+        "//packages/linux/system/libs/utility/libevent:libevent",
         "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
     ],
     cmake_args = [

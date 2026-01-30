@@ -16,7 +16,7 @@ autotools_package(
 
     use_deps = {
         "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
-        "elf": ["//packages/linux/dev-tools/dev-utils/elfutils:elfutils"],
+        "elf": ["//packages/linux/system/libs/elfutils:elfutils"],
         # TODO: Add libselinux when available:
         # "selinux": ["//packages/linux/system/security/selinux/libselinux:libselinux"],
     },

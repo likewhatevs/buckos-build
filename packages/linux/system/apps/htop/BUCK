@@ -30,7 +30,7 @@ autotools_package(
     ],
     use_defaults = ["unicode"],
     use_deps = {
-        "hwloc": ["//packages/linux/system/hardware/hwloc:hwloc"],
+        "hwloc": ["//packages/linux/system/libs/hwloc:hwloc"],
         "caps": ["//packages/linux/system/libs/ipc/libcap:libcap"],
     },
     use_configure = {
@@ -62,7 +62,7 @@ autotools_package(
         "--sysconfdir=/etc",
     ],
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

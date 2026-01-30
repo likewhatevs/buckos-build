@@ -23,7 +23,7 @@ autotools_package(
     ],
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "Network packet analyzer with grep-like functionality",

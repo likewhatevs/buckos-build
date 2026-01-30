@@ -48,48 +48,7 @@ autoreconf -fi
     """,
     deps = [
         "//packages/linux/system/security/encryption:linux-pam",
-        ":cracklib",
-    ],
-    visibility = ["PUBLIC"],
-)
-
-# cracklib - Password strength checking library
-download_source(
-    name = "cracklib-src",
-    src_uri = "https://github.com/cracklib/cracklib/releases/download/v2.9.11/cracklib-2.9.11.tar.xz",
-    sha256 = "2c83a91dd21d035eab98bded764eb4579b73fd837b683e1a447b11ef604ee130",
-    signature_required = False,
-)
-
-autotools_package(
-    name = "cracklib",
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
-        "//packages/linux/dev-tools/build-systems/automake:automake",
-        "//packages/linux/dev-tools/build-systems/libtool:libtool",
-    ],
-    src_prepare = """
-autoreconf -fi
-""",
-    source = ":cracklib-src",
-    version = "2.9.11",
-    description = "Password strength checking library",
-    homepage = "https://github.com/cracklib/cracklib",
-    license = "LGPL-2.1+",
-    configure_args = [
-        "--prefix=/usr",
-        "--sysconfdir=/etc",
-        "--sbindir=/usr/sbin",
-        "--enable-shared",
-        "--disable-static",
-        "--without-python",
-    ],
-    post_install = """
-        mkdir -p "$OUT/usr/share/cracklib"
-        # Create empty dictionary placeholder
-        touch "$OUT/usr/share/cracklib/pw_dict.pwd"
-    """,
-    deps = [
+        "//packages/linux/system/security/cracklib:cracklib",
     ],
     visibility = ["PUBLIC"],
 )

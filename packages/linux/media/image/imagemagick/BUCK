@@ -60,8 +60,8 @@ autotools_package(
     ],
     use_deps = {
         "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
-        "png": ["//packages/linux/media/image/libpng:libpng"],
-        "tiff": ["//packages/linux/media/image/libtiff:libtiff"],
+        "png": ["//packages/linux/system/libs/image/libpng:libpng"],
+        "tiff": ["//packages/linux/system/libs/image/libtiff:libtiff"],
         "webp": ["//packages/linux/system/libs/image/libwebp:libwebp"],
         "jxl": ["//packages/linux/media/image/libjxl:libjxl"],
         "heif": ["//packages/linux/media/image/libheif:libheif"],

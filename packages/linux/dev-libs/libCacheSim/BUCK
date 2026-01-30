@@ -16,7 +16,7 @@ cmake_package(
     ],
     deps = [
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/dev-libs/compression/zstd:zstd",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

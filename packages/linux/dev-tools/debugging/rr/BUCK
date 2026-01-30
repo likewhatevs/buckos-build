@@ -20,7 +20,7 @@ cmake_package(
     ],
     deps = [
         "//packages/linux/dev-libs/serialization/capnproto:capnproto",
-        "//packages/linux/dev-libs/compression/brotli:brotli",
+        "//packages/linux/system/libs/compression/brotli:brotli",
         "//packages/linux/core/zlib:zlib",
     ],
     visibility = ["PUBLIC"],

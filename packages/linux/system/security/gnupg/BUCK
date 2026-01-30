@@ -1,24 +1,9 @@
 load("//defs:package_defs.bzl", "download_source", "autotools_package")
-load("//defs:use_flags.bzl", "set_use_flags")
 
 download_source(
     name = "gnupg-src",
     src_uri = "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.4.3.tar.bz2",
     sha256 = "a271ae6d732f6f4d80c258ad9ee88dd9c94c8fdc33c3e45328c4d7c126bd219d",
-    signature_required = False,
-)
-
-download_source(
-    name = "libgpg-error-src",
-    src_uri = "https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.47.tar.bz2",
-    sha256 = "9e3c670966b96ecc746c28c2c419541e3bcb787d1a73930f5e5f5e1bcbbb9bdb",
-    signature_required = False,
-)
-
-download_source(
-    name = "libgcrypt-src",
-    src_uri = "https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.10.3.tar.bz2",
-    sha256 = "8b0870897ac5ac67ded568dcfadf45969cfa8a6beb0fd60af2a9eadc2a3272aa",
     signature_required = False,
 )
 
@@ -45,62 +30,6 @@ download_source(
 )
 
 autotools_package(
-    name = "libgpg-error",
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
-        "//packages/linux/dev-tools/build-systems/automake:automake",
-        "//packages/linux/dev-tools/build-systems/libtool:libtool",
-    ],
-    src_prepare = """
-autoreconf -fi
-""",
-    source = ":libgpg-error-src",
-    iuse = ["common-lisp", "nls", "static-libs"],
-    use_configure = {
-        "-common-lisp": "--disable-common-lisp",
-        "-nls": "--disable-nls",
-        "-static-libs": "--disable-static",
-        "common-lisp": "--enable-common-lisp",
-        "nls": "--enable-nls",
-        "static-libs": "--enable-static",
-    },
-    version = "1.47",
-    description = "GnuPG error library",
-    homepage = "https://gnupg.org/",
-    license = "LGPL-2.1+",
-    configure_args = [
-        "--prefix=/usr",
-        "--enable-shared",
-        "--disable-static",
-    ],
-    visibility = ["PUBLIC"],
-)
-
-autotools_package(
-    name = "libgcrypt",
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
-        "//packages/linux/dev-tools/build-systems/automake:automake",
-        "//packages/linux/dev-tools/build-systems/libtool:libtool",
-    ],
-    src_prepare = """
-autoreconf -fi
-""",
-    source = ":libgcrypt-src",
-    version = "1.10.3",
-    description = "General purpose cryptographic library",
-    homepage = "https://gnupg.org/",
-    license = "LGPL-2.1+",
-    configure_args = [
-        "--prefix=/usr",
-        "--enable-shared",
-        "--disable-static",
-    ],
-    deps = [":libgpg-error"],
-    visibility = ["PUBLIC"],
-)
-
-autotools_package(
     name = "libksba",
     bdepend = [
         "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
@@ -120,7 +49,7 @@ autoreconf -fi
         "--enable-shared",
         "--disable-static",
     ],
-    deps = [":libgpg-error"],
+    deps = ["//packages/linux/system/libs/crypto/libgpg-error:libgpg-error"],
     visibility = ["PUBLIC"],
 )
 
@@ -144,7 +73,7 @@ autoreconf -fi
         "--enable-shared",
         "--disable-static",
     ],
-    deps = [":libgpg-error"],
+    deps = ["//packages/linux/system/libs/crypto/libgpg-error:libgpg-error"],
     visibility = ["PUBLIC"],
 )
 
@@ -194,15 +123,15 @@ autoreconf -fi
         "--enable-maintainer-mode",
     ],
     deps = [
-        ":libgpg-error",
-        ":libgcrypt",
+        "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
+        "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
         ":libksba",
         ":libassuan",
         ":npth",
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/system/libs/compression/bzip2:bzip2",
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

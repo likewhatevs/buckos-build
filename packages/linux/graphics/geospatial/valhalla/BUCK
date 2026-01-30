@@ -18,10 +18,10 @@ cmake_package(
     deps = [
         "//packages/linux/dev-libs/boost:boost",
         "//packages/linux/dev-libs/serialization/protobuf:protobuf",
-        "//packages/linux/network/curl:curl",
+        "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/lang/lua:lua",
-        "//packages/linux/databases/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/dev-libs/json/rapidjson:rapidjson",
         "//packages/linux/dev-libs/serialization/protozero:protozero",
         "//packages/linux/dev-libs/geospatial/libosmpbf:libosmpbf",

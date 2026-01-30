@@ -12,12 +12,12 @@ meson_package(
     deps = [
         "//packages/linux/network/libs/dpdk:dpdk",
         "//packages/linux/system/libs/numactl:numactl",
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/dev-libs/libbsd:libbsd",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/dev-libs/zlib:zlib",
         "//packages/linux/lang/lua:lua",
-        "//packages/linux/dev-libs/json/json-c:json-c",
+        "//packages/linux/system/libs/data/json-c:json-c",
         "//packages/linux/system/libs/libelf:libelf",
     ],
 )

@@ -32,7 +32,7 @@ autotools_package(
     },
     use_deps = {
         "alsa": ["//packages/linux/system/libs/audio/alsa-lib:alsa-lib"],
-        "wayland": ["//packages/linux/core/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
+        "wayland": ["//packages/linux/system/libs/utility/libffi:libffi", "//packages/linux/graphics/rendering/wayland:wayland"],
         "opengl": ["//packages/linux/desktop/mesa:mesa"],
         "vulkan": ["//packages/linux/desktop/mesa:mesa"],
     },

@@ -24,7 +24,7 @@ LLVM_USE_DEFAULTS = ["zlib", "ffi"]
 # Resolve USE-based dependencies
 LLVM_USE_DEPS = {
     "zlib": ["//packages/linux/core/zlib:zlib"],
-    "ffi": ["//packages/linux/core/libffi:libffi"],
+    "ffi": ["//packages/linux/system/libs/utility/libffi:libffi"],
 }
 
 # Get current global USE flags (can be overridden per-build)
@@ -94,7 +94,7 @@ cmake_package(
     src_configure = LLVM_SRC_CONFIGURE,
     cmake_args = LLVM_CMAKE_ARGS,
     deps = use_dep(LLVM_USE_DEPS, _effective_use) + [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

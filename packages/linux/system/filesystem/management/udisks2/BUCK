@@ -21,7 +21,7 @@ autotools_package(
     ],
     deps = [
         "//packages/linux/core/util-linux:util-linux",
-        "//packages/linux/system/filesystem/management/lvm2:lvm2",
+        "//packages/linux/system/security/cryptsetup:lvm2",
         "//packages/linux/system/init/eudev:eudev",
     ],
     visibility = ["PUBLIC"],

@@ -61,9 +61,9 @@ cmake_package(
         "-DENABLE_FFMPEG_VERSIONS=ON",
     ],
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/desktop/qt:qt5",
-        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
         "//packages/linux/graphics/video/v4l-utils:v4l-utils",
         "//packages/linux/desktop/libdrm:libdrm",

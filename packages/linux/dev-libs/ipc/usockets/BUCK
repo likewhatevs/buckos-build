@@ -27,12 +27,12 @@ cp -r src/*.h "$DESTDIR/usr/include/usockets/"
 """,
 
     bdepend = [
-        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/utility/libuv:libuv",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/core/zlib:zlib",
     ],
     rdepend = [
-        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/utility/libuv:libuv",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/core/zlib:zlib",
     ],

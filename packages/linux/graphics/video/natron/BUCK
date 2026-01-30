@@ -29,9 +29,9 @@ qmake -r CONFIG+=release \
 INSTALL_ROOT=$OUT make install
 """,
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/desktop/qt:qt5",
-        "//packages/linux/graphics/utilities/imagemagick:imagemagick",
+        "//packages/linux/media/image/imagemagick:imagemagick",
         "//packages/linux/dev-libs/boost:boost",
         "//packages/linux/system/libs/graphics/cairo:cairo",
     ],

@@ -194,10 +194,10 @@ meson_package(
         "-Dsdl2=enabled",
     ],
     deps = [
-        "//packages/linux/graphics/video/ffmpeg:ffmpeg",
+        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/graphics/video/libva:libva",
         "//packages/linux/graphics/video/vdpau:vdpau",
-        "//packages/linux/audio/daemons/alsa-lib:alsa-lib",
+        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
         "//packages/linux/audio/daemons/pipewire:pipewire",
         "//packages/linux/desktop/libdrm:libdrm",

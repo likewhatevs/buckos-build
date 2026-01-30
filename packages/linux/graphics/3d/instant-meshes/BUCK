@@ -9,7 +9,7 @@ cmake_package(
     homepage = "https://github.com/wjakob/instant-meshes",
     license = "BSD-3-Clause",
     deps = [
-        "//packages/linux/robotics/eigen3:eigen3",
+        "//packages/linux/dev-libs/eigen3:eigen3",
         "//packages/linux/dev-libs/misc/tbb:tbb",
         "//packages/linux/graphics/rendering/glfw:glfw",
     ],

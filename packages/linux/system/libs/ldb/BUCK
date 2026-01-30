@@ -55,8 +55,8 @@ make -j${MAKEOPTS:-$(nproc)}
 ''',
     deps = [
         "//packages/linux/system/libs/talloc:talloc",
-        "//packages/linux/system/libs/tdb:tdb",
-        "//packages/linux/system/libs/tevent:tevent",
+        "//packages/linux/system/security/auth/directory:tdb",
+        "//packages/linux/system/security/auth/directory:tevent",
     ],
     visibility = ["PUBLIC"],
 )

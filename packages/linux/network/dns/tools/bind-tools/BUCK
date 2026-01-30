@@ -64,7 +64,7 @@ done
 """,
 
     deps = [
-        "//packages/linux/dev-libs/misc/libuv:libuv",
+        "//packages/linux/system/libs/utility/libuv:libuv",
     ],
 
     description = "DNS utilities from BIND (dig, host, nslookup, nsupdate)",

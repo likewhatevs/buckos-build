@@ -18,8 +18,8 @@ autotools_package(
         "//packages/linux/graphics/xorg/libX11:libX11",
         "//packages/linux/graphics/xorg/libXrender:libXrender",
         "//packages/linux/graphics/xorg/xorgproto:xorgproto",
-        "//packages/linux/graphics/freetype:freetype",
-        "//packages/linux/graphics/fontconfig:fontconfig",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
     visibility = ["PUBLIC"],
 )

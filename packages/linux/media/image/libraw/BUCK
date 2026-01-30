@@ -45,7 +45,7 @@ autotools_package(
     },
     deps = [],
     use_deps = {
-        "jpeg": ["//packages/linux/media/image/libjpeg-turbo:libjpeg-turbo"],
+        "jpeg": ["//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
         "lcms2": ["//packages/linux/graphics/utilities/lcms:lcms"],
     },

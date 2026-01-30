@@ -14,7 +14,7 @@ autotools_package(
     use_defaults = ["ecdsa"],
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
-        "//packages/linux/dev-libs/misc/libevent:libevent",
+        "//packages/linux/system/libs/utility/libevent:libevent",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

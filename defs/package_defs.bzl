@@ -5307,7 +5307,7 @@ def autotools_package(
             },
             use_deps = {
                 "ssl": ["//packages/linux/dev-libs/openssl"],
-                "http2": ["//packages/linux/network/nghttp2"],
+                "http2": ["//packages/linux/system/libs/network/nghttp2"],
             },
         )
     """
@@ -7263,7 +7263,7 @@ def font_package(
             src_uri = "https://github.com/notofonts/noto-fonts/archive/v2023.05.tar.gz",
             sha256 = "...",
             font_types = ["ttf", "otf"],
-            deps = ["//packages/linux/fonts/libraries/fontconfig:fontconfig"],
+            deps = ["//packages/linux/system/libs/font/fontconfig:fontconfig"],
         )
 
         # With custom suffix patterns:

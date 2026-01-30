@@ -46,7 +46,7 @@ autotools_package(
         "--with-fileio=lame",
     ],
     deps = [
-        "//packages/linux/core/ncurses:ncurses",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     visibility = ["PUBLIC"],
 )

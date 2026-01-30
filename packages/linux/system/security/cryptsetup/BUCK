@@ -60,7 +60,7 @@ autoreconf -fi
     use_defaults = ["udev"],
     use_deps = {
         "udev": ["//packages/linux/system/init/eudev:eudev"],
-        "readline": ["//packages/linux/core/readline:readline"],
+        "readline": ["//packages/linux/system/terminal/readline:readline"],
     },
     use_configure = {
         "udev": "--enable-udev_rules --enable-udev_sync",
@@ -86,62 +86,4 @@ autoreconf -fi
     visibility = ["PUBLIC"],
 )
 
-autotools_package(
-    name = "cryptsetup",
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
-        "//packages/linux/dev-tools/build-systems/automake:automake",
-        "//packages/linux/dev-tools/build-systems/libtool:libtool",
-        "//packages/linux/dev-libs/misc/gettext:gettext",
-    ],
-    src_prepare = """
-autoreconf -fi
-""",
-    version = "2.6.1",
-    src_uri = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.6/cryptsetup-2.6.1.tar.xz",
-    sha256 = "410ded65a1072ab9c8e41added37b9729c087fef4d2db02bb4ef529ad6da4693",
-    signature_required = False,
-    description = "Disk encryption setup utility using dm-crypt and LUKS",
-    homepage = "https://gitlab.com/cryptsetup/cryptsetup",
-    license = "GPL-2.0+",
-    iuse = ["openssl", "gcrypt", "nettle", "nls", "argon2", "ssh-token", "fips", "reencrypt"],
-    use_defaults = ["openssl", "argon2", "reencrypt"],
-    use_deps = {
-        "openssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "gcrypt": ["//packages/linux/system/libs/crypto/libgcrypt:libgcrypt"],
-        "nettle": ["//packages/linux/system/libs/crypto/nettle:nettle"],
-        "argon2": ["//packages/linux/system/libs/crypto/argon2:argon2"],
-    },
-    use_configure = {
-        "openssl": "--with-crypto_backend=openssl",
-        "gcrypt": "--with-crypto_backend=gcrypt",
-        "nettle": "--with-crypto_backend=nettle",
-        "nls": "--enable-nls",
-        "-nls": "--disable-nls",
-        "argon2": "--enable-libargon2",
-        "-argon2": "--disable-libargon2",
-        "ssh-token": "--enable-ssh-token",
-        "-ssh-token": "--disable-ssh-token",
-        "fips": "--enable-fips",
-        "-fips": "--disable-fips",
-        "reencrypt": "--enable-cryptsetup-reencrypt",
-        "-reencrypt": "--disable-cryptsetup-reencrypt",
-    },
-    configure_args = [
-        "--prefix=/usr",
-        "--sbindir=/sbin",
-        "--sysconfdir=/etc",
-        "--localstatedir=/var",
-        "--disable-asciidoc",  # Don't build man pages (requires asciidoctor)
-    ],
-    post_install = """
-        mkdir -p $OUT/etc/crypttab.d
-    """,
-    deps = [
-        ":popt",
-        ":lvm2",
-        "//packages/linux/core/util-linux:util-linux",
-        "//packages/linux/system/libs/data/json-c:json-c",
-    ],
-    visibility = ["PUBLIC"],
-)
+# cryptsetup package moved to //packages/linux/system/filesystem/management/cryptsetup

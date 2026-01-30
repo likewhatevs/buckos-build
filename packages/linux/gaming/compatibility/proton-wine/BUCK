@@ -34,7 +34,7 @@ autotools_package(
     use_deps = {
         "x11": [
             "//packages/linux/graphics/xorg:x11-full",
-            "//packages/linux/graphics/freetype:freetype",
+            "//packages/linux/system/libs/font/freetype:freetype",
             "//packages/linux/system/libs/font/fontconfig:fontconfig",
         ],
         "wayland": [

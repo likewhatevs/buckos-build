@@ -59,7 +59,7 @@ autoreconf -fiv
 
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "WiFi security auditing tools suite",

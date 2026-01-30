@@ -55,7 +55,7 @@ autotools_package(
     ],
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/dev-libs/text/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
     visibility = ["PUBLIC"],
 )

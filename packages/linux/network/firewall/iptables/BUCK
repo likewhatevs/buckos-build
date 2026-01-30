@@ -78,7 +78,7 @@ chmod 600 "$DESTDIR/etc/iptables/rules.v6"
 
     deps = [
         "//packages/linux/core/libnl:libnl",
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
         # TODO: Add these libraries when available:
         # "//packages/linux/system/libs/network/libmnl:libmnl",
         # "//packages/linux/system/libs/network/libnftnl:libnftnl",

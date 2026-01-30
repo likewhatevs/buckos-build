@@ -31,7 +31,7 @@ load("//defs:use_flags.bzl", "set_use_flags")
 #
 #     deps = [
 #         "//packages/linux/core/libnl:libnl",
-#         "//packages/linux/core/ncurses:ncurses",
+#         "//packages/linux/system/terminal/ncurses:ncurses",
 #         # "//packages/linux/dev-libs/libconfuse:libconfuse",  # TODO: Create this package
 #     ],
 #

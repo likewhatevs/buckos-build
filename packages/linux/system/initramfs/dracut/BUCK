@@ -36,7 +36,7 @@ autotools_package(
     use_defaults = ["systemd"],
     use_deps = {
         "systemd": ["//packages/linux/system/init/systemd:systemd"],
-        "cryptsetup": ["//packages/linux/system/security/cryptsetup:cryptsetup"],
+        "cryptsetup": ["//packages/linux/system/filesystem/management/cryptsetup:cryptsetup"],
     },
     pre_configure = """
 # dracut uses a custom configure script (not autotools)

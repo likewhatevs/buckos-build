@@ -13,8 +13,8 @@ autotools_package(
 
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "readline": ["//packages/linux/core/readline:readline"],
-        "ncurses": ["//packages/linux/core/ncurses:ncurses"],
+        "readline": ["//packages/linux/system/terminal/readline:readline"],
+        "ncurses": ["//packages/linux/system/terminal/ncurses:ncurses"],
     },
 
     use_configure = {},

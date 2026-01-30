@@ -34,7 +34,7 @@ autotools_package(
     },
 
     deps = [
-        "//packages/linux/network/libpcap:libpcap",
+        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "Ethernet/IP address pairing monitor",

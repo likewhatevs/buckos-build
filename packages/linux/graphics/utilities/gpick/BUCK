@@ -31,7 +31,7 @@ DESTDIR=$OUT make install
     deps = [
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/lang/lua:lua",
-        "//packages/linux/core/expat:expat",
+        "//packages/linux/system/libs/data/expat:expat",
         "//packages/linux/dev-libs/boost:boost",
     ],
     bdepend = [

@@ -15,7 +15,7 @@ simple_package(
     deps = [],
     use_deps = {
         "ssl": ["//packages/linux/system/libs/crypto/openssl:openssl"],
-        "ldap": ["//packages/linux/network/ldap/openldap:openldap"],
+        "ldap": ["//packages/linux/system/security/auth/directory:openldap"],
         "mysql": ["//packages/linux/databases/mysql:mysql"],
         "pgsql": ["//packages/linux/databases/postgresql:postgresql"],
     },

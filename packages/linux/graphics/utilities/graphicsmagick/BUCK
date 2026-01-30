@@ -137,7 +137,7 @@ make DESTDIR=$OUT install
         "//packages/linux/system/libs/image/libtiff:libtiff",
         "//packages/linux/system/libs/image/libwebp:libwebp",
         "//packages/linux/system/libs/graphics/lcms2:lcms2",
-        "//packages/linux/fonts/libraries/freetype:freetype",
+        "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/data/libxml2:libxml2",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/compression/zstd:zstd",

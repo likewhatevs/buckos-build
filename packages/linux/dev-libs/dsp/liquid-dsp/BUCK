@@ -28,7 +28,7 @@ autoreconf -fi
         "static-libs": "--enable-static",
     },
     use_deps = {
-        "fftw": ["//packages/linux/dev-libs/fftw:fftw"],
+        "fftw": ["//packages/linux/dev-libs/math/fftw:fftw"],
     },
     description = "Software-defined radio digital signal processing library",
     homepage = "https://liquidsdr.org/",

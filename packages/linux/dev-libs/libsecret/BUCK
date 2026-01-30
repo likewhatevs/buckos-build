@@ -53,7 +53,7 @@ meson_package(
     ],
     deps = [
         "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/dev-libs/libgcrypt:libgcrypt",
+        "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
     ],
     visibility = ["PUBLIC"],
 )

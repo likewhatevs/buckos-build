@@ -11,8 +11,8 @@ cargo_package(
     license = "MIT",
     bins = ["eww"],
     deps = [
-        "//packages/linux/core/libffi:libffi",
-        "//packages/linux/graphics/pango:pango",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+        "//packages/linux/fonts/libraries/pango:pango",
     ],
     visibility = ["PUBLIC"],
 )
