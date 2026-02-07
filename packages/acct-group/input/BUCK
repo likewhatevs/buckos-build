@@ -1,0 +1,8 @@
+load("//defs:package_defs.bzl", "acct_group_package")
+
+acct_group_package(
+    name = "input",
+    gid = 97,  # Standard input group GID
+    description = "System group for input device access",
+    visibility = ["PUBLIC"],
+)

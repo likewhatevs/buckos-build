@@ -175,36 +175,17 @@ DESTDIR="$DESTDIR" cmake --install "$S/build"
 mkdir -p "$DESTDIR/var/lib/sddm"
 chmod 755 "$DESTDIR/var/lib/sddm"
 
-# Patch PAM configuration for better systemd integration
-# The default PAM config has pam_systemd as optional, which can cause XDG_RUNTIME_DIR not to be set
-# We need pam_systemd to be required so it always runs and sets up the user session properly
-# For live ISOs, use permissive config to avoid setuid issues in overlay fs
-cat > "$DESTDIR/etc/pam.d/sddm-autologin" << 'PAM_AUTOLOGIN'
-#%PAM-1.0
-# Autologin PAM configuration for SDDM
-auth      required    pam_env.so
-auth      required    pam_permit.so
--auth     optional    pam_gnome_keyring.so
--auth     optional    pam_kwallet5.so
+# Install systemd service file manually (CMake installs to wrong path due to symlink resolution)
+mkdir -p "$DESTDIR/usr/lib/systemd/system"
+if [ -f "$S/build/services/sddm.service" ]; then
+    cp "$S/build/services/sddm.service" "$DESTDIR/usr/lib/systemd/system/"
+fi
 
-# Permissive account check (no setuid in overlay fs)
-account   required    pam_permit.so
-
-password  required    pam_permit.so
-
-# Session setup - pam_systemd MUST run first to set XDG_RUNTIME_DIR
-# All session modules except pam_systemd are optional to avoid setuid failures
-session   required    pam_systemd.so
-session   required    pam_env.so
--session  optional    pam_keyinit.so revoke
-session   required    pam_limits.so
--session  optional    pam_loginuid.so
--session  optional    pam_unix.so
--session  optional    pam_gnome_keyring.so auto_start
--session  optional    pam_kwallet5.so auto_start
-PAM_AUTOLOGIN
+# Note: PAM configuration is now provided by //packages/linux/desktop/sddm/pam:sddm-pam
 """,
     deps = [
+        "//packages/acct-group/sddm:sddm",
+        "//packages/acct-user/sddm:sddm",
         "//packages/linux/desktop/qt:qt6",
         "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
         "//packages/linux/system/libs/utility/libffi:libffi",

@@ -135,6 +135,8 @@ _KDE_COMMON_DEPS = [
     "//packages/linux/core/util-linux:util-linux",
     "//packages/linux/dev-tools/build-systems/libtool:libtool",
     "//packages/linux/system/libs/utility/icu:icu",
+    "//packages/linux/system/libs/compression/zstd:zstd",  # Qt6Core depends on zstd
+    "//packages/linux/desktop/kde:syndication",  # KNewStuff depends on syndication
 ]
 
 # -----------------------------------------------------------------------------

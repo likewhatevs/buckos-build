@@ -88,14 +88,18 @@ FUZZ_STUB
         "zstd",
     ],
     # TEMPORARILY DISABLED acl for aarch64 cross-compilation (Fix #26 - acl/libattr linking issue)
+    # Note: audit disabled for now due to build issues with C11 atomics
     use_defaults = ["pam", "kmod", "lzma", "lz4", "xz", "zstd", "kernel-install"],
     use_deps = {
         "pam": ["//packages/linux/system/security/auth/pam:pam"],
         "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
+        "audit": ["//packages/linux/system/security/audit:audit"],
     },
     use_meson = {
         "apparmor": "-Dapparmor=enabled",
         "-apparmor": "-Dapparmor=disabled",
+        "audit": "-Daudit=enabled",
+        "-audit": "-Daudit=disabled",
         "boot": "-Dbootloader=enabled",
         "-boot": "-Dbootloader=disabled",
         "bpf": "-Dbpf-framework=enabled",
@@ -163,6 +167,7 @@ FUZZ_STUB
         "-Dsysconfdir=/etc",
         "-Dmode=release",
         "-Dstrip=false",  # Disable stripping (causes issues with cross-compilation)
+        "-Dutmp=true",  # Enable utmp/wtmp support for login tracking (needed by SDDM)
         # Override auto-detected paths - meson finds build-time paths, we need runtime paths
         "-Dmount-path=/bin/mount",
         "-Dumount-path=/bin/umount",
@@ -173,7 +178,6 @@ FUZZ_STUB
         # Disable features not needed (feature type: enabled/disabled/auto)
         # Note: features controlled by use_meson are set via use_defaults, NOT here
         "-Dselinux=disabled",
-        "-Daudit=disabled",
         "-Dgcrypt=disabled",
         # Compression support
         "-Dzlib=enabled",

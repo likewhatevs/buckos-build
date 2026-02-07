@@ -1,0 +1,8 @@
+load("//defs:package_defs.bzl", "acct_group_package")
+
+acct_group_package(
+    name = "tape",
+    gid = 33,
+    description = "System group for tape drive device access",
+    visibility = ["PUBLIC"],
+)

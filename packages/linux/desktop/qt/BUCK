@@ -24,6 +24,13 @@ download_source(
     signature_required = False,
 )
 
+download_source(
+    name = "qt5compat-src",
+    src_uri = "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qt5compat-everywhere-src-6.8.3.tar.xz",
+    sha256 = "54b9c84bff34b423dd8c472862ce1009753ff505e418b4ef33907416da16b82e",
+    signature_required = False,
+)
+
 # =============================================================================
 # Qt6 Native - Minimal build for host tools (syncqt, moc, rcc, etc.)
 # Used when cross-compiling Qt6 for aarch64/other architectures
@@ -36,6 +43,23 @@ cmake_package(
     description = "Qt6 native host tools for cross-compilation",
     homepage = "https://www.qt.io/",
     license = "LGPL-3.0-or-later OR GPL-3.0-or-later",
+
+    # Extract qt5compat module into source tree
+    src_prepare = '''
+# Qt5Compat not included in native build (not needed for host tools)
+echo "Qt5Compat not included in native build"
+
+# Disable qdoc and linguist - they require LLVM/libclang which may have
+# incompatible C++ library (libc++ vs libstdc++) on the host system.
+# We only need qttools for UiTools/designer, not for documentation/translation.
+if [ -f "$S/qttools/src/CMakeLists.txt" ]; then
+    echo "Patching qttools to disable qdoc and linguist..."
+    sed -i 's|add_subdirectory(qdoc)|# add_subdirectory(qdoc) # Disabled - requires libclang|g' "$S/qttools/src/CMakeLists.txt"
+    sed -i 's|add_subdirectory(linguist)|# add_subdirectory(linguist) # Disabled - requires libclang|g' "$S/qttools/src/CMakeLists.txt"
+    echo "qdoc and linguist disabled in qttools"
+    grep -n -E "(qdoc|linguist)" "$S/qttools/src/CMakeLists.txt" || true
+fi
+''',
 
     # Force clean reconfigure to ensure feature flags take effect
     pre_configure = '''
@@ -119,7 +143,6 @@ done
         "-DQT_FORCE_FIND_TOOLS=OFF",  # Don't search for external tools, build our own
         "-DQT_BUILD_TOOLS_BY_DEFAULT=ON",  # Ensure tools packages (Qt6*Tools) are created
         # Disable ALL optional Qt modules - only build qtbase
-        "-DBUILD_qttools=OFF",
         "-DBUILD_qtwayland=ON",  # Need qtwaylandscanner host tool for cross-compiling qtwayland
         "-DBUILD_qtdoc=OFF",
         "-DBUILD_qttranslations=OFF",
@@ -132,7 +155,6 @@ done
         "-DBUILD_qtquick3d=OFF",
         "-DBUILD_qtmultimedia=OFF",
         "-DBUILD_qt3d=OFF",
-        "-DBUILD_qt5compat=OFF",
         "-DBUILD_qtactiveqt=OFF",
         "-DBUILD_qtcharts=OFF",
         "-DBUILD_qtcoap=OFF",
@@ -241,7 +263,23 @@ cmake_package(
     license = "LGPL-3.0-or-later OR GPL-3.0-or-later",
 
     # src_prepare: Patch Qt's CMakeLists.txt to define EGL and GLESv2 targets for cross-compilation
+    # NOTE: qt5compat is already included in the Qt "single" tarball, no need to extract it
     src_prepare = """
+# Qt5Compat is already included in the qt-everywhere-src tarball
+echo "Qt5Compat already included in Qt single tarball"
+
+# Remove any leftover qt5compat-everywhere-src directory from previous extraction attempts
+if [ -d "$S/qt5compat-everywhere-src-6.8.3" ]; then
+    echo "Removing leftover qt5compat-everywhere-src-6.8.3 directory..."
+    rm -rf "$S/qt5compat-everywhere-src-6.8.3"
+fi
+
+# Also remove nested leftover directory inside qt5compat from previous extractions
+if [ -d "$S/qt5compat/qt5compat-everywhere-src-6.8.3" ]; then
+    echo "Removing nested leftover qt5compat/qt5compat-everywhere-src-6.8.3 directory..."
+    rm -rf "$S/qt5compat/qt5compat-everywhere-src-6.8.3"
+fi
+
 # Find mesa library path from CMAKE_PREFIX_PATH (already set before src_prepare runs)
 MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa)
 if [ -n "$MESA_PATH" ]; then
@@ -295,29 +333,31 @@ EOF
     fi
 fi
 
-# Disable qdoc (Qt documentation generator) - it requires LLVM/libclang which
-# may have incompatible C++ library (libc++ vs libstdc++) on the host system.
-# We only need qttools for UiTools/designer, not for documentation generation.
+# Disable qdoc and linguist - they require LLVM/libclang which may have
+# incompatible C++ library (libc++ vs libstdc++) on the host system.
+# We only need qttools for UiTools/designer, not for documentation/translation.
 if [ -f "$S/qttools/src/CMakeLists.txt" ]; then
-    echo "Patching qttools to disable qdoc..."
-    # Comment out add_subdirectory(qdoc)
+    echo "Patching qttools to disable qdoc and linguist..."
     sed -i 's|add_subdirectory(qdoc)|# add_subdirectory(qdoc) # Disabled - requires libclang|g' "$S/qttools/src/CMakeLists.txt"
-    echo "qdoc disabled in qttools"
-    grep -n "qdoc" "$S/qttools/src/CMakeLists.txt" || true
+    sed -i 's|add_subdirectory(linguist)|# add_subdirectory(linguist) # Disabled - requires libclang|g' "$S/qttools/src/CMakeLists.txt"
+    echo "qdoc and linguist disabled in qttools"
+    grep -n -E "(qdoc|linguist)" "$S/qttools/src/CMakeLists.txt" || true
 fi
 
 # For cross-compilation only: Remove optional Qt modules that require native tools
 # Qt's CMakeLists.txt checks dependencies before honoring -DBUILD_* flags
 # So we physically remove the modules from the source tree to avoid dependency errors
+# NOTE: qt5compat is kept - needed by kwin
+# NOTE: qttools is kept - needed by kwin for Qt6UiTools
 if [ "${CROSS_COMPILING:-false}" = "true" ]; then
     echo "Cross-compiling: Removing optional Qt modules that require native tools..."
     for module in qtquick3d qtquick3dphysics qt3d qtlanguageserver \
-                  qtquicktimeline qt5compat qtactiveqt qtcharts qtcoap qtconnectivity \
+                  qtquicktimeline qtactiveqt qtcharts qtcoap qtconnectivity \
                   qtdatavis3d qtgraphs qtgrpc qthttpserver qtlocation qtlottie qtmqtt \
-                  qtnetworkauth qtopcua qtpositioning qtquickeffectmaker qtremoteobjects \
-                  qtscxml qtsensors qtserialbus qtserialport qtvirtualkeyboard \
+                  qtnetworkauth qtopcua qtquickeffectmaker qtremoteobjects \
+                  qtscxml qtserialbus qtserialport qtvirtualkeyboard \
                   qtwebchannel qtwebsockets qtmultimedia qtspeech qtwebengine qtwebview \
-                  qttranslations qtdoc qtimageformats qttools; do
+                  qttranslations qtdoc qtimageformats; do
         if [ -d "$S/$module" ]; then
             echo "  Removing $module"
             rm -rf "$S/$module"
@@ -563,7 +603,8 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
         # Disable other optional modules not needed for KDE
         "-DBUILD_qtlanguageserver=OFF",
         "-DBUILD_qtquicktimeline=OFF",
-        "-DBUILD_qt5compat=OFF",
+        "-DBUILD_qt5compat=ON",  # Needed by kwin - force rebuild v3
+        "-DQT_BUILD_EXAMPLES=OFF",  # Explicitly disable examples
         "-DBUILD_qtactiveqt=OFF",
         "-DBUILD_qtcharts=OFF",
         "-DBUILD_qtcoap=OFF",
@@ -809,5 +850,90 @@ binary_package(
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# polkit-qt - Qt wrapper around polkit-1 client libraries
+# =============================================================================
+
+download_source(
+    name = "polkit-qt-src",
+    src_uri = "https://download.kde.org/stable/polkit-qt-1/polkit-qt-1-0.200.0.tar.xz",
+    sha256 = "5d3b611c062d2b76a93750bb10c907bfd21d1ff08d0a15dc2cf63e278e1677fb",
+    signature_required = False,
+)
+
+cmake_package(
+    name = "polkit-qt",
+    source = ":polkit-qt-src",
+    version = "0.200.0",
+    description = "Qt6 wrapper around polkit-1 client libraries",
+    homepage = "https://api.kde.org/polkit-qt-1/html/",
+    license = "LGPL-2",
+
+    # Custom src_configure to pass EGL/GLESv2 as CMake cache variables
+    src_configure = """
+# Find mesa library path from CMAKE_PREFIX_PATH (already set by ebuild system)
+MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa | head -1)
+if [ -z "$MESA_PATH" ]; then
+    echo "Error: Mesa path not found in CMAKE_PREFIX_PATH"
+    exit 1
+fi
+
+EGL_LIB="$MESA_PATH/lib64/libEGL.so"
+GLESV2_LIB="$MESA_PATH/lib64/libGLESv2.so"
+EGL_INCLUDE="$MESA_PATH/include"
+
+echo "=== EGL/GLESv2 Configuration for polkit-qt ==="
+echo "MESA_PATH=$MESA_PATH"
+echo "EGL_LIB=$EGL_LIB"
+echo "GLESV2_LIB=$GLESV2_LIB"
+
+# Build CMAKE_PREFIX_PATH argument
+CMAKE_PREFIX_PATH_ARG=""
+if [ -n "${CMAKE_PREFIX_PATH:-}" ]; then
+    CMAKE_PREFIX_PATH_ARG="-DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+fi
+
+# Run cmake configure with EGL/GLESv2 cache variables pre-set
+rm -rf "$S/build"
+mkdir -p "$S/build"
+
+cmake -S "$S" -B "$S/build" \\
+    -DCMAKE_INSTALL_PREFIX="${EPREFIX:-/usr}" \\
+    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}" \\
+    -DCMAKE_INSTALL_LIBDIR="${LIBDIR:-lib64}" \\
+    -DCMAKE_C_FLAGS="${CFLAGS:-}" \\
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS:-}" \\
+    -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-}" \\
+    -DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS:-}" \\
+    -DCMAKE_MODULE_LINKER_FLAGS="${LDFLAGS:-}" \\
+    $CMAKE_PREFIX_PATH_ARG \\
+    -DEGL_FOUND=TRUE \\
+    -DEGL_LIBRARY="$EGL_LIB" \\
+    -DEGL_INCLUDE_DIR="$EGL_INCLUDE" \\
+    -DGLESv2_FOUND=TRUE \\
+    -DGLESv2_LIBRARY="$GLESV2_LIB" \\
+    -DGLESv2_INCLUDE_DIR="$EGL_INCLUDE" \\
+    -DHAVE_EGL=TRUE \\
+    -DHAVE_GLESv2=TRUE \\
+    -DBUILD_EXAMPLES=OFF \\
+    -DQT_MAJOR_VERSION=6 \\
+    -DQT_NO_PACKAGE_VERSION_CHECK=TRUE
+""",
+
+    cmake_args = [],
+    
+    deps = [
+        ":qt6",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/security/auth/privilege:polkit",
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+        "//packages/linux/core/zlib:zlib",
+    ],
+    
     visibility = ["PUBLIC"],
 )

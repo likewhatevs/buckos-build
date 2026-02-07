@@ -161,76 +161,9 @@ cat > "$OUT/etc/fstab" << 'FSTAB'
 # systemd handles /proc, /sys, /dev, /run automatically.
 FSTAB
 
-# Create live user entries (includes system users needed by systemd/dbus)
-cat > "$OUT/etc/passwd" << 'PASSWD'
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/dev/null:/bin/false
-daemon:x:2:2:daemon:/dev/null:/bin/false
-messagebus:x:81:81:System Message Bus:/dev/null:/bin/false
-systemd-journal:x:190:190:systemd Journal:/dev/null:/bin/false
-systemd-network:x:192:192:systemd Network Management:/dev/null:/bin/false
-systemd-resolve:x:193:193:systemd Resolver:/dev/null:/bin/false
-systemd-timesync:x:194:194:systemd Time Synchronization:/dev/null:/bin/false
-sddm:x:990:990:SDDM Display Manager:/var/lib/sddm:/sbin/nologin
-live:x:1000:1000:Live User:/home/live:/bin/bash
-nobody:x:65534:65534:Nobody:/:/bin/false
-PASSWD
-
-cat > "$OUT/etc/group" << 'GROUP'
-root:x:0:
-bin:x:1:
-daemon:x:2:
-sys:x:3:
-adm:x:4:
-tty:x:5:
-disk:x:6:
-lp:x:7:
-mem:x:8:
-kmem:x:9:
-wheel:x:10:root,live
-cdrom:x:11:
-mail:x:12:
-man:x:15:
-dialout:x:18:
-floppy:x:19:
-games:x:20:
-utmp:x:22:
-tape:x:26:
-video:x:27:live,root,sddm
-audio:x:29:live,root,sddm
-messagebus:x:81:
-input:x:97:live,root,sddm
-kvm:x:78:
-render:x:109:live,root,sddm
-sgx:x:106:
-users:x:100:
-systemd-journal:x:190:
-systemd-network:x:192:
-systemd-resolve:x:193:
-systemd-timesync:x:194:
-seat:x:985:root,sddm
-sddm:x:990:
-live:x:1000:
-nobody:x:65534:
-GROUP
-
-# Password for root and live user is "buckos"
-# Hash generated with: python3 -c "import crypt; print(crypt.crypt('buckos', crypt.mksalt(crypt.METHOD_SHA512)))"
-# System users are locked (!)
-cat > "$OUT/etc/shadow" << 'SHADOW'
-root:$6$XxYSRB9p2uZQDqdN$5y91468svaBTNkjBI9Z18f/Tw019c6QmeyhcWpa4FcHHdleWagixJvhK0tWMNW20XZwzn0AWw9iTSYN7Ed1zF/:19000:0:99999:7:::
-bin:!:0:0:99999:7:::
-daemon:!:0:0:99999:7:::
-messagebus:!:0:0:99999:7:::
-systemd-journal:!:0:0:99999:7:::
-systemd-network:!:0:0:99999:7:::
-systemd-resolve:!:0:0:99999:7:::
-systemd-timesync:!:0:0:99999:7:::
-sddm:!:0:0:99999:7:::
-live:$6$XxYSRB9p2uZQDqdN$5y91468svaBTNkjBI9Z18f/Tw019c6QmeyhcWpa4FcHHdleWagixJvhK0tWMNW20XZwzn0AWw9iTSYN7Ed1zF/:19000:0:99999:7:::
-nobody:!:0:0:99999:7:::
-SHADOW
-chmod 640 "$OUT/etc/shadow"
+# NOTE: /etc/passwd, /etc/group, /etc/shadow are now managed by the
+# live-users-gen genrule in packages/linux/system/BUCK
+# This ensures proper group memberships for the live user
 
 # Create os-release
 cat > "$OUT/etc/os-release" << 'OSRELEASE'
@@ -539,9 +472,11 @@ session   include   system-login
 PAMLOCALLOGIN
 
 cat > "$OUT/etc/pam.d/systemd-user" << 'PAMSYSTEMDUSER'
+# PAM configuration for systemd user instance (user@.service)
+# NOTE: pam_systemd should NOT be here - it's for login sessions only
+# The user systemd instance is started BY pam_systemd during login
 account  required pam_unix.so
 session  required pam_unix.so
-session  optional pam_systemd.so
 PAMSYSTEMDUSER
 
 cat > "$OUT/etc/pam.d/other" << 'PAMOTHER'
@@ -587,37 +522,12 @@ fi
 # Create dbus run directory
 mkdir -p "$OUT/run/dbus"
 
-# =============================================================================
-# Login tracking files (utmp/wtmp/btmp)
-# =============================================================================
-
-# Create utmp/wtmp/btmp files for login tracking
-# These are required by login, getty, and display managers like SDDM
-mkdir -p "$OUT/var/log"
-mkdir -p "$OUT/var/run"
-mkdir -p "$OUT/run"
-
-# Create empty utmp file (current logins)
-touch "$OUT/var/run/utmp"
-touch "$OUT/run/utmp"
-chmod 664 "$OUT/var/run/utmp"
-chmod 664 "$OUT/run/utmp"
-
-# Create empty wtmp file (login history)
-touch "$OUT/var/log/wtmp"
-chmod 664 "$OUT/var/log/wtmp"
-
-# Create empty btmp file (failed login attempts)
-touch "$OUT/var/log/btmp"
-chmod 600 "$OUT/var/log/btmp"
-
-# Create lastlog file (last login time for each user)
-touch "$OUT/var/log/lastlog"
-chmod 664 "$OUT/var/log/lastlog"
+# Note: D-Bus policy for session creation is now in live-dbus-policy-gen Buck genrule
 
 # =============================================================================
 # Runtime directories and udev/logind setup
 # =============================================================================
+# Note: utmp/wtmp/btmp and polkit rules are now created by Buck genrules
 
 # Create essential runtime directories that systemd services need
 mkdir -p "$OUT/run/udev"
@@ -682,7 +592,7 @@ d /run/systemd 0755 root root -
 d /run/systemd/sessions 0755 root root -
 d /run/systemd/users 0755 root root -
 d /run/user 0755 root root -
-d /tmp 1777 root root -
+# Note: /tmp is handled by systemd's /usr/lib/tmpfiles.d/tmp.conf
 
 # systemd-logind state directories
 d /var/lib/systemd 0755 root root -
@@ -696,6 +606,13 @@ f /run/utmp 0664 root utmp -
 f /var/log/wtmp 0664 root utmp -
 f /var/log/btmp 0600 root utmp -
 f /var/log/lastlog 0664 root utmp -
+
+# SDDM display manager runtime and state directories
+d /run/sddm 0755 sddm sddm -
+d /var/lib/sddm 0755 sddm sddm -
+
+# X11 socket directory (needed for SDDM and X server)
+d /tmp/.X11-unix 1777 root root -
 
 # Note: /run/user/1000 is created automatically by systemd-logind on user login
 TMPFILES

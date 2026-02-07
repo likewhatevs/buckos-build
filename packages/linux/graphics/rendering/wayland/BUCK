@@ -150,9 +150,9 @@ meson_package(
         "-Dtests=false",
         # Disable DTD validation - this removes the libxml2 dependency from wayland-scanner
         "-Ddtd_validation=false",
-        # Don't build scanner for target - use native scanner from exec_bdepend only
-        # This prevents the target (aarch64) scanner from being found by CMake during cross-builds
-        "-Dscanner=false",
+        # Build scanner to install wayland-scanner.pc and protocol files
+        # The actual scanner binary will be from native wayland-scanner via meson native file
+        "-Dscanner=true",
         "-Dlibraries=true",
     ],
     # For cross-compilation, find the native wayland-scanner from exec_bdepend

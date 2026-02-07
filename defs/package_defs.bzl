@@ -1737,8 +1737,43 @@ if [ -d "$ROOTFS/lib" ] && [ ! -L "$ROOTFS/lib" ]; then
     ln -s usr/lib "$ROOTFS/lib"
 fi
 
+# Fix /var/run and /var/lock symlinks: if they ended up as directories, move contents and recreate symlinks
+# This handles cases where packages create /var/run/* before baselayout's symlink is applied
+if [ -d "$ROOTFS/var/run" ] && [ ! -L "$ROOTFS/var/run" ]; then
+    mkdir -p "$ROOTFS/run"
+    cp -a "$ROOTFS/var/run/"* "$ROOTFS/run/" 2>/dev/null || true
+    rm -rf "$ROOTFS/var/run"
+    ln -s ../run "$ROOTFS/var/run"
+    echo "Fixed /var/run symlink (was directory, moved contents to /run)"
+fi
+if [ -d "$ROOTFS/var/lock" ] && [ ! -L "$ROOTFS/var/lock" ]; then
+    mkdir -p "$ROOTFS/run/lock"
+    cp -a "$ROOTFS/var/lock/"* "$ROOTFS/run/lock/" 2>/dev/null || true
+    rm -rf "$ROOTFS/var/lock"
+    ln -s ../run/lock "$ROOTFS/var/lock"
+    echo "Fixed /var/lock symlink (was directory, moved contents to /run/lock)"
+fi
+
 # Note: lib64 handling removed - on x86_64, /lib64/ld-linux-x86-64.so.2 must exist
 # aarch64-specific builds should handle lib64 merging in their own assembly if needed
+
+# Fix merged-bin layout: systemd now recommends /usr/sbin -> bin (merged-bin)
+# This eliminates the "unmerged-bin" taint
+# Merge /usr/sbin into /usr/bin and create symlink
+if [ -d "$ROOTFS/usr/sbin" ] && [ ! -L "$ROOTFS/usr/sbin" ]; then
+    mkdir -p "$ROOTFS/usr/bin"
+    # Move all binaries from /usr/sbin to /usr/bin
+    cp -a "$ROOTFS/usr/sbin/"* "$ROOTFS/usr/bin/" 2>/dev/null || true
+    rm -rf "$ROOTFS/usr/sbin"
+    ln -s bin "$ROOTFS/usr/sbin"
+    echo "Merged /usr/sbin into /usr/bin (systemd merged-bin layout)"
+fi
+
+# Update /sbin symlink to point to usr/bin (not usr/sbin) for consistency
+if [ -L "$ROOTFS/sbin" ]; then
+    rm -f "$ROOTFS/sbin"
+    ln -s usr/bin "$ROOTFS/sbin"
+fi
 
 # Create compatibility symlinks for /bin -> /usr/bin
 # Many scripts expect common utilities in /bin (especially /bin/sh)
@@ -1752,11 +1787,104 @@ done
 chmod 1777 "$ROOTFS/tmp"
 chmod 755 "$ROOTFS/root"
 
+# Automatically merge acct-user and acct-group files into /etc/passwd, /etc/group, /etc/shadow
+# This processes all installed acct-user and acct-group packages
+if [ -d "$ROOTFS/usr/share/acct-group" ] || [ -d "$ROOTFS/usr/share/acct-user" ]; then
+    echo "Merging system users and groups from acct packages..."
+
+    # Merge groups from acct-group packages
+    if [ -d "$ROOTFS/usr/share/acct-group" ]; then
+        for group_file in "$ROOTFS/usr/share/acct-group"/*.group; do
+            if [ -f "$group_file" ]; then
+                group_name=$(cut -d: -f1 "$group_file")
+                # Only add if not already in /etc/group
+                if ! grep -q "^${group_name}:" "$ROOTFS/etc/group" 2>/dev/null; then
+                    cat "$group_file" >> "$ROOTFS/etc/group"
+                    echo "  Added group: $group_name"
+                fi
+            fi
+        done
+    fi
+
+    # Merge users from acct-user packages
+    if [ -d "$ROOTFS/usr/share/acct-user" ]; then
+        for passwd_file in "$ROOTFS/usr/share/acct-user"/*.passwd; do
+            if [ -f "$passwd_file" ]; then
+                user_name=$(cut -d: -f1 "$passwd_file")
+                # Only add if not already in /etc/passwd
+                if ! grep -q "^${user_name}:" "$ROOTFS/etc/passwd" 2>/dev/null; then
+                    cat "$passwd_file" >> "$ROOTFS/etc/passwd"
+                    echo "  Added user: $user_name"
+                fi
+            fi
+        done
+
+        # Merge shadow entries
+        for shadow_file in "$ROOTFS/usr/share/acct-user"/*.shadow; do
+            if [ -f "$shadow_file" ]; then
+                user_name=$(cut -d: -f1 "$shadow_file")
+                # Only add if not already in /etc/shadow
+                if [ -f "$ROOTFS/etc/shadow" ]; then
+                    if ! grep -q "^${user_name}:" "$ROOTFS/etc/shadow" 2>/dev/null; then
+                        cat "$shadow_file" >> "$ROOTFS/etc/shadow"
+                    fi
+                fi
+            fi
+        done
+    fi
+
+    # Add users to supplementary groups (done AFTER all groups and users are merged)
+    if [ -d "$ROOTFS/usr/share/acct-user" ]; then
+        for groups_file in "$ROOTFS/usr/share/acct-user"/*.groups; do
+            [ -f "$groups_file" ] || continue
+            user_name=$(basename "$groups_file" .groups)
+
+            # Read supplementary groups (comma-separated)
+            supp_groups=$(cat "$groups_file")
+            [ -n "$supp_groups" ] || continue
+
+            # Process each group
+            IFS=',' read -ra GROUP_ARRAY <<< "$supp_groups"
+            for group_name in "${GROUP_ARRAY[@]}"; do
+                # Check if group exists
+                if ! grep -q "^${group_name}:" "$ROOTFS/etc/group" 2>/dev/null; then
+                    continue
+                fi
+
+                # Check if user already in group (avoid duplicates)
+                if grep -q "^${group_name}:.*[:,]${user_name}\\(,\\|[[:space:]]\\|\$\\)" "$ROOTFS/etc/group" 2>/dev/null; then
+                    continue
+                fi
+
+                # Use awk to append user to group members - more reliable than sed
+                awk -F: -v group="$group_name" -v user="$user_name" '
+                BEGIN { OFS=":" }
+                $1 == group {
+                    # If members list is empty, just add the user
+                    if ($4 == "") {
+                        $4 = user
+                    } else {
+                        # Otherwise append with comma
+                        $4 = $4 "," user
+                    }
+                }
+                { print }
+                ' "$ROOTFS/etc/group" > "$ROOTFS/etc/group.tmp"
+
+                mv "$ROOTFS/etc/group.tmp" "$ROOTFS/etc/group"
+                echo "  Added $user_name to group: $group_name"
+            done
+        done
+    fi
+fi
+
 # Run ldconfig to generate dynamic linker cache (ld.so.cache)
 # This ensures shared libraries are found at boot time
 if [ -f "$ROOTFS/etc/ld.so.conf" ]; then
     ldconfig -r "$ROOTFS" 2>/dev/null || true
 fi
+
+# Note: C.UTF-8 locale is built into glibc and doesn't need generation
 """
 
     script = ctx.actions.write("assemble.sh", script_content, is_executable = True)
@@ -10593,13 +10721,13 @@ def acct_user_package(
         "ACCT_USER_PRIMARY_GROUP": primary_group if primary_group else name,
     }
 
-    # Create a minimal source (empty genrule that produces nothing)
+    # Create a minimal source (placeholder file so ebuild doesn't error on empty dir)
     # The package just runs the eclass src_install which creates account files
     src_name = name + "-acct-src"
     native.genrule(
         name = src_name,
         out = ".",
-        cmd = "mkdir -p $OUT",
+        cmd = "mkdir -p $OUT && echo '# acct-user package: {}' > $OUT/README".format(name),
     )
 
     # Get post_install script if available
@@ -10613,6 +10741,7 @@ def acct_user_package(
         source = ":" + src_name,
         version = "0",  # Account packages don't have versions
         package_type = "acct-user",
+        src_compile = "# No compilation needed for account packages",
         src_install = src_install,
         rdepend = deps,
         env = env,
@@ -10653,12 +10782,12 @@ def acct_group_package(
         "ACCT_GROUP_ID": str(gid),
     }
 
-    # Create a minimal source (empty genrule that produces nothing)
+    # Create a minimal source (placeholder file so ebuild doesn't error on empty dir)
     src_name = name + "-acct-src"
     native.genrule(
         name = src_name,
         out = ".",
-        cmd = "mkdir -p $OUT",
+        cmd = "mkdir -p $OUT && echo '# acct-group package: {}' > $OUT/README".format(name),
     )
 
     # Get post_install script if available
@@ -10672,6 +10801,7 @@ def acct_group_package(
         source = ":" + src_name,
         version = "0",  # Account packages don't have versions
         package_type = "acct-group",
+        src_compile = "# No compilation needed for account packages",
         src_install = src_install,
         env = env,
         description = description if description else "System group account: " + name,

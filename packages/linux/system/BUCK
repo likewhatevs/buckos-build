@@ -90,7 +90,7 @@ disk:x:6:
 lp:x:7:
 mem:x:8:
 kmem:x:9:
-wheel:x:10:root
+wheel:x:10:root,live
 cdrom:x:11:
 mail:x:12:
 man:x:15:
@@ -206,19 +206,21 @@ mkdir -p $OUT/usr/local/lib
 mkdir -p $OUT/etc
 mkdir -p $OUT/var/log
 mkdir -p $OUT/var/tmp
-mkdir -p $OUT/var/lock
 mkdir -p $OUT/tmp
 mkdir -p $OUT/proc
 mkdir -p $OUT/sys
 mkdir -p $OUT/dev
 mkdir -p $OUT/run
+mkdir -p $OUT/run/lock
+mkdir -p $OUT/run/user
 mkdir -p $OUT/root
 mkdir -p $OUT/home
 mkdir -p $OUT/mnt
 mkdir -p $OUT/opt
 mkdir -p $OUT/boot
-# Create /var/run as symlink to /run (modern systemd requirement)
-ln -s /run $OUT/var/run
+# Create systemd-compatible symlinks (fixes systemd taints)
+ln -s ../run $OUT/var/run
+ln -s ../run/lock $OUT/var/lock
 # Set permissions
 chmod 1777 $OUT/tmp
 chmod 1777 $OUT/var/tmp
@@ -243,6 +245,18 @@ cat > $OUT/etc/locale.gen << 'LOCALEGEN'
 en_US.UTF-8 UTF-8
 en_US ISO-8859-1
 LOCALEGEN
+
+# Create tmpfiles.d directory and utmp configuration
+mkdir -p $OUT/usr/lib/tmpfiles.d
+cat > $OUT/usr/lib/tmpfiles.d/utmp.conf << 'UTMPCONF'
+# utmp/wtmp/lastlog files for login records
+# f = create file if it doesn't exist
+# Format: f path mode user group age argument
+# Use /run/utmp (NOT /var/run/utmp) since /var/run is a symlink to /run
+f /run/utmp 0664 root utmp -
+f /var/log/wtmp 0664 root utmp -
+f /var/log/lastlog 0664 root utmp -
+UTMPCONF
 """,
     visibility = ["PUBLIC"],
 )
@@ -294,13 +308,87 @@ mkdir -p $OUT/etc/sddm.conf.d
 cat > $OUT/etc/sddm.conf.d/autologin.conf << 'SDDMEOF'
 [Autologin]
 User=live
-Session=plasma.desktop
+Session=plasma
+
+[General]
+# Halt display server to restart cleanly
+HaltCommand=/usr/bin/systemctl poweroff
+RebootCommand=/usr/bin/systemctl reboot
+
+[Users]
+# Maximum user id for displayed users
+MaximumUid=60000
+# Minimum user id for displayed users
+MinimumUid=1000
+
+[X11]
+# Script to run when starting X11 display server
+DisplayCommand=/usr/share/sddm/scripts/Xsetup
 SDDMEOF
+
+# Create script to ensure runtime directories exist before SDDM starts
+mkdir -p $OUT/usr/local/bin
+cat > $OUT/usr/local/bin/sddm-pre-start.sh << 'PRESTARTEOF'
+#!/bin/bash
+set -x  # Debug output
+
+# Run ALL tmpfiles.d configs to set up directories with proper ownership
+systemd-tmpfiles --create 2>/dev/null || true
+
+# Fix polkit directories - must be owned by polkitd (UID 87)
+mkdir -p /etc/polkit-1/rules.d
+mkdir -p /usr/share/polkit-1/rules.d
+chown -R 87:87 /etc/polkit-1/rules.d
+chown -R 87:87 /usr/share/polkit-1/rules.d
+chmod 700 /etc/polkit-1/rules.d
+chmod 700 /usr/share/polkit-1/rules.d
+
+# Ensure /run/user directory exists
+mkdir -p /run/user
+chmod 755 /run/user
+
+# Ensure /run/user/1000 exists for live user (UID 1000)
+mkdir -p /run/user/1000
+chown 1000:1000 /run/user/1000
+chmod 700 /run/user/1000
+
+# Ensure SDDM user's runtime directory exists (UID 990)
+mkdir -p /run/user/990
+chown 990:990 /run/user/990
+chmod 700 /run/user/990
+
+# Ensure /var/lib/sddm exists and is writable by sddm user
+mkdir -p /var/lib/sddm
+chown 990:990 /var/lib/sddm
+chmod 755 /var/lib/sddm
+
+# Pre-create state.conf with correct ownership so SDDM can write to it
+touch /var/lib/sddm/state.conf
+chown 990:990 /var/lib/sddm/state.conf
+chmod 644 /var/lib/sddm/state.conf
+
+# Ensure /run/sddm exists
+mkdir -p /run/sddm
+chown 990:990 /run/sddm
+chmod 755 /run/sddm
+
+# Ensure home directories exist with correct ownership
+mkdir -p /home/live/Desktop
+chown -R 1000:1000 /home/live
+
+# Restart polkit now that permissions are fixed
+systemctl restart polkit 2>/dev/null || true
+
+echo "SDDM pre-start completed"
+PRESTARTEOF
+chmod 755 $OUT/usr/local/bin/sddm-pre-start.sh
 """,
     visibility = ["PUBLIC"],
 )
 
 # Users and groups for live environment
+# This is the authoritative source for /etc/passwd, /etc/group, /etc/shadow
+# Contains all system users and proper group memberships for the live user
 genrule(
     name = "live-users-gen",
     out = "live-users",
@@ -308,29 +396,93 @@ genrule(
 mkdir -p $OUT/etc
 mkdir -p $OUT/home/live
 mkdir -p $OUT/var/empty
+mkdir -p $OUT/var/lib/sddm
+mkdir -p $OUT/root
 
 echo "buckos-live" > $OUT/etc/hostname
 
+# Complete passwd with all system users
 cat > $OUT/etc/passwd << 'PASSWDEOF'
 root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/dev/null:/bin/false
+daemon:x:2:2:daemon:/dev/null:/bin/false
+messagebus:x:81:81:System Message Bus:/dev/null:/bin/false
 polkitd:x:87:87:PolicyKit Daemon:/var/empty:/sbin/nologin
+systemd-journal:x:190:190:systemd Journal:/dev/null:/bin/false
+systemd-network:x:192:192:systemd Network Management:/dev/null:/bin/false
+systemd-resolve:x:193:193:systemd Resolver:/dev/null:/bin/false
+systemd-timesync:x:194:194:systemd Time Synchronization:/dev/null:/bin/false
+sddm:x:990:990:SDDM Display Manager:/var/lib/sddm:/sbin/nologin
 live:x:1000:1000:Live User:/home/live:/bin/bash
+nobody:x:65534:65534:Nobody:/:/bin/false
 PASSWDEOF
 
+# Complete group with all system groups and live user memberships
+# CRITICAL: live user MUST be in wheel, video, audio, input, render, etc.
 cat > $OUT/etc/group << 'GROUPEOF'
 root:x:0:
+bin:x:1:
+daemon:x:2:
+sys:x:3:live
+adm:x:4:
+tty:x:5:live
+disk:x:6:
+lp:x:7:live
+mem:x:8:
+kmem:x:9:
+wheel:x:10:root,live
+cdrom:x:11:live
+mail:x:12:
+man:x:15:
+dialout:x:18:live
+floppy:x:19:
+games:x:20:
+utmp:x:22:sddm,live
+tape:x:26:
+video:x:27:live,root,sddm
+audio:x:29:live,root,sddm
+messagebus:x:81:
 polkitd:x:87:
+network:x:90:live
+storage:x:91:live
+rfkill:x:92:live
+kvm:x:78:live
+input:x:97:live,root,sddm
+users:x:100:live
+sgx:x:106:
+render:x:109:live,root,sddm
+systemd-journal:x:190:
+systemd-network:x:192:
+systemd-resolve:x:193:
+systemd-timesync:x:194:
+seat:x:985:root,sddm
+sddm:x:990:
 live:x:1000:
+nopasswdlogin:x:1001:live
+autologin:x:1002:live
+nobody:x:65534:
 GROUPEOF
 
+# Shadow file - password for root and live is "buckos"
+# Hash: python3 -c "import crypt; print(crypt.crypt('buckos', crypt.mksalt(crypt.METHOD_SHA512)))"
 cat > $OUT/etc/shadow << 'SHADOWEOF'
-root:$6$buckos$fd.d0QE6ZS9SwcbOsmWW2EU6mLA1ornIaRnsvK0/EJC2uF5LSXnKWG3Jrb6E3ehDFriHsZdTqd00B6XwMfc48/:19000:0:99999:7:::
+root:$6$XxYSRB9p2uZQDqdN$5y91468svaBTNkjBI9Z18f/Tw019c6QmeyhcWpa4FcHHdleWagixJvhK0tWMNW20XZwzn0AWw9iTSYN7Ed1zF/:19000:0:99999:7:::
+bin:!:0:0:99999:7:::
+daemon:!:0:0:99999:7:::
+messagebus:!:0:0:99999:7:::
 polkitd:!:19000::::::
-live:$6$live$DGwTyJOHVdGXnIgakdVYF1yqVFI2k5.sn.mrenraSfBaEVrgfoJsHHqnGjq52SMkEo.KOT3SAoEGgtnPYZOFl1:19000:0:99999:7:::
+systemd-journal:!:0:0:99999:7:::
+systemd-network:!:0:0:99999:7:::
+systemd-resolve:!:0:0:99999:7:::
+systemd-timesync:!:0:0:99999:7:::
+sddm:!:0:0:99999:7:::
+live:$6$XxYSRB9p2uZQDqdN$5y91468svaBTNkjBI9Z18f/Tw019c6QmeyhcWpa4FcHHdleWagixJvhK0tWMNW20XZwzn0AWw9iTSYN7Ed1zF/:19000:0:99999:7:::
+nobody:!:0:0:99999:7:::
 SHADOWEOF
 chmod 640 $OUT/etc/shadow
 chmod 755 $OUT/home/live
 chmod 755 $OUT/var/empty
+chmod 755 $OUT/var/lib/sddm
 """,
     visibility = ["PUBLIC"],
 )
@@ -342,11 +494,132 @@ genrule(
     cmd = """
 mkdir -p $OUT/etc/tmpfiles.d
 cat > $OUT/etc/tmpfiles.d/live-session.conf << 'TMPFILESEOF'
-# Session tracking files for PAM
-f /run/utmp 0644 root root -
-f /var/log/wtmp 0644 root root -
-f /var/log/lastlog 0644 root root -
+# Session tracking files for PAM - owned by utmp group so SDDM can write login records
+# Use /run/utmp (NOT /var/run/utmp) since /var/run is a symlink to /run
+f /run/utmp 0664 root utmp -
+f /var/log/wtmp 0664 root utmp -
+f /var/log/lastlog 0664 root utmp -
+
+# XDG Runtime Directory for live user
+# This ensures /run/user/1000 exists before systemd-logind tries to use it
+# systemd-logind will set proper permissions when pam_systemd runs
+d /run/user 0755 root root -
+d /run/user/1000 0700 live live -
+
+# SDDM directories - must be owned by sddm user for the greeter to run properly
+d /var/lib/sddm 0755 sddm sddm -
+d /run/sddm 0755 sddm sddm -
+d /var/lib/sddm/.cache 0755 sddm sddm -
+
+# Live user home directory
+d /home/live 0755 live live -
+d /home/live/Desktop 0755 live live -
 TMPFILESEOF
+
+# Create PAM environment configuration to ensure XDG_RUNTIME_DIR is set
+mkdir -p $OUT/etc/security
+cat > $OUT/etc/security/pam_env.conf << 'PAMENVEOF'
+# PAM environment variables configuration
+# Ensure XDG_RUNTIME_DIR is set for all users
+XDG_RUNTIME_DIR DEFAULT=/run/user/@{UID}
+PAMENVEOF
+
+# Configure UTF-8 locale - use C.UTF-8 which is built into glibc 2.35+
+# No locale generation needed - C.UTF-8 is always available
+mkdir -p $OUT/etc
+cat > $OUT/etc/locale.conf << 'LOCALEEOF'
+LANG=C.UTF-8
+LOCALEEOF
+
+# Set environment variables for UTF-8 locale system-wide
+mkdir -p $OUT/etc/profile.d
+cat > $OUT/etc/profile.d/locale.sh << 'PROFILEEOF'
+export LANG=C.UTF-8
+PROFILEEOF
+chmod 755 $OUT/etc/profile.d/locale.sh
+
+""",
+    visibility = ["PUBLIC"],
+)
+
+# System-wide environment configuration (must be applied after PAM to override its empty /etc/environment)
+genrule(
+    name = "live-environment-gen",
+    out = "live-environment",
+    cmd = """
+mkdir -p $OUT/etc
+# Set LANG for all systemd services and user sessions
+cat > $OUT/etc/environment << 'ENVEOF'
+# System-wide locale configuration
+# This file is read by pam_env and systemd
+LANG=C.UTF-8
+ENVEOF
+
+# Also create the locale directory structure
+mkdir -p $OUT/usr/lib/locale
+""",
+    visibility = ["PUBLIC"],
+)
+
+# Polkit rules for live session (allow session management without authentication)
+genrule(
+    name = "polkit-live-rules-gen",
+    out = "polkit-live-rules",
+    cmd = """
+mkdir -p $OUT/etc/polkit-1/rules.d
+mkdir -p $OUT/usr/share/polkit-1/rules.d
+mkdir -p $OUT/etc/tmpfiles.d
+
+# Allow all actions for wheel group members (like CachyOS live ISO)
+cat > $OUT/etc/polkit-1/rules.d/49-nopasswd-wheel.rules << 'POLKITRULES'
+/* Allow members of the wheel group to execute any actions
+ * without password authentication, similar to "sudo NOPASSWD:"
+ * This is required for live session where the user needs full access.
+ */
+polkit.addRule(function(action, subject) {
+    if (subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+    }
+});
+POLKITRULES
+chmod 644 $OUT/etc/polkit-1/rules.d/49-nopasswd-wheel.rules
+
+# Create tmpfiles.d config to set correct polkit ownership at boot
+# polkitd user (UID 87) must own the rules.d directories
+cat > $OUT/etc/tmpfiles.d/polkit-rules.conf << 'TMPFILESEOF'
+# Polkit rules directories must be owned by polkitd
+d /etc/polkit-1/rules.d 0700 polkitd polkitd -
+d /usr/share/polkit-1/rules.d 0700 polkitd polkitd -
+TMPFILESEOF
+""",
+    visibility = ["PUBLIC"],
+)
+
+# Login tracking files (utmp/wtmp/btmp) for live session
+# NOTE: Do NOT create static utmp files here - they must be created at runtime
+# by systemd-tmpfiles on the tmpfs-mounted /run, otherwise they'll be read-only
+# in the squashfs layer and cause "permission denied" errors.
+# See live-tmpfiles-gen for the tmpfiles.d config that creates these at boot.
+genrule(
+    name = "live-utmp-gen",
+    out = "live-utmp",
+    cmd = """
+# Create directory structure for log files (but NOT the files themselves for /run)
+# /run is mounted as tmpfs by systemd, so files there are created by tmpfiles.d
+mkdir -p $OUT/var/log
+
+# Create wtmp/btmp/lastlog in /var/log (these are on the overlay, not tmpfs)
+# They need to exist and be writable
+touch $OUT/var/log/wtmp
+touch $OUT/var/log/btmp
+touch $OUT/var/log/lastlog
+chmod 664 $OUT/var/log/wtmp
+chmod 600 $OUT/var/log/btmp
+chmod 664 $OUT/var/log/lastlog
+
+# Ensure /var/run is a symlink to /run (standard FHS)
+mkdir -p $OUT/var
+ln -sf ../run $OUT/var/run
 """,
     visibility = ["PUBLIC"],
 )
@@ -396,6 +669,27 @@ mkdir -p $OUT/etc/systemd/system
 mkdir -p $OUT/etc/systemd/system/multi-user.target.wants
 mkdir -p $OUT/etc/systemd/system/graphical.target.wants
 mkdir -p $OUT/etc/systemd/system/sockets.target.wants
+mkdir -p $OUT/etc/systemd
+mkdir -p $OUT/etc/systemd/system/user@.service.d
+
+# Configure systemd-logind to not create user instances for system users
+cat > $OUT/etc/systemd/logind.conf << 'LOGINDEOF'
+[Login]
+# Don't kill user processes on logout (useful for live environment)
+KillUserProcesses=no
+# Only create user instances for regular users (UID >= 1000)
+# System users (messagebus, polkitd, sddm, etc.) should not have user instances
+UserTasksMax=12288
+LOGINDEOF
+
+# Prevent user@ instances for system users (UID < 1000)
+# System users should not have systemd user instances
+cat > $OUT/etc/systemd/system/user@.service.d/10-no-system-users.conf << 'USERSERVICEEOF'
+[Unit]
+# Only allow user instances for regular users (UID >= 1000)
+# This prevents "Operation not permitted" errors for system users
+ConditionUser=!0-999
+USERSERVICEEOF
 
 # Set graphical.target as default
 ln -sf /usr/lib/systemd/system/graphical.target $OUT/etc/systemd/system/default.target
@@ -409,6 +703,23 @@ ln -sf /usr/lib/systemd/system/polkit.service $OUT/etc/systemd/system/multi-user
 
 # Enable systemd-logind (required for loginctl and PAM sessions)
 ln -sf /usr/lib/systemd/system/systemd-logind.service $OUT/etc/systemd/system/multi-user.target.wants/systemd-logind.service
+
+# Create SDDM service drop-in to ensure dependencies and runtime directories
+mkdir -p $OUT/etc/systemd/system/sddm.service.d
+cat > $OUT/etc/systemd/system/sddm.service.d/10-dependencies.conf << 'SDDMDROPINEOF'
+[Unit]
+# Ensure polkit and systemd-logind are running before SDDM starts
+# pam_systemd needs to talk to systemd-logind via D-Bus, which needs polkit
+After=polkit.service systemd-logind.service dbus.service systemd-user-sessions.service
+Wants=polkit.service systemd-logind.service dbus.service
+
+[Service]
+# Ensure /run/user/1000 exists before SDDM starts
+ExecStartPre=/usr/local/bin/sddm-pre-start.sh
+# Set environment for SDDM greeter - needed for Qt platform plugins
+Environment=XDG_RUNTIME_DIR=/run/sddm
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
+SDDMDROPINEOF
 
 # Enable SDDM display manager
 ln -sf /usr/lib/systemd/system/sddm.service $OUT/etc/systemd/system/graphical.target.wants/sddm.service
@@ -813,12 +1124,33 @@ rootfs(
         ":live-init-scripts-gen",
         ":baselayout-gen",
         ":live-dbus-policy-gen",
-        ":live-sddm-config-gen",
+        ":polkit-live-rules-gen",
+        ":live-utmp-gen",
         ":live-users-gen",
         ":live-tmpfiles-gen",
         ":live-desktop-gen",
         ":live-ssh-config-gen",
+        ":live-sddm-config-gen",
         ":live-systemd-config-gen",
+        # System groups (automatically merged into /etc/group)
+        "//packages/acct-group/tty:tty",
+        "//packages/acct-group/disk:disk",
+        "//packages/acct-group/lp:lp",
+        "//packages/acct-group/kmem:kmem",
+        "//packages/acct-group/wheel:wheel",
+        "//packages/acct-group/cdrom:cdrom",
+        "//packages/acct-group/uucp:uucp",
+        "//packages/acct-group/dialout:dialout",
+        "//packages/acct-group/audio:audio",
+        "//packages/acct-group/video:video",
+        "//packages/acct-group/input:input",
+        "//packages/acct-group/utmp:utmp",
+        "//packages/acct-group/usb:usb",
+        "//packages/acct-group/kvm:kvm",
+        "//packages/acct-group/render:render",
+        "//packages/acct-group/systemd-journal:systemd-journal",
+        "//packages/acct-group/sgx:sgx",
+        "//packages/acct-group/tape:tape",
         # C/C++ runtime (required for all dynamically-linked binaries)
         "//packages/linux/core/glibc:glibc",
         "//packages/linux/lang/gcc:gcc-runtime",  # Provides libstdc++.so.6, libgcc_s.so.1 for C++ apps
@@ -846,8 +1178,7 @@ rootfs(
         "//packages/linux/system/libs/network/libnsl:libnsl",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/network/curl:curl",
-        # TEMPORARILY DISABLED for aarch64 cross-compilation (Fix #22)
-        # "//packages/linux/network/openssh:openssh",
+        "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
         "//packages/linux/system/libs/kmod:kmod",  # Provides modprobe, lsmod, etc.
@@ -922,6 +1253,7 @@ rootfs(
 
         # Display Manager
         "//packages/linux/desktop/sddm:sddm",
+        "//packages/linux/desktop/sddm/pam:sddm-pam",  # SDDM PAM configuration
 
         # Audio (PipeWire with systemd support)
         "//packages/linux/audio/daemons/pipewire:pipewire",
@@ -930,6 +1262,14 @@ rootfs(
         # Development tools (for post-install)
         "//packages/linux/dev-tools/vcs/git:git",
         "//packages/linux/editors/vim:vim",
+
+        # NOTE: BuckOS installer and CLI tools require Rust toolchain
+        # Commented out until Rust is added to bootstrap toolchain
+        # "//packages/linux/apps/buckos-tools/installer:buckos-installer",
+        # "//packages/linux/apps/buckos-tools/cli:buckos-cli",
+
+        # IMPORTANT: This must be LAST to override PAM's /etc/environment file
+        ":live-environment-gen",
     ],
     visibility = ["PUBLIC"],
 )
@@ -1152,18 +1492,21 @@ mkdir -p $OUT/usr/local/lib
 mkdir -p $OUT/etc
 mkdir -p $OUT/var/log
 mkdir -p $OUT/var/tmp
-mkdir -p $OUT/var/run
-mkdir -p $OUT/var/lock
 mkdir -p $OUT/tmp
 mkdir -p $OUT/proc
 mkdir -p $OUT/sys
 mkdir -p $OUT/dev
 mkdir -p $OUT/run
+mkdir -p $OUT/run/lock
+mkdir -p $OUT/run/user
 mkdir -p $OUT/root
 mkdir -p $OUT/home
 mkdir -p $OUT/mnt
 mkdir -p $OUT/opt
 mkdir -p $OUT/boot
+# Create systemd-compatible symlinks (fixes systemd taints)
+ln -s ../run $OUT/var/run
+ln -s ../run/lock $OUT/var/lock
 # NOTE: Do NOT create lib64 symlinks here. The rootfs assembly script handles
 # merging lib64 contents into lib and creating symlinks AFTER all packages are copied.
 # Creating symlinks here causes cp -a to fail when copying package lib64 directories.

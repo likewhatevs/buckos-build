@@ -16,20 +16,28 @@ meson_package(
         "nls",
         "pam",
         "selinux",
+        "systemd",
     ],
+    use_defaults = ["systemd"],  # Default to systemd for KDE live CD
     src_uri = "https://github.com/polkit-org/polkit/archive/refs/tags/124/polkit-124.tar.gz",
     sha256 = "72457d96a0538fd03a3ca96a6bf9b7faf82184d4d67c793eb759168e4fd49e20",
     signature_required = False,
     description = "Application-level authorization toolkit",
     homepage = "https://github.com/polkit-org/polkit",
     license = "LGPL-2.0+",
+    src_prepare = """
+# Fix meson.build bug: systemd_dep used outside its definition scope (line 222)
+# When systemdsystemunitdir is set, systemd_dep is never defined, causing build failure
+sed -i '222s|.*systemd_sysusers_dir.*|  systemd_sysusers_dir = '"'"'/usr/lib/sysusers.d'"'"'|' meson.build
+""",
     meson_args = [
         "-Djs_engine=duktape",
         "-Dpam_module_dir=/lib/security",
         "-Dpam_include=system-auth",
         "-Dman=false",
         "-Dtests=false",
-        "-Dsession_tracking=ConsoleKit",  # Cannot use libsystemd-login yet due to missing libcap dependency
+        # Must set to relative path - pkg-config returns absolute path into dep's build dir
+        "-Dsystemdsystemunitdir=/usr/lib/systemd/system",
     ],
     src_install = """
 # Run default meson install
@@ -47,6 +55,8 @@ if [ -d "$DESTDIR/data/buckos-build/buck-out" ]; then
 fi
 """,
     use_meson = {
+        "systemd": "-Dsession_tracking=libsystemd-login",
+        "-systemd": "-Dsession_tracking=ConsoleKit",
         "examples": "-Dexamples=true",
         "-examples": "-Dexamples=false",
         "gtk": "-Dgtk_doc=true",
@@ -63,7 +73,11 @@ fi
         "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/data/expat:expat",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
     ],
+    use_deps = {
+        "systemd": ["//packages/linux/system/init/systemd:systemd"],
+    },
     visibility = ["PUBLIC"],
 )
 
