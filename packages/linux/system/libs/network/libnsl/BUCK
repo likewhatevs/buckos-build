@@ -50,7 +50,34 @@ echo "  LIBS: $(pkg-config --libs libtirpc)"
 ''',
 
     src_compile = '''
-make -j$(nproc)
+# Fix libtool .la files with absolute host paths (CLAUDE.md #8)
+# Create writable copies with cleared dependency_libs
+for la_file in $(find . -name "*.la" 2>/dev/null); do
+    if [ -f "$la_file" ] && [ ! -w "$la_file" ]; then
+        echo "Making $la_file writable and clearing dependency_libs"
+        chmod +w "$la_file"
+        sed -i "s/^dependency_libs=.*/dependency_libs=''/" "$la_file"
+    fi
+done
+
+# Also check dependency .la files
+IFS=':' read -ra _DEP_ARRAY <<< "${DEP_BASE_DIRS:-}"
+for _dep in "${_DEP_ARRAY[@]}"; do
+    for la_file in $(find "$_dep" -name "*.la" 2>/dev/null); do
+        if [ -f "$la_file" ] && [ ! -w "$la_file" ]; then
+            echo "Copying and fixing $la_file"
+            # Create a local copy
+            local_la="$(basename "$la_file")"
+            cp "$la_file" "./$local_la"
+            chmod +w "./$local_la"
+            sed -i "s/^dependency_libs=.*/dependency_libs=''/" "./$local_la"
+            sed -i "s|^libdir=.*|libdir='$(dirname "$la_file")'|" "./$local_la"
+        fi
+    done
+done
+
+# Pass LDFLAGS on command line to override Makefile variables
+make -j$(nproc) LDFLAGS="${LDFLAGS:-}"
 ''',
 
     src_install = '''

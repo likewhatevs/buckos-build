@@ -134,11 +134,30 @@ echo "Copying glibc from: $CROSS_GLIBC"
 cp -a "$CROSS_GLIBC"/* "$DESTDIR/" 2>/dev/null || true
 
 echo "glibc installation complete"
+
+# Generate C.UTF-8 locale for live environment
+# C.UTF-8 is built into glibc 2.35+ but still needs to be compiled
+echo "Generating C.UTF-8 locale..."
+mkdir -p "$DESTDIR/usr/lib/locale"
+
+# Use localedef from the cross-glibc to generate C.UTF-8
+if [ -x "$CROSS_GLIBC/usr/bin/localedef" ]; then
+    "$CROSS_GLIBC/usr/bin/localedef" \
+        --prefix="$DESTDIR" \
+        -i C -f UTF-8 C.UTF-8 2>/dev/null || \
+    echo "Warning: localedef failed, C.UTF-8 may not be available"
+else
+    echo "Warning: localedef not found, locales not generated"
+fi
+
 # Show installed libraries (check both lib64 for x86_64 and lib for aarch64)
 ls -la "$DESTDIR/usr/lib64/"*.so* 2>/dev/null | head -5 || \
 ls -la "$DESTDIR/lib64/"*.so* 2>/dev/null | head -5 || \
 ls -la "$DESTDIR/usr/lib/"*.so* 2>/dev/null | head -5 || \
 ls -la "$DESTDIR/lib/"*.so* 2>/dev/null | head -5 || true
+
+# Show generated locale
+ls -la "$DESTDIR/usr/lib/locale/" 2>/dev/null || true
 """,
 
     # Depend on cross-glibc from bootstrap to get the pre-built glibc

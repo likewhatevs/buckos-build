@@ -1,154 +1,168 @@
-load("//defs:package_defs.bzl", "download_source", "autotools_package")
-load("//defs:use_flags.bzl", "set_use_flags")
+load("//defs:package_defs.bzl", "meson_package")
 
-autotools_package(
+# Zstandard - Fast real-time compression algorithm
+# Following Gentoo's approach: uses meson build (in build/meson subdirectory)
+meson_package(
     name = "zstd",
-    version = "1.5.6",
-    src_uri = "https://github.com/facebook/zstd/releases/download/v1.5.6/zstd-1.5.6.tar.gz",
-    sha256 = "8c29e06cf42aacc1eafc4077ae2ec6c6fcb96a626157e0593d5e82a34fd403c1",
-    signature_sha256 = "9c2287421e09619e243d07bf0fbdb0aa56d4e38ee24cb8d0ca6dc58f4d381d99",
-    signature_required = False,
-    description = "Fast lossless compression algorithm",
+    version = "1.5.7",
+    src_uri = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
+    sha256 = "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
+    description = "Zstandard - fast real-time compression algorithm",
     homepage = "https://facebook.github.io/zstd/",
-    license = "BSD-3-Clause",
-    iuse = ["static-libs", "lz4", "zlib", "lzma", "threads"],
-    use_defaults = ["threads"],
-    use_configure = {},
+    license = "BSD-3-Clause OR GPL-2",
+    iuse = ["static-libs", "lz4", "zlib", "lzma", "test"],
+    use_defaults = [],
+
+    # Override src_configure to handle meson source in build/meson subdirectory
+    # This replicates meson eclass logic but points to build/meson as source dir
+    # Use _build instead of build to avoid deleting source files in build/meson
+    src_configure = """
+# Use _build as build directory to avoid conflicts with build/meson source directory
+BUILD_DIR="_build"
+
+# Wipe build directory first to ensure clean configuration
+if [ -d "$BUILD_DIR" ]; then
+    echo "Build directory exists, wiping for clean reconfiguration..."
+    rm -rf "$BUILD_DIR"
+fi
+
+# Generate meson cross-file when cross-compiling
+MESON_CROSS_FILE=""
+if [ "${CROSS_COMPILING:-false}" = "true" ] && [ -n "${CC:-}" ]; then
+    MESON_CROSS_FILE="$BUILD_DIR/cross-file.ini"
+    mkdir -p "$BUILD_DIR"
+
+    # Build c_args and cpp_args from CFLAGS/CXXFLAGS
+    MESON_C_ARGS=""
+    for flag in ${CFLAGS:-}; do
+        if [ -n "$MESON_C_ARGS" ]; then
+            MESON_C_ARGS="${MESON_C_ARGS}, '${flag}'"
+        else
+            MESON_C_ARGS="'${flag}'"
+        fi
+    done
+
+    MESON_CXX_ARGS=""
+    for flag in ${CXXFLAGS:-}; do
+        if [ -n "$MESON_CXX_ARGS" ]; then
+            MESON_CXX_ARGS="${MESON_CXX_ARGS}, '${flag}'"
+        else
+            MESON_CXX_ARGS="'${flag}'"
+        fi
+    done
+
+    MESON_LINK_ARGS=""
+    for flag in ${LDFLAGS:-}; do
+        if [ -n "$MESON_LINK_ARGS" ]; then
+            MESON_LINK_ARGS="${MESON_LINK_ARGS}, '${flag}'"
+        else
+            MESON_LINK_ARGS="'${flag}'"
+        fi
+    done
+
+    # Detect target architecture from CHOST or compiler
+    MESON_CPU_FAMILY="x86_64"
+    MESON_CPU="x86_64"
+    MESON_ENDIAN="little"
+
+    TARGET_ARCH="${CHOST:-$(${CC:-gcc} -dumpmachine)}"
+    case "$TARGET_ARCH" in
+        aarch64*|arm64*)
+            MESON_CPU_FAMILY="aarch64"
+            MESON_CPU="aarch64"
+            ;;
+        x86_64*|amd64*)
+            MESON_CPU_FAMILY="x86_64"
+            MESON_CPU="x86_64"
+            ;;
+        arm*)
+            MESON_CPU_FAMILY="arm"
+            MESON_CPU="arm"
+            ;;
+        riscv64*)
+            MESON_CPU_FAMILY="riscv64"
+            MESON_CPU="riscv64"
+            ;;
+    esac
+
+    cat > "$MESON_CROSS_FILE" << CROSSEOF
+[binaries]
+c = '${CC}'
+cpp = '${CXX}'
+ar = '${AR:-ar}'
+strip = '${STRIP:-strip}'
+pkgconfig = 'pkg-config'
+
+[built-in options]
+c_args = [${MESON_C_ARGS}]
+cpp_args = [${MESON_CXX_ARGS}]
+c_link_args = [${MESON_LINK_ARGS}]
+cpp_link_args = [${MESON_LINK_ARGS}]
+
+[host_machine]
+system = 'linux'
+cpu_family = '$MESON_CPU_FAMILY'
+cpu = '$MESON_CPU'
+endian = '$MESON_ENDIAN'
+CROSSEOF
+    echo "Generated meson cross-file: $MESON_CROSS_FILE"
+    cat "$MESON_CROSS_FILE"
+fi
+
+# Build meson command pointing to build/meson as source directory
+# This is the key difference from standard meson eclass
+MESON_SOURCE_DIR="$S/build/meson"
+echo "Running meson with source directory: $MESON_SOURCE_DIR"
+echo "Using build directory: $BUILD_DIR"
+
+# Build meson command with source directory
+MESON_CMD="meson setup \\"$BUILD_DIR\\" \\"$MESON_SOURCE_DIR\\" --prefix=\\"\${EPREFIX:-/usr}\\" --libdir=\\"\${LIBDIR:-lib64}\\" --buildtype=\\"\${MESON_BUILD_TYPE:-release}\\""
+if [ -n "$MESON_CROSS_FILE" ]; then
+    MESON_CMD="$MESON_CMD --cross-file=\\"$MESON_CROSS_FILE\\""
+fi
+MESON_CMD="$MESON_CMD \${MESON_EXTRA_ARGS:-}"
+
+eval $MESON_CMD
+""",
+
+    src_compile = """
+# Use _build directory to match src_configure
+BUILD_DIR="_build"
+meson compile -C "$BUILD_DIR" -j${MAKEOPTS:-$(nproc)}
+""",
+
+    src_install = """
+# Use _build directory to match src_configure
+BUILD_DIR="_build"
+DESTDIR="$DESTDIR" meson install -C "$BUILD_DIR"
+""",
+
+    meson_args = [
+        "-Dbin_programs=true",
+        "-Dbin_contrib=true",
+    ],
+
+    # USE flag to meson option mapping
+    use_meson = {
+        "static-libs": "-Ddefault_library=both",
+        "-static-libs": "-Ddefault_library=shared",
+        "test": "-Dbin_tests=true",
+        "-test": "-Dbin_tests=false",
+        "zlib": "-Dzlib=enabled",
+        "-zlib": "-Dzlib=disabled",
+        "lzma": "-Dlzma=enabled",
+        "-lzma": "-Dlzma=disabled",
+        "lz4": "-Dlz4=enabled",
+        "-lz4": "-Dlz4=disabled",
+    },
+
+    # Conditional dependencies based on USE flags
     use_deps = {
         "lz4": ["//packages/linux/system/libs/compression/lz4:lz4"],
         "zlib": ["//packages/linux/core/zlib:zlib"],
         "lzma": ["//packages/linux/system/libs/compression/xz:xz"],
     },
-    configure_args = [],
-    # zstd doesn't use autotools - skip configure phase
-    src_configure = """
-# zstd uses plain Makefile, no configure needed
-# Setup environment for build
-export PREFIX=/usr
 
-# Build flags for optional features
-if [ "${USE_lz4}" = "1" ]; then
-    export HAVE_LZ4=1
-fi
-if [ "${USE_zlib}" = "1" ]; then
-    export HAVE_ZLIB=1
-fi
-if [ "${USE_lzma}" = "1" ]; then
-    export HAVE_LZMA=1
-fi
-if [ "${USE_threads}" = "1" ]; then
-    export ZSTD_LEGACY_SUPPORT=0
-    export HAVE_PTHREAD=1
-fi
-
-echo "zstd: Skipping configure (Makefile-only package)"
-""",
-    # Build zstd - both static and shared libraries
-    src_compile = """
-# Build both static and shared libraries
-# Pass cross-compiler flags to make (CC is set by ebuild environment)
-echo "Building zstd with CC=$CC"
-cd lib
-# Set BUILD_DIR explicitly to avoid recursive make losing CC/AR/RANLIB variables
-# The Makefile's SET_CACHE_DIRECTORY recursive call doesn't pass CC/AR/RANLIB
-mkdir -p obj/build/static obj/build/dynamic
-make -j${MAKEOPTS:-$(nproc)} PREFIX=/usr \
-    BUILD_DIR=obj/build \
-    CFLAGS="$CFLAGS -fPIC" \
-    CPPFLAGS="$CPPFLAGS" \
-    CC="$CC" \
-    AR="$AR" \
-    RANLIB="$RANLIB" \
-    libzstd.a libzstd
-ls -la libzstd.* 2>/dev/null || echo "No libzstd files found in lib/"
-ls -la obj/build/dynamic/ 2>/dev/null || echo "No files in dynamic/"
-# Copy shared library to lib/ for the programs build to find
-cp -a obj/build/dynamic/libzstd.so* . 2>/dev/null || true
-ls -la libzstd.* 2>/dev/null || echo "No libzstd files after copy"
-cd ../programs
-make -j${MAKEOPTS:-$(nproc)} PREFIX=/usr CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS -L../lib -Wl,-rpath,." zstd
-""",
-    # Install both programs and libraries
-    src_install = """
-# Use lib64 for x86_64 consistency
-LIBDIR="${LIBDIR:-lib64}"
-install -d "$DESTDIR/usr/$LIBDIR"
-install -d "$DESTDIR/usr/include"
-install -d "$DESTDIR/usr/bin"
-install -d "$DESTDIR/usr/$LIBDIR/pkgconfig"
-
-# Install library
-cd lib
-echo "Installing from lib directory:"
-ls -la libzstd.* 2>/dev/null || echo "Warning: No libzstd files in lib/"
-ls -la obj/build/dynamic/ 2>/dev/null || echo "Warning: No files in obj/build/dynamic/"
-
-# Install static library from BUILD_DIR
-if [ -f "obj/build/static/libzstd.a" ]; then
-    install -m644 obj/build/static/libzstd.a "$DESTDIR/usr/$LIBDIR/"
-    echo "Installed: libzstd.a"
-fi
-
-# Install shared library from BUILD_DIR/dynamic
-# The shared library is built as libzstd.so.X.Y.Z in obj/build/dynamic/
-for f in obj/build/dynamic/libzstd.so.*; do
-    if [ -f "$f" ] && [ ! -L "$f" ]; then
-        install -m755 "$f" "$DESTDIR/usr/$LIBDIR/"
-        echo "Installed: $(basename $f)"
-    fi
-done
-
-# Create symlinks for shared library
-FULL_SO=$(ls obj/build/dynamic/libzstd.so.* 2>/dev/null | grep -v '\.so\.[0-9]*$' | head -1)
-if [ -n "$FULL_SO" ]; then
-    BASENAME=$(basename "$FULL_SO")
-    # Extract major version (e.g., libzstd.so.1.5.6 -> 1)
-    MAJOR=$(echo "$BASENAME" | sed 's/libzstd.so.\([0-9]*\).*/\1/')
-    # Create versioned symlink (libzstd.so.1)
-    ln -sf "$BASENAME" "$DESTDIR/usr/$LIBDIR/libzstd.so.$MAJOR"
-    echo "Created symlink: libzstd.so.$MAJOR -> $BASENAME"
-    # Create unversioned symlink (libzstd.so)
-    ln -sf "$BASENAME" "$DESTDIR/usr/$LIBDIR/libzstd.so"
-    echo "Created symlink: libzstd.so -> $BASENAME"
-fi
-
-install -m644 zstd.h zdict.h zstd_errors.h "$DESTDIR/usr/include/"
-# Generate pkg-config file
-cat > "$DESTDIR/usr/$LIBDIR/pkgconfig/libzstd.pc" << EOF
-prefix=/usr
-exec_prefix=\${prefix}
-libdir=\${prefix}/$LIBDIR
-includedir=\${prefix}/include
-
-Name: zstd
-Description: fast lossless compression algorithm library
-URL: https://facebook.github.io/zstd/
-Version: $PV
-Libs: -L\${libdir} -lzstd
-Cflags: -I\${includedir}
-EOF
-
-# Install program
-cd ../programs
-install -m755 zstd "$DESTDIR/usr/bin/"
-ln -sf zstd "$DESTDIR/usr/bin/zstdcat"
-ln -sf zstd "$DESTDIR/usr/bin/unzstd"
-ln -sf zstd "$DESTDIR/usr/bin/zstdmt"
-""",
-    post_install = """
-# Remove static library if USE flag is disabled
-if [ "${USE_static_libs}" != "1" ]; then
-    rm -f "$DESTDIR/usr/lib/libzstd.a" "$DESTDIR/usr/lib64/libzstd.a"
-    echo "Removed static libraries (USE_static_libs not enabled)"
-fi
-
-# Fix pkg-config file - zstd's Makefile generates incorrect relative libdir
-# This causes libtool to fail when trying to resolve -Llib64 as an absolute path
-if [ -f "$DESTDIR/usr/lib64/pkgconfig/libzstd.pc" ]; then
-    sed -i 's|^libdir=lib64$|libdir=${prefix}/lib64|' "$DESTDIR/usr/lib64/pkgconfig/libzstd.pc"
-    echo "Fixed libzstd.pc to use absolute libdir path"
-fi
-""",
     deps = [],
     visibility = ["PUBLIC"],
 )

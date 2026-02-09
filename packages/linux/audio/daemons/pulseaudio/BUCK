@@ -65,15 +65,22 @@ meson_package(
         "fftw": "fftw",
         "orc": "orc",
         "soxr": "soxr",
-        "speex": "speex-aec",
-        "doc": "man",
+        "speex": "speex",
+        # Note: "man" option requires boolean (true/false), not enabled/disabled
+        # So we handle it in meson_args instead
     },
+
+    # Patch meson.build to make intl optional (can't find it during cross-compilation)
+    src_prepare = """
+sed -i "s/intl_dep = cc.find_library('intl'/intl_dep = dependency('', required: false) #/" meson.build
+""",
 
     # Base Meson arguments (always applied)
     meson_args = [
         "-Ddaemon=true",
         "-Dclient=true",
         "-Ddoxygen=false",
+        "-Dman=false",  # "doc" USE flag would need boolean, disabled by default
         "-Dgcov=false",
         "-Dtests=false",
         "-Ddatabase=simple",
@@ -88,7 +95,16 @@ meson_package(
     ],
 
     # Base dependencies (always required)
+    # Audio codec libraries must be listed directly so meson can find their .pc files
+    # (libsndfile references them via Requires.private in its .pc file)
     deps = [
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/system/libs/audio/libsndfile:libsndfile",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/opus:opus",
+        "//packages/linux/system/libs/libltdl:libltdl",
     ],
 
     visibility = ["PUBLIC"],

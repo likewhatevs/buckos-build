@@ -34,11 +34,18 @@ autotools_package(
     # NOTE: When using host toolchain, use bundled libraries to avoid glibc version mismatch
     src_configure = """
 echo "=== Configuring cmake with bootstrap ==="
+# CRITICAL: CMake is a host tool - use host compiler for bootstrap, not cross-compiler
+# The cross-compiler's libstdc++ (GCC 14.3) requires GLIBCXX_3.4.32 which the host may not have
+# Unset cross-compiler variables - bootstrap will find host g++
+unset CC CXX CFLAGS CXXFLAGS LDFLAGS
+# Run bootstrap with host compiler and bundled libraries
+# We don't use --system-* options because the deps are in buck-out paths that bootstrap can't find
 ./bootstrap \\
     --prefix=/usr \\
     --parallel=$(nproc) \\
     --no-qt-gui \\
-    -- -DBUILD_CursesDialog=OFF
+    -- -DCMAKE_USE_OPENSSL=OFF \\
+       -DBUILD_CursesDialog=OFF
 """,
 
     src_compile = """

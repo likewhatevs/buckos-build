@@ -136,65 +136,6 @@ setup_live_environment() {
     mount --move /dev /mnt/root/dev 2>/dev/null || mount -t devtmpfs devtmpfs /mnt/root/dev
     mount --move /run /mnt/root/run 2>/dev/null || mount -t tmpfs tmpfs /mnt/root/run
 
-    # Create home directory for live user
-    mkdir -p /mnt/root/home/live
-    chmod 755 /mnt/root/home/live
-
-    # Create live user if passwd is writable (overlay mode)
-    if [ -w /mnt/root/etc/passwd ]; then
-        # Check if live user already exists
-        if ! grep -q "^live:" /mnt/root/etc/passwd; then
-            echo "live:x:1000:1000:Live User:/home/live:/bin/bash" >> /mnt/root/etc/passwd
-            echo "live:x:1000:" >> /mnt/root/etc/group
-            echo "live:*:19000:0:99999:7:::" >> /mnt/root/etc/shadow 2>/dev/null || true
-            chown 1000:1000 /mnt/root/home/live
-        fi
-    fi
-
-    # Set hostname
-    if [ -w /mnt/root/etc/hostname ]; then
-        echo "buckos-live" > /mnt/root/etc/hostname
-    fi
-
-    # Configure autologin if we have a display manager config
-    if [ -d /mnt/root/etc/sddm.conf.d ] && [ -w /mnt/root/etc/sddm.conf.d ]; then
-        cat > /mnt/root/etc/sddm.conf.d/autologin.conf << 'EOF'
-[Autologin]
-User=live
-Session=plasma.desktop
-EOF
-    fi
-
-    # Create desktop entry for installer
-    mkdir -p /mnt/root/home/live/Desktop
-    if [ -f /mnt/root/usr/bin/buckos-installer ]; then
-        cat > /mnt/root/home/live/Desktop/Install-BuckOS.desktop << 'EOF'
-[Desktop Entry]
-Type=Application
-Name=Install BuckOS
-Comment=Install BuckOS to your computer
-Exec=pkexec /usr/bin/buckos-installer
-Icon=system-software-install
-Terminal=false
-Categories=System;
-EOF
-        chmod 755 /mnt/root/home/live/Desktop/Install-BuckOS.desktop
-        chown 1000:1000 /mnt/root/home/live/Desktop/Install-BuckOS.desktop 2>/dev/null || true
-    fi
-
-    # Configure network (DHCP by default)
-    if [ -w /mnt/root/etc ]; then
-        mkdir -p /mnt/root/etc/NetworkManager/conf.d
-        cat > /mnt/root/etc/NetworkManager/conf.d/live.conf << 'EOF'
-[main]
-plugins=ifupdown,keyfile
-dns=default
-
-[ifupdown]
-managed=true
-EOF
-    fi
-
     log "Live environment configured"
 }
 
@@ -202,8 +143,27 @@ EOF
 switch_root() {
     log "Switching to live root filesystem..."
 
-    # Clean up initramfs mounts before switch_root
-    # switch_root needs to be able to remove the old root contents
+    # Move backing mounts into new root so switch_root can clean up
+    # the initramfs. The overlay FS keeps internal superblock refs,
+    # so moving the underlying mounts is safe.
+    mkdir -p /mnt/root/run/live/medium /mnt/root/run/live/rootfs /mnt/root/run/live/overlay
+
+    # Move ISO/USB media mount
+    if mountpoint -q /mnt/cdrom 2>/dev/null; then
+        mount --move /mnt/cdrom /mnt/root/run/live/medium 2>/dev/null || true
+    fi
+
+    # Move squashfs mount
+    if mountpoint -q /mnt/live 2>/dev/null; then
+        mount --move /mnt/live /mnt/root/run/live/rootfs 2>/dev/null || true
+    fi
+
+    # Move overlay tmpfs (upper/work dirs)
+    if mountpoint -q /mnt/overlay 2>/dev/null; then
+        mount --move /mnt/overlay /mnt/root/run/live/overlay 2>/dev/null || true
+    fi
+
+    # Clean up remaining initramfs mounts
     umount /dev/pts 2>/dev/null || true
     cd /mnt/root
 

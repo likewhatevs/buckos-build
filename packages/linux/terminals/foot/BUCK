@@ -20,9 +20,9 @@ meson_package(
     patches = [
         "patches/0001-use-find_program-for-wayland-scanner.patch",
     ],
-    # wayland-host provides wayland-scanner for host (exec_bdepend builds for host platform)
+    # wayland-scanner provides native wayland-scanner for host (exec_bdepend builds for host platform)
     exec_bdepend = [
-        "//packages/linux/graphics/rendering/wayland:wayland-host",
+        "//packages/linux/graphics/rendering/wayland:wayland-scanner",
     ],
     meson_args = [
         "-Ddocs=disabled",

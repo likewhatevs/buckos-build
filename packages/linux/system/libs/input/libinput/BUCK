@@ -31,6 +31,7 @@ meson_package(
         "//packages/linux/system/init/eudev:eudev",  # Provides libudev
         "//packages/linux/system/libs/input/libevdev:libevdev",
         "//packages/linux/system/libs/input/mtdev:mtdev",
+        "//packages/linux/system/init/eudev:eudev",  # Provides libudev
     ],
     visibility = ["PUBLIC"],
 )

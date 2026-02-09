@@ -17,7 +17,7 @@ autotools_package(
         "nls": "--enable-nls",
     },
     version = "2.15.0",
-    description = "Library for configuring and customizing font access",
+    description = "Library for configuring and customizing font access",  # Cache invalidation: 2026-01-30
     homepage = "https://www.freedesktop.org/wiki/Software/fontconfig/",
     license = "MIT",
     # gperf is needed to generate hash tables during build
@@ -43,6 +43,17 @@ echo "FREETYPE_LIBS=$FREETYPE_LIBS"
 # Get freetype2 include path from pkg-config
 FREETYPE_CFLAGS="$(pkg-config --cflags freetype2 2>/dev/null || echo '-I/usr/include/freetype2')"
 echo "Using FREETYPE_CFLAGS=$FREETYPE_CFLAGS"
+
+# Ensure GCC internal headers (like stdatomic.h) are available
+# The bootstrap toolchain has stdatomic.h in GCC's internal include directory
+GCC_INTERNAL_INCLUDES=""
+if [ -n "$CC" ]; then
+    GCC_INCLUDE_DIR="$($CC -print-file-name=include 2>/dev/null || true)"
+    if [ -d "$GCC_INCLUDE_DIR" ] && [ -f "$GCC_INCLUDE_DIR/stdatomic.h" ]; then
+        GCC_INTERNAL_INCLUDES="-isystem $GCC_INCLUDE_DIR"
+        echo "Found GCC internal includes: $GCC_INCLUDE_DIR"
+    fi
+fi
 
 # Fix libtool .la file cross-compilation issue:
 # Dep .la files in read-only Buck2 artifacts reference absolute host paths
@@ -71,7 +82,10 @@ echo "LDFLAGS starts with: $(echo "$_NEW_LDFLAGS" | cut -c1-200)"
 FREETYPE_LIBS="$(pkg-config --libs freetype2 2>/dev/null || echo '-lfreetype')"
 echo "Using FREETYPE_LIBS=$FREETYPE_LIBS"
 
-make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} LDFLAGS="$_NEW_LDFLAGS" CPPFLAGS="$CPPFLAGS $FREETYPE_CFLAGS" FREETYPE_LIBS="$FREETYPE_LIBS"
+# Build with proper include paths (GCC internal + freetype2 + existing CPPFLAGS)
+FULL_CPPFLAGS="$GCC_INTERNAL_INCLUDES $CPPFLAGS $FREETYPE_CFLAGS"
+echo "CPPFLAGS: $FULL_CPPFLAGS"
+make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} LDFLAGS="$_NEW_LDFLAGS" CPPFLAGS="$FULL_CPPFLAGS" FREETYPE_LIBS="$FREETYPE_LIBS"
 """,
     deps = [
         "//packages/linux/system/libs/font/freetype:freetype",
@@ -79,6 +93,10 @@ make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} LDFLAGS="$_NEW_LDFLAGS" CPPFLAGS="
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/compression/bzip2:bzip2",
+    ],
+    # gperf is needed to generate fcobjshash.h during build
+    exec_bdepend = [
+        "//packages/linux/dev-tools/dev-utils/gperf:gperf",
     ],
     visibility = ["PUBLIC"],
 )

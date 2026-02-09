@@ -153,46 +153,17 @@ DM
 chmod +x "$OUT/etc/init.d/display-manager"
 
 # Create fstab for live system
+# Keep it minimal - systemd handles /proc, /sys, /dev, /run automatically
+# Don't add /tmp here; let systemd's tmp.mount handle it or mask it
 cat > "$OUT/etc/fstab" << 'FSTAB'
 # /etc/fstab - BuckOS Live System
-# Note: Root filesystem is a squashfs overlay mounted by initramfs
-proc             /proc          proc    defaults          0       0
-sysfs            /sys           sysfs   defaults          0       0
-devtmpfs         /dev           devtmpfs defaults         0       0
-tmpfs            /tmp           tmpfs   defaults,nodev    0       0
-tmpfs            /run           tmpfs   defaults,nodev    0       0
+# Root is an overlay filesystem mounted by initramfs.
+# systemd handles /proc, /sys, /dev, /run automatically.
 FSTAB
 
-# Create live user entries
-cat > "$OUT/etc/passwd" << 'PASSWD'
-root:x:0:0:root:/root:/bin/bash
-live:x:1000:1000:Live User:/home/live:/bin/bash
-nobody:x:65534:65534:Nobody:/:/bin/false
-sddm:x:990:990:SDDM Display Manager:/var/lib/sddm:/sbin/nologin
-PASSWD
-
-cat > "$OUT/etc/group" << 'GROUP'
-root:x:0:
-wheel:x:10:root,live
-audio:x:11:live,root
-video:x:12:live,root
-input:x:13:live,root
-seat:x:985:root
-render:x:986:root
-live:x:1000:
-nobody:x:65534:
-sddm:x:990:
-GROUP
-
-# Password for root and live user is "buckos"
-# Hash generated with: python3 -c "import crypt; print(crypt.crypt('buckos', crypt.mksalt(crypt.METHOD_SHA512)))"
-cat > "$OUT/etc/shadow" << 'SHADOW'
-root:$6$S3r4QEYFJnjXqTwW$.Bh.r8p/9uOYytWpTunEfcOYPd3LdC.cyKUTkrRDd/xqnbcMobFJTHR8C3TNROE3I7Vxm07qGjVAl/9scARyY0:19000:0:99999:7:::
-live:$6$S3r4QEYFJnjXqTwW$.Bh.r8p/9uOYytWpTunEfcOYPd3LdC.cyKUTkrRDd/xqnbcMobFJTHR8C3TNROE3I7Vxm07qGjVAl/9scARyY0:19000:0:99999:7:::
-nobody:!:19000:0:99999:7:::
-sddm:!:19000:0:99999:7:::
-SHADOW
-chmod 640 "$OUT/etc/shadow"
+# NOTE: /etc/passwd, /etc/group, /etc/shadow are now managed by the
+# live-users-gen genrule in packages/linux/system/BUCK
+# This ensures proper group memberships for the live user
 
 # Create os-release
 cat > "$OUT/etc/os-release" << 'OSRELEASE'
@@ -215,22 +186,19 @@ cat > "$OUT/etc/hosts" << 'HOSTS'
 ::1         localhost ip6-localhost ip6-loopback
 HOSTS
 
+# Locale configuration is now provided by baselayout package
+
 # Create profile
 cat > "$OUT/etc/profile" << 'PROFILE'
 # /etc/profile - BuckOS Live System
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export PS1='\[\033[01;32m\]live@buckos-live\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 export TERM=linux
-export XDG_RUNTIME_DIR=/run/user/1000
+
+# Wayland preferences (XDG_RUNTIME_DIR is set by pam_systemd)
 export XDG_SESSION_TYPE=wayland
 export QT_QPA_PLATFORM=wayland
 export GDK_BACKEND=wayland
-
-# Create runtime dir for live user
-if [ "$(id -u)" = "1000" ]; then
-    mkdir -p /run/user/1000
-    chmod 700 /run/user/1000
-fi
 PROFILE
 
 # Create issue (login banner)
@@ -257,7 +225,7 @@ ISSUE
 cat > "$OUT/etc/sddm.conf.d/autologin.conf" << 'SDDMCONF'
 [Autologin]
 User=live
-Session=plasma.desktop
+Session=plasma
 Relogin=false
 
 [Theme]
@@ -266,7 +234,36 @@ Current=breeze
 [General]
 HaltCommand=/sbin/poweroff
 RebootCommand=/sbin/reboot
+DisplayServer=wayland
+
+[X11]
+DisplayCommand=/usr/share/sddm/scripts/Xsetup
+
+[Wayland]
+SessionDir=/usr/share/wayland-sessions
 SDDMCONF
+
+# Also create a direct sddm.conf (some versions read this instead of conf.d)
+cat > "$OUT/etc/sddm.conf" << 'SDDMCONFMAIN'
+[Autologin]
+User=live
+Session=plasma
+Relogin=false
+
+[Theme]
+Current=breeze
+
+[General]
+HaltCommand=/sbin/poweroff
+RebootCommand=/sbin/reboot
+DisplayServer=wayland
+
+[X11]
+DisplayCommand=/usr/share/sddm/scripts/Xsetup
+
+[Wayland]
+SessionDir=/usr/share/wayland-sessions
+SDDMCONFMAIN
 
 # Create XDG autostart for installer notification
 cat > "$OUT/etc/xdg/autostart/buckos-installer-notify.desktop" << 'AUTOSTART'
@@ -295,101 +292,18 @@ StartupNotify=true
 X-KDE-StartupNotify=true
 DESKTOPENTRY
 
-# Create simple Sway init script (alternative to busybox init)
-# This can be used as /sbin/init for a minimal Sway-based live system
-cat > "$OUT/sbin/sway-init" << 'SWAYINIT'
-#!/bin/bash
-# BuckOS Live CD with Sway - Simple init script
-# Use this as /sbin/init for a minimal Sway desktop
-
-# Set PATH first - essential for finding commands
-export PATH=/usr/bin:/bin:/usr/sbin:/sbin
-
-# Set up console - try multiple devices for both x86_64 and aarch64
-for console in /dev/console /dev/ttyAMA0 /dev/ttyS0 /dev/tty0 /dev/tty1; do
-    if [ -c "$console" ]; then
-        exec 0<"$console" 1>"$console" 2>"$console"
-        break
-    fi
-done
-
-# Set LD_LIBRARY_PATH for aarch64 compatibility
-# Some packages install to lib64 which is x86_64 convention
-export LD_LIBRARY_PATH=/lib:/usr/lib:/lib64:/usr/lib64
-
-# Mount essential filesystems (skip if already mounted by initramfs)
-mountpoint -q /proc  || mount -t proc proc /proc
-mountpoint -q /sys   || mount -t sysfs sys /sys
-mountpoint -q /dev   || mount -t devtmpfs dev /dev
-mkdir -p /dev/pts /dev/shm
-mountpoint -q /dev/pts || mount -t devpts devpts /dev/pts
-mountpoint -q /dev/shm || mount -t tmpfs tmpfs /dev/shm
-mountpoint -q /tmp     || mount -t tmpfs tmpfs /tmp
-mountpoint -q /run     || mount -t tmpfs tmpfs /run
-
-# Set hostname
-hostname buckos-live
-
-# Create XDG runtime directory
-export XDG_RUNTIME_DIR=/run/user/0
-mkdir -p "$XDG_RUNTIME_DIR"
-chmod 0700 "$XDG_RUNTIME_DIR"
-
-# Export environment
-export HOME=/root
-export TERM=linux
-
-# Start udev if available
-if [ -x /sbin/udevd ]; then
-    /sbin/udevd --daemon
-    udevadm trigger --action=add
-    udevadm settle
-fi
-
-# Print welcome message
-echo ""
-echo "======================================"
-echo "  Welcome to BuckOS Live CD"
-echo "======================================"
-echo ""
-
-# Check if we have a display (DRM device)
-if [ -e /dev/dri/card0 ]; then
-    echo "Starting Sway Wayland compositor..."
-    echo ""
-    cd /root
-    sway || {
-        echo ""
-        echo "Sway failed to start. Dropping to shell..."
-        echo "You can try 'sway' again if you have a display."
-        echo ""
-    }
-else
-    echo "No display detected (no /dev/dri/card0)"
-    echo "Skipping Sway, dropping to shell..."
-    echo ""
-fi
-
-# Drop to interactive shell
-echo "BuckOS shell ready. Type 'sway' to start desktop (if display available)."
-cd /root
-exec /bin/bash --noediting -i
-SWAYINIT
-chmod +x "$OUT/sbin/sway-init"
-
-# Create /sbin/init symlink to systemd for live boot
-# systemd handles console, getty, and service management properly
-ln -sf ../usr/lib/systemd/systemd "$OUT/sbin/init"
+# Note: sway-init is now in //packages/linux/system/init/sway-init:sway-init
+# Note: /sbin/init symlink is created by the init system package (systemd or sway-init)
 
 # =============================================================================
 # Systemd configuration for live boot (when systemd is PID 1)
 # =============================================================================
 
-# Getty autologin on tty1 - auto-login as root for live session
+# Getty autologin on tty1 - auto-login as live user for live session
 cat > "$OUT/etc/systemd/system/getty@tty1.service.d/autologin.conf" << 'GETTYCONF'
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
+ExecStart=-/sbin/agetty --autologin live --noclear %I $TERM
 Type=idle
 GETTYCONF
 
@@ -410,7 +324,9 @@ WantedBy=multi-user.target
 SEATD
 
 # Enable seatd at boot
-ln -sf ../seatd.service "$OUT/etc/systemd/system/multi-user.target.wants/seatd.service"
+# NOTE: Disabled for KDE - KDE uses systemd-logind for seat management
+# Uncomment for sway-based live systems that need seatd
+# ln -sf ../seatd.service "$OUT/etc/systemd/system/multi-user.target.wants/seatd.service"
 
 # Create root's profile to auto-start sway on tty1
 mkdir -p "$OUT/root"
@@ -441,24 +357,281 @@ fi
 ROOTPROFILE
 
 # Disable systemd-firstboot (live system is pre-configured)
-# Create the machine-id and locale so firstboot doesn't trigger
+# Create the machine-id so firstboot doesn't trigger (locale.conf already created above)
 mkdir -p "$OUT/etc"
 echo "buckos-live" > "$OUT/etc/machine-id"
-echo "LANG=C.UTF-8" > "$OUT/etc/locale.conf"
 echo "UTC" > "$OUT/etc/timezone"
 ln -sf /usr/share/zoneinfo/UTC "$OUT/etc/localtime" 2>/dev/null || true
 
-# Mask systemd-firstboot so it never runs on live system
+# Mask systemd services that don't work / aren't needed on a live overlay root
 mkdir -p "$OUT/etc/systemd/system"
-ln -sf /dev/null "$OUT/etc/systemd/system/systemd-firstboot.service"
 
-# Mask systemd-vconsole-setup - requires kbd package (setfont/loadkeys)
-# Console works fine with kernel defaults
-ln -sf /dev/null "$OUT/etc/systemd/system/systemd-vconsole-setup.service"
+for svc in \
+    systemd-firstboot.service \
+    systemd-remount-fs.service \
+    tmp.mount \
+    sys-kernel-debug.mount \
+    sys-kernel-tracing.mount \
+    sys-kernel-debug-tracing.mount \
+    sys-kernel-config.mount \
+    sys-fs-fuse-connections.mount \
+    dev-hugepages.mount \
+    systemd-udev-load-credentials.service \
+    systemd-machine-id-commit.service \
+    systemd-random-seed.service \
+    systemd-boot-random-seed.service \
+    systemd-update-done.service \
+    systemd-sysusers.service \
+    systemd-pcrphase-initrd.service \
+    systemd-pcrphase-sysinit.service \
+    systemd-pcrphase.service \
+    systemd-pcrmachine.service \
+    systemd-pcrfs-root.service \
+    systemd-binfmt.service \
+    systemd-boot-update.service \
+    systemd-homed.service \
+    systemd-hwdb-update.service \
+    ldconfig.service \
+; do
+    ln -sf /dev/null "$OUT/etc/systemd/system/$svc"
+done
 
-# Set default target to multi-user (console) - sway starts via bash_profile
-# graphical.target requires a display manager which we don't have
-ln -sf /usr/lib/systemd/system/multi-user.target "$OUT/etc/systemd/system/default.target"
+# =============================================================================
+# Systemd service enablement for live boot
+# =============================================================================
+
+# Set graphical.target as default (needed for display manager)
+ln -sf /usr/lib/systemd/system/graphical.target "$OUT/etc/systemd/system/default.target"
+
+# Enable SDDM display manager (if present, it will start at boot)
+mkdir -p "$OUT/etc/systemd/system/display-manager.service.d"
+ln -sf /usr/lib/systemd/system/sddm.service "$OUT/etc/systemd/system/display-manager.service"
+
+# Enable dbus and logind (required by most desktop services and session management)
+mkdir -p "$OUT/etc/systemd/system/multi-user.target.wants"
+ln -sf /usr/lib/systemd/system/dbus.service "$OUT/etc/systemd/system/multi-user.target.wants/dbus.service" 2>/dev/null || true
+ln -sf /usr/lib/systemd/system/systemd-logind.service "$OUT/etc/systemd/system/multi-user.target.wants/systemd-logind.service" 2>/dev/null || true
+
+# =============================================================================
+# Fix common boot issues
+# =============================================================================
+
+# Create sulogin symlink - systemd expects /usr/bin/sulogin but shadow installs to /sbin/sulogin
+mkdir -p "$OUT/usr/bin"
+if [ ! -e "$OUT/usr/bin/sulogin" ]; then
+    ln -sf /sbin/sulogin "$OUT/usr/bin/sulogin"
+fi
+
+# Create ld.so.conf so ldconfig can find libraries
+cat > "$OUT/etc/ld.so.conf" << 'LDCONF'
+/usr/lib64
+/usr/lib
+/lib64
+/lib
+include /etc/ld.so.conf.d/*.conf
+LDCONF
+mkdir -p "$OUT/etc/ld.so.conf.d"
+
+# =============================================================================
+# PAM configuration (required by systemd-logind and login services)
+# =============================================================================
+mkdir -p "$OUT/etc/pam.d"
+
+cat > "$OUT/etc/pam.d/system-auth" << 'PAMAUTH'
+auth      sufficient  pam_unix.so try_first_pass nullok
+auth      required    pam_deny.so
+account   required    pam_unix.so
+password  sufficient  pam_unix.so try_first_pass nullok sha512 shadow
+password  required    pam_deny.so
+session   required    pam_unix.so
+PAMAUTH
+
+cat > "$OUT/etc/pam.d/system-login" << 'PAMLOGIN'
+auth      include   system-auth
+account   include   system-auth
+password  include   system-auth
+session   include   system-auth
+session   optional  pam_systemd.so
+PAMLOGIN
+
+cat > "$OUT/etc/pam.d/login" << 'PAMLOGINF'
+auth      include   system-login
+account   include   system-login
+password  include   system-login
+session   include   system-login
+PAMLOGINF
+
+# SDDM PAM configs are now provided by the SDDM package itself
+# No need to create them here
+
+cat > "$OUT/etc/pam.d/system-local-login" << 'PAMLOCALLOGIN'
+auth      include   system-login
+account   include   system-login
+password  include   system-login
+session   include   system-login
+PAMLOCALLOGIN
+
+cat > "$OUT/etc/pam.d/systemd-user" << 'PAMSYSTEMDUSER'
+# PAM configuration for systemd user instance (user@.service)
+# NOTE: pam_systemd should NOT be here - it's for login sessions only
+# The user systemd instance is started BY pam_systemd during login
+account  required pam_unix.so
+session  required pam_unix.so
+PAMSYSTEMDUSER
+
+cat > "$OUT/etc/pam.d/other" << 'PAMOTHER'
+auth      required  pam_deny.so
+account   required  pam_deny.so
+password  required  pam_deny.so
+session   required  pam_deny.so
+PAMOTHER
+
+# =============================================================================
+# D-Bus system bus configuration
+# =============================================================================
+mkdir -p "$OUT/etc/dbus-1"
+mkdir -p "$OUT/var/lib/dbus"
+
+# Generate machine D-Bus UUID (needed by dbus-daemon)
+if [ ! -f "$OUT/var/lib/dbus/machine-id" ]; then
+    cp "$OUT/etc/machine-id" "$OUT/var/lib/dbus/machine-id" 2>/dev/null || \
+        echo "buckoslive" > "$OUT/var/lib/dbus/machine-id"
+fi
+
+# Ensure dbus system.conf exists (should come from dbus package, but ensure it)
+if [ ! -f "$OUT/etc/dbus-1/system.conf" ] && [ ! -f "$OUT/usr/share/dbus-1/system.conf" ]; then
+    cat > "$OUT/etc/dbus-1/system.conf" << 'DBUSCONF'
+<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+  <type>system</type>
+  <listen>unix:path=/run/dbus/system_bus_socket</listen>
+  <auth>EXTERNAL</auth>
+  <includedir>/etc/dbus-1/system.d</includedir>
+  <includedir>/usr/share/dbus-1/system.d</includedir>
+  <policy context="default">
+    <allow send_destination="*" eavesdrop="true"/>
+    <allow eavesdrop="true"/>
+    <allow own="*"/>
+    <allow user="*"/>
+  </policy>
+</busconfig>
+DBUSCONF
+fi
+
+# Create dbus run directory
+mkdir -p "$OUT/run/dbus"
+
+# Note: D-Bus policy for session creation is now in live-dbus-policy-gen Buck genrule
+
+# =============================================================================
+# Runtime directories and udev/logind setup
+# =============================================================================
+# Note: utmp/wtmp/btmp and polkit rules are now created by Buck genrules
+
+# Create essential runtime directories that systemd services need
+mkdir -p "$OUT/run/udev"
+mkdir -p "$OUT/run/systemd/sessions"
+mkdir -p "$OUT/run/systemd/users"
+mkdir -p "$OUT/var/lib/systemd/linger"
+mkdir -p "$OUT/var/lib/systemd/backlight"
+mkdir -p "$OUT/var/lib/systemd/rfkill"
+
+# Ensure udev directories exist
+mkdir -p "$OUT/etc/udev/rules.d"
+mkdir -p "$OUT/etc/udev/hwdb.d"
+mkdir -p "$OUT/usr/lib/udev/rules.d"
+
+# Create empty hwdb.bin if it doesn't exist (prevents udev hwdb errors)
+touch "$OUT/etc/udev/hwdb.bin"
+
+# Create udev configuration
+cat > "$OUT/etc/udev/udev.conf" << 'UDEVCONF'
+# udev configuration for live system
+udev_log=err
+UDEVCONF
+
+# Create a no-op vconsole-setup service override to prevent udev errors
+# We don't have the kbd package (setfont/loadkeys), but udev still triggers vconsole-setup
+# Instead of masking it (which causes "failed with exit code 1"), create a dummy service that succeeds
+mkdir -p "$OUT/etc/systemd/system/systemd-vconsole-setup.service.d"
+cat > "$OUT/etc/systemd/system/systemd-vconsole-setup.service.d/override.conf" << 'VCONSOLEOVERRIDE'
+[Unit]
+# Live system doesn't need vconsole setup (kbd package not installed)
+# Kernel console defaults work fine
+
+[Service]
+# Replace the service command with a no-op that succeeds
+ExecStart=
+ExecStart=/bin/true
+VCONSOLEOVERRIDE
+
+# Ensure logind directories exist
+mkdir -p "$OUT/var/lib/systemd/linger"
+mkdir -p "$OUT/etc/systemd/logind.conf.d"
+
+# Configure logind for live session (no lid switch, no power key actions)
+cat > "$OUT/etc/systemd/logind.conf.d/live.conf" << 'LOGINDCONF'
+[Login]
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+HandlePowerKey=ignore
+HandleSuspendKey=ignore
+HandleHibernateKey=ignore
+KillUserProcesses=no
+LOGINDCONF
+
+# Create tmpfiles.d config to set up runtime directories at boot
+mkdir -p "$OUT/etc/tmpfiles.d"
+cat > "$OUT/etc/tmpfiles.d/live-system.conf" << 'TMPFILES'
+# Live system runtime directories
+d /run/udev 0755 root root -
+d /run/dbus 0755 root root -
+d /run/systemd 0755 root root -
+d /run/systemd/sessions 0755 root root -
+d /run/systemd/users 0755 root root -
+d /run/user 0755 root root -
+# Note: /tmp is handled by systemd's /usr/lib/tmpfiles.d/tmp.conf
+
+# systemd-logind state directories
+d /var/lib/systemd 0755 root root -
+d /var/lib/systemd/linger 0755 root root -
+d /var/lib/systemd/backlight 0755 root root -
+d /var/lib/systemd/rfkill 0755 root root -
+
+# Login tracking files
+d /var/log 0755 root root -
+f /run/utmp 0664 root utmp -
+f /var/log/wtmp 0664 root utmp -
+f /var/log/btmp 0600 root utmp -
+f /var/log/lastlog 0664 root utmp -
+
+# SDDM display manager runtime and state directories
+d /run/sddm 0755 sddm sddm -
+d /var/lib/sddm 0755 sddm sddm -
+
+# X11 socket directory (needed for SDDM and X server)
+d /tmp/.X11-unix 1777 root root -
+
+# Note: /run/user/1000 is created automatically by systemd-logind on user login
+TMPFILES
+
+# Ensure cgroups v2 unified hierarchy works
+mkdir -p "$OUT/etc/systemd/system.conf.d"
+cat > "$OUT/etc/systemd/system.conf.d/live.conf" << 'SYSTEMCONF'
+[Manager]
+# Use cgroups v2 unified hierarchy
+DefaultCPUAccounting=yes
+DefaultMemoryAccounting=yes
+DefaultTasksAccounting=yes
+# Reduce boot timeout for live system
+DefaultTimeoutStartSec=30s
+DefaultTimeoutStopSec=15s
+SYSTEMCONF
+
+# Note: default.target is set to graphical.target earlier in this script (for KDE/SDDM)
+# Don't override it here
 
 # Enable getty on tty1 explicitly
 mkdir -p "$OUT/etc/systemd/system/getty.target.wants"

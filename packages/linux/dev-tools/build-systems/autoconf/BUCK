@@ -30,8 +30,8 @@ ebuild_package(
 # files with backslashes in their names (Buck2 cannot handle these paths)
 ac_cv_unsupported_fs_chars='\"<>\\\\|' ./configure \\
     --prefix=/usr \\
-    --build=$(gcc -dumpmachine) \\
-    --host=$(gcc -dumpmachine) \\
+    --build=$(./build-aux/config.guess 2>/dev/null || echo x86_64-pc-linux-gnu) \\
+    --host=${CHOST:-$(${CC:-gcc} -dumpmachine)} \\
     --mandir=/usr/share/man \\
     --infodir=/usr/share/info \\
     --datadir=/usr/share \\
@@ -42,7 +42,11 @@ ac_cv_unsupported_fs_chars='\"<>\\\\|' ./configure \\
 ''',
 
     src_compile = '''
-make -j$(nproc)
+# Clean any pre-existing frozen files that may cause format mismatches
+find . -name '*.m4f' -delete 2>/dev/null || true
+
+# Build with MAKEINFO=true to skip documentation (reduces build time)
+make -j$(nproc) MAKEINFO=true
 ''',
 
     src_install = '''

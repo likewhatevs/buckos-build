@@ -47,6 +47,11 @@ export S="$(cd "$_EBUILD_SRCDIR" && pwd)"
 export WORKDIR="$(dirname "$S")"
 export T="$WORKDIR/temp"
 mkdir -p "$T"
+
+# Ensure source files are writable - Buck may materialize them read-only between actions
+# This is critical for builds that modify source files during configure/compile/install
+chmod -R u+w "$S" 2>/dev/null || true
+
 PKG_CONFIG_WRAPPER_SCRIPT="$_EBUILD_PKG_CONFIG_WRAPPER"
 
 # Convert dep dirs from space-separated to array
@@ -66,11 +71,14 @@ BUCKOS_TARGET=""
 # These are tools built for the HOST platform that need to run during the build
 HOST_TOOL_PATH=""
 HOST_TOOL_PYTHONPATH=""
+EXEC_BDEP_BASE_DIRS=""
 for tool_dir in "${HOST_TOOL_DIRS_ARRAY[@]}"; do
     # Convert to absolute path if relative
     if [[ "$tool_dir" != /* ]]; then
         tool_dir="$(cd "$tool_dir" 2>/dev/null && pwd)" || continue
     fi
+    # Store base directory for packages that need direct access (e.g., ICU cross-compilation)
+    EXEC_BDEP_BASE_DIRS="${EXEC_BDEP_BASE_DIRS:+$EXEC_BDEP_BASE_DIRS:}$tool_dir"
     if [ -d "$tool_dir/usr/bin" ]; then
         HOST_TOOL_PATH="${HOST_TOOL_PATH:+$HOST_TOOL_PATH:}$tool_dir/usr/bin"
     fi
@@ -189,34 +197,50 @@ done
 export TOOLCHAIN_INCLUDE  # For --with-headers etc
 export TOOLCHAIN_ROOT     # For copying toolchain files
 
-# Fallback BUCKOS_TARGET if not auto-detected
-if [ -z "$BUCKOS_TARGET" ]; then
-    BUCKOS_TARGET="x86_64-buckos-linux-gnu"
-fi
-export BUCKOS_TARGET
-
-# PATH setup: For bootstrap builds, toolchain must come BEFORE /usr/bin so bootstrap
-# gcc is found instead of host gcc. TOOLCHAIN_PATH only contains compiler tools
-# (gcc, ld, ar, etc.), not general utilities, so this is safe.
-# Priority for bootstrap: TOOLCHAIN_PATH > HOST_TOOL_PATH > DEP_PATH > system PATH
-# Priority for non-bootstrap: HOST_TOOL_PATH > DEP_PATH > system PATH
-if [ "$USE_BOOTSTRAP" = "true" ] && [ -n "$TOOLCHAIN_PATH" ]; then
-    # Bootstrap build: toolchain first so bootstrap gcc is found
-    if [ -n "$HOST_TOOL_PATH" ]; then
-        export PATH="$TOOLCHAIN_PATH:$HOST_TOOL_PATH:$DEP_PATH:$PATH"
-    elif [ -n "$DEP_PATH" ]; then
-        export PATH="$TOOLCHAIN_PATH:$DEP_PATH:$PATH"
-    else
-        export PATH="$TOOLCHAIN_PATH:$PATH"
-    fi
-elif [ -n "$HOST_TOOL_PATH" ]; then
-    export PATH="$HOST_TOOL_PATH:$DEP_PATH:$PATH${TOOLCHAIN_PATH:+:$TOOLCHAIN_PATH}"
+# For regular packages: prioritize host tools, but include toolchain at the end
+# This way: host utilities (bash, make, etc.) are used first (avoiding GLIBC conflicts)
+# But GCC can still find its internal programs (cc1, etc.) from TOOLCHAIN_PATH
+# Priority: /usr/bin:/bin (host essentials) > HOST_TOOL_PATH > DEP_PATH > system PATH > TOOLCHAIN_PATH
+# CRITICAL: Always ensure /usr/bin and /bin are at the front to guarantee host utilities
+# are found first, preventing GLIBC version mismatches from target-built tools
+HOST_ESSENTIAL_PATH="/usr/bin:/bin:/usr/sbin:/sbin"
+if [ -n "$HOST_TOOL_PATH" ]; then
+    export PATH="$HOST_ESSENTIAL_PATH:$HOST_TOOL_PATH:$DEP_PATH:$PATH:$TOOLCHAIN_PATH"
 elif [ -n "$DEP_PATH" ] && [ -n "$TOOLCHAIN_PATH" ]; then
-    export PATH="$DEP_PATH:$PATH:$TOOLCHAIN_PATH"
+    export PATH="$HOST_ESSENTIAL_PATH:$DEP_PATH:$PATH:$TOOLCHAIN_PATH"
 elif [ -n "$DEP_PATH" ]; then
-    export PATH="$DEP_PATH:$PATH"
+    export PATH="$HOST_ESSENTIAL_PATH:$DEP_PATH:$PATH"
 elif [ -n "$TOOLCHAIN_PATH" ]; then
-    export PATH="$PATH:$TOOLCHAIN_PATH"
+    export PATH="$HOST_ESSENTIAL_PATH:$PATH:$TOOLCHAIN_PATH"
+else
+    export PATH="$HOST_ESSENTIAL_PATH:$PATH"
+fi
+
+# Force use of host system text processing tools to avoid GLIBC version mismatches
+# These tools might be in DEP_PATH from target builds, but they need to run on the host
+# Setting these environment variables ensures configure scripts use host binaries
+# EXCEPTION: Don't set these vars when building the tools themselves (bootstrap issue)
+# grep's configure fails if GREP is set, gawk's configure might have similar issues
+if [ "$PN" != "gawk" ]; then
+    if command -v /usr/bin/gawk >/dev/null 2>&1; then
+        export AWK=/usr/bin/gawk
+        export GAWK=/usr/bin/gawk
+    elif command -v /usr/bin/awk >/dev/null 2>&1; then
+        export AWK=/usr/bin/awk
+    fi
+fi
+if command -v /usr/bin/sed >/dev/null 2>&1; then
+    export SED=/usr/bin/sed
+fi
+# NOTE: grep's configure explicitly checks if GREP/EGREP are set and fails if so
+# This is a bootstrap protection - don't set GREP when building grep itself
+if [ "$PN" != "grep" ]; then
+    if command -v /usr/bin/grep >/dev/null 2>&1; then
+        export GREP=/usr/bin/grep
+    fi
+fi
+if command -v /usr/bin/m4 >/dev/null 2>&1; then
+    export M4=/usr/bin/m4
 fi
 
 # Set up PYTHONPATH for Python-based build tools (meson, etc)
@@ -517,6 +541,7 @@ elif [ "$USE_BOOTSTRAP" = "true" ]; then
     # Verify the cross-compiler actually exists
     if [ -n "$CROSS_COMPILER_BIN" ] && [ -x "$CROSS_COMPILER_BIN/${BUCKOS_TARGET}-gcc" ]; then
         CROSS_COMPILING="true"
+        export CROSS_COMPILING
         echo "=== Using Bootstrap Toolchain ==="
         echo "Target: $BUCKOS_TARGET"
         echo "Sysroot: $BOOTSTRAP_SYSROOT"
@@ -589,15 +614,36 @@ elif [ "$USE_BOOTSTRAP" = "true" ]; then
                 if [ -d "$CXX_INCLUDE_DIR" ]; then
                     GCC_VERSION=$(basename "$CXX_INCLUDE_DIR")
                     export CXXFLAGS="$CXXFLAGS -isystem $CXX_INCLUDE_DIR"
+                    # Also add to CPPFLAGS so $(CPPFLAGS) $(CXXFLAGS) order works
+                    export CPPFLAGS="$CPPFLAGS -isystem $CXX_INCLUDE_DIR"
                     # Add target-specific subdirectory if it exists
                     if [ -d "$CXX_INCLUDE_DIR/$BUCKOS_TARGET" ]; then
                         export CXXFLAGS="$CXXFLAGS -isystem $CXX_INCLUDE_DIR/$BUCKOS_TARGET"
+                        export CPPFLAGS="$CPPFLAGS -isystem $CXX_INCLUDE_DIR/$BUCKOS_TARGET"
                     fi
                     break  # Use the first version found
                 fi
             done
 
+            # Add GCC internal include directory for stdatomic.h, stddef.h, etc.
+            # These headers are installed with GCC, not in the sysroot
+            # Check both /lib/gcc and /tools/lib/gcc paths (depending on toolchain layout)
+            # Set both CFLAGS/CPPFLAGS and C_INCLUDE_PATH since meson may not use CPPFLAGS
+            for GCC_INCLUDE_DIR in "$BOOTSTRAP_SYSROOT/lib/gcc/$BUCKOS_TARGET/"*/include "$BOOTSTRAP_SYSROOT/tools/lib/gcc/$BUCKOS_TARGET/"*/include; do
+                if [ -f "$GCC_INCLUDE_DIR/stdatomic.h" ]; then
+                    export CFLAGS="$CFLAGS -isystem $GCC_INCLUDE_DIR"
+                    export CXXFLAGS="$CXXFLAGS -isystem $GCC_INCLUDE_DIR"
+                    export CPPFLAGS="$CPPFLAGS -isystem $GCC_INCLUDE_DIR"
+                    # Also set C_INCLUDE_PATH for meson builds which may not respect CPPFLAGS
+                    export C_INCLUDE_PATH="${C_INCLUDE_PATH:+$C_INCLUDE_PATH:}$GCC_INCLUDE_DIR"
+                    export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH:+$CPLUS_INCLUDE_PATH:}$GCC_INCLUDE_DIR"
+                    break
+                fi
+            done
+
             # Add C library include path LAST (required for #include_next in C++ headers)
+            # The bootstrap sysroot has headers in /include, not /usr/include,
+            # so we need explicit -isystem flags (--sysroot alone won't find them)
             if [ -d "$BOOTSTRAP_SYSROOT/include" ]; then
                 export CFLAGS="$CFLAGS -isystem $BOOTSTRAP_SYSROOT/include"
                 export CXXFLAGS="$CXXFLAGS -isystem $BOOTSTRAP_SYSROOT/include"
@@ -968,9 +1014,15 @@ cd "$S"
 # CRITICAL: Ensure source directory is writable BEFORE network isolation
 # Buck2 artifacts and cp -a may preserve read-only permissions from cached files
 # This must happen BEFORE entering unshare namespace where permission changes may fail
+# IMPORTANT: Also make WORKDIR writable as some builds (coreutils) copy to ../source/
 chmod -R u+w . 2>/dev/null || {
     find . -type f -exec chmod u+w {} + 2>/dev/null || true
     find . -type d -exec chmod u+w {} + 2>/dev/null || true
+}
+# Also make the parent WORKDIR writable in case of out-of-tree builds
+chmod -R u+w "$WORKDIR" 2>/dev/null || {
+    find "$WORKDIR" -type f -exec chmod u+w {} + 2>/dev/null || true
+    find "$WORKDIR" -type d -exec chmod u+w {} + 2>/dev/null || true
 }
 
 # =============================================================================
@@ -1204,7 +1256,7 @@ fi
 
 # Export all critical environment variables
 export DESTDIR S EPREFIX PREFIX LIBDIR LIBDIR_SUFFIX BUILD_DIR WORKDIR T FILESDIR
-export PATH PYTHONPATH PKG_CONFIG_PATH PKG_CONFIG_LIBDIR DEP_BASE_DIRS
+export PATH PYTHONPATH PKG_CONFIG_PATH PKG_CONFIG_LIBDIR DEP_BASE_DIRS EXEC_BDEP_BASE_DIRS
 
 # Export cross-compilation variables if set
 if [ -n "$CC" ]; then

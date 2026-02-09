@@ -1,0 +1,8 @@
+load("//defs:package_defs.bzl", "acct_group_package")
+
+acct_group_package(
+    name = "polkitd",
+    gid = 87,
+    description = "System group for PolicyKit daemon",
+    visibility = ["PUBLIC"],
+)

@@ -14,7 +14,8 @@ autotools_package(
     homepage = "https://www.gnu.org/software/tar",
     license = "GPL-3+",
     iuse = ["nls", "acl", "xattr", "selinux"],
-    use_defaults = ["acl", "xattr"],
+    # TEMPORARILY DISABLED acl for aarch64 cross-compilation (Fix #26 - acl/libattr linking issue)
+    use_defaults = ["xattr"],
     use_deps = {
         "acl": ["//packages/linux/system/libs/ipc/acl:acl"],
         "selinux": ["//packages/linux/system/security/selinux:selinux"],

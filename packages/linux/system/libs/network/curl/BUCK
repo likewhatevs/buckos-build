@@ -151,6 +151,22 @@ autotools_package(
         "--enable-threaded-resolver",
         "--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt",
     ],
+    # Ensure GCC internal headers (stdatomic.h) are found during compilation
+    src_compile = """
+# Find GCC internal include directory for stdatomic.h
+GCC_INTERNAL_INCLUDES=""
+if [ -n "$CC" ]; then
+    GCC_INCLUDE_DIR="$($CC -print-file-name=include 2>/dev/null || true)"
+    if [ -d "$GCC_INCLUDE_DIR" ] && [ -f "$GCC_INCLUDE_DIR/stdatomic.h" ]; then
+        GCC_INTERNAL_INCLUDES="-isystem $GCC_INCLUDE_DIR"
+        echo "Found GCC internal includes: $GCC_INCLUDE_DIR"
+    fi
+fi
+
+# Pass CPPFLAGS directly to make to override Makefile settings
+echo "Adding CPPFLAGS: $GCC_INTERNAL_INCLUDES"
+make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} CPPFLAGS="$GCC_INTERNAL_INCLUDES $CPPFLAGS"
+""",
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/network/libpsl:libpsl",

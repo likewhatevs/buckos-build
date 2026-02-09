@@ -52,6 +52,10 @@ ebuild_package(
     license = "BSD-3-Clause",
 
     src_configure = '''
+# For cross-compilation: --build is the build machine, --host is the target
+BUILD_SYSTEM=$(./build-aux/config.guess 2>/dev/null || echo x86_64-pc-linux-gnu)
+HOST_SYSTEM=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+
 ./configure \\
     --prefix=/usr \\
     --sysconfdir=/etc \\
@@ -59,7 +63,9 @@ ebuild_package(
     --sbindir=/usr/sbin \\
     --enable-securedir=/lib/security \\
     --disable-nls \\
-    --disable-db
+    --disable-db \\
+    --build=$BUILD_SYSTEM \\
+    --host=$HOST_SYSTEM
 ''',
 
     src_compile = '''
@@ -125,6 +131,29 @@ account   required  pam_unix.so
 password  required  pam_unix.so nullok sha512 shadow
 session   required  pam_unix.so
 OTHERPAM
+
+# Create system-login PAM config (used by display managers like SDDM)
+cat > "$DESTDIR/etc/pam.d/system-login" << 'SYSTEMLOGIN'
+#%PAM-1.0
+# System login configuration for display managers
+
+auth       required   pam_env.so
+-auth      optional   pam_faildelay.so delay=2000000
+auth       sufficient pam_unix.so try_first_pass nullok
+auth       required   pam_deny.so
+
+account    required   pam_unix.so
+-account   optional   pam_nologin.so
+
+password   sufficient pam_unix.so try_first_pass nullok sha512 shadow
+password   required   pam_deny.so
+
+-session   optional   pam_loginuid.so
+-session   optional   pam_keyinit.so force revoke
+-session   optional   pam_limits.so
+session    required   pam_unix.so
+-session   optional   pam_systemd.so
+SYSTEMLOGIN
 
 # Create systemd-user PAM config (for user sessions)
 cat > "$DESTDIR/etc/pam.d/systemd-user" << 'SYSTEMDUSER'

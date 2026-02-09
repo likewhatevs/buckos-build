@@ -7,11 +7,11 @@ meson_package(
     src_uri = "https://github.com/PipeWire/pipewire/archive/refs/tags/1.0.7.tar.gz",
     sha256 = "9c45eef65e66224804ae8671849452a7f221e913813072b3aad346f20df666a8",
     signature_required = False,
-    description = "Low-latency audio/video router and processor",
+    description = "Low-latency audio/video router and processor",  # Cache: 2026-02-04 no-custom-configure
     homepage = "https://pipewire.org/",
     license = "MIT",
     iuse = ["alsa", "jack", "pulseaudio", "bluetooth", "gstreamer", "ffmpeg", "vulkan", "X", "v4l2", "libcamera", "systemd", "doc", "test", "examples"],
-    use_defaults = ["alsa", "jack", "pulseaudio"],
+    use_defaults = ["alsa", "systemd"],  # systemd enabled for proper init system support
     use_configure = {
         "alsa": "-Dalsa=enabled -Dpipewire-alsa=enabled",
         "-alsa": "-Dalsa=disabled -Dpipewire-alsa=disabled",
@@ -47,7 +47,11 @@ meson_package(
         "bluetooth": ["//packages/linux/system/bluetooth/bluez:bluez"],
         "gstreamer": ["//packages/linux/graphics/video/gstreamer:gstreamer"],
         "ffmpeg": ["//packages/linux/media/video/ffmpeg:ffmpeg"],
-        "systemd": ["//packages/linux/system/init/systemd:systemd"],
+        "systemd": [
+            "//packages/linux/system/init/systemd:systemd",
+            "//packages/linux/system/libs/ipc/libcap:libcap",  # libsystemd.so needs libcap
+        ],
+        "pulseaudio": ["//packages/linux/audio/daemons/pulseaudio:pulseaudio"],
     },
     meson_args = [
         "-Dspa-plugins=enabled",
@@ -76,6 +80,12 @@ meson_package(
     ],
     deps = [
         "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/init/eudev:eudev",
+        "//packages/linux/system/libs/audio/libsndfile:libsndfile",
+        "//packages/linux/system/libs/audio/flac:flac",
+        "//packages/linux/system/libs/audio/libogg:libogg",
+        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+        "//packages/linux/system/libs/audio/opus:opus",
     ],
     visibility = ["PUBLIC"],
 )

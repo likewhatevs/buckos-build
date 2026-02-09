@@ -53,12 +53,7 @@ autotools_package(
         # Tools are enabled by default (no --disable-tools)
     ],
     post_install = """
-# Create compatibility symlinks for traditional module tools
-mkdir -p $DESTDIR/sbin
-for tool in insmod rmmod lsmod modprobe modinfo depmod; do
-    ln -sf ../usr/bin/kmod $DESTDIR/sbin/$tool
-done
-# Also create symlinks in /usr/sbin for compatibility
+# Create compatibility symlinks in /usr/sbin (merged-usr: /sbin -> usr/sbin)
 mkdir -p $DESTDIR/usr/sbin
 for tool in insmod rmmod lsmod modprobe modinfo depmod; do
     ln -sf ../bin/kmod $DESTDIR/usr/sbin/$tool

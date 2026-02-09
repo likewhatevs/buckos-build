@@ -1,0 +1,14 @@
+load("//defs:package_defs.bzl", "acct_user_package")
+
+acct_user_package(
+    name = "messagebus",
+    uid = 101,
+    home = "/nonexistent",
+    shell = "/usr/sbin/nologin",
+    primary_group = "messagebus",
+    description = "System user for D-Bus message bus daemon",
+    deps = [
+        "//packages/acct-group/messagebus:messagebus",
+    ],
+    visibility = ["PUBLIC"],
+)

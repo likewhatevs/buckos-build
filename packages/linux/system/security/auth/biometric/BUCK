@@ -138,6 +138,15 @@ meson_package(
     meson_args = [
         "-Dgtk=disabled",
         "-Dlibpng=disabled",
+        # Disable x86 SIMD for cross-compilation to non-x86 architectures
+        # Meson should auto-detect but being explicit helps
+        "-Dmmx=disabled",
+        "-Dsse2=disabled",
+        "-Dssse3=disabled",
+        # Enable ARM NEON when targeting aarch64
+        "-Da64-neon=auto",
+        "-Darm-simd=auto",
+        "-Dneon=auto",
     ],
     visibility = ["PUBLIC"],
 )

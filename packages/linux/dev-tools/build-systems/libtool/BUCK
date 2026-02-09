@@ -33,10 +33,14 @@ chmod -R u+w . 2>/dev/null || true
 ''',
 
     src_configure = '''
+# For cross-compilation: --build is the build machine, --host is the target
+BUILD_SYSTEM=$(./build-aux/config.guess 2>/dev/null || echo x86_64-pc-linux-gnu)
+HOST_SYSTEM=${CHOST:-$(${CC:-gcc} -dumpmachine)}
+
 ./configure \\
     --prefix=/usr \\
-    --build=$(gcc -dumpmachine) \\
-    --host=$(gcc -dumpmachine) \\
+    --build=$BUILD_SYSTEM \\
+    --host=$HOST_SYSTEM \\
     --mandir=/usr/share/man \\
     --infodir=/usr/share/info \\
     --datadir=/usr/share \\
@@ -123,6 +127,10 @@ exec "$SCRIPT_DIR/libtool.real" "$@"
 WRAPPER_EOF
     chmod +x "$BINDIR/libtool"
 fi
+
+# Remove .la files to prevent libtool absolute path issues in cross-compilation
+# This includes libltdl.la which was causing "file in wrong format" errors
+find "$DESTDIR" -name '*.la' -type f -delete 2>/dev/null || true
 ''',
 
     # No dependencies - libtool is a bootstrap package that must build without

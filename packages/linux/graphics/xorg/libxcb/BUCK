@@ -6,6 +6,7 @@ autotools_package(
     name = "libxcb",
     version = "1.16",
     iuse = ["selinux", "xkb"],
+    use_defaults = ["xkb"],
     use_configure = {
         "-selinux": "--disable-selinux",
         "-xkb": "--disable-xkb",

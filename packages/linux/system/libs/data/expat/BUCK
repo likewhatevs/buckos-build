@@ -9,7 +9,7 @@ download_source(
     signature_required = False,
 )
 
-# expat-host - Native expat for host builds (used by wayland-host, etc.)
+# expat-host - Native expat for host builds (used by wayland-scanner, etc.)
 autotools_package(
     name = "expat-host",
     source = ":expat-src",
@@ -48,7 +48,9 @@ autotools_package(
     homepage = "https://libexpat.github.io/",
     license = "MIT",
     configure_args = [
-        "--disable-static",
+        # Enable static library - needed for host tools like wayland-scanner
+        # that must link statically to avoid glibc version mismatch issues
+        "--enable-static",
     ],
     visibility = ["PUBLIC"],
 )

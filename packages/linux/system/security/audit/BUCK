@@ -37,16 +37,26 @@ autotools_package(
     use_deps = {
         "caps": ["//packages/linux/system/libs/ipc/libcap-ng:libcap-ng"],
     },
-    configure_args = [
-        "--prefix=/usr",
-        "--sbindir=/sbin",
-        "--sysconfdir=/etc",
-        "--localstatedir=/var",
-        "--without-python",
-        "--without-python3",
-        "--enable-shared",
-        "--disable-static",
-        "--disable-zos-remote",  # Requires openldap
-    ],
+    src_configure = """
+# Force include stdatomic.h for C11 atomic types
+export CFLAGS="$CFLAGS -std=gnu11 -include stdatomic.h"
+export CXXFLAGS="$CXXFLAGS -std=gnu++11"
+./configure \\
+    --prefix=/usr \\
+    --sbindir=/sbin \\
+    --sysconfdir=/etc \\
+    --localstatedir=/var \\
+    --without-python \\
+    --without-python3 \\
+    --enable-shared \\
+    --disable-static \\
+    --disable-zos-remote
+""",
+    src_compile = """
+# Ensure CFLAGS with atomic support are used during compilation
+make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} \\
+    CFLAGS="$CFLAGS -std=gnu11 -include stdatomic.h" \\
+    CXXFLAGS="$CXXFLAGS -std=gnu++11"
+""",
     visibility = ["PUBLIC"],
 )

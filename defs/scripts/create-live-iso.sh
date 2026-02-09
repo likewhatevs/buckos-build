@@ -314,33 +314,43 @@ if command -v xorriso >/dev/null 2>&1; then
                 "$WORK"
             ;;
         hybrid|*)
-            # Try full hybrid boot, fallback if it fails
-            xorriso -as mkisofs \
-                -o "$ISO_OUT" \
-                -isohybrid-mbr /usr/lib/syslinux/bios/isohdpfx.bin 2>/dev/null || true \
-                -c isolinux/boot.cat \
-                -b isolinux/isolinux.bin \
-                -no-emul-boot \
-                -boot-load-size 4 \
-                -boot-info-table \
-                -eltorito-alt-boot \
-                -e boot/efi.img \
-                -no-emul-boot \
-                -isohybrid-gpt-basdat \
-                -V "$VOLUME_LABEL" \
-                -J -R \
-                "$WORK" 2>/dev/null || \
-            # Fallback to simpler ISO
-            xorriso -as mkisofs \
-                -o "$ISO_OUT" \
-                -c isolinux/boot.cat \
-                -b isolinux/isolinux.bin \
-                -no-emul-boot \
-                -boot-load-size 4 \
-                -boot-info-table \
-                -V "$VOLUME_LABEL" \
-                -J -R \
-                "$WORK"
+            if [ -f "$WORK/isolinux/isolinux.bin" ]; then
+                # Full hybrid boot (BIOS + EFI)
+                ISOHDPFX=""
+                for pfx in /usr/lib/syslinux/bios/isohdpfx.bin /usr/share/syslinux/isohdpfx.bin; do
+                    if [ -f "$pfx" ]; then ISOHDPFX="$pfx"; break; fi
+                done
+                HYBRID_MBR=""
+                if [ -n "$ISOHDPFX" ]; then
+                    HYBRID_MBR="-isohybrid-mbr $ISOHDPFX"
+                fi
+                xorriso -as mkisofs \
+                    -o "$ISO_OUT" \
+                    $HYBRID_MBR \
+                    -c isolinux/boot.cat \
+                    -b isolinux/isolinux.bin \
+                    -no-emul-boot \
+                    -boot-load-size 4 \
+                    -boot-info-table \
+                    -eltorito-alt-boot \
+                    -e boot/efi.img \
+                    -no-emul-boot \
+                    -isohybrid-gpt-basdat \
+                    -V "$VOLUME_LABEL" \
+                    -J -R \
+                    "$WORK"
+            else
+                # EFI-only fallback (isolinux not available)
+                echo "Warning: isolinux.bin not found, creating EFI-only ISO"
+                xorriso -as mkisofs \
+                    -o "$ISO_OUT" \
+                    -e boot/efi.img \
+                    -no-emul-boot \
+                    -isohybrid-gpt-basdat \
+                    -V "$VOLUME_LABEL" \
+                    -J -R \
+                    "$WORK"
+            fi
             ;;
     esac
 elif command -v genisoimage >/dev/null 2>&1; then

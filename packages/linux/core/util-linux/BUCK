@@ -158,6 +158,12 @@ autotools_package(
         "--enable-lsblk",
     ],
 
+    # Force sequential build to avoid parallel race conditions
+    # util-linux has internal dependencies that aren't properly declared in Makefiles
+    src_compile = """
+make -j1
+""",
+
     # Post-install script to verify getopt installation
     post_install = """
 # Verify that getopt was installed

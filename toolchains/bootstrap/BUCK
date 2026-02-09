@@ -5229,12 +5229,25 @@ ebuild_package(
     src_configure = '''
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 CFLAGS="$CFLAGS -std=gnu17"  # Force C17 for old glib code compatibility
+
+# Provide cache variables for glib's cross-compilation tests
+# These values are correct for AArch64 Linux
+cat > config.cache << 'EOF'
+ac_cv_func_posix_getpwuid_r=yes
+ac_cv_func_posix_getgrgid_r=yes
+glib_cv_stack_grows=no
+glib_cv_uscore=no
+ac_cv_func_vsnprintf_c99=yes
+ac_cv_func_printf_unix98=yes
+EOF
+
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --with-internal-glib \
-    --disable-host-tool
+    --disable-host-tool \
+    --cache-file=config.cache
 ''',
 
     src_compile = '''

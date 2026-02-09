@@ -1,0 +1,98 @@
+load("//defs:package_defs.bzl", "download_source", "ebuild_package")
+
+# Download BuckOS source from GitHub
+download_source(
+    name = "buckos-src",
+    url = "https://github.com/hodgesds/buckos/archive/refs/heads/main.tar.gz",
+    sha256 = "",  # Will be updated after first download
+    signature_required = False,
+)
+
+# BuckOS Installer - Graphical installer for live environment
+# Uses eframe/egui for GUI on Wayland/X11
+
+ebuild_package(
+    name = "buckos-installer",
+    source = ":buckos-src",
+    version = "0.1.0",
+    description = "Graphical installer for BuckOS - beginner-friendly system installation",
+    homepage = "https://github.com/hodgesds/buckos",
+    license = "Apache-2.0 OR MIT",
+    category = "apps",
+    slot = "0",
+
+    # Build with host toolchain (Rust not in bootstrap)
+    use_bootstrap = False,
+
+    src_prepare = """
+# Extract to a known directory name
+if [ -d buckos-main ]; then
+    mv buckos-main buckos-src
+fi
+cd buckos-src/installer || exit 1
+""",
+
+    src_configure = """
+cd buckos-src/installer
+
+# Use system Rust toolchain
+export CARGO_HOME="$S/cargo"
+export RUSTUP_HOME="$S/rustup"
+
+# Check if cargo is available
+if ! command -v cargo >/dev/null 2>&1; then
+    echo "ERROR: cargo not found. Please install Rust toolchain on the host system."
+    exit 1
+fi
+
+echo "Using Rust: $(rustc --version)"
+echo "Using Cargo: $(cargo --version)"
+""",
+
+    src_compile = """
+cd buckos-src/installer
+
+# Build the installer binary (native build)
+echo "Building buckos-installer..."
+cargo build --release --locked 2>&1 || cargo build --release 2>&1
+
+echo "Installer build complete"
+ls -lh target/release/buckos-installer
+""",
+
+    src_install = """
+cd buckos-src/installer
+
+# Install the binary
+install -D -m 755 target/release/buckos-installer \\
+    "$DESTDIR/usr/bin/buckos-installer"
+
+# Create desktop entry for live environment
+mkdir -p "$DESTDIR/usr/share/applications"
+cat > "$DESTDIR/usr/share/applications/buckos-installer.desktop" << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Install BuckOS
+Comment=Install BuckOS to your hard drive
+Icon=system-software-install
+Exec=buckos-installer
+Terminal=false
+Categories=System;Settings;
+Keywords=install;installer;setup;
+EOF
+
+chmod 644 "$DESTDIR/usr/share/applications/buckos-installer.desktop"
+echo "Installed buckos-installer"
+""",
+
+    # Depend on Rust build tools (will come from bootstrap)
+    bdepend = [],
+
+    # Runtime dependencies
+    depend = [
+        "//packages/linux/desktop/qt:qt6",  # For GUI
+    ],
+
+    visibility = ["PUBLIC"],
+)

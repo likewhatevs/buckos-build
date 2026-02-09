@@ -26,15 +26,65 @@ ebuild_package(
     license = "LGPL-2.1",
 
     src_configure = '''
+# Set LDFLAGS and LIBS to find attr from dependencies, not host
+_EXTRA_LDFLAGS=""
+_ATTR_LIB=""
+IFS=':' read -ra _DEP_ARRAY <<< "${DEP_BASE_DIRS:-}"
+for _dep in "${_DEP_ARRAY[@]}"; do
+    for _libdir in "$_dep/usr/lib64" "$_dep/usr/lib"; do
+        if [ -d "$_libdir" ]; then
+            _EXTRA_LDFLAGS="$_EXTRA_LDFLAGS -L$_libdir -Wl,-rpath-link,$_libdir"
+            # Find libattr.so explicitly
+            if [ -f "$_libdir/libattr.so" ] && [ -z "$_ATTR_LIB" ]; then
+                _ATTR_LIB="$_libdir/libattr.so"
+            fi
+        fi
+    done
+done
+export LDFLAGS="${LDFLAGS:-} $_EXTRA_LDFLAGS"
+
+# Explicitly pass attr library path to prevent finding host version
+if [ -n "$_ATTR_LIB" ]; then
+    export LIBS="${LIBS:-} $_ATTR_LIB"
+fi
+
 ./configure \\
     --prefix=/usr \\
-    --build=$(gcc -dumpmachine) \\
-    --host=$(gcc -dumpmachine) \\
+    --build=$(./build-aux/config.guess 2>/dev/null || echo x86_64-pc-linux-gnu) \\
+    --host=${CHOST:-$(${CC:-gcc} -dumpmachine)} \\
     --disable-static \\
     --disable-nls
+
+# Patch the Makefile to remove -lattr (which searches host paths) and only use explicit path
+if [ -f Makefile ]; then
+    sed -i 's/^LIBS = -lattr /LIBS = /' Makefile
+    echo "Patched Makefile to remove -lattr and use only explicit libattr path"
+fi
 ''',
 
     src_compile = '''
+# Build list of all dependency lib directories
+_LIB_DIRS=""
+IFS=':' read -ra _DEP_ARRAY <<< "${DEP_BASE_DIRS:-}"
+for _dep in "${_DEP_ARRAY[@]}"; do
+    for _libdir in "$_dep/usr/lib64" "$_dep/usr/lib"; do
+        if [ -d "$_libdir" ]; then
+            _LIB_DIRS="${_LIB_DIRS:+$_LIB_DIRS:}$_libdir"
+        fi
+    done
+done
+
+# Add toolchain lib directories
+TOOLCHAIN_LIBS="/data/buckos-build/buck-out/v2/gen/toolchains/f71afeb1ef1e9008/bootstrap/__bootstrap-toolchain-aarch64__/bootstrap-toolchain-aarch64/tools/lib64"
+if [ -d "$TOOLCHAIN_LIBS" ]; then
+    _LIB_DIRS="${_LIB_DIRS:+$_LIB_DIRS:}$TOOLCHAIN_LIBS"
+fi
+
+# Use --library-path to completely override library search, excluding /usr/lib64
+if [ -n "$_LIB_DIRS" ]; then
+    export LDFLAGS="${LDFLAGS:-} -Wl,--library-path=$_LIB_DIRS"
+fi
+
 make -j$(nproc)
 ''',
 

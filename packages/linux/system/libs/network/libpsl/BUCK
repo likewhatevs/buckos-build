@@ -9,7 +9,7 @@ meson_package(
     signature_sha256 = "87d819c4b61b6880ebe788edb411b92ac6ac47c7a2fb72899a8446a485d4607a",
     signature_required = False,
 
-    description = "Public Suffix List library",
+    description = "Public Suffix List library",  # Cache invalidation: 2026-01-30
     homepage = "https://github.com/rockdaboot/libpsl",
     license = "MIT",
 
@@ -34,6 +34,11 @@ meson_package(
         "-Dbuiltin=true",  # Use built-in PSL data
         "-Druntime=no",    # No runtime PSL loading - avoids ICU/IDN linking issues
     ],
+
+    # Force proper source extraction
+    src_prepare = """
+echo "Preparing libpsl source..."
+""",
 
     deps = [],
 
