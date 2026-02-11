@@ -478,14 +478,16 @@ evdev
 uinput
 INPUTEOF
 
-# DRM/Graphics modules (in case not built-in)
+# DRM/Graphics modules
+# Note: drm, drm_kms_helper, virtio_gpu, bochs, qxl are built-in (=y) in live kernel
+# Only list actual modules here
 cat > "$OUT/etc/modules-load.d/drm.conf" << 'DRMEOF'
-# DRM core
-drm
-drm_kms_helper
-# Virtual graphics for QEMU
-virtio_gpu
-bochs
+# i915 for Intel GPUs (if present as module)
+# i915
+# nouveau for NVIDIA GPUs (if present as module)
+# nouveau
+# amdgpu for AMD GPUs (if present as module)
+# amdgpu
 DRMEOF
 
 # Network modules
@@ -497,6 +499,75 @@ e1000e
 r8169
 igc
 NETEOF
+
+# =============================================================================
+# Systemd getty auto-login (since we don't have plasma-login-manager)
+# =============================================================================
+
+# Create getty@tty1 override for auto-login
+mkdir -p "$OUT/etc/systemd/system/getty@tty1.service.d"
+cat > "$OUT/etc/systemd/system/getty@tty1.service.d/autologin.conf" << 'GETTYEOF'
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin live --noclear %I $TERM
+Type=idle
+GETTYEOF
+
+# Create .bash_profile for live user to start Plasma Wayland on tty1
+mkdir -p "$OUT/home/live"
+cat > "$OUT/home/live/.bash_profile" << 'PROFILEEOF'
+# BuckOS Live - Auto-start Plasma Wayland on tty1
+
+# Only start on tty1 and if not already in a graphical session
+if [ "`tty`" = "/dev/tty1" ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
+    # Set up XDG runtime directory
+    export XDG_RUNTIME_DIR="/run/user/1000"
+
+    # Ensure runtime directory exists
+    if [ ! -d "$XDG_RUNTIME_DIR" ]; then
+        sudo mkdir -p "$XDG_RUNTIME_DIR"
+        sudo chown 1000:1000 "$XDG_RUNTIME_DIR"
+        sudo chmod 700 "$XDG_RUNTIME_DIR"
+    fi
+
+    # Set XDG base directories
+    export XDG_CONFIG_HOME="$HOME/.config"
+    export XDG_DATA_HOME="$HOME/.local/share"
+    export XDG_CACHE_HOME="$HOME/.cache"
+    export XDG_STATE_HOME="$HOME/.local/state"
+
+    # Create directories if needed
+    mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
+
+    # Start Plasma Wayland session
+    echo "Starting Plasma Wayland session..."
+    exec dbus-run-session startplasma-wayland
+fi
+
+# Source .bashrc for interactive shells
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+PROFILEEOF
+
+# Also create it in /etc/skel
+mkdir -p "$OUT/etc/skel"
+cp "$OUT/home/live/.bash_profile" "$OUT/etc/skel/.bash_profile"
+
+# Enable getty@tty1 (create symlink for systemd)
+mkdir -p "$OUT/etc/systemd/system/getty.target.wants"
+ln -sf /lib/systemd/system/getty@.service "$OUT/etc/systemd/system/getty.target.wants/getty@tty1.service"
+
+# Create symlink for pam_systemd.so (systemd installs to lib64, pam looks in lib)
+mkdir -p "$OUT/usr/lib/security"
+ln -sf ../../lib64/security/pam_systemd.so "$OUT/usr/lib/security/pam_systemd.so"
+
+# Fix user@.service to set XDG_RUNTIME_DIR (needed for user systemd instance)
+mkdir -p "$OUT/etc/systemd/system/user@.service.d"
+cat > "$OUT/etc/systemd/system/user@.service.d/runtime.conf" << 'USERSERVICEEOF'
+[Service]
+Environment=XDG_RUNTIME_DIR=/run/user/%i
+USERSERVICEEOF
 """,
     visibility = ["PUBLIC"],
 )
@@ -862,20 +933,20 @@ cat > $OUT/etc/tmpfiles.d/live-user-runtime.conf << 'TMPFILESEOF'
 d /run/user/1000 0700 1000 1000 -
 TMPFILESEOF
 
-# Create systemd user service drop-in to set XDG_RUNTIME_DIR
-mkdir -p "$OUT/etc/systemd/user/-.slice.d"
-cat > "$OUT/etc/systemd/user/-.slice.d/10-xdg-runtime.conf" << 'SLICEEOF'
-[Slice]
-Environment=XDG_RUNTIME_DIR=/run/user/%U
-SLICEEOF
-
 # Fix kwin_wayland_wrapper - the binary passes --xwayland which kwin doesn't support
-# Replace with a simple shell script that calls kwin_wayland directly
+# Replace with a simple shell script that filters out unsupported options
 mkdir -p $OUT/usr/bin $OUT/usr/sbin
 cat > $OUT/usr/bin/kwin_wayland_wrapper << 'KWRAPPER'
 #!/bin/bash
-# Wrapper replacement: original binary passed unsupported --xwayland flag
-exec /usr/bin/kwin_wayland "$@"
+# Wrapper replacement: filter out unsupported --xwayland flag
+ARGS=()
+for arg in "$@"; do
+    case "$arg" in
+        --xwayland) ;; # Skip this unsupported option
+        *) ARGS+=("$arg") ;;
+    esac
+done
+exec /usr/bin/kwin_wayland "${ARGS[@]}"
 KWRAPPER
 chmod +x $OUT/usr/bin/kwin_wayland_wrapper
 cp $OUT/usr/bin/kwin_wayland_wrapper $OUT/usr/sbin/kwin_wayland_wrapper
@@ -941,25 +1012,67 @@ ln -sf /usr/lib/systemd/system/polkit.service $OUT/etc/systemd/system/multi-user
 # Enable systemd-logind (required for loginctl and PAM sessions)
 ln -sf /usr/lib/systemd/system/systemd-logind.service $OUT/etc/systemd/system/multi-user.target.wants/systemd-logind.service
 
-# Create plasmalogin service drop-in (like CachyOS)
-mkdir -p $OUT/etc/systemd/system/plasmalogin.service.d
-cat > $OUT/etc/systemd/system/plasmalogin.service.d/10-live-environment.conf << 'PLASMADROPINEOF'
+# Create a systemd service to start Plasma Wayland on tty1 (no display manager needed)
+mkdir -p $OUT/usr/lib/systemd/system
+cat > $OUT/usr/lib/systemd/system/plasma-wayland-live.service << 'PLASMASERVICEEOF'
 [Unit]
-# Ensure dependencies are running before plasmalogin starts
-After=polkit.service systemd-logind.service dbus.service systemd-user-sessions.service
-Wants=polkit.service systemd-logind.service dbus.service
+Description=Plasma Wayland Session (Live)
+After=systemd-user-sessions.service dbus.service polkit.service systemd-logind.service
+Wants=dbus.service polkit.service systemd-logind.service
+Conflicts=getty@tty1.service
 
 [Service]
-# Ensure runtime directories exist before plasmalogin starts
-ExecStartPre=/usr/local/bin/plasmalogin-pre-start.sh
-# Environment for Qt
+Type=simple
+User=live
+Group=live
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty
+StandardOutput=tty
+StandardError=journal
+Environment=XDG_SESSION_TYPE=wayland
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+Environment=QT_QPA_PLATFORM=wayland
 Environment=QML_IMPORT_PATH=/usr/lib64/qml:/usr/lib64/qt6/qml
 Environment=QT_PLUGIN_PATH=/usr/lib64/qt6/plugins:/usr/lib64/plugins
 Environment=LIBSEAT_BACKEND=logind
-PLASMADROPINEOF
+ExecStartPre=/bin/mkdir -p /run/user/1000
+ExecStartPre=/bin/chown 1000:1000 /run/user/1000
+ExecStartPre=/bin/chmod 700 /run/user/1000
+ExecStart=/usr/bin/dbus-run-session /usr/bin/startplasma-wayland
+Restart=on-failure
+RestartSec=3
 
-# Enable plasma-login-manager (like CachyOS)
-ln -sf /usr/lib/systemd/system/plasmalogin.service $OUT/etc/systemd/system/graphical.target.wants/plasmalogin.service
+[Install]
+WantedBy=graphical.target
+PLASMASERVICEEOF
+
+# Enable plasma-wayland-live service
+ln -sf /usr/lib/systemd/system/plasma-wayland-live.service $OUT/etc/systemd/system/graphical.target.wants/plasma-wayland-live.service
+
+# Disable getty on tty1 (plasma-wayland-live will use it)
+ln -sf /dev/null $OUT/etc/systemd/system/getty@tty1.service
+
+# Disable screen locker for live session
+mkdir -p $OUT/home/live/.config
+cat > $OUT/home/live/.config/kscreenlockerrc << 'LOCKEREOF'
+[Daemon]
+Autolock=false
+LockOnResume=false
+Timeout=0
+LOCKEREOF
+chown -R 1000:1000 $OUT/home/live/.config
+
+# Also set a known password for live user in case lock screen appears
+# Password is "live"
+mkdir -p $OUT/etc
+# Use openssl to generate password hash for "live"
+# This is pre-computed: live -> $6$rounds=5000$salt$hash
+sed -i 's|^live:!:|live:$6$xyz$LH0pTsMhKj5X5VQrDvKxQ8Kj7FqNJvGqKxjQh3CqZ8nD6s5R2lVpLlZ.K9J4X5.iY8J6m.tQ3H4D5v6W7x8Y9z0:0|' $OUT/etc/shadow 2>/dev/null || true
 
 # Note: sshd is NOT enabled by default - it needs host keys generated first
 # To enable SSH access, run: systemctl start sshd (after generating keys with ssh-keygen -A)
@@ -1357,12 +1470,47 @@ filegroup(
 # Live Root Filesystem - Full desktop environment
 # =============================================================================
 
+# BuckOS source repository for the live environment
+# Downloads from GitHub to get the full buckos-build repository
+# The buckos CLI expects /var/db/repos/buckos-build with defs/ and packages/ directories
+# Also downloads buck2 prebuilt binary for building packages
+genrule(
+    name = "buckos-repo-gen",
+    out = "buckos-repo",
+    cmd = """
+mkdir -p "$OUT/var/db/repos/buckos-build"
+mkdir -p "$OUT/usr/bin"
+# Create empty etc directory to trigger fast tar merge path in assemble.sh
+# Without this, the assemble script recursively processes thousands of directories
+mkdir -p "$OUT/etc"
+
+# Download the buckos-build tarball from GitHub
+TARBALL=`mktemp`
+curl -sL "https://github.com/buck-os/buckos-build/archive/refs/heads/main.tar.gz" -o "$TARBALL"
+# Extract defs/ directory (required by buckos CLI)
+tar -xzf "$TARBALL" --strip-components=1 -C "$OUT/var/db/repos/buckos-build" "buckos-build-main/defs"
+# Extract packages/linux directory
+mkdir -p "$OUT/var/db/repos/buckos-build/packages"
+tar -xzf "$TARBALL" --strip-components=2 -C "$OUT/var/db/repos/buckos-build/packages" "buckos-build-main/packages/linux"
+rm -f "$TARBALL"
+
+# Download buck2 prebuilt static binary (x86_64)
+BUCK2_ZST=`mktemp`
+curl -sL "https://github.com/facebook/buck2/releases/download/2026-01-02/buck2-x86_64-unknown-linux-gnu.zst" -o "$BUCK2_ZST"
+zstd -d "$BUCK2_ZST" -o "$OUT/usr/bin/buck2"
+chmod +x "$OUT/usr/bin/buck2"
+rm -f "$BUCK2_ZST"
+""",
+    visibility = ["PUBLIC"],
+)
+
 # Live rootfs with KDE Plasma desktop (systemd-only, no eudev)
 rootfs(
     name = "buckos-live-kde-rootfs",
     packages = [
         ":live-init-scripts-gen",
         ":baselayout-gen",
+        ":buckos-repo-gen",
         ":live-dbus-policy-gen",
         ":polkit-live-rules-gen",
         ":live-utmp-gen",
@@ -1372,6 +1520,8 @@ rootfs(
         ":live-ssh-config-gen",
         ":live-plasmalogin-config-gen",
         ":live-systemd-config-gen",
+        # Kernel modules (needed for hardware support at runtime)
+        "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
         # System groups (automatically merged into /etc/group)
         "//packages/acct-group/tty:tty",
         "//packages/acct-group/disk:disk",
@@ -1507,8 +1657,8 @@ rootfs(
         "//packages/linux/graphics/xorg/xcb-util-image:xcb-util-image",
         "//packages/linux/graphics/xorg/xcb-util-renderutil:xcb-util-renderutil",
 
-        # Display Manager (plasma-login-manager like CachyOS)
-        "//packages/linux/desktop/kde:plasma-login-manager",
+        # Note: Using getty autologin + startplasma-wayland instead of plasma-login-manager
+        # (plasma-login-manager 6.5.91 requires PlasmaQuick 6.5.90, but we have 6.2.4)
 
         # Audio (PipeWire with systemd support)
         "//packages/linux/audio/daemons/pipewire:pipewire",
@@ -1518,6 +1668,7 @@ rootfs(
         "//packages/linux/dev-tools/vcs/git:git",
         "//packages/linux/editors/vim:vim",
 
+        # BuckOS tools (uses cargo_workspace_package with vendor tarball)
         "//packages/linux/apps/buckos-tools/installer:buckos-installer",
         "//packages/linux/apps/buckos-tools/cli:buckos-cli",
 
@@ -1628,7 +1779,7 @@ initramfs(
 
 # Live ISO with KDE Plasma desktop (hybrid BIOS+UEFI boot)
 iso_image(
-    name = "buckos-live-installer-kde-iso",
+    name = "buckos-live-installer-kde",
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
     initramfs = ":buckos-live-initramfs",
     rootfs = ":buckos-live-kde-rootfs",
@@ -1640,7 +1791,7 @@ iso_image(
 
 # Live ISO with Sway (lighter alternative)
 iso_image(
-    name = "buckos-live-installer-sway-iso",
+    name = "buckos-live-installer-sway",
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
     initramfs = ":buckos-live-initramfs",
     rootfs = ":buckos-live-sway-rootfs",
@@ -1652,7 +1803,7 @@ iso_image(
 
 # Live ISO with KDE Plasma desktop for aarch64 (UEFI boot)
 iso_image(
-    name = "buckos-live-installer-kde-iso-aarch64",
+    name = "buckos-live-installer-kde-aarch64",
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
     initramfs = ":buckos-live-initramfs",
     rootfs = ":buckos-live-kde-rootfs",
@@ -1665,8 +1816,8 @@ iso_image(
 
 # Main live installer ISO (defaults to KDE x86_64)
 alias(
-    name = "buckos-live-installer-iso",
-    actual = ":buckos-live-installer-kde-iso",
+    name = "buckos-live-installer",
+    actual = ":buckos-live-installer-kde",
     visibility = ["PUBLIC"],
 )
 
