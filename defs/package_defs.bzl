@@ -23,7 +23,7 @@ load("//config:fedora_build_flags.bzl",
 load("//defs:toolchain_providers.bzl",
      "GoToolchainInfo",
      "RustToolchainInfo")
-load("//defs:patch_registry.bzl", "apply_registry_overrides")
+load("//defs:patch_registry.bzl", "apply_registry_overrides", "lookup_patches")
 
 # Bootstrap toolchain target path (for use in package definitions)
 # All packages will use this by default to ensure they link against BuckOS glibc
@@ -875,6 +875,23 @@ if [ -n "$5" ]; then
     fi
 fi
 
+# Collect variable-length arguments: patches and module sources
+PATCH_COUNT="${7:-0}"
+shift 7 2>/dev/null || shift $#
+PATCH_FILES=()
+for ((i=0; i<PATCH_COUNT; i++)); do
+    PATCH_FILES+=("$1")
+    shift
+done
+
+MODULE_COUNT="${1:-0}"
+shift
+MODULE_DIRS=()
+for ((i=0; i<MODULE_COUNT; i++)); do
+    MODULE_DIRS+=("$1")
+    shift
+done
+
 # Copy source to writable build directory (buck2 inputs are read-only)
 # BUILD_DIR is passed as $3 from Buck2 for hermetic, deterministic builds
 mkdir -p "$BUILD_DIR"
@@ -908,6 +925,21 @@ fi
 echo "Copying kernel source to build directory: $BUILD_DIR"
 cp -a "$SRC_DIR"/. "$BUILD_DIR/"
 cd "$BUILD_DIR"
+
+# Apply patches to kernel source
+if [ ${#PATCH_FILES[@]} -gt 0 ]; then
+    echo "Applying ${#PATCH_FILES[@]} patch(es) to kernel source..."
+    for patch_file in "${PATCH_FILES[@]}"; do
+        if [ -n "$patch_file" ]; then
+            echo "  Applying $(basename "$patch_file")..."
+            if [[ "$patch_file" != /* ]]; then
+                patch_file="$OLDPWD/$patch_file"
+            fi
+            patch -p1 < "$patch_file" || { echo "Patch failed: $patch_file"; exit 1; }
+        fi
+    done
+    echo "All patches applied successfully"
+fi
 
 # Set up cross-compilation if building for different architecture
 MAKE_ARCH_OPTS="ARCH=$KERNEL_ARCH"
@@ -963,6 +995,46 @@ make $MAKE_CC_OVERRIDE $MAKE_ARCH_OPTS INSTALL_MOD_PATH="$INSTALL_BASE" modules_
 # Install headers (useful for out-of-tree modules)
 mkdir -p "$INSTALL_BASE/usr/src/linux-$KRELEASE"
 make $MAKE_CC_OVERRIDE $MAKE_ARCH_OPTS INSTALL_HDR_PATH="$INSTALL_BASE/usr" headers_install
+
+# Build and install external kernel modules
+if [ ${#MODULE_DIRS[@]} -gt 0 ]; then
+    echo "Building ${#MODULE_DIRS[@]} external module(s)..."
+    for mod_src_dir in "${MODULE_DIRS[@]}"; do
+        if [ -n "$mod_src_dir" ] && [ -d "$mod_src_dir" ]; then
+            # Convert to absolute path
+            if [[ "$mod_src_dir" != /* ]]; then
+                mod_src_dir="$(cd "$mod_src_dir" && pwd)"
+            fi
+
+            MOD_NAME=$(basename "$mod_src_dir")
+            echo "  Building external module: $MOD_NAME"
+
+            # Copy module source to writable location (Buck2 inputs are read-only)
+            MOD_BUILD="$BUILD_DIR/.modules/$MOD_NAME"
+            mkdir -p "$MOD_BUILD"
+            cp -a "$mod_src_dir"/. "$MOD_BUILD/"
+            chmod -R u+w "$MOD_BUILD"
+
+            # Build module against our kernel tree
+            make $MAKE_CC_OVERRIDE $MAKE_ARCH_OPTS \
+                -C "$BUILD_DIR" M="$MOD_BUILD" -j${MAKEOPTS:-$(nproc)} modules
+
+            # Install module .ko files
+            mkdir -p "$INSTALL_BASE/lib/modules/$KRELEASE/extra"
+            find "$MOD_BUILD" -name '*.ko' -exec \
+                install -m 644 {} "$INSTALL_BASE/lib/modules/$KRELEASE/extra/" \;
+
+            echo "  Installed module: $MOD_NAME"
+        fi
+    done
+    echo "All external modules built and installed"
+fi
+
+# Run depmod to generate module dependency metadata
+if command -v depmod >/dev/null 2>&1; then
+    echo "Running depmod for $KRELEASE..."
+    depmod -b "$INSTALL_BASE" "$KRELEASE" 2>/dev/null || true
+fi
 """,
         is_executable = True,
     )
@@ -987,10 +1059,23 @@ make $MAKE_CC_OVERRIDE $MAKE_ARCH_OPTS INSTALL_HDR_PATH="$INSTALL_BASE/usr" head
     else:
         cmd.add("")
 
-    # Add cross-toolchain directory if present
+    # Add cross-toolchain directory if present, otherwise empty placeholder
     if ctx.attrs.cross_toolchain:
         toolchain_dir = ctx.attrs.cross_toolchain[DefaultInfo].default_outputs[0]
         cmd.add(toolchain_dir)
+    else:
+        cmd.add("")
+
+    # Add patch count and patch file paths
+    cmd.add(str(len(ctx.attrs.patches)))
+    for patch in ctx.attrs.patches:
+        cmd.add(patch)
+
+    # Add module count and module source directories
+    cmd.add(str(len(ctx.attrs.modules)))
+    for mod in ctx.attrs.modules:
+        mod_dir = mod[DefaultInfo].default_outputs[0]
+        cmd.add(mod_dir)
 
     ctx.actions.run(
         cmd,
@@ -1000,7 +1085,7 @@ make $MAKE_CC_OVERRIDE $MAKE_ARCH_OPTS INSTALL_HDR_PATH="$INSTALL_BASE/usr" head
 
     return [DefaultInfo(default_output = install_dir)]
 
-kernel_build = rule(
+_kernel_build_rule = rule(
     impl = _kernel_build_impl,
     attrs = {
         "source": attrs.dep(),
@@ -1009,8 +1094,57 @@ kernel_build = rule(
         "config_dep": attrs.option(attrs.dep(), default = None),
         "arch": attrs.string(default = "x86_64"),  # Target architecture: x86_64 or aarch64
         "cross_toolchain": attrs.option(attrs.dep(), default = None),  # Cross-toolchain for cross-compilation
+        "patches": attrs.list(attrs.source(), default = []),  # Patches to apply to kernel source
+        "modules": attrs.list(attrs.dep(), default = []),  # External module sources to build
     },
 )
+
+def kernel_build(
+        name,
+        source,
+        version,
+        config = None,
+        config_dep = None,
+        arch = "x86_64",
+        cross_toolchain = None,
+        patches = [],
+        modules = [],
+        visibility = []):
+    """Build Linux kernel with optional patches and external modules.
+
+    This macro wraps _kernel_build_rule to integrate with the private
+    patch registry (patches/registry.bzl).
+
+    Args:
+        name: Target name
+        source: Kernel source dependency (download_source target)
+        version: Kernel version string
+        config: Optional direct path to .config file
+        config_dep: Optional dependency providing generated .config (from kernel_config)
+        arch: Target architecture (x86_64 or aarch64)
+        cross_toolchain: Optional cross-compilation toolchain dependency
+        patches: List of patch files to apply to kernel source before build
+        modules: List of external module source dependencies (download_source targets) to compile
+        visibility: Target visibility
+    """
+    # Apply private patch registry overrides
+    merged_patches = list(patches)
+    overrides = lookup_patches(name)
+    if overrides and "patches" in overrides:
+        merged_patches.extend(overrides["patches"])
+
+    _kernel_build_rule(
+        name = name,
+        source = source,
+        version = version,
+        config = config,
+        config_dep = config_dep,
+        arch = arch,
+        cross_toolchain = cross_toolchain,
+        patches = merged_patches,
+        modules = modules,
+        visibility = visibility,
+    )
 
 def _binary_package_impl(ctx: AnalysisContext) -> list[Provider]:
     """
