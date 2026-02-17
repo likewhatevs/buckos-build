@@ -662,6 +662,21 @@ def download_source(
             ext = ".zip"
         archive_filename = name + ext
 
+    # Derive a base package name from the target name (strip common suffixes)
+    base_pkg = name
+    for suffix in ["-src-archive", "-src", "-archive", "-source"]:
+        if base_pkg.endswith(suffix):
+            base_pkg = base_pkg[:-len(suffix)]
+            break
+
+    # Ensure the archive filename contains the package name to avoid
+    # mirror path collisions and numeric-only filenames. For example:
+    #   "1.5.10.tar.gz" -> "libepoxy-1.5.10.tar.gz"
+    #   "vulkan-sdk-1.4.335.0.tar.gz" -> "SPIRV-Tools-vulkan-sdk-1.4.335.0.tar.gz" (if different pkg)
+    # Skip if the filename already starts with the package name (case-insensitive)
+    if not archive_filename.lower().startswith(base_pkg.lower()):
+        archive_filename = base_pkg + "-" + archive_filename
+
     # Create http_file for the main archive (using custom rule with proxy support)
     archive_target = name + "-archive"
     _http_file_with_proxy(
