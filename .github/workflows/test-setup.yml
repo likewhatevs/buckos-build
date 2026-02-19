@@ -1,12 +1,7 @@
 name: Test Setup Script
 
 on:
-  push:
-    branches: [main, master]
-    paths: [setup.sh]
-  pull_request:
-    branches: [main, master]
-    paths: [setup.sh]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
