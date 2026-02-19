@@ -96,6 +96,35 @@ def test_compile_targets_have_build_type(all_target_labels: dict[str, list[str]]
     )
 
 
+# --- USE flag provenance labels ---
+
+def test_iuse_labels_exist(all_target_labels: dict[str, list[str]]):
+    """At least some targets have buckos:iuse:* labels."""
+    iuse_targets = targets_with_label(all_target_labels, "buckos:iuse:")
+    assert len(iuse_targets) > 10, (
+        f"Expected >10 targets with buckos:iuse:* labels, got {len(iuse_targets)}"
+    )
+
+
+def test_use_labels_exist(all_target_labels: dict[str, list[str]]):
+    """At least some targets have buckos:use:* labels."""
+    use_targets = targets_with_label(all_target_labels, "buckos:use:")
+    assert len(use_targets) > 10, (
+        f"Expected >10 targets with buckos:use:* labels, got {len(use_targets)}"
+    )
+
+
+
+def test_iuse_labels_format(all_target_labels: dict[str, list[str]]):
+    """buckos:iuse:* and buckos:use:* labels must have non-empty flag names."""
+    bad = []
+    for target, labels in all_target_labels.items():
+        for label in labels:
+            if label == "buckos:iuse:" or label == "buckos:use:":
+                bad.append(f"{target}: {label}")
+    assert not bad, f"Empty USE flag labels:\n" + "\n".join(bad[:20])
+
+
 # --- Label format invariants ---
 
 def test_no_empty_sha256_labels(all_target_labels: dict[str, list[str]]):

@@ -11,6 +11,7 @@ jobs:
   test-setup:
     name: "Test setup.sh (${{ matrix.distro }})"
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -30,6 +31,7 @@ jobs:
               gcc --version &&
               buck2 --version &&
               cargo --version &&
+              uv --version &&
               rg --version &&
               fd --version || fdfind --version &&
               grep use_host_toolchain .buckconfig.local

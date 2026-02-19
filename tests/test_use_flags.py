@@ -66,6 +66,33 @@ def _uquery_with_config_file(buck2, ini_content: str, target: str = TARGET) -> l
         return _uquery_use_flags(buck2, target, "--config-file", f.name)
 
 
+def _uquery_labels(buck2, target: str, *extra_args: str) -> list[str]:
+    """Run buck2 uquery and extract the labels attribute."""
+    result = buck2(
+        "uquery",
+        target,
+        "--output-attribute", "labels",
+        "--json",
+        *extra_args,
+        check=True,
+    )
+    data = json.loads(result.stdout)
+    for key, attrs in data.items():
+        if key.endswith(target.lstrip("/")) or key == target:
+            return sorted(attrs.get("labels", []))
+    return []
+
+
+def _uquery_labels_with_config_file(buck2, ini_content: str, target: str = TARGET) -> list[str]:
+    """Write a temp buckconfig file and query labels with --config-file."""
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".buckconfig", delete=False
+    ) as f:
+        f.write(ini_content)
+        f.flush()
+        return _uquery_labels(buck2, target, "--config-file", f.name)
+
+
 def _cquery_env(buck2, target: str, *extra_args: str) -> dict[str, str]:
     """Run buck2 cquery and extract the env attribute."""
     result = buck2(
@@ -494,3 +521,130 @@ class TestUseExpand:
         )
         # Should not contain the default values
         assert "fbdev" not in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# USE flag provenance labels (buckos:iuse:* and buckos:use:*)
+# ---------------------------------------------------------------------------
+
+class TestUseIuseLabels:
+    """buckos:iuse:FLAG labels designate available USE flags for a package."""
+
+    def test_iuse_labels_present(self, buck2):
+        """All iuse flags appear as buckos:iuse:FLAG labels."""
+        labels = _uquery_labels(buck2, TARGET)
+        for flag in ("ssl", "zstd", "debug"):
+            assert f"buckos:iuse:{flag}" in labels, (
+                f"Missing buckos:iuse:{flag} in {labels}"
+            )
+
+    def test_iuse_labels_cmake(self, buck2):
+        """cmake fixture has iuse labels."""
+        labels = _uquery_labels(buck2, CMAKE_TARGET)
+        for flag in ("ssl", "zstd", "debug"):
+            assert f"buckos:iuse:{flag}" in labels
+
+    def test_iuse_labels_meson(self, buck2):
+        """meson fixture has iuse labels."""
+        labels = _uquery_labels(buck2, MESON_TARGET)
+        for flag in ("ssl", "zstd", "debug"):
+            assert f"buckos:iuse:{flag}" in labels
+
+    def test_iuse_labels_cargo(self, buck2):
+        """cargo fixture has iuse labels."""
+        labels = _uquery_labels(buck2, CARGO_TARGET)
+        for flag in ("ssl", "zstd", "debug"):
+            assert f"buckos:iuse:{flag}" in labels
+
+    def test_iuse_labels_go(self, buck2):
+        """go fixture has iuse labels."""
+        labels = _uquery_labels(buck2, GO_TARGET)
+        for flag in ("ssl", "zstd", "debug"):
+            assert f"buckos:iuse:{flag}" in labels
+
+
+class TestUseEnabledLabels:
+    """buckos:use:FLAG labels record which USE flags are actually enabled."""
+
+    def test_default_use_labels(self, buck2):
+        """Default (ssl on) → buckos:use:ssl present, no buckos:use:zstd."""
+        labels = _uquery_labels(buck2, TARGET)
+        assert "buckos:use:ssl" in labels
+        assert "buckos:use:zstd" not in labels
+        assert "buckos:use:debug" not in labels
+
+    def test_enable_adds_use_label(self, buck2):
+        """Enabling zstd globally adds buckos:use:zstd."""
+        labels = _uquery_labels(
+            buck2, TARGET,
+            "--config", "use.zstd=true",
+        )
+        assert "buckos:use:zstd" in labels
+        assert "buckos:use:ssl" in labels
+
+    def test_disable_removes_use_label(self, buck2):
+        """Disabling ssl removes buckos:use:ssl."""
+        labels = _uquery_labels(
+            buck2, TARGET,
+            "--config", "use.ssl=false",
+        )
+        assert "buckos:use:ssl" not in labels
+
+    def test_per_package_override_labels(self, buck2):
+        """Per-package override changes buckos:use:* labels."""
+        labels = _uquery_labels_with_config_file(buck2, "\n".join([
+            "[use]",
+            "  ssl = false",
+            "[use.test-use-flags]",
+            "  ssl = true",
+            "  zstd = true",
+        ]))
+        assert "buckos:use:ssl" in labels
+        assert "buckos:use:zstd" in labels
+
+    def test_all_build_systems_have_use_labels(self, buck2):
+        """All fixture build systems emit buckos:use:ssl with default config."""
+        for target in (TARGET, CMAKE_TARGET, MESON_TARGET, CARGO_TARGET, GO_TARGET):
+            labels = _uquery_labels(buck2, target)
+            assert "buckos:use:ssl" in labels, (
+                f"{target} missing buckos:use:ssl"
+            )
+
+    def test_enable_all_flags(self, buck2):
+        """All flags on → all buckos:use:* labels present."""
+        labels = _uquery_labels(
+            buck2, TARGET,
+            "--config", "use.zstd=true",
+            "--config", "use.debug=true",
+        )
+        for flag in ("ssl", "zstd", "debug"):
+            assert f"buckos:use:{flag}" in labels
+
+
+class TestBuckosUseArray:
+    """BUCKOS_USE is exported as a bash array in the ebuild environment."""
+
+    def test_use_flags_attr_is_list(self, buck2):
+        """use_flags attribute is a list matching enabled flags."""
+        flags = _uquery_use_flags(buck2, TARGET)
+        assert isinstance(flags, list)
+        assert "ssl" in flags
+
+    def test_use_flags_tracks_config(self, buck2):
+        """use_flags list changes with config overrides."""
+        flags = _uquery_use_flags(
+            buck2, TARGET,
+            "--config", "use.zstd=true",
+        )
+        assert "ssl" in flags
+        assert "zstd" in flags
+
+    def test_use_flags_empty_when_all_disabled(self, buck2):
+        """Disabling all flags yields empty use_flags."""
+        flags = _uquery_use_flags(
+            buck2, TARGET,
+            "--config", "use.ssl=false",
+        )
+        assert "ssl" not in flags
+        assert "zstd" not in flags
+        assert "debug" not in flags

@@ -25,6 +25,23 @@ _prov_graph_hash="$(_prov_escape "${BUCKOS_PKG_GRAPH_HASH:-}")"
 
 _own_record="{\"name\":\"${_prov_name}\",\"version\":\"${_prov_version}\",\"type\":\"${_prov_type}\",\"target\":\"${_prov_target}\",\"sourceUrl\":\"${_prov_url}\",\"sourceSha256\":\"${_prov_sha}\",\"graphHash\":\"${_prov_graph_hash}\""
 
+# ── 1b. Serialize BUCKOS_USE to JSON array ────────────────────────────────
+_prov_use_json="["
+_prov_use_first=true
+if [ ${#BUCKOS_USE[@]} -gt 0 ] 2>/dev/null; then
+    for _flag in "${BUCKOS_USE[@]}"; do
+        if [ "$_prov_use_first" = true ]; then
+            _prov_use_first=false
+        else
+            _prov_use_json="${_prov_use_json},"
+        fi
+        _prov_use_json="${_prov_use_json}\"$(_prov_escape "$_flag")\""
+    done
+fi
+_prov_use_json="${_prov_use_json}]"
+
+_own_record="${_own_record},\"useFlags\":${_prov_use_json}"
+
 # ── 2. Append SLSA volatile fields if enabled ───────────────────────────────
 
 if [ "${BUCKOS_SLSA_ENABLED:-false}" = "true" ]; then
