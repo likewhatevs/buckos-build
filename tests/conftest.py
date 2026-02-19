@@ -95,6 +95,22 @@ def all_target_labels(buck2) -> dict[str, list[str]]:
 
 
 @pytest.fixture(scope="session")
+def ch_binary(buck2, repo_root: Path) -> Path:
+    """Build cloud-hypervisor and return the binary path."""
+    result = buck2(
+        "build", "--show-output",
+        "-c", "buckos.use_host_toolchain=true",
+        "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
+        timeout=900,
+    )
+    for line in result.stdout.splitlines():
+        parts = line.strip().split(None, 1)
+        if len(parts) == 2 and ":cloud-hypervisor" in parts[0] and ":cloud-hypervisor-" not in parts[0]:
+            return repo_root / parts[1]
+    pytest.fail(f"Could not find CH binary in build output:\n{result.stdout}")
+
+
+@pytest.fixture(scope="session")
 def parsed_buck_targets(repo_root: Path):
     """AST-parsed target definitions from BUCK files under packages/."""
     from tests.buck_parser import parse_buck_files

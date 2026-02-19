@@ -11,4 +11,5 @@ testpaths = ["tests"]
 timeout = 300
 markers = [
     "slow: tests that boot QEMU or build kernels (deselect with '-m not slow')",
+    "integration: tests that need KVM and build full stack",
 ]
