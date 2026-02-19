@@ -3,7 +3,7 @@ name: Test Setup Script
 on:
   push:
     branches: [main]
-  pull_request:
+  merge_group:
   workflow_dispatch:
 
 concurrency:
