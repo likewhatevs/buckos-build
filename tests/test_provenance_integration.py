@@ -564,7 +564,7 @@ class TestSubgraphHash:
 # ---------------------------------------------------------------------------
 
 class TestImaSigning:
-    """IMA signing integration tests — gated on evmctl + xattr capability."""
+    """IMA signing integration tests — gated on evmctl availability."""
 
     @pytest.fixture(scope="class")
     def hello_ima(self, repo_root: Path) -> Path:
@@ -582,35 +582,20 @@ class TestImaSigning:
             use_overrides={"ima": "false"},
         )
 
-    def test_ima_disabled_no_xattr(self, hello_no_ima: Path):
-        """Without IMA, no security.ima xattr should exist."""
-        exes = _find_executables(hello_no_ima)
-        if not exes:
-            pytest.skip("No executables found")
-        for exe in exes:
-            result = subprocess.run(
-                ["getfattr", "-n", "security.ima", str(exe)],
-                capture_output=True, text=True,
-            ) if shutil.which("getfattr") else None
-            if result is not None:
-                assert result.returncode != 0, (
-                    f"{exe.name}: security.ima should not exist when IMA is disabled"
-                )
+    def test_ima_disabled_no_sig(self, hello_no_ima: Path):
+        """Without IMA, no .sig sidecars should exist."""
+        sigs = list(hello_no_ima.rglob("*.sig"))
+        assert not sigs, (
+            f".sig files should not exist when IMA is disabled: {sigs}"
+        )
 
-    def test_ima_signed_elf_has_xattr(self, hello_ima: Path):
-        """With IMA enabled, ELF binaries should have security.ima xattr."""
-        if not shutil.which("getfattr"):
-            pytest.skip("getfattr not available")
+    def test_ima_signed_elf_has_sig(self, hello_ima: Path):
+        """With IMA enabled, ELF binaries should have .sig sidecars."""
         exes = _find_executables(hello_ima)
         assert exes, f"No executables found under {hello_ima}"
         for exe in exes:
-            result = subprocess.run(
-                ["getfattr", "-n", "security.ima", str(exe)],
-                capture_output=True, text=True,
-            )
-            assert result.returncode == 0, (
-                f"{exe.name}: missing security.ima xattr"
-            )
+            sig = exe.with_name(exe.name + ".sig")
+            assert sig.exists(), f"{exe.name}: missing .sig sidecar"
 
     def test_ima_signed_binary_still_runs(self, hello_ima: Path):
         """IMA-signed binary should still execute normally."""

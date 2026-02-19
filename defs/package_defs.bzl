@@ -5141,19 +5141,24 @@ def _ebuild_package_impl(ctx: AnalysisContext) -> list[Provider]:
 set -e
 _dep_count="$1"; shift
 _input_count="$1"; shift
-# Hash all input artifacts
-{ for _i in $(seq 1 "$_input_count"); do cat "$1"; shift; done
-  # Append sorted dep subgraph hashes
+# Collect input file args, then dep dir args, then output path
+_inputs=()
+for _i in $(seq 1 "$_input_count"); do _inputs+=("$1"); shift; done
+_deps=()
+for _i in $(seq 1 "$_dep_count"); do _deps+=("$1"); shift; done
+_out="$1"
+# Hash all input artifacts + sorted dep subgraph hashes
+{ for _f in "${_inputs[@]}"; do cat "$_f"; done
   _hashes=""
-  for _i in $(seq 1 "$_dep_count"); do
-      _f="$1/.buckos-subgraph-hash"
-      if [ -f "$_f" ]; then _hashes="${_hashes}$(cat "$_f")\n"; fi
-      shift
+  for _d in "${_deps[@]}"; do
+      _f="$_d/.buckos-subgraph-hash"
+      [ -f "$_f" ] && _hashes="${_hashes}$(cat "$_f")\n"
   done
   [ -n "$_hashes" ] && printf '%b' "$_hashes" | sort
-} | sha256sum | cut -d' ' -f1 > "${1}"
+} | sha256sum | cut -d' ' -f1 > "$_out"
 """
     hash_cmd.add(hash_script)
+    hash_cmd.add("_")  # placeholder for bash -c $0
     hash_cmd.add(str(len(dep_dirs)))
     hash_cmd.add(str(len(subgraph_inputs)))
     for inp in subgraph_inputs:
