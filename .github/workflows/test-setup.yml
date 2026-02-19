@@ -1,6 +1,9 @@
 name: Test Setup Script
 
 on:
+  push:
+    branches: [main]
+  merge_group:
   workflow_dispatch:
 
 concurrency:
