@@ -873,13 +873,19 @@ done
 
     return [DefaultInfo(default_output = output)]
 
-kernel_config = rule(
+_kernel_config_rule = rule(
     impl = _kernel_config_impl,
     attrs = {
         "fragments": attrs.list(attrs.source()),
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def kernel_config(labels = [], **kwargs):
+    _kernel_config_rule(
+        labels = _config_labels(extra = labels),
+        **kwargs
+    )
 
 def _kernel_build_impl(ctx: AnalysisContext) -> list[Provider]:
     """Build Linux kernel with custom configuration."""
@@ -1775,7 +1781,7 @@ done
         ),
     ]
 
-binary_package = rule(
+_binary_package_rule = rule(
     impl = _binary_package_impl,
     attrs = {
         "srcs": attrs.list(attrs.dep(), default = []),
@@ -1792,6 +1798,12 @@ binary_package = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def binary_package(labels = [], **kwargs):
+    _binary_package_rule(
+        labels = _prebuilt_labels(extra = labels),
+        **kwargs
+    )
 
 # -----------------------------------------------------------------------------
 # Precompiled Binary Package Rule
@@ -1891,7 +1903,7 @@ cp -r "$SRC"/* "$OUT{extract_to}/" 2>/dev/null || true
         ),
     ]
 
-precompiled_package = rule(
+_precompiled_package_rule = rule(
     impl = _precompiled_package_impl,
     attrs = {
         "source": attrs.dep(),
@@ -1906,6 +1918,12 @@ precompiled_package = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def precompiled_package(labels = [], **kwargs):
+    _precompiled_package_rule(
+        labels = _prebuilt_labels(extra = labels),
+        **kwargs
+    )
 
 def _rootfs_impl(ctx: AnalysisContext) -> list[Provider]:
     """Assemble a root filesystem from packages."""
@@ -2222,7 +2240,7 @@ shift
 
     return [DefaultInfo(default_output = rootfs_dir)]
 
-rootfs = rule(
+_rootfs_rule = rule(
     impl = _rootfs_impl,
     attrs = {
         "packages": attrs.list(attrs.dep()),
@@ -2230,6 +2248,12 @@ rootfs = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def rootfs(labels = [], **kwargs):
+    _rootfs_rule(
+        labels = _image_labels(extra = labels),
+        **kwargs
+    )
 
 def _initramfs_impl(ctx: AnalysisContext) -> list[Provider]:
     """Create an initramfs cpio archive from a rootfs."""
@@ -2366,7 +2390,7 @@ echo "Created initramfs: $OUTPUT"
 
     return [DefaultInfo(default_output = initramfs_file)]
 
-initramfs = rule(
+_initramfs_rule = rule(
     impl = _initramfs_impl,
     attrs = {
         "rootfs": attrs.dep(),
@@ -2376,6 +2400,12 @@ initramfs = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def initramfs(labels = [], **kwargs):
+    _initramfs_rule(
+        labels = _image_labels(extra = labels),
+        **kwargs
+    )
 
 def _dracut_initramfs_impl(ctx: AnalysisContext) -> list[Provider]:
     """Create an initramfs using dracut with dmsquash-live module for live boot."""
@@ -2415,7 +2445,7 @@ def _dracut_initramfs_impl(ctx: AnalysisContext) -> list[Provider]:
 
     return [DefaultInfo(default_output = initramfs_file)]
 
-dracut_initramfs = rule(
+_dracut_initramfs_rule = rule(
     impl = _dracut_initramfs_impl,
     attrs = {
         "kernel": attrs.dep(),
@@ -2428,6 +2458,12 @@ dracut_initramfs = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def dracut_initramfs(labels = [], **kwargs):
+    _dracut_initramfs_rule(
+        labels = _image_labels(extra = labels),
+        **kwargs
+    )
 
 def _qemu_boot_script_impl(ctx: AnalysisContext) -> list[Provider]:
     """Generate a QEMU boot script for testing."""
@@ -2570,7 +2606,7 @@ chmod +x "$OUTPUT"
 
     return [DefaultInfo(default_output = boot_script)]
 
-qemu_boot_script = rule(
+_qemu_boot_script_rule = rule(
     impl = _qemu_boot_script_impl,
     attrs = {
         "kernel": attrs.dep(),
@@ -2580,8 +2616,15 @@ qemu_boot_script = rule(
         "cpus": attrs.string(default = "2"),
         "kernel_args": attrs.string(default = "console=ttyS0 quiet"),
         "extra_args": attrs.list(attrs.string(), default = []),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def qemu_boot_script(labels = [], **kwargs):
+    _qemu_boot_script_rule(
+        labels = _bootscript_labels(arch = kwargs.get("arch"), extra = labels),
+        **kwargs
+    )
 
 # =============================================================================
 # Cloud Hypervisor Boot Script Rule
@@ -2893,7 +2936,7 @@ echo ""
 
     return [DefaultInfo(default_output = boot_script)]
 
-ch_boot_script = rule(
+_ch_boot_script_rule = rule(
     impl = _ch_boot_script_impl,
     attrs = {
         "kernel": attrs.option(attrs.dep(), default = None),
@@ -2914,6 +2957,12 @@ ch_boot_script = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def ch_boot_script(labels = [], **kwargs):
+    _ch_boot_script_rule(
+        labels = _bootscript_labels(extra = labels),
+        **kwargs
+    )
 
 # =============================================================================
 # Raw Disk Image Rule
@@ -3088,7 +3137,7 @@ echo "Disk image created: $OUTPUT"
 
     return [DefaultInfo(default_output = image_file)]
 
-raw_disk_image = rule(
+_raw_disk_image_rule = rule(
     impl = _raw_disk_image_impl,
     attrs = {
         "rootfs": attrs.dep(),
@@ -3099,6 +3148,12 @@ raw_disk_image = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def raw_disk_image(labels = [], **kwargs):
+    _raw_disk_image_rule(
+        labels = _image_labels(extra = labels),
+        **kwargs
+    )
 
 def _iso_image_impl(ctx: AnalysisContext) -> list[Provider]:
     """Create a bootable ISO image from kernel, initramfs, and optional rootfs."""
@@ -3565,7 +3620,7 @@ ls -lh "$ISO_OUT"
 
     return [DefaultInfo(default_output = iso_file)]
 
-iso_image = rule(
+_iso_image_rule = rule(
     impl = _iso_image_impl,
     attrs = {
         "kernel": attrs.dep(),
@@ -3579,6 +3634,12 @@ iso_image = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def iso_image(labels = [], **kwargs):
+    _iso_image_rule(
+        labels = _image_labels(arch = kwargs.get("arch"), extra = labels),
+        **kwargs
+    )
 
 # =============================================================================
 # STAGE3 TARBALL
@@ -3752,7 +3813,7 @@ echo "  Contents: $CONTENTS_FILE"
         ),
     ]
 
-stage3_tarball = rule(
+_stage3_tarball_rule = rule(
     impl = _stage3_tarball_impl,
     attrs = {
         "rootfs": attrs.dep(),
@@ -3764,6 +3825,12 @@ stage3_tarball = rule(
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
+
+def stage3_tarball(labels = [], **kwargs):
+    _stage3_tarball_rule(
+        labels = _image_labels(arch = kwargs.get("arch"), extra = labels),
+        **kwargs
+    )
 
 # =============================================================================
 # EBUILD-STYLE HELPER FUNCTIONS
