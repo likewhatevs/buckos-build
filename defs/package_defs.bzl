@@ -410,6 +410,7 @@ _http_file_with_proxy = rule(
         "out": attrs.string(doc = "Output filename"),
         "proxy": attrs.string(default = "", doc = "HTTP proxy URL (legacy, now read from env)"),
         "_fetch_script": attrs.dep(default = "//defs/scripts:fetch-source"),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -590,6 +591,7 @@ _extract_source = rule(
         "strip_components": attrs.int(default = 1),
         "extract": attrs.bool(default = True),
         "_extract_script": attrs.dep(default = "//defs/scripts:extract-source"),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -798,6 +800,7 @@ kernel_config = rule(
     impl = _kernel_config_impl,
     attrs = {
         "fragments": attrs.list(attrs.source()),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -1118,6 +1121,7 @@ _kernel_build_rule = rule(
         "cross_toolchain": attrs.option(attrs.dep(), default = None),  # Cross-toolchain for cross-compilation
         "patches": attrs.list(attrs.source(), default = []),  # Patches to apply to kernel source
         "modules": attrs.list(attrs.dep(), default = []),  # External module sources to build
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -1706,6 +1710,7 @@ binary_package = rule(
         "deps": attrs.list(attrs.dep(), default = []),
         "build_deps": attrs.list(attrs.dep(), default = []),
         "maintainers": attrs.list(attrs.string(), default = []),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -1819,6 +1824,7 @@ precompiled_package = rule(
         "license": attrs.string(default = ""),
         "deps": attrs.list(attrs.dep(), default = []),
         "maintainers": attrs.list(attrs.string(), default = []),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -2142,6 +2148,7 @@ rootfs = rule(
     attrs = {
         "packages": attrs.list(attrs.dep()),
         "version": attrs.string(default = "1"),  # Bump to invalidate cache
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -2287,6 +2294,7 @@ initramfs = rule(
         "compression": attrs.string(default = "gz"),
         "init": attrs.string(default = "/sbin/init"),
         "init_script": attrs.option(attrs.dep(), default = None),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -2338,6 +2346,7 @@ dracut_initramfs = rule(
         "kernel_version": attrs.string(default = ""),
         "add_modules": attrs.list(attrs.string(), default = ["dmsquash-live", "livenet"]),
         "compression": attrs.string(default = "gzip"),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -2823,6 +2832,7 @@ ch_boot_script = rule(
         "virtiofs_path": attrs.string(default = "/tmp/rootfs"),
         "serial_console": attrs.string(default = "tty"),
         "extra_args": attrs.list(attrs.string(), default = []),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -3007,6 +3017,7 @@ raw_disk_image = rule(
         "filesystem": attrs.string(default = "ext4"),  # ext4, xfs, btrfs
         "label": attrs.option(attrs.string(), default = None),
         "partition_table": attrs.bool(default = False),  # True for GPT with EFI
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -3486,6 +3497,7 @@ iso_image = rule(
         "kernel_args": attrs.string(default = "quiet"),
         "arch": attrs.string(default = "x86_64"),  # x86_64 or aarch64
         "version": attrs.string(default = "1"),  # Bump to invalidate cache
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -3670,6 +3682,7 @@ stage3_tarball = rule(
         "libc": attrs.string(default = "glibc"),        # glibc, musl
         "compression": attrs.string(default = "xz"),    # xz, gz, zstd
         "version": attrs.string(default = ""),          # Optional version string
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -5427,6 +5440,7 @@ ebuild_package_rule = rule(
         "_ebuild_bootstrap_stage1_script": attrs.dep(default = "//defs/scripts:ebuild-bootstrap-stage1"),
         "_ebuild_bootstrap_stage2_script": attrs.dep(default = "//defs/scripts:ebuild-bootstrap-stage2"),
         "_ebuild_bootstrap_stage3_script": attrs.dep(default = "//defs/scripts:ebuild-bootstrap-stage3"),
+        "labels": attrs.list(attrs.string(), default = []),
     },
 )
 
