@@ -26,7 +26,7 @@ def _get_vendor_dir(ctx: bxl.Context) -> str:
     Get the vendor directory from .buckconfig.
     Returns the configured vendor directory (default: "vendor").
     """
-    return read_root_config("vendor", "dir", "vendor")
+    return read_config("vendor", "dir", "vendor")
 
 def _filename_from_url(url: str) -> str | None:
     """Extract filename from URL, handling query strings."""

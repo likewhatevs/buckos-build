@@ -179,21 +179,21 @@ def _get_download_proxy():
     Get the HTTP proxy for downloading sources.
     Reads from download.proxy config in .buckconfig.
     """
-    return read_root_config("download", "proxy", "")
+    return read_config("download", "proxy", "")
 
 def _get_vendor_prefer():
     """
     Check if vendored sources should be preferred over downloads.
     Reads from vendor.prefer_vendored config in .buckconfig.
     """
-    return read_root_config("vendor", "prefer_vendored", "true") == "true"
+    return read_config("vendor", "prefer_vendored", "true") == "true"
 
 def _get_vendor_require():
     """
     Check if vendored sources are required (strict offline mode).
     Reads from vendor.require_vendored config in .buckconfig.
     """
-    return read_root_config("vendor", "require_vendored", "false") == "true"
+    return read_config("vendor", "require_vendored", "false") == "true"
 
 def _get_vendor_dir():
     """
@@ -202,7 +202,7 @@ def _get_vendor_dir():
 
     Returns the configured vendor directory (default: "vendor").
     """
-    return read_root_config("vendor", "dir", "vendor")
+    return read_config("vendor", "dir", "vendor")
 
 def get_vendor_path(package_path: str, filename: str) -> str:
     """
@@ -225,7 +225,7 @@ def _get_download_max_concurrent():
     Get the maximum concurrent downloads setting.
     Reads from download.max_concurrent config in .buckconfig.
     """
-    return read_root_config("download", "max_concurrent", "4")
+    return read_config("download", "max_concurrent", "4")
 
 def _get_download_env():
     """
@@ -240,62 +240,53 @@ def _get_download_env():
         "BUCKOS_VENDOR_REQUIRE": "true" if _get_vendor_require() else "false",
     }
 
-    # BuckOS public mirror URL
-    mirror_url = _get_mirror_buckos_url()
+    # Mirror config
+    mirror_type = _get_mirror_type()
+    if mirror_type:
+        env["BUCKOS_MIRROR_TYPE"] = mirror_type
+
+    mirror_url = _get_mirror_url()
     if mirror_url:
         env["BUCKOS_MIRROR_URL"] = mirror_url
+
+    cli_get = _get_mirror_cli_get()
+    if cli_get:
+        env["BUCKOS_MIRROR_CLI_GET"] = cli_get
+
+    cert_path = _get_mirror_cert_path()
+    if cert_path:
+        env["BUCKOS_MIRROR_CERT_PATH"] = cert_path
 
     # Proxy support
     proxy = _get_download_proxy()
     if proxy:
         env["BUCKOS_DOWNLOAD_PROXY"] = proxy
 
-    # Internal mirror config (only set when configured, e.g. via .buckconfig.local)
-    internal_type = _get_mirror_internal_type()
-    if internal_type:
-        env["BUCKOS_INTERNAL_MIRROR_TYPE"] = internal_type
-
-        base_url = _get_mirror_internal_base_url()
-        if base_url:
-            env["BUCKOS_INTERNAL_MIRROR_BASE_URL"] = base_url
-
-        cert_path = _get_mirror_internal_cert_path()
-        if cert_path:
-            env["BUCKOS_INTERNAL_MIRROR_CERT_PATH"] = cert_path
-
-        cli_get = _get_mirror_internal_cli_get()
-        if cli_get:
-            env["BUCKOS_INTERNAL_MIRROR_CLI_GET"] = cli_get
-
     return env
 
 def _get_mirror_source_order():
     """Get the source resolution order from [mirror] section."""
-    return read_root_config("mirror", "source_order", "vendor,buckos-mirror,upstream")
+    return read_config("mirror", "source_order", "vendor,mirror,upstream")
 
-def _get_mirror_buckos_url():
-    """Get the public BuckOS mirror URL from [mirror] section."""
-    return read_root_config("mirror", "buckos_mirror_url", "")
+def _get_mirror_type():
+    """Get the mirror transport type (http or cli) from [mirror] section."""
+    return read_config("mirror", "mirror_type", "http")
 
-def _get_mirror_internal_type():
-    """Get the internal mirror type (http or cli) from [mirror] section."""
-    return read_root_config("mirror", "internal_mirror_type", "")
+def _get_mirror_url():
+    """Get the mirror base URL from [mirror] section."""
+    return read_config("mirror", "mirror_url", "")
 
-def _get_mirror_internal_base_url():
-    """Get the internal mirror base URL from [mirror] section."""
-    return read_root_config("mirror", "internal_mirror_base_url", "")
-
-def _get_mirror_internal_cert_path():
-    """Get the internal mirror x509 cert path from [mirror] section."""
-    return read_root_config("mirror", "internal_mirror_cert_path", "")
-
-def _get_mirror_internal_cli_get():
-    """Get the internal mirror CLI get command template from [mirror] section.
+def _get_mirror_cli_get():
+    """Get the mirror CLI get command template from [mirror] section.
 
     The command template uses {path} and {output} placeholders.
     Example: 'mycli get mybucket/{path} {output}'
     """
-    return read_root_config("mirror", "internal_mirror_cli_get", "")
+    return read_config("mirror", "mirror_cli_get", "")
+
+def _get_mirror_cert_path():
+    """Get the mirror x509 cert path from [mirror] section."""
+    return read_config("mirror", "mirror_cert_path", "")
 
 # Platform constraint values for target_compatible_with
 # Only macOS packages need constraints to prevent building on Linux
@@ -376,8 +367,8 @@ def _http_file_with_proxy_impl(ctx: AnalysisContext) -> list[Provider]:
     """Download a file using configurable multi-source resolution.
 
     Source order is controlled by [mirror] source_order in .buckconfig.
-    The external fetch_source.sh script handles vendor, buckos-mirror,
-    internal-mirror, and upstream backends.
+    The external fetch_source.sh script handles vendor, mirror,
+    and upstream backends.
     """
     out_file = ctx.actions.declare_output(ctx.attrs.out)
 
