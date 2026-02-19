@@ -109,6 +109,19 @@ install_packages() {
     echo ""
 }
 
+install_uv() {
+    if command -v uv &>/dev/null; then
+        echo "--- uv already installed: $(command -v uv) ---"
+        echo ""
+        return
+    fi
+
+    echo "--- Installing uv ---"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+    echo ""
+}
+
 install_buck2() {
     if command -v buck2 &>/dev/null; then
         echo "--- Buck2 already installed: $(command -v buck2) ---"
@@ -172,7 +185,7 @@ verify() {
     echo "--- Verification ---"
     local failed=false
 
-    for cmd in gcc g++ make cmake meson ninja ar ld nm curl tar zstd python3 perl cargo rg; do
+    for cmd in gcc g++ make cmake meson ninja ar ld nm curl tar zstd python3 perl cargo rg uv; do
         if command -v "$cmd" &>/dev/null; then
             printf "  %-12s %s\n" "$cmd" "$(command -v "$cmd")"
         else
@@ -252,6 +265,7 @@ main() {
     fi
 
     install_packages
+    install_uv
     install_buck2
     configure_buckconfig
     verify

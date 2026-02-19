@@ -1413,6 +1413,16 @@ if [ -n "$PHASES_CONTENT" ]; then
         [ -n "${BUCKOS_PKG_SOURCE_URL:-}" ] && echo "export BUCKOS_PKG_SOURCE_URL=\"$BUCKOS_PKG_SOURCE_URL\""
         [ -n "${BUCKOS_PKG_SOURCE_SHA256:-}" ] && echo "export BUCKOS_PKG_SOURCE_SHA256=\"$BUCKOS_PKG_SOURCE_SHA256\""
         [ -n "${BUCKOS_PKG_GRAPH_HASH:-}" ] && echo "export BUCKOS_PKG_GRAPH_HASH=\"$BUCKOS_PKG_GRAPH_HASH\""
+        # Forward BUCKOS_USE array (bash arrays can't be exported via environment)
+        if [ ${#BUCKOS_USE[@]} -gt 0 ] 2>/dev/null; then
+            printf 'BUCKOS_USE=('
+            for _use_flag in "${BUCKOS_USE[@]}"; do
+                printf '"%s" ' "$_use_flag"
+            done
+            printf ')\n'
+        else
+            echo "BUCKOS_USE=()"
+        fi
         echo ""
         echo "$PHASES_CONTENT"
     } > "$T/phases.sh"

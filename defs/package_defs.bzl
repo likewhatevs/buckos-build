@@ -86,7 +86,7 @@ VALID_EBUILD_KWARGS = [
     "visibility", "patches", "labels",
 ]
 
-def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None, src_uri = None, sha256 = None, signature_required = False):
+def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None, src_uri = None, sha256 = None, signature_required = False, iuse = [], effective_use = []):
     """
     Filter kwargs to only include parameters that ebuild_package_rule accepts.
     Also handles post_install by appending it to src_install, and injects
@@ -99,6 +99,8 @@ def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None, src_ur
         src_uri: Source download URL for provenance labels
         sha256: Source checksum for provenance labels
         signature_required: Whether GPG signature is required
+        iuse: Available USE flags for this package
+        effective_use: Resolved (enabled) USE flags for this package
 
     Returns:
         tuple: (filtered_kwargs dict, updated src_install string)
@@ -116,12 +118,15 @@ def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None, src_ur
     # Collect provenance labels from source download parameters
     provenance = _provenance_labels(src_uri, sha256, signature_required)
 
-    # Auto-inject buckos:* labels (compile + provenance)
+    # Collect USE flag provenance labels
+    use_prov = _use_labels(iuse, effective_use)
+
+    # Auto-inject buckos:* labels (compile + provenance + use flags)
     user_labels = filtered.pop("labels", [])
     filtered["labels"] = _compile_labels(
         package_type = package_type or filtered.get("package_type"),
         bootstrap_stage = filtered.get("bootstrap_stage"),
-        extra = user_labels + provenance,
+        extra = user_labels + provenance + use_prov,
     )
 
     return filtered, src_install
@@ -181,6 +186,22 @@ def _provenance_labels(src_uri = None, sha256 = None, signature_required = False
             labels.append("buckos:sig:gpg")
         else:
             labels.append("buckos:sig:none")
+    return labels
+
+def _use_labels(iuse = [], effective_use = []):
+    """Build provenance labels from USE flag metadata.
+
+    Records both the available flags (iuse) and the resolved enabled
+    flags so that provenance queries can answer "what could this
+    package do?" and "what did it actually do?".
+    """
+    labels = []
+    for flag in iuse:
+        if flag:
+            labels.append("buckos:iuse:" + flag)
+    for flag in effective_use:
+        if flag:
+            labels.append("buckos:use:" + flag)
     return labels
 
 def _download_labels(src_uri = None, sha256 = None, signature_required = False, vendor_path = None, extra = []):
@@ -4996,6 +5017,7 @@ def _ebuild_package_impl(ctx: AnalysisContext) -> list[Provider]:
 
     # USE flags
     use_flags = " ".join(ctx.attrs.use_flags) if ctx.attrs.use_flags else ""
+    use_flags_array = " ".join(['"{}"'.format(f) for f in ctx.attrs.use_flags]) if ctx.attrs.use_flags else ""
 
     # Check if bootstrap toolchain is being used
     use_bootstrap = ctx.attrs.use_bootstrap if hasattr(ctx.attrs, "use_bootstrap") else False
@@ -5202,6 +5224,8 @@ export PACKAGE_NAME="@@NAME@@"
 export CATEGORY="@@CATEGORY@@"
 export SLOT="@@SLOT@@"
 export USE="@@USE_FLAGS@@"
+BUCKOS_USE=(@@USE_FLAGS_ARRAY@@)
+export BUCKOS_USE
 export USE_BOOTSTRAP="@@USE_BOOTSTRAP@@"
 export USE_HOST_TOOLCHAIN="@@USE_HOST@@"
 export BOOTSTRAP_SYSROOT="@@BOOTSTRAP_SYSROOT@@"
@@ -5504,6 +5528,7 @@ source "$FRAMEWORK_SCRIPT"
     script_content = script_content.replace("@@CATEGORY@@", ctx.attrs.category)
     script_content = script_content.replace("@@SLOT@@", ctx.attrs.slot)
     script_content = script_content.replace("@@USE_FLAGS@@", use_flags)
+    script_content = script_content.replace("@@USE_FLAGS_ARRAY@@", use_flags_array)
     script_content = script_content.replace("@@USE_BOOTSTRAP@@", "true" if use_bootstrap else "false")
     script_content = script_content.replace("@@USE_HOST@@", "true" if use_host_toolchain else "false")
     script_content = script_content.replace("@@BOOTSTRAP_SYSROOT@@", bootstrap_sysroot)
@@ -5844,7 +5869,7 @@ def ebuild_package(
         kwargs["patches"] = registry_patches
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -6100,7 +6125,7 @@ def cmake_package(
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cmake", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cmake", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -6301,7 +6326,7 @@ def meson_package(
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "meson", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "meson", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -6535,7 +6560,7 @@ def autotools_package(
             patch_refs.append(":" + patch_target_name)
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "autotools", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "autotools", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -6762,7 +6787,7 @@ def make_package(
             patch_refs.append(":" + patch_target_name)
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "make", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "make", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -7425,7 +7450,7 @@ fi
     src_install = cargo_src_install(bins) if bins else eclass_config["src_install"]
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cargo", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cargo", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -8267,7 +8292,7 @@ echo "Go library compiled successfully (no binaries to install)"
 '''
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "go", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "go", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -9402,7 +9427,7 @@ def python_package(
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     # Also pop src_prepare before filtering so we can use custom_src_prepare
     custom_src_prepare = kwargs.pop("src_prepare", None)
-    filtered_kwargs, _ = filter_ebuild_kwargs(kwargs, package_type = "python", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, _ = filter_ebuild_kwargs(kwargs, package_type = "python", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     # Setup vendor src_prepare for offline builds
     vendor_src_prepare = ""
@@ -10960,7 +10985,7 @@ def java_package(
 
     # Filter kwargs
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "java", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "java", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -11155,7 +11180,7 @@ done
 
     # Filter kwargs
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "maven", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "maven", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
@@ -11473,7 +11498,7 @@ def qt6_package(
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "qt6", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "qt6", src_uri = src_uri, sha256 = sha256, signature_required = signature_required, iuse = iuse, effective_use = effective_use)
 
     ebuild_package_rule(
         name = name,
