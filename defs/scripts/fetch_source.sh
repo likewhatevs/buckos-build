@@ -7,16 +7,15 @@
 #   $3 - Expected SHA256 checksum
 #
 # Configuration via environment variables:
-#   BUCKOS_SOURCE_ORDER              - Comma-separated source backends (default: "vendor,buckos-mirror,upstream")
-#   BUCKOS_MIRROR_URL                - Public BuckOS mirror base URL
+#   BUCKOS_SOURCE_ORDER              - Comma-separated source backends (default: "vendor,mirror,upstream")
+#   BUCKOS_MIRROR_TYPE               - Mirror transport: "http" (default) or "cli"
+#   BUCKOS_MIRROR_URL                - Base URL for HTTP mode (files at {url}/{l}/{file})
+#   BUCKOS_MIRROR_CLI_GET            - CLI get command template (use {path} and {output} placeholders)
+#   BUCKOS_MIRROR_CERT_PATH          - x509 cert path for HTTP mode (optional)
 #   BUCKOS_VENDOR_DIR                - Vendor directory path (default: "vendor")
 #   BUCKOS_VENDOR_PREFER             - Whether to check vendor first (default: "true")
 #   BUCKOS_VENDOR_REQUIRE            - Require vendored sources, fail if missing (default: "false")
 #   BUCKOS_DOWNLOAD_PROXY            - HTTP proxy URL for curl
-#   BUCKOS_INTERNAL_MIRROR_TYPE      - "http" or "cli"
-#   BUCKOS_INTERNAL_MIRROR_BASE_URL  - Base URL for HTTP mode (files at {base}/{l}/{file})
-#   BUCKOS_INTERNAL_MIRROR_CERT_PATH - x509 cert path for HTTP mode (optional)
-#   BUCKOS_INTERNAL_MIRROR_CLI_GET   - CLI get command template (use {path} and {output} placeholders)
 #   BUCKOS_MAX_CONCURRENT_DOWNLOADS  - Concurrent download limit (default: 4)
 
 set -e
@@ -35,7 +34,8 @@ FILENAME="$(basename "$OUT_FILE")"
 FIRST_LETTER="$(echo "$FILENAME" | head -c1 | tr '[:upper:]' '[:lower:]')"
 
 # Configuration defaults
-SOURCE_ORDER="${BUCKOS_SOURCE_ORDER:-vendor,buckos-mirror,upstream}"
+SOURCE_ORDER="${BUCKOS_SOURCE_ORDER:-vendor,mirror,upstream}"
+MIRROR_TYPE="${BUCKOS_MIRROR_TYPE:-http}"
 MIRROR_URL="${BUCKOS_MIRROR_URL:-}"
 VENDOR_DIR="${BUCKOS_VENDOR_DIR:-vendor}"
 VENDOR_PREFER="${BUCKOS_VENDOR_PREFER:-true}"
@@ -166,91 +166,66 @@ try_vendor() {
     return 1
 }
 
-try_buckos_mirror() {
-    if [ -z "$MIRROR_URL" ]; then
-        return 1
-    fi
-
-    local mirror_file_url="${MIRROR_URL}/${FIRST_LETTER}/${FILENAME}"
-    echo "Trying BuckOS mirror: $mirror_file_url"
-
-    acquire_download_slot
-
-    if curl -fsSL --connect-timeout 10 --max-time 300 --retry 1 $PROXY_ARGS -o "$OUT_FILE" "$mirror_file_url" 2>/dev/null; then
-        if [ -s "$OUT_FILE" ] && verify_sha256 "$OUT_FILE" "$EXPECTED_SHA256"; then
-            echo "Downloaded from BuckOS mirror, SHA256 verified"
-            release_download_slot
-            return 0
-        fi
-        rm -f "$OUT_FILE"
-    fi
-
-    release_download_slot
-    return 1
-}
-
-try_internal_mirror() {
-    local mirror_type="${BUCKOS_INTERNAL_MIRROR_TYPE:-}"
-    if [ -z "$mirror_type" ]; then
-        return 1
-    fi
-
+try_mirror() {
     local mirror_path="${FIRST_LETTER}/${FILENAME}"
 
-    echo "Trying internal mirror ($mirror_type): $mirror_path"
-
-    acquire_download_slot
-
-    if [ "$mirror_type" = "http" ]; then
-        local base_url="${BUCKOS_INTERNAL_MIRROR_BASE_URL:-}"
-        if [ -z "$base_url" ]; then
-            echo "WARNING: internal mirror type=http but no base URL configured" >&2
-            release_download_slot
+    if [ "$MIRROR_TYPE" = "http" ]; then
+        if [ -z "$MIRROR_URL" ]; then
             return 1
         fi
 
-        local cert_path="${BUCKOS_INTERNAL_MIRROR_CERT_PATH:-}"
+        local mirror_file_url="${MIRROR_URL}/${mirror_path}"
+        echo "Trying mirror (http): $mirror_file_url"
+
+        acquire_download_slot
+
+        local cert_path="${BUCKOS_MIRROR_CERT_PATH:-}"
         local cert_args=""
         if [ -n "$cert_path" ]; then
             cert_args="--cert $cert_path"
         fi
 
-        if curl -fsSL --connect-timeout 10 --max-time 300 $cert_args $PROXY_ARGS \
-            -o "$OUT_FILE" "${base_url}/${mirror_path}" 2>/dev/null; then
+        if curl -fsSL --connect-timeout 10 --max-time 300 --retry 1 $cert_args $PROXY_ARGS \
+            -o "$OUT_FILE" "$mirror_file_url" 2>/dev/null; then
             if [ -s "$OUT_FILE" ] && verify_sha256 "$OUT_FILE" "$EXPECTED_SHA256"; then
-                echo "Downloaded from internal mirror (HTTP), SHA256 verified"
+                echo "Downloaded from mirror, SHA256 verified"
                 release_download_slot
                 return 0
             fi
             rm -f "$OUT_FILE"
         fi
-    elif [ "$mirror_type" = "cli" ]; then
-        # CLI mode: BUCKOS_INTERNAL_MIRROR_CLI_GET is a command template
-        # Placeholders: {path} = mirror_path, {output} = output file
-        local cli_get="${BUCKOS_INTERNAL_MIRROR_CLI_GET:-}"
+
+        release_download_slot
+        return 1
+    elif [ "$MIRROR_TYPE" = "cli" ]; then
+        local cli_get="${BUCKOS_MIRROR_CLI_GET:-}"
         if [ -z "$cli_get" ]; then
-            echo "WARNING: internal mirror type=cli but no CLI get command configured" >&2
-            release_download_slot
+            echo "WARNING: mirror type=cli but no mirror_cli_get configured" >&2
             return 1
         fi
+
+        echo "Trying mirror (cli): $mirror_path"
+
+        acquire_download_slot
 
         local cmd="${cli_get//\{path\}/$mirror_path}"
         cmd="${cmd//\{output\}/$OUT_FILE}"
 
         if eval "$cmd" >/dev/null 2>&1; then
             if [ -s "$OUT_FILE" ] && verify_sha256 "$OUT_FILE" "$EXPECTED_SHA256"; then
-                echo "Downloaded from internal mirror (CLI), SHA256 verified"
+                echo "Downloaded from mirror (cli), SHA256 verified"
                 release_download_slot
                 return 0
             fi
             rm -f "$OUT_FILE"
         fi
-    else
-        echo "WARNING: Unknown internal mirror type: $mirror_type" >&2
-    fi
 
-    release_download_slot
-    return 1
+        release_download_slot
+        return 1
+    else
+        echo "WARNING: Unknown mirror type: $MIRROR_TYPE" >&2
+        return 1
+    fi
 }
 
 try_upstream() {
@@ -294,13 +269,8 @@ for source in "${SOURCES[@]}"; do
                 exit 0
             fi
             ;;
-        buckos-mirror)
-            if try_buckos_mirror; then
-                exit 0
-            fi
-            ;;
-        internal-mirror)
-            if try_internal_mirror; then
+        mirror)
+            if try_mirror; then
                 exit 0
             fi
             ;;

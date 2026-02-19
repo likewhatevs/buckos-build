@@ -21,15 +21,12 @@
     target:toolchains//...->prelude//platforms:default
 
 [build]
-  execution_platforms = root//platforms:local
+  execution_platforms = root//platforms/execution:local
 
 [project]
-  ignore = .git
-
-[buckos]
-  use_host_toolchain = false
-  # build_threads = 0              # 0 = auto-detect (default), N = fixed thread count
+  ignore = .git, buck-out
 
 [mirror]
-  source_order = vendor,buckos-mirror,upstream
-  buckos_mirror_url = https://mirror.buckos.org
+  source_order = vendor,mirror,upstream
+  mirror_type = http
+  mirror_url = https://mirror.buckos.org
