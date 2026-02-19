@@ -42,7 +42,13 @@ COMPILE_RULES: dict[str, str | None] = {
 
 PREBUILT_RULES = {"binary_package", "precompiled_package"}
 IMAGE_RULES = {"rootfs", "initramfs", "iso_image", "raw_disk_image", "stage3_tarball"}
-BOOTSCRIPT_RULES = {"qemu_boot_script", "ch_boot_script"}
+BOOTSCRIPT_RULES = {
+    "qemu_boot_script",
+    "ch_boot_script",
+    "ch_direct_boot_script",
+    "ch_firmware_boot_script",
+    "ch_virtiofs_boot_script",
+}
 CONFIG_RULES = {"kernel_config"}
 
 LABELED_RULES = set(COMPILE_RULES) | PREBUILT_RULES | IMAGE_RULES | BOOTSCRIPT_RULES | CONFIG_RULES

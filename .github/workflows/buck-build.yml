@@ -11,33 +11,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: pytest
+  query:
+    name: query tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Harden apt against flaky mirrors
-        run: |
-          echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4 >/dev/null
-          echo 'Acquire::Queue-Mode "access";' | sudo tee /etc/apt/apt.conf.d/99queue-mode >/dev/null
-          echo 'Acquire::http::Pipeline-Depth "0";' | sudo tee /etc/apt/apt.conf.d/99pipeline >/dev/null
-          sudo sed -i -E \
-            -e 's|https?://([a-z0-9-]+\.)*archive\.ubuntu\.com/ubuntu|mirror://mirrors.ubuntu.com/mirrors.txt|g' \
-            -e 's|https?://security\.ubuntu\.com/ubuntu|mirror://mirrors.ubuntu.com/mirrors.txt|g' \
-            /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
-      - run: bash setup.sh --yes
-        env:
-          DEBIAN_FRONTEND: noninteractive
-      - run: make test
+      - uses: ./.github/actions/ci-setup
+      - run: uv run pytest -v -m "not slow and not integration"
+
+  build:
+    name: build tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
+      - run: uv run pytest -v -m "slow and not integration"
+
+  integration:
+    name: integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
+      - run: uv run pytest -v -m "integration"
 
   required:
-    name: required-checks
-    runs-on: ubuntu-latest
+    name: all tests pass
     if: always()
-    needs: [test]
+    needs: [query, build, integration]
+    runs-on: ubuntu-latest
     steps:
       - run: |
-          if [[ "${{ needs.test.result }}" != "success" ]]; then
-            echo "::error::test failed: ${{ needs.test.result }}"
-            exit 1
-          fi
+          results=("${{ needs.query.result }}" "${{ needs.build.result }}" "${{ needs.integration.result }}")
+          for r in "${results[@]}"; do
+            if [ "$r" != "success" ]; then
+              echo "query=${{ needs.query.result }} build=${{ needs.build.result }} integration=${{ needs.integration.result }}"
+              exit 1
+            fi
+          done
