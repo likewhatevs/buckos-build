@@ -75,7 +75,7 @@ VALID_EBUILD_KWARGS = [
     "visibility", "patches", "labels",
 ]
 
-def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None):
+def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None, src_uri = None, sha256 = None, signature_required = False):
     """
     Filter kwargs to only include parameters that ebuild_package_rule accepts.
     Also handles post_install by appending it to src_install, and injects
@@ -85,6 +85,9 @@ def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None):
         kwargs: The kwargs dict from a wrapper function
         src_install: The current src_install script (if any)
         package_type: Build system type for label injection (e.g. "cmake")
+        src_uri: Source download URL for provenance labels
+        sha256: Source checksum for provenance labels
+        signature_required: Whether GPG signature is required
 
     Returns:
         tuple: (filtered_kwargs dict, updated src_install string)
@@ -99,11 +102,15 @@ def filter_ebuild_kwargs(kwargs, src_install = None, package_type = None):
         else:
             src_install = post_install
 
-    # Auto-inject buckos:* labels
+    # Collect provenance labels from source download parameters
+    provenance = _provenance_labels(src_uri, sha256, signature_required)
+
+    # Auto-inject buckos:* labels (compile + provenance)
+    user_labels = filtered.pop("labels", [])
     filtered["labels"] = _compile_labels(
         package_type = package_type or filtered.get("package_type"),
         bootstrap_stage = filtered.get("bootstrap_stage"),
-        extra = filtered.pop("labels", []),
+        extra = user_labels + provenance,
     )
 
     return filtered, src_install
@@ -145,9 +152,32 @@ def _compile_labels(package_type = None, bootstrap_stage = None, arch = None, ex
         labels.append("buckos:arch:" + normalized)
     return _buckos_labels(labels, extra)
 
-def _download_labels(extra = []):
+def _provenance_labels(src_uri = None, sha256 = None, signature_required = False):
+    """Build provenance labels from download parameters.
+
+    Shared by both download and compile targets so provenance
+    propagates to the final build target.
+    """
+    labels = []
+    if src_uri:
+        host = src_uri.split("://")[-1].split("/")[0]
+        labels.append("buckos:source:" + host)
+        labels.append("buckos:url:" + src_uri)
+    if sha256:
+        labels.append("buckos:sha256:" + sha256)
+    if src_uri:
+        if signature_required:
+            labels.append("buckos:sig:gpg")
+        else:
+            labels.append("buckos:sig:none")
+    return labels
+
+def _download_labels(src_uri = None, sha256 = None, signature_required = False, vendor_path = None, extra = []):
     """Build labels for a download target."""
-    return _buckos_labels(["buckos:download"], extra)
+    labels = ["buckos:download"] + _provenance_labels(src_uri, sha256, signature_required)
+    if vendor_path:
+        labels.append("buckos:vendor:" + vendor_path)
+    return _buckos_labels(labels, extra)
 
 def _image_labels(arch = None, extra = []):
     """Build labels for an image/aggregate target."""
@@ -681,6 +711,7 @@ def download_source(
         exclude_patterns: list[str] = [],
         strip_components: int = 1,
         extract: bool = True,
+        labels: list[str] = [],
         visibility: list[str] = ["PUBLIC"]):
     """
     Download and extract source archives using Buck2's native http_file.
@@ -770,7 +801,8 @@ def download_source(
 
     # Create http_file for the main archive (using custom rule with proxy support)
     archive_target = name + "-archive"
-    dl_labels = _download_labels()
+    v_path = get_vendor_path("", archive_filename)
+    dl_labels = _download_labels(src_uri = src_uri, sha256 = sha256, signature_required = signature_required, vendor_path = v_path, extra = labels)
     _http_file_with_proxy(
         name = archive_target,
         urls = [src_uri],
@@ -808,6 +840,7 @@ def download_source(
         visibility = visibility,
         labels = dl_labels,
     )
+
 
 def _kernel_config_impl(ctx: AnalysisContext) -> list[Provider]:
     """Merge kernel configuration fragments into a single .config file."""
@@ -5592,8 +5625,16 @@ ebuild_package_rule = rule(
 
 def ebuild_package(
         name: str,
-        source: str,
-        version: str,
+        source: str | None = None,
+        version: str = "",
+        # Source download (alternative to source=)
+        src_uri: str | None = None,
+        sha256: str | None = None,
+        signature_sha256: str | None = None,
+        signature_required: bool = False,
+        gpg_key: str | None = None,
+        gpg_keyring: str | None = None,
+        exclude_patterns: list[str] = [],
         # USE flag support
         iuse: list[str] = [],
         use_defaults: list[str] = [],
@@ -5649,6 +5690,25 @@ def ebuild_package(
         env: Environment variables
         **kwargs: Additional arguments passed to the rule
     """
+    # Handle source - either use provided source or create one from src_uri
+    if source:
+        src_target = source
+    else:
+        if not src_uri or not sha256:
+            fail("Either 'source' or both 'src_uri' and 'sha256' must be provided")
+        src_name = name + "-src"
+        download_source(
+            name = src_name,
+            src_uri = src_uri,
+            sha256 = sha256,
+            signature_sha256 = signature_sha256,
+            signature_required = signature_required,
+            gpg_key = gpg_key,
+            gpg_keyring = gpg_keyring,
+            exclude_patterns = exclude_patterns,
+        )
+        src_target = ":" + src_name
+
     # Add bootstrap toolchain by default to ensure linking against BuckOS glibc
     use_bootstrap = kwargs.pop("use_bootstrap", True)
     use_host_toolchain = _should_use_host_toolchain()
@@ -5735,11 +5795,11 @@ def ebuild_package(
         kwargs["patches"] = registry_patches
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install)
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
-        source = source,
+        source = src_target,
         version = version,
         use_flags = effective_use,
         use_bootstrap = use_bootstrap,
@@ -5997,7 +6057,7 @@ def cmake_package(
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cmake")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cmake", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -6204,7 +6264,7 @@ def meson_package(
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "meson")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "meson", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -6447,7 +6507,7 @@ def autotools_package(
             patch_refs.append(":" + patch_target_name)
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "autotools")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "autotools", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -6685,7 +6745,7 @@ def make_package(
             patch_refs.append(":" + patch_target_name)
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "make")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "make", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -7354,7 +7414,7 @@ fi
     src_install = cargo_src_install(bins) if bins else eclass_config["src_install"]
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cargo")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "cargo", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -8202,7 +8262,7 @@ echo "Go library compiled successfully (no binaries to install)"
 '''
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "go")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "go", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -8311,7 +8371,7 @@ def perl_package(
     src_install = kwargs.pop("src_install", eclass_config["src_install"])
 
     # Filter kwargs
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "perl")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "perl", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -8413,7 +8473,7 @@ def ruby_package(
     src_install = kwargs.pop("src_install", eclass_config["src_install"])
 
     # Filter kwargs
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "ruby")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "ruby", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -8561,7 +8621,7 @@ def font_package(
     post_install = eclass_config.get("post_install", "")
 
     # Filter kwargs and handle post_install
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "font")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "font", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     # Append eclass post_install to src_install
     if post_install:
@@ -8727,7 +8787,7 @@ done
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "npm")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "npm", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -9343,7 +9403,7 @@ def python_package(
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     # Also pop src_prepare before filtering so we can use custom_src_prepare
     custom_src_prepare = kwargs.pop("src_prepare", None)
-    filtered_kwargs, _ = filter_ebuild_kwargs(kwargs, package_type = "python")
+    filtered_kwargs, _ = filter_ebuild_kwargs(kwargs, package_type = "python", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     # Setup vendor src_prepare for offline builds
     vendor_src_prepare = ""
@@ -10907,7 +10967,7 @@ def java_package(
 
     # Filter kwargs
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "java")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "java", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -11108,7 +11168,7 @@ done
 
     # Filter kwargs
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "maven")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "maven", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
@@ -11432,7 +11492,7 @@ def qt6_package(
 
     # Filter kwargs to only include parameters that ebuild_package_rule accepts
     src_install = custom_src_install if custom_src_install else eclass_config["src_install"]
-    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "qt6")
+    filtered_kwargs, src_install = filter_ebuild_kwargs(kwargs, src_install, package_type = "qt6", src_uri = src_uri, sha256 = sha256, signature_required = signature_required)
 
     ebuild_package_rule(
         name = name,
