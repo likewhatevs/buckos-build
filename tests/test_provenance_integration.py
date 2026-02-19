@@ -557,3 +557,66 @@ class TestSubgraphHash:
         h1 = (out1 / ".buckos-subgraph-hash").read_text().strip()
         h2 = (out2 / ".buckos-subgraph-hash").read_text().strip()
         assert h1 == h2, "Same target should produce identical subgraph hash"
+
+
+# ---------------------------------------------------------------------------
+# IMA signing
+# ---------------------------------------------------------------------------
+
+class TestImaSigning:
+    """IMA signing integration tests — gated on evmctl + xattr capability."""
+
+    @pytest.fixture(scope="class")
+    def hello_ima(self, repo_root: Path) -> Path:
+        if not shutil.which("evmctl"):
+            pytest.skip("evmctl not found")
+        return _buck2_build(
+            repo_root, "//tests/fixtures/hello:hello",
+            use_overrides={"ima": "true"},
+        )
+
+    @pytest.fixture(scope="class")
+    def hello_no_ima(self, repo_root: Path) -> Path:
+        return _buck2_build(
+            repo_root, "//tests/fixtures/hello:hello",
+            use_overrides={"ima": "false"},
+        )
+
+    def test_ima_disabled_no_xattr(self, hello_no_ima: Path):
+        """Without IMA, no security.ima xattr should exist."""
+        exes = _find_executables(hello_no_ima)
+        if not exes:
+            pytest.skip("No executables found")
+        for exe in exes:
+            result = subprocess.run(
+                ["getfattr", "-n", "security.ima", str(exe)],
+                capture_output=True, text=True,
+            ) if shutil.which("getfattr") else None
+            if result is not None:
+                assert result.returncode != 0, (
+                    f"{exe.name}: security.ima should not exist when IMA is disabled"
+                )
+
+    def test_ima_signed_elf_has_xattr(self, hello_ima: Path):
+        """With IMA enabled, ELF binaries should have security.ima xattr."""
+        if not shutil.which("getfattr"):
+            pytest.skip("getfattr not available")
+        exes = _find_executables(hello_ima)
+        assert exes, f"No executables found under {hello_ima}"
+        for exe in exes:
+            result = subprocess.run(
+                ["getfattr", "-n", "security.ima", str(exe)],
+                capture_output=True, text=True,
+            )
+            assert result.returncode == 0, (
+                f"{exe.name}: missing security.ima xattr"
+            )
+
+    def test_ima_signed_binary_still_runs(self, hello_ima: Path):
+        """IMA-signed binary should still execute normally."""
+        exes = _find_executables(hello_ima)
+        hello = next((e for e in exes if e.name == "hello"), exes[0])
+        result = subprocess.run(
+            [str(hello)], capture_output=True, text=True,
+        )
+        assert result.returncode == 0, f"IMA-signed binary failed:\n{result.stderr}"

@@ -612,5 +612,103 @@ class TestLabelParsing(unittest.TestCase):
         self.assertEqual(sha256, "deadbeef1234")
 
 
+class TestImaSigning(unittest.TestCase):
+    """IMA signing gated by BUCKOS_IMA_ENABLED."""
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.destdir = os.path.join(self.tmpdir, "dest")
+        os.makedirs(self.destdir)
+        self.t = os.path.join(self.tmpdir, "temp")
+        os.makedirs(self.t)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir)
+
+    def test_ima_disabled_no_signing(self):
+        """When IMA is disabled, no evmctl output expected."""
+        result = _run_stamp({
+            "DESTDIR": self.destdir,
+            "T": self.t,
+            "BUCKOS_IMA_ENABLED": "false",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("IMA-signed", result.stdout)
+
+    def test_ima_enabled_missing_key_fails(self):
+        """IMA enabled without a key should fail."""
+        result = _run_stamp({
+            "DESTDIR": self.destdir,
+            "T": self.t,
+            "BUCKOS_IMA_ENABLED": "true",
+            "BUCKOS_IMA_KEY": "",
+        })
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("BUCKOS_IMA_KEY", result.stderr)
+
+    def test_ima_enabled_missing_key_file_fails(self):
+        """IMA enabled with nonexistent key file should fail."""
+        result = _run_stamp({
+            "DESTDIR": self.destdir,
+            "T": self.t,
+            "BUCKOS_IMA_ENABLED": "true",
+            "BUCKOS_IMA_KEY": "/nonexistent/key.priv",
+        })
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("IMA key not found", result.stderr)
+
+    @unittest.skipUnless(
+        shutil.which("evmctl") and shutil.which("cc") and shutil.which("objcopy"),
+        "evmctl, cc, and objcopy required",
+    )
+    def test_ima_sign_elf(self):
+        """Verify security.ima xattr is set on a signed ELF."""
+        # Build a minimal binary
+        c_src = os.path.join(self.tmpdir, "hello.c")
+        with open(c_src, "w") as f:
+            f.write("int main(){return 0;}\n")
+        elf_path = os.path.join(self.destdir, "usr", "bin", "hello")
+        os.makedirs(os.path.dirname(elf_path))
+        subprocess.run(
+            ["cc", c_src, "-o", elf_path],
+            check=True,
+            capture_output=True,
+        )
+        os.chmod(elf_path, 0o755)
+
+        # Use the test key
+        key_path = os.path.join(
+            os.path.dirname(__file__), "..", "defs", "keys", "ima-test.priv"
+        )
+        if not os.path.exists(key_path):
+            self.skipTest("IMA test key not found")
+
+        result = _run_stamp({
+            "DESTDIR": self.destdir,
+            "T": self.t,
+            "BUCKOS_IMA_ENABLED": "true",
+            "BUCKOS_IMA_KEY": os.path.abspath(key_path),
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("IMA-signed", result.stdout)
+
+        # Check for security.ima xattr
+        try:
+            import xattr
+            attrs = xattr.listxattr(elf_path)
+            self.assertIn("security.ima", attrs)
+        except ImportError:
+            # xattr module not available, check with getfattr
+            if shutil.which("getfattr"):
+                check = subprocess.run(
+                    ["getfattr", "-n", "security.ima", elf_path],
+                    capture_output=True, text=True,
+                )
+                self.assertEqual(check.returncode, 0,
+                                 "security.ima xattr not found on signed ELF")
+            else:
+                self.skipTest("Neither xattr module nor getfattr available")
+
+
 if __name__ == "__main__":
     unittest.main()

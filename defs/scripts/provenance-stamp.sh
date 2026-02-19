@@ -160,3 +160,53 @@ else
 fi
 
 echo "provenance-stamp: stamped ELF binaries in $DESTDIR"
+
+# ── 6. IMA signing (security.ima xattr) ──────────────────────────────────────
+# Signs every ELF binary with evmctl ima_sign when use.ima=true.
+# Must run AFTER .note.package stamping since objcopy modifies the binary.
+
+if [ "${BUCKOS_IMA_ENABLED:-false}" = "true" ]; then
+    if [ -z "${BUCKOS_IMA_KEY:-}" ]; then
+        echo "provenance-stamp: ERROR: BUCKOS_IMA_ENABLED=true but BUCKOS_IMA_KEY is not set" >&2
+        exit 1
+    fi
+    if ! [ -f "$BUCKOS_IMA_KEY" ]; then
+        echo "provenance-stamp: ERROR: IMA key not found: $BUCKOS_IMA_KEY" >&2
+        exit 1
+    fi
+    if ! command -v evmctl >/dev/null 2>&1; then
+        echo "provenance-stamp: ERROR: evmctl not found (install ima-evm-utils)" >&2
+        exit 1
+    fi
+
+    _ima_sign_elf() {
+        local _elf="$1"
+        local _magic
+        _magic="$(head -c 4 "$_elf" 2>/dev/null)" || return
+        case "$_magic" in
+            $'\x7fELF') ;;
+            *) return ;;
+        esac
+        evmctl ima_sign --key "$BUCKOS_IMA_KEY" "$_elf" 2>/dev/null || {
+            echo "provenance-stamp: warning: failed to IMA-sign $_elf" >&2
+        }
+    }
+
+    if [ -n "$_fd_bin" ]; then
+        while IFS= read -r _elf; do
+            [ -n "$_elf" ] && _ima_sign_elf "$_elf"
+        done < <("$_fd_bin" --type f --no-ignore --hidden -e so '' "$DESTDIR" 2>/dev/null)
+        while IFS= read -r _elf; do
+            [ -n "$_elf" ] && _ima_sign_elf "$_elf"
+        done < <("$_fd_bin" --type f --no-ignore --hidden '\.so\.' "$DESTDIR" 2>/dev/null)
+        while IFS= read -r _elf; do
+            [ -n "$_elf" ] && _ima_sign_elf "$_elf"
+        done < <("$_fd_bin" --type x --no-ignore --hidden '' "$DESTDIR" 2>/dev/null)
+    else
+        while IFS= read -r -d '' _elf; do
+            _ima_sign_elf "$_elf"
+        done < <(find "$DESTDIR" -type f \( -executable -o -name '*.so' -o -name '*.so.*' \) -print0 2>/dev/null)
+    fi
+
+    echo "provenance-stamp: IMA-signed ELF binaries in $DESTDIR"
+fi

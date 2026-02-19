@@ -31,6 +31,7 @@
 [use]
   provenance = false
   slsa = false
+  ima = false
 
 [use_expand]
   video_cards = fbdev,vesa

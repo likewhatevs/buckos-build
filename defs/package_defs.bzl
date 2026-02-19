@@ -4942,6 +4942,7 @@ def _ebuild_package_impl(ctx: AnalysisContext) -> list[Provider]:
     # Read provenance config
     provenance_enabled = read_config("use", "provenance", "false").lower() in ["true", "1", "yes"]
     slsa_enabled = read_config("use", "slsa", "false").lower() in ["true", "1", "yes"]
+    ima_enabled = read_config("use", "ima", "false").lower() in ["true", "1", "yes"]
 
     # Extract source provenance metadata from labels
     pkg_source_url = ""
@@ -5132,7 +5133,7 @@ ORIGINAL_ARGS=("$@")
 # Arguments: DESTDIR, SRC_DIR, PKG_CONFIG_WRAPPER, FRAMEWORK_SCRIPT, PATCH_COUNT,
 #            ENV_SCRIPT, SRC_UNPACK, SRC_PREPARE, PRE_CONFIGURE, SRC_CONFIGURE,
 #            SRC_COMPILE, SRC_TEST, SRC_INSTALL, PROVENANCE_STAMP, SUBGRAPH_HASH,
-#            HOST_TOOL_COUNT, patches..., host_tool_dirs..., dep_dirs...
+#            IMA_KEY, HOST_TOOL_COUNT, patches..., host_tool_dirs..., dep_dirs...
 # Convert paths to absolute to work in mount namespace
 export _EBUILD_DESTDIR="$(readlink -f "$1")"
 export _EBUILD_SRCDIR="$(readlink -f "$2")"
@@ -5154,8 +5155,12 @@ export PHASE_SRC_INSTALL="$(readlink -f "$8")"
 export PHASE_PROVENANCE_STAMP="$(readlink -f "$9")"
 BUCKOS_PKG_GRAPH_HASH="$(cat "$(readlink -f "${10}")")"
 export BUCKOS_PKG_GRAPH_HASH
-HOST_TOOL_COUNT="${11}"
-shift 11
+if [ "${11}" != "__none__" ]; then
+    BUCKOS_IMA_KEY="$(readlink -f "${11}")"
+    export BUCKOS_IMA_KEY
+fi
+HOST_TOOL_COUNT="${12}"
+shift 12
 
 # Debug: Log phase script paths for troubleshooting
 if [ -n "${EBUILD_DEBUG:-}" ]; then
@@ -5300,6 +5305,7 @@ export BUCKOS_PKG_TYPE="@@PKG_TYPE@@"
 export BUCKOS_PKG_TARGET="@@PKG_TARGET@@"
 export BUCKOS_PKG_SOURCE_URL="@@PKG_SOURCE_URL@@"
 export BUCKOS_PKG_SOURCE_SHA256="@@PKG_SOURCE_SHA256@@"
+export BUCKOS_IMA_ENABLED="@@IMA_ENABLED@@"
 
 # Set MAKE_JOBS based on BUILD_THREADS
 # 0 = auto-detect with nproc, otherwise use specified value
@@ -5604,6 +5610,7 @@ source "$FRAMEWORK_SCRIPT"
     script_content = script_content.replace("@@PKG_TARGET@@", str(ctx.label))
     script_content = script_content.replace("@@PKG_SOURCE_URL@@", pkg_source_url)
     script_content = script_content.replace("@@PKG_SOURCE_SHA256@@", pkg_source_sha256)
+    script_content = script_content.replace("@@IMA_ENABLED@@", "true" if ima_enabled else "false")
 
     script = ctx.actions.write(
         "ebuild_wrapper.sh",
@@ -5615,7 +5622,7 @@ source "$FRAMEWORK_SCRIPT"
     # Arguments order: DESTDIR, SRC_DIR, PKG_CONFIG_WRAPPER, FRAMEWORK_SCRIPT, PATCH_COUNT,
     #                  ENV_SCRIPT, SRC_UNPACK, SRC_PREPARE, PRE_CONFIGURE, SRC_CONFIGURE,
     #                  SRC_COMPILE, SRC_TEST, SRC_INSTALL, PROVENANCE_STAMP, SUBGRAPH_HASH,
-    #                  HOST_TOOL_COUNT, patches..., host_tool_dirs..., dep_dirs...
+    #                  IMA_KEY, HOST_TOOL_COUNT, patches..., host_tool_dirs..., dep_dirs...
     cmd = cmd_args([
         "bash",
         script,
@@ -5636,9 +5643,13 @@ source "$FRAMEWORK_SCRIPT"
     cmd.add(phase_scripts["src_test"])
     cmd.add(phase_scripts["src_install"])
 
-    # Provenance stamp script and subgraph hash (positional args before HOST_TOOL_COUNT)
+    # Provenance stamp script, subgraph hash, IMA key (positional args before HOST_TOOL_COUNT)
     cmd.add(provenance_stamp_script)
     cmd.add(subgraph_hash_artifact)
+    if ima_enabled:
+        cmd.add(ctx.attrs._ima_key[DefaultInfo].default_outputs[0])
+    else:
+        cmd.add("__none__")
 
     # Add host tool count (number of exec_bdepend directories)
     exec_dep_count = len(exec_dep_dirs)
@@ -5758,6 +5769,7 @@ ebuild_package_rule = rule(
         "_ebuild_bootstrap_stage2_script": attrs.dep(default = "//defs/scripts:ebuild-bootstrap-stage2"),
         "_ebuild_bootstrap_stage3_script": attrs.dep(default = "//defs/scripts:ebuild-bootstrap-stage3"),
         "_provenance_stamp_script": attrs.dep(default = "//defs/scripts:provenance-stamp"),
+        "_ima_key": attrs.dep(default = "//defs/keys:ima-test-key"),
         "labels": attrs.list(attrs.string(), default = []),
     },
 )
