@@ -89,10 +89,10 @@ autotools_package(
     src_prepare = """
 autoreconf -fi
 """,
-    src_uri = "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.4.3.tar.bz2",
+    src_uri = "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.4.7.tar.bz2",
 
-    sha256 = "a271ae6d732f6f4d80c258ad9ee88dd9c94c8fdc33c3e45328c4d7c126bd219d",
-    version = "2.4.3",
+    sha256 = "7b24706e4da7e0e3b06ca068231027401f238102c41c909631349dcc3b85eb46",
+    version = "2.4.7",
     description = "GNU Privacy Guard - encryption and signing tools",
     homepage = "https://gnupg.org/",
     license = "GPL-3.0+",
@@ -103,6 +103,58 @@ autoreconf -fi
         "--enable-symcryptrun",
         "--enable-maintainer-mode",
     ],
+    # gnupg uses gpgrt-config to detect libgcrypt, libksba, etc.  Both the
+    # configure script and gpgrt-config itself derive --libdir from
+    # cc -print-search-dirs.  In Buck2, each dep has its own output dir and
+    # the deep paths contain /libs/ which breaks the %%/lib* prefix stripping.
+    # Configure ends up passing --libdir=<single-dep-dir> to gpgrt-config,
+    # which only finds gpg-error.pc there and misses libgcrypt.pc/ksba.pc.
+    #
+    # Fix: merge all dep .pc files into one dir, then wrap gpgrt-config with
+    # a script that overrides any --libdir to point at the merged dir.
+    src_configure = """
+MERGED="$T/gpg-prefix"
+mkdir -p "$MERGED/bin" "$MERGED/lib64/pkgconfig"
+
+REAL_GPGRT=""
+IFS=';' read -ra _PREFIX_DIRS <<< "${CMAKE_PREFIX_PATH:-}"
+for prefix in "${_PREFIX_DIRS[@]}"; do
+    if [ -x "$prefix/bin/gpgrt-config" ] && [ -z "$REAL_GPGRT" ]; then
+        REAL_GPGRT="$prefix/bin/gpgrt-config"
+    fi
+    for pc_dir in "$prefix/lib64/pkgconfig" "$prefix/lib/pkgconfig"; do
+        if [ -d "$pc_dir" ]; then
+            for pc in "$pc_dir"/*.pc; do
+                [ -f "$pc" ] && ln -sf "$pc" "$MERGED/lib64/pkgconfig/"
+            done
+        fi
+    done
+done
+
+if [ -n "$REAL_GPGRT" ]; then
+    cat > "$MERGED/bin/gpgrt-config" << GPGWRAP
+#!/bin/sh
+# Wrapper: strip any --libdir and force merged pkgconfig dir
+_a=""
+for _x; do
+    case \\$_x in --libdir=*) ;; *) _a="\\$_a \\$_x" ;; esac
+done
+exec $REAL_GPGRT --libdir=$MERGED/lib64 \\$_a
+GPGWRAP
+    chmod +x "$MERGED/bin/gpgrt-config"
+fi
+
+export PATH="$MERGED/bin:$PATH"
+
+./configure \\
+    --prefix="${EPREFIX:-/usr}" \\
+    --build="${CBUILD:-$(gcc -dumpmachine)}" \\
+    --host="${CHOST:-$(gcc -dumpmachine)}" \\
+    --libdir="${EPREFIX:-/usr}/${LIBDIR:-lib64}" \\
+    --sysconfdir=/etc \\
+    --localstatedir=/var \\
+    ${EXTRA_ECONF:-}
+""",
     deps = [
         "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
         "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",

@@ -9,7 +9,9 @@
 
 REAL_PKGCONFIG=""
 # Find the real pkg-config (skip ourselves)
-for p in $(type -ap pkg-config); do
+# Prefer pkgconf to avoid Fedora's /usr/bin/pkg-config wrapper which calls
+# rpm --eval and breaks when a Buck2-built rpm is in PATH
+for p in $(type -ap pkgconf 2>/dev/null) $(type -ap pkg-config 2>/dev/null); do
     if [ "$p" != "$0" ] && [ "$p" != "$T/bin/pkg-config" ]; then
         REAL_PKGCONFIG="$p"
         break
@@ -29,8 +31,9 @@ if [ -z "$REAL_PKGCONFIG" ]; then
 fi
 
 if [ -z "$REAL_PKGCONFIG" ]; then
-    # Fallback: try common locations
-    for p in /usr/bin/pkg-config /bin/pkg-config; do
+    # Fallback: prefer pkgconf or platform-specific binary to avoid
+    # Fedora's /usr/bin/pkg-config wrapper which calls rpm --eval
+    for p in /usr/bin/pkgconf /usr/bin/*-pkg-config /usr/bin/pkg-config /bin/pkg-config; do
         if [ -x "$p" ]; then
             REAL_PKGCONFIG="$p"
             break
@@ -88,6 +91,8 @@ case "$*" in
                         # /usr/share/... -> $DEP_ROOT/usr/share/... (for pkgdatadir etc)
                         # Also handle //usr/... (double slash from pc_sysrootdir="/" + /usr)
                         OUTPUT=$(echo "$OUTPUT" | sed -e "s|-I/usr/include|-I$DEP_ROOT/usr/include|g" \
+                                                      -e "s|-I/usr/lib64|-I$DEP_ROOT/usr/lib64|g" \
+                                                      -e "s|-I/usr/lib|-I$DEP_ROOT/usr/lib|g" \
                                                       -e "s|-L/usr/lib64|-L$DEP_ROOT/usr/lib64|g" \
                                                       -e "s|-L/usr/lib|-L$DEP_ROOT/usr/lib|g" \
                                                       -e "s| /usr/include| $DEP_ROOT/usr/include|g" \

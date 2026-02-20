@@ -5,9 +5,9 @@ autotools_package(
     # GnuPG release tarball includes pre-generated configure script
     bdepend = [],
     src_prepare = "",
-    version = "1.50",
-    src_uri = "https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.50.tar.bz2",
-    sha256 = "69405349e0a633e444a28c5b35ce8f14484684518a508dc48a089992fe93e20a",
+    version = "1.51",
+    src_uri = "https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.51.tar.bz2",
+    sha256 = "be0f1b2db6b93eed55369cdf79f19f72750c8c7c39fc20b577e724545427e6b2",
     signature_required = False,
     description = "GnuPG error values library",
     homepage = "https://gnupg.org/related_software/libgpg-error/",

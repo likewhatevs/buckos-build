@@ -7,6 +7,7 @@ cmake_package(
     sha256 = "44fd2e1425885288ce8e8da8f18e6b85bd380332c2972554a85860af10f86d0f",
     deps = [
         "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
         "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/crypto/gpgme:gpgme",
@@ -15,6 +16,9 @@ cmake_package(
         "//packages/linux/system/libs/compression/libarchive:libarchive",
         "//packages/linux/lang/lua:lua",
         "//packages/linux/core/file:file",
+        "//packages/linux/system/libs/compression/xz:xz",
+        "//packages/linux/system/terminal/readline:readline",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     cmake_args = [
         "-DENABLE_PYTHON=OFF",
@@ -24,6 +28,12 @@ cmake_package(
         "-DENABLE_TESTSUITE=OFF",
         "-DWITH_SELINUX=OFF",
         "-DWITH_DBUS=OFF",
+        "-DWITH_LIBELF=OFF",
+        "-DWITH_LIBDW=OFF",
+        "-DWITH_CAP=OFF",
+        "-DWITH_ACL=OFF",
+        "-DWITH_SEQUOIA=OFF",
+        "-DWITH_OPENSSL=ON",
     ],
     post_install = """
 # Install Fedora 42 RPM macros for correct filesystem layout

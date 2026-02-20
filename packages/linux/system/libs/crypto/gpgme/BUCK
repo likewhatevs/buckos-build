@@ -10,56 +10,20 @@ autotools_package(
     homepage = "https://www.gnupg.org/related_software/gpgme/",
     license = "LGPL-2.1",
 
-    # USE flags: static-libs, cxx, qt5, python, test
-    iuse = [
-        "common-lisp",
-        "cxx",
-        "python",
-        "qt5",
-        "static-libs",
-        "test",
-    ],
-    use_defaults = ["cxx"],
-
-    use_configure = {
-        "-common-lisp": "--disable-common-lisp",
-        "-cxx": "--disable-languages=cpp",
-        "-python": "--disable-languages=python",
-        "-qt5": "--disable-languages=qt",
-        "-static-libs": "--disable-static",
-        "common-lisp": "--enable-common-lisp",
-        "cxx": "--enable-languages=cpp",
-        "python": "--enable-languages=python",
-        "qt5": "--enable-languages=qt",
-        "static-libs": "--enable-static",
-    },
-
-    use_deps = {
-        "qt5": ["//packages/linux/dev-libs/qt5:qt5"],
-        "python": ["//packages/linux/lang/python:python"],
-    },
-
     configure_args = [
         "--prefix=/usr",
         "--enable-shared",
-    ] + ([
+        "--disable-static",
+        "--enable-languages=cpp",
         "--disable-gpg-test",
         "--disable-gpgsm-test",
         "--disable-gpgconf-test",
         "--disable-g13-test",
-    ]),
-
-    pre_configure = """
-# Available USE flags:
-# - static-libs: Build static libraries
-# - cxx: Build C++ language bindings
-# - qt5: Build Qt5 language bindings
-# - python: Build Python language bindings
-# - test: Enable GPG component tests
-""",
+    ],
 
     deps = [
         "//packages/linux/system/security/gnupg:gnupg",
+        "//packages/linux/system/security/gnupg:libassuan",
         "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
     ],
     visibility = ["PUBLIC"],

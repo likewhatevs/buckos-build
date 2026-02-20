@@ -590,6 +590,10 @@ if [ "$USE_HOST_TOOLCHAIN" = "true" ]; then
     export STRIP="${STRIP:-strip}"
     export OBJCOPY="${OBJCOPY:-objcopy}"
     export OBJDUMP="${OBJDUMP:-objdump}"
+    # Set CHOST/CBUILD to the host's native triplet so autotools configure
+    # scripts and gpgrt-config agree on the platform triplet.
+    export CHOST="${CHOST:-$(gcc -dumpmachine)}"
+    export CBUILD="$CHOST"
 elif [ "$USE_BOOTSTRAP" = "true" ]; then
     # Determine which cross-compiler bin directory to use
     # Prefer BOOTSTRAP_TOOLCHAIN_BIN (aggregated toolchain) over TOOLCHAIN_PATH

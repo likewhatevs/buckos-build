@@ -2,19 +2,34 @@ load("//defs:package_defs.bzl", "cmake_package")
 
 cmake_package(
     name = "librepo",
-    version = "1.19.0",
-    src_uri = "https://github.com/rpm-software-management/librepo/archive/refs/tags/1.19.0.tar.gz",
-    sha256 = "7395b34af0d7a3fa13d2db1ad0ca0d8cbcae6695c2ecd62c6204606184bfd92b",
+    version = "1.20.0",
+    src_uri = "https://github.com/rpm-software-management/librepo/archive/refs/tags/1.20.0.tar.gz",
+    sha256 = "c21dd3caefe97ea58bc865f92095a9d2db2ec8aab49d0c714d4742094db930b6",
     deps = [
         "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/system/libs/crypto/gpgme:gpgme",
         "//packages/linux/system/libs/data/libxml2:libxml2",
         "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/glib:glib",
+        # Transitive deps needed for pkg-config resolution
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+        "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
+        "//packages/linux/system/security/gnupg:libassuan",
     ],
+    # Modern gpgme (1.23+) dropped gpgme-config; patch to use pkg-config
+    src_prepare = """
+sed -i '/FIND_PACKAGE(Gpgme REQUIRED)/c\\
+    PKG_CHECK_MODULES(GPGME gpgme REQUIRED)\\
+    set(GPGME_VANILLA_LIBRARIES ${GPGME_LIBRARIES})\\
+    INCLUDE_DIRECTORIES(${GPGME_INCLUDE_DIRS})' CMakeLists.txt
+""",
     cmake_args = [
         "-DENABLE_PYTHON=OFF",
         "-DENABLE_TESTS=OFF",
         "-DWITH_ZCHUNK=OFF",
+        "-DENABLE_SELINUX=OFF",
     ],
     description = "Library for downloading Linux repository metadata and packages",
     homepage = "https://github.com/rpm-software-management/librepo",
