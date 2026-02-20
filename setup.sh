@@ -52,7 +52,6 @@ define_packages() {
                 unzip gawk sed grep diffutils findutils coreutils bash gettext
                 texinfo bison flex gperf zlib linux-api-headers git gnupg
                 rust fd ripgrep
-                ima-evm-utils
             )
             ;;
         debian)
@@ -225,6 +224,14 @@ verify() {
     fi
 
     echo "All tools verified. Ready to build with: buck2 build //packages/..."
+
+    # Remind Arch users about AUR packages
+    if [ "$DISTRO" = "arch" ]; then
+        echo ""
+        echo "Note: ima-evm-utils is not in the Arch repos."
+        echo "If IMA signing support is needed, install from AUR:"
+        echo "  yay -S ima-evm-utils   (or your preferred AUR helper)"
+    fi
 }
 
 main() {
