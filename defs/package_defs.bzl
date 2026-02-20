@@ -19,9 +19,7 @@ load("//defs:distro_constraints.bzl",
 load("//defs:fhs_mapping.bzl",
      "get_configure_args_for_layout")
 load("//config:fedora_build_flags.bzl",
-     "get_fedora_build_env",
-     "fedora_cmake_args",
-     "fedora_meson_args")
+     "get_fedora_build_env")
 load("//defs:toolchain_providers.bzl",
      "GoToolchainInfo",
      "RustToolchainInfo")
@@ -6041,15 +6039,15 @@ def cmake_package(
                     else:
                         resolved_cmake_args.append(cmake_arg)
 
-    # Apply Fedora 42 hardening flags when fedora mode is active
-    if _FEDORA_MODE:
-        resolved_cmake_args.extend(fedora_cmake_args())
-
     # Use eclass inheritance for cmake
     eclass_config = inherit(["cmake"])
 
     # Handle cmake_args by setting environment variable
     env = kwargs.pop("env", {})
+    # Apply Fedora 42 hardening flags via CFLAGS/CXXFLAGS/LDFLAGS env vars.
+    # The cmake eclass already passes these to cmake via -DCMAKE_C_FLAGS="${CFLAGS:-}" etc.
+    # (using env vars instead of cmake -D args avoids shell quoting issues with spaces)
+    env = _merge_fedora_env(env)
     if resolved_cmake_args:
         env["CMAKE_EXTRA_ARGS"] = " ".join(resolved_cmake_args)
 
@@ -6246,15 +6244,16 @@ def meson_package(
             meson_args_from_use = use_configure_args(combined_use_meson, effective_use)
             resolved_meson_args.extend(meson_args_from_use)
 
-    # Apply Fedora 42 hardening flags when fedora mode is active
-    if _FEDORA_MODE:
-        resolved_meson_args.extend(fedora_meson_args())
-
     # Use eclass inheritance for meson
     eclass_config = inherit(["meson"])
 
     # Handle meson_args by setting environment variable
     env = kwargs.pop("env", {})
+    # Apply Fedora 42 hardening flags via CFLAGS/CXXFLAGS/LDFLAGS env vars.
+    # Meson reads these natively, and the meson eclass cross-file builder
+    # converts them to c_args/cpp_args/c_link_args arrays.
+    # (using env vars instead of -Dc_args=... CLI args avoids shell quoting issues)
+    env = _merge_fedora_env(env)
     if resolved_meson_args:
         env["MESON_EXTRA_ARGS"] = " ".join(resolved_meson_args)
 
@@ -11439,6 +11438,7 @@ def qt6_package(
 
     # Handle cmake_args and qmake_args by setting environment variables
     env = kwargs.pop("env", {})
+    env = _merge_fedora_env(env)
     if resolved_cmake_args:
         env["CMAKE_EXTRA_ARGS"] = " ".join(resolved_cmake_args)
     if qmake_args:
