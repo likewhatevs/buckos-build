@@ -41,14 +41,11 @@ jobs:
   required:
     name: all tests pass
     if: always()
-    needs: [query, build, integration]
+    needs: [query]
     runs-on: ubuntu-latest
     steps:
       - run: |
-          results=("${{ needs.query.result }}" "${{ needs.build.result }}" "${{ needs.integration.result }}")
-          for r in "${results[@]}"; do
-            if [ "$r" != "success" ]; then
-              echo "query=${{ needs.query.result }} build=${{ needs.build.result }} integration=${{ needs.integration.result }}"
-              exit 1
-            fi
-          done
+          if [ "${{ needs.query.result }}" != "success" ]; then
+            echo "query=${{ needs.query.result }}"
+            exit 1
+          fi

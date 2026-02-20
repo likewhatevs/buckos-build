@@ -1,0 +1,67 @@
+genrule(
+    name = "fedora-repos",
+    out = "fedora-repos",
+    cmd = """
+mkdir -p "$OUT/etc/yum.repos.d"
+mkdir -p "$OUT/etc/pki/rpm-gpg"
+mkdir -p "$OUT/etc/rpm"
+
+# Fedora 42 base repo
+cat > "$OUT/etc/yum.repos.d/fedora.repo" << 'REPO'
+[fedora]
+name=Fedora $releasever - $basearch
+metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-$releasever&arch=$basearch
+enabled=1
+countme=1
+metadata_expire=7d
+repo_gpgcheck=0
+type=rpm
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch
+skip_if_unavailable=False
+REPO
+
+# Fedora 42 updates repo
+cat > "$OUT/etc/yum.repos.d/fedora-updates.repo" << 'REPO'
+[updates]
+name=Fedora $releasever - $basearch - Updates
+metalink=https://mirrors.fedoraproject.org/metalink?repo=updates-released-f$releasever&arch=$basearch
+enabled=1
+countme=1
+repo_gpgcheck=0
+type=rpm
+gpgcheck=1
+metadata_expire=6h
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch
+skip_if_unavailable=False
+REPO
+
+# Fedora release metadata
+cat > "$OUT/etc/os-release" << 'OSREL'
+NAME="BuckOS"
+VERSION="0.1 (Fedora 42 Compatible)"
+ID=buckos
+ID_LIKE=fedora
+VERSION_ID=42
+PLATFORM_ID="platform:f42"
+PRETTY_NAME="BuckOS (Fedora 42 Compatible)"
+ANSI_COLOR="0;38;2;60;110;180"
+CPE_NAME="cpe:/o:buckos:buckos:0.1"
+OSREL
+
+# RPM macros for BuckOS filesystem layout
+cat > "$OUT/etc/rpm/macros.buckos" << 'MACROS'
+%_prefix /usr
+%_libdir /usr/lib64
+%_sysconfdir /etc
+%_localstatedir /var
+%_sharedstatedir /var/lib
+MACROS
+
+# Fedora release version for dnf/rpm variable expansion
+echo "42" > "$OUT/etc/yum/vars/releasever" 2>/dev/null || true
+mkdir -p "$OUT/etc/dnf/vars"
+echo "42" > "$OUT/etc/dnf/vars/releasever"
+""",
+    visibility = ["PUBLIC"],
+)

@@ -146,7 +146,7 @@ def rpm_package(
     name,
     rpm_uri,
     sha256 = None,
-    fedora_version = "40",
+    fedora_version = "42",
     rpm_deps = {},
     deps = [],
     compat_tags = None,
@@ -291,10 +291,11 @@ def translate_rpm_deps(rpm_dep_names):
 FEDORA_MIRRORS = {
     "39": "https://download.fedoraproject.org/pub/fedora/linux/releases/39/Everything/x86_64/os/Packages",
     "40": "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Everything/x86_64/os/Packages",
-    "41": "https://download.fedoraproject.org/pub/fedora/linux/development/rawhide/Everything/x86_64/os/Packages",
+    "41": "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Everything/x86_64/os/Packages",
+    "42": "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Everything/x86_64/os/Packages",
 }
 
-def fedora_rpm_url(package_name, version, fedora_version = "40"):
+def fedora_rpm_url(package_name, version, fedora_version = "42"):
     """Generate Fedora RPM URL for a package.
 
     Args:

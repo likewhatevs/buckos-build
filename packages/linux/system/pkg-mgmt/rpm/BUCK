@@ -1,0 +1,50 @@
+load("//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "rpm",
+    version = "4.20.1",
+    src_uri = "https://github.com/rpm-software-management/rpm/releases/download/rpm-4.20.1/rpm-4.20.1.tar.bz2",
+    sha256 = "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5",
+    deps = [
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/core/zstd:zstd",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
+        "//packages/linux/system/libs/data/popt:popt",
+        "//packages/linux/system/libs/data/sqlite:sqlite",
+        "//packages/linux/system/libs/compression/libarchive:libarchive",
+        "//packages/linux/system/scripting/lua:lua",
+        "//packages/linux/core/file:file",
+    ],
+    cmake_args = [
+        "-DENABLE_PYTHON=OFF",
+        "-DENABLE_NDB=ON",
+        "-DENABLE_SQLITE=ON",
+        "-DWITH_AUDIT=OFF",
+        "-DENABLE_TESTSUITE=OFF",
+        "-DWITH_SELINUX=OFF",
+        "-DWITH_DBUS=OFF",
+    ],
+    post_install = """
+# Install Fedora 42 RPM macros for correct filesystem layout
+mkdir -p "$DESTDIR/usr/lib/rpm/macros.d"
+cat > "$DESTDIR/usr/lib/rpm/macros.d/macros.buckos" << 'MACROS'
+%_prefix /usr
+%_exec_prefix /usr
+%_bindir /usr/bin
+%_sbindir /usr/sbin
+%_libdir /usr/lib64
+%_libexecdir /usr/libexec
+%_datadir /usr/share
+%_sysconfdir /etc
+%_localstatedir /var
+%_infodir /usr/share/info
+%_mandir /usr/share/man
+%_initddir /etc/init.d
+MACROS
+""",
+    description = "RPM Package Manager",
+    homepage = "https://rpm.org",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

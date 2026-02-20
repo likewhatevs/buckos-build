@@ -1,15 +1,16 @@
 """
-Fedora build flags and compiler options.
+Fedora 42 build flags and compiler options.
 
-This module provides Fedora-compatible build flags to ensure packages
+This module provides Fedora 42-compatible build flags to ensure packages
 built in BuckOS can run on Fedora systems and vice versa.
 
 Based on Fedora's RPM macro definitions:
 - https://src.fedoraproject.org/rpms/redhat-rpm-config
 - /usr/lib/rpm/redhat/macros
 
-Fedora build flags focus on:
-- Security hardening (PIE, RELRO, stack protector, fortify source)
+Fedora 42 build flags focus on:
+- Security hardening (PIE, RELRO, stack protector, _FORTIFY_SOURCE=3)
+- Frame pointers (-fno-omit-frame-pointer for profiling/debugging)
 - Optimization for x86_64-v2 microarchitecture level
 - Reproducible builds
 - LTO (Link Time Optimization)
@@ -19,7 +20,7 @@ Fedora build flags focus on:
 # FEDORA COMPILER FLAGS
 # =============================================================================
 
-# Fedora 39/40 standard optimization flags
+# Fedora 42 standard optimization flags
 FEDORA_CFLAGS_BASE = [
     "-O2",
     "-flto=auto",           # Link-time optimization
@@ -30,8 +31,9 @@ FEDORA_CFLAGS_BASE = [
     "-pipe",
     "-Wall",
     "-Werror=format-security",
-    "-Wp,-D_FORTIFY_SOURCE=2",  # Buffer overflow protection
+    "-Wp,-D_FORTIFY_SOURCE=3",  # Buffer overflow protection (level 3 since F42)
     "-Wp,-D_GLIBCXX_ASSERTIONS",
+    "-fno-omit-frame-pointer",  # Frame pointers (F42+ requirement for profiling)
 ]
 
 # x86_64 specific flags (x86-64-v2 baseline)
@@ -76,7 +78,7 @@ FEDORA_LDFLAGS_EXECUTABLE = FEDORA_LDFLAGS + [
 FEDORA_ARCH_FLAGS = {
     "x86_64": {
         "cflags": FEDORA_CFLAGS_X86_64,
-        "march": "x86-64-v2",  # Fedora 40+ baseline
+        "march": "x86-64-v2",  # Fedora 42 baseline
     },
     "i686": {
         "cflags": [
@@ -105,7 +107,7 @@ FEDORA_ARCH_FLAGS = {
 def get_fedora_flags(
     arch = "x86_64",
     build_type = "release",
-    fortify_level = 2,
+    fortify_level = 3,
     lto = True,
     hardened = True):
     """Get Fedora build flags for specified configuration.
@@ -252,6 +254,7 @@ def is_fedora_compatible_flags(cflags):
     required_flags = [
         "-fstack-clash-protection",
         "-fcf-protection",
+        "-fno-omit-frame-pointer",
     ]
 
     recommended_flags = [

@@ -1,0 +1,24 @@
+load("//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "libsolv",
+    version = "0.7.31",
+    src_uri = "https://github.com/openSUSE/libsolv/archive/refs/tags/0.7.31.tar.gz",
+    sha256 = "912aa843447db8a3e7d70f5df743d6e120120e3324394ad6ed7252d23631ade1",
+    deps = [
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+    ],
+    cmake_args = [
+        "-DENABLE_RPMDB=ON",
+        "-DENABLE_RPMMD=ON",
+        "-DENABLE_COMPS=ON",
+        "-DENABLE_BZIP2=ON",
+        "-DENABLE_ZSTD=ON",
+        "-DWITH_LIBXML2=ON",
+    ],
+    description = "Library for solving packages and reading repositories",
+    homepage = "https://github.com/openSUSE/libsolv",
+    license = "BSD",
+    visibility = ["PUBLIC"],
+)

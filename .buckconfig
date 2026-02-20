@@ -33,6 +33,7 @@
   slsa = false
   ima = false
   ima_key = //defs/keys:ima-test-key
+  fedora = false
 
 [use_expand]
   video_cards = fbdev,vesa

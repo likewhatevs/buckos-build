@@ -115,3 +115,135 @@ def parsed_buck_targets(repo_root: Path):
     """AST-parsed target definitions from BUCK files under packages/."""
     from tests.buck_parser import parse_buck_files
     return parse_buck_files(repo_root / "packages")
+
+
+class QemuVM:
+    """Wrapper around a QEMU VM with serial console interaction."""
+
+    def __init__(self, proc: subprocess.Popen, repo_root: Path):
+        self._proc = proc
+        self._repo_root = repo_root
+
+    def run(self, cmd: str, timeout: int = 30) -> subprocess.CompletedProcess:
+        """Execute a command inside the VM via serial console.
+
+        Uses pexpect to send a command and capture output between
+        known delimiters on the serial console.
+        """
+        import pexpect
+
+        # Write command to stdin, read from stdout
+        marker = f"__DONE_{id(cmd)}__"
+        full_cmd = f"{cmd}; echo {marker} $?\n"
+        self._proc.stdin.write(full_cmd.encode())
+        self._proc.stdin.flush()
+
+        # Read until marker appears
+        output_lines = []
+        import select
+        import time
+
+        deadline = time.monotonic() + timeout
+        buf = b""
+        while time.monotonic() < deadline:
+            ready, _, _ = select.select([self._proc.stdout], [], [], 1.0)
+            if ready:
+                chunk = self._proc.stdout.read1(4096)
+                if not chunk:
+                    break
+                buf += chunk
+                while b"\n" in buf:
+                    line, buf = buf.split(b"\n", 1)
+                    decoded = line.decode("utf-8", errors="replace").rstrip()
+                    if marker in decoded:
+                        # Extract return code
+                        parts = decoded.split(marker)
+                        rc_str = parts[-1].strip() if len(parts) > 1 else "0"
+                        try:
+                            rc = int(rc_str)
+                        except ValueError:
+                            rc = 1
+                        stdout = "\n".join(output_lines)
+                        return subprocess.CompletedProcess(
+                            args=cmd, returncode=rc, stdout=stdout, stderr=""
+                        )
+                    output_lines.append(decoded)
+
+        raise TimeoutError(f"Command timed out after {timeout}s: {cmd}")
+
+    def close(self):
+        self._proc.terminate()
+        try:
+            self._proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            self._proc.kill()
+            self._proc.wait()
+
+
+@pytest.fixture(scope="session")
+def qemu_vm(buck2, repo_root):
+    """Boot a Fedora-compatible QEMU VM for integration testing.
+
+    Builds the fedora QEMU boot target, then launches qemu-system-x86_64
+    with serial console on stdio. Yields a QemuVM instance for running
+    commands. Tears down the VM on cleanup.
+
+    Marked slow — skipped by `make test-fast`.
+    """
+    pytest.importorskip("pexpect")
+
+    # Build the boot script
+    result = buck2(
+        "build", "//packages/linux/system:qemu-boot-fedora",
+        "-c", "use.fedora=true",
+        "--show-full-output",
+        timeout=600,
+    )
+
+    # Parse the boot script path from build output
+    boot_script = None
+    for line in result.stdout.splitlines():
+        if "qemu-boot-fedora" in line:
+            parts = line.strip().split(None, 1)
+            if len(parts) == 2:
+                boot_script = Path(parts[1])
+                break
+
+    if not boot_script or not boot_script.exists():
+        pytest.skip("Could not build qemu-boot-fedora target")
+
+    # Launch QEMU with serial on stdio, no display
+    proc = subprocess.Popen(
+        ["bash", str(boot_script)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=repo_root,
+    )
+
+    # Wait for shell prompt (up to 60s for boot)
+    import time
+    import select
+
+    deadline = time.monotonic() + 60
+    buf = b""
+    booted = False
+    while time.monotonic() < deadline:
+        ready, _, _ = select.select([proc.stdout], [], [], 1.0)
+        if ready:
+            chunk = proc.stdout.read1(4096)
+            if chunk:
+                buf += chunk
+                # Look for shell prompt indicators
+                if b"#" in buf or b"$" in buf or b"login:" in buf:
+                    booted = True
+                    break
+
+    if not booted:
+        proc.terminate()
+        proc.wait()
+        pytest.skip("QEMU VM did not boot within 60s")
+
+    vm = QemuVM(proc, repo_root)
+    yield vm
+    vm.close()

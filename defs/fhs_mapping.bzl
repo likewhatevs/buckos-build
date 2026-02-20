@@ -9,10 +9,9 @@ and Fedora's FHS-compliant layout. This is essential for:
 
 FHS Reference: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
 
-Key differences:
-- Fedora uses /usr/lib64 for 64-bit libraries, BuckOS may use /usr/lib
-- Fedora uses /usr/libexec for internal binaries
-- Fedora strictly follows /usr merge (no /bin, /lib, /sbin)
+Note: BuckOS uses /usr/lib64 natively on x86_64 (matching Fedora), so
+most path translations are no-ops for that architecture. The mapping
+functions are retained for documentation and potential 32-bit/multilib use.
 """
 
 # =============================================================================
@@ -40,7 +39,7 @@ FHS_DIRECTORIES = {
 BUCKOS_DIRECTORIES = {
     "bin": "/usr/bin",
     "sbin": "/usr/sbin",
-    "lib": "/usr/lib",        # No lib64 split
+    "lib": "/usr/lib64",      # 64-bit primary (matches Fedora on x86_64)
     "lib32": "/usr/lib32",
     "libexec": "/usr/libexec",
     "include": "/usr/include",
@@ -79,15 +78,10 @@ def fhs_to_buckos(fhs_path):
         fhs_path: Path in FHS layout (e.g., "/usr/lib64/libfoo.so")
 
     Returns:
-        Path in BuckOS layout (e.g., "/usr/lib/libfoo.so")
+        Path in BuckOS layout. On x86_64 this is a no-op since
+        BuckOS uses /usr/lib64 natively.
     """
-    # Map lib64 to lib (BuckOS doesn't split)
-    if fhs_path.startswith("/usr/lib64/"):
-        return fhs_path.replace("/usr/lib64/", "/usr/lib/", 1)
-    if fhs_path.startswith("/lib64/"):
-        return fhs_path.replace("/lib64/", "/lib/", 1)
-
-    # Most paths are identical
+    # BuckOS uses lib64 on x86_64, matching FHS — no translation needed
     return fhs_path
 
 def buckos_to_fhs(buckos_path, arch = "x86_64"):
@@ -98,19 +92,10 @@ def buckos_to_fhs(buckos_path, arch = "x86_64"):
         arch: Target architecture (x86_64, i686, etc.)
 
     Returns:
-        Path in FHS layout
+        Path in FHS layout. On x86_64 this is a no-op since
+        BuckOS uses /usr/lib64 natively.
     """
-    # Map lib to lib64 for 64-bit architectures
-    if arch == "x86_64":
-        if buckos_path.startswith("/usr/lib/"):
-            # Don't convert lib32 or other lib* directories
-            if not buckos_path.startswith("/usr/lib32/") and \
-               not buckos_path.startswith("/usr/libexec/"):
-                return buckos_path.replace("/usr/lib/", "/usr/lib64/", 1)
-        if buckos_path.startswith("/lib/"):
-            if not buckos_path.startswith("/lib32/"):
-                return buckos_path.replace("/lib/", "/lib64/", 1)
-
+    # BuckOS uses lib64 on x86_64, matching FHS — no translation needed
     return buckos_path
 
 def normalize_path(path, target_layout = "buckos"):
@@ -221,12 +206,18 @@ def get_lib_dirs(layout = "buckos", arch = "x86_64"):
                 "/lib",
             ]
     else:  # buckos
-        return [
-            "/usr/lib",
-            "/lib",
-            "/usr/lib32",
-            "/lib32",
-        ]
+        if arch == "x86_64":
+            return [
+                "/usr/lib64",
+                "/lib64",
+                "/usr/lib",
+                "/lib",
+            ]
+        else:
+            return [
+                "/usr/lib",
+                "/lib",
+            ]
 
 def get_pkgconfig_dirs(layout = "buckos", arch = "x86_64"):
     """Get pkg-config search directories for a layout.
@@ -239,6 +230,13 @@ def get_pkgconfig_dirs(layout = "buckos", arch = "x86_64"):
         List of pkg-config directories
     """
     if layout == "fhs" and arch == "x86_64":
+        return [
+            "/usr/lib64/pkgconfig",
+            "/usr/share/pkgconfig",
+            "/usr/lib/pkgconfig",
+        ]
+    elif arch == "x86_64":
+        # BuckOS on x86_64 uses lib64, same as Fedora FHS
         return [
             "/usr/lib64/pkgconfig",
             "/usr/share/pkgconfig",

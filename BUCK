@@ -139,6 +139,25 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+# Fedora-compatible rootfs (build with -c use.fedora=true)
+alias(
+    name = "fedora",
+    actual = "//packages/linux/system:buckos-fedora-rootfs",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "fedora-boot",
+    actual = "//packages/linux/system:qemu-boot-fedora",
+    visibility = ["PUBLIC"],
+)
+
+alias(
+    name = "fedora-vm",
+    actual = "//packages/linux/system:fedora-vm",
+    visibility = ["PUBLIC"],
+)
+
 alias(
     name = "init-s6",
     actual = "//packages/linux/system/init:s6",

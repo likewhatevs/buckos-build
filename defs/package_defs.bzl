@@ -19,7 +19,9 @@ load("//defs:distro_constraints.bzl",
 load("//defs:fhs_mapping.bzl",
      "get_configure_args_for_layout")
 load("//config:fedora_build_flags.bzl",
-     "get_fedora_build_env")
+     "get_fedora_build_env",
+     "fedora_cmake_args",
+     "fedora_meson_args")
 load("//defs:toolchain_providers.bzl",
      "GoToolchainInfo",
      "RustToolchainInfo")
@@ -36,6 +38,24 @@ PREBUILT_BOOTSTRAP_TOOLCHAIN = "//config:prebuilt-bootstrap-toolchain"
 # Pre-computed at module level so it reads from the root cell's .buckconfig,
 # not the calling BUCK file's cell (toolchains// has no .buckconfig).
 _PREBUILT_TOOLCHAIN_PATH = read_config("buckos", "prebuilt_toolchain_path", "")
+
+# Fedora compatibility mode: apply Fedora 42 hardening flags to all builds.
+# Enable via .buckconfig [use] fedora=true or CLI: buck2 build -c use.fedora=true
+_FEDORA_MODE = read_config("use", "fedora", "false").lower() in ["true", "1", "yes"]
+
+def _merge_fedora_env(env):
+    """Merge Fedora 42 hardening flags into an env dict when fedora mode is active."""
+    if not _FEDORA_MODE:
+        return env
+    fedora_env = get_fedora_build_env()
+    merged = dict(env)
+    for key in ["CFLAGS", "CXXFLAGS", "FFLAGS", "LDFLAGS"]:
+        if key in fedora_env:
+            if key in merged:
+                merged[key] = merged[key] + " " + fedora_env[key]
+            else:
+                merged[key] = fedora_env[key]
+    return merged
 
 # Detect host architecture from host_info()
 # This helps choose the right toolchain when building on native aarch64
@@ -2101,8 +2121,16 @@ if [ -d "$ROOTFS/var/lock" ] && [ ! -L "$ROOTFS/var/lock" ]; then
     echo "Fixed /var/lock symlink (was directory, moved contents to /run/lock)"
 fi
 
-# Note: lib64 handling removed - on x86_64, /lib64/ld-linux-x86-64.so.2 must exist
-# aarch64-specific builds should handle lib64 merging in their own assembly if needed
+# Ensure /lib64 -> /usr/lib64 merged-usr symlink exists (required for Fedora compat
+# and the x86_64 dynamic linker which expects /lib64/ld-linux-x86-64.so.2)
+mkdir -p "$ROOTFS/usr/lib64"
+if [ -d "$ROOTFS/lib64" ] && [ ! -L "$ROOTFS/lib64" ]; then
+    cp -a "$ROOTFS/lib64/"* "$ROOTFS/usr/lib64/" 2>/dev/null || true
+    rm -rf "$ROOTFS/lib64"
+fi
+if [ ! -e "$ROOTFS/lib64" ]; then
+    ln -s usr/lib64 "$ROOTFS/lib64"
+fi
 
 # Fix merged-bin layout: systemd now recommends /usr/sbin -> bin (merged-bin)
 # This eliminates the "unmerged-bin" taint
@@ -2674,7 +2702,10 @@ chmod +x "$OUTPUT"
         identifier = ctx.attrs.name,
     )
 
-    return [DefaultInfo(default_output = boot_script)]
+    return [
+        DefaultInfo(default_output = boot_script),
+        RunInfo(args = cmd_args(["bash", boot_script])),
+    ]
 
 _qemu_boot_script_rule = rule(
     impl = _qemu_boot_script_impl,
@@ -6009,6 +6040,10 @@ def cmake_package(
                     else:
                         resolved_cmake_args.append(cmake_arg)
 
+    # Apply Fedora 42 hardening flags when fedora mode is active
+    if _FEDORA_MODE:
+        resolved_cmake_args.extend(fedora_cmake_args())
+
     # Use eclass inheritance for cmake
     eclass_config = inherit(["cmake"])
 
@@ -6209,6 +6244,10 @@ def meson_package(
         if combined_use_meson:
             meson_args_from_use = use_configure_args(combined_use_meson, effective_use)
             resolved_meson_args.extend(meson_args_from_use)
+
+    # Apply Fedora 42 hardening flags when fedora mode is active
+    if _FEDORA_MODE:
+        resolved_meson_args.extend(fedora_meson_args())
 
     # Use eclass inheritance for meson
     eclass_config = inherit(["meson"])
@@ -6423,6 +6462,8 @@ def autotools_package(
 
     # Handle configure and make args by setting environment variables
     env = kwargs.pop("env", {})
+    # Apply Fedora 42 hardening flags when fedora mode is active
+    env = _merge_fedora_env(env)
     if resolved_configure_args:
         env["EXTRA_ECONF"] = " ".join(resolved_configure_args)
     if make_args:
@@ -6668,6 +6709,8 @@ def make_package(
 
     # Set up environment
     env = kwargs.pop("env", {})
+    # Apply Fedora 42 hardening flags when fedora mode is active
+    env = _merge_fedora_env(env)
     if resolved_make_args:
         env["EXTRA_EMAKE"] = " ".join(resolved_make_args)
     if make_install_args:
@@ -7303,6 +7346,8 @@ def cargo_package(
 
     # Handle cargo_args by setting environment variable
     env = kwargs.pop("env", {})
+    # Apply Fedora 42 hardening flags when fedora mode is active
+    env = _merge_fedora_env(env)
     if resolved_cargo_args:
         env["CARGO_BUILD_FLAGS"] = " ".join(resolved_cargo_args)
 
@@ -8131,6 +8176,8 @@ def go_package(
 
     # Handle packages by setting environment variable
     env = kwargs.pop("env", {})
+    # Apply Fedora 42 hardening flags when fedora mode is active
+    env = _merge_fedora_env(env)
     if packages != ["."]:
         env["GO_PACKAGES"] = " ".join(packages)
 

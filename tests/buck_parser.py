@@ -49,6 +49,9 @@ BOOTSCRIPT_RULES = {
     "ch_firmware_boot_script",
     "ch_virtiofs_boot_script",
 }
+# Macros that expand to labeled rules — the parser sees them but buck2
+# resolves the labels on the underlying rules, so exclude from label checks.
+MACRO_RULES = {"qemu_machine", "qemu_run", "qemu_test"}
 CONFIG_RULES = {"kernel_config"}
 
 LABELED_RULES = set(COMPILE_RULES) | PREBUILT_RULES | IMAGE_RULES | BOOTSCRIPT_RULES | CONFIG_RULES

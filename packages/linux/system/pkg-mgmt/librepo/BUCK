@@ -1,0 +1,23 @@
+load("//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "librepo",
+    version = "1.19.0",
+    src_uri = "https://github.com/rpm-software-management/librepo/archive/refs/tags/1.19.0.tar.gz",
+    sha256 = "7395b34af0d7a3fa13d2db1ad0ca0d8cbcae6695c2ecd62c6204606184bfd92b",
+    deps = [
+        "//packages/linux/system/libs/network/curl:curl",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+    ],
+    cmake_args = [
+        "-DENABLE_PYTHON=OFF",
+        "-DENABLE_TESTS=OFF",
+        "-DWITH_ZCHUNK=OFF",
+    ],
+    description = "Library for downloading Linux repository metadata and packages",
+    homepage = "https://github.com/rpm-software-management/librepo",
+    license = "LGPL-2.1",
+    visibility = ["PUBLIC"],
+)

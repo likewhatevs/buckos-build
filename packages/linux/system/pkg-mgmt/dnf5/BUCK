@@ -1,0 +1,29 @@
+load("//defs:package_defs.bzl", "cmake_package")
+
+cmake_package(
+    name = "dnf5",
+    version = "5.2.8.1",
+    src_uri = "https://github.com/rpm-software-management/dnf5/archive/refs/tags/5.2.8.1.tar.gz",
+    sha256 = "82280087c78f8f05a032adf7714ede8b762d02447ee47f6e3b27c1cbec2d41f1",
+    deps = [
+        "//packages/linux/system/pkg-mgmt/libsolv:libsolv",
+        "//packages/linux/system/pkg-mgmt/librepo:librepo",
+        "//packages/linux/system/pkg-mgmt/rpm:rpm",
+        "//packages/linux/system/libs/data/json-c:json-c",
+        "//packages/linux/system/libs/data/sqlite:sqlite",
+        "//packages/linux/system/libs/crypto/gpgme:gpgme",
+    ],
+    cmake_args = [
+        "-DWITH_DNF5DAEMON=OFF",
+        "-DWITH_TESTS=OFF",
+        "-DWITH_PERL5=OFF",
+        "-DWITH_PYTHON3=OFF",
+        "-DWITH_RUBY=OFF",
+        "-DWITH_MAN=OFF",
+        "-DWITH_TRANSLATIONS=OFF",
+    ],
+    description = "Package manager forked from DNF, using libdnf5",
+    homepage = "https://github.com/rpm-software-management/dnf5",
+    license = "GPL-2.0",
+    visibility = ["PUBLIC"],
+)

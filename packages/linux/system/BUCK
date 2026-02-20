@@ -1,5 +1,6 @@
 load("//defs:package_defs.bzl", "binary_package", "rootfs", "autotools_package")
 load("//defs:package_defs.bzl", "binary_package", "rootfs", "initramfs", "dracut_initramfs", "qemu_boot_script", "iso_image", "stage3_tarball", "autotools_package")
+load("//defs:qemu.bzl", "qemu_machine", "qemu_run", "qemu_test")
 
 # =============================================================================
 # Helper files for live environment
@@ -3152,6 +3153,94 @@ qemu_boot_script(
         "-device usb-mouse",
         "-display gtk",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# Fedora-compatible rootfs, initramfs, and QEMU targets
+# =============================================================================
+
+rootfs(
+    name = "buckos-fedora-rootfs",
+    packages = [
+        ":init-scripts-gen",
+        ":baselayout-gen",
+        # C runtime
+        "//packages/linux/core/glibc:glibc",
+        # Core system
+        "//packages/linux/system/apps/coreutils:coreutils",
+        "//packages/linux/editors/grep:grep",
+        "//packages/linux/system/libs/cpio:cpio",
+        "//packages/linux/core/util-linux:util-linux",
+        "//packages/linux/core/zlib:zlib",
+        # Shell and terminal
+        "//packages/linux/system/terminal/ncurses:ncurses",
+        "//packages/linux/system/terminal/readline:readline",
+        "//packages/linux/core/bash:bash",
+        "//packages/linux/core/less:less",
+        # Compression
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+        "//packages/linux/system/libs/compression/xz:xz",
+        # System utilities
+        "//packages/linux/core/procps-ng:procps-ng",
+        "//packages/linux/core/file:file",
+        # User management
+        "//packages/linux/system/apps/shadow:shadow",
+        # Networking
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/system/libs/network/curl:curl",
+        "//packages/linux/network/iproute2:iproute2",
+        "//packages/linux/network/dhcpcd:dhcpcd",
+        # RPM + DNF5 package management
+        "//packages/linux/system/pkg-mgmt/rpm:rpm",
+        "//packages/linux/system/pkg-mgmt/dnf5:dnf5",
+        "//packages/linux/system/pkg-mgmt/fedora-repos:fedora-repos",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+initramfs(
+    name = "buckos-fedora-initramfs",
+    rootfs = ":buckos-fedora-rootfs",
+    compression = "gz",
+    init = "/sbin/init",
+    visibility = ["PUBLIC"],
+)
+
+qemu_boot_script(
+    name = "qemu-boot-fedora",
+    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-fedora-initramfs",
+    arch = "x86_64",
+    memory = "2G",
+    cpus = "4",
+    kernel_args = "console=ttyS0 rdinit=/init",
+    extra_args = [
+        "-netdev user,id=net0,hostfwd=tcp::2222-:22",
+        "-device virtio-net-pci,netdev=net0",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# Composable QEMU targets — interactive shell + individual VM tests
+qemu_machine(
+    name = "fedora-vm",
+    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
+    initramfs = ":buckos-fedora-initramfs",
+    memory = "2G",
+    cpus = "4",
+    kernel_args = "console=ttyS0 rdinit=/init",
+    extra_args = [
+        "-netdev user,id=net0,hostfwd=tcp::2222-:22",
+        "-device virtio-net-pci,netdev=net0",
+    ],
+    net = True,
+    tests = {
+        "rpm-works": "rpm -qa >/dev/null",
+        "dnf-works": "dnf5 --version",
+        "lib64-layout": "test -L /lib64 && test -d /usr/lib64",
+        "install-tree": "dnf5 install -y tree && tree --version",
+    },
     visibility = ["PUBLIC"],
 )
 

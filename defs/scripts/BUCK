@@ -97,6 +97,20 @@ export_file(
     visibility = ["PUBLIC"],
 )
 
+# QEMU boot/run/test script generator
+export_file(
+    name = "generate-qemu-script",
+    src = "generate-qemu-script.sh",
+    visibility = ["PUBLIC"],
+)
+
+# QEMU command overlay cpio generator
+export_file(
+    name = "generate-qemu-overlay",
+    src = "generate-qemu-overlay.sh",
+    visibility = ["PUBLIC"],
+)
+
 # ============================================================================
 # Live system scripts
 # ============================================================================
