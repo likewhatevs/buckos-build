@@ -2,15 +2,15 @@ load("//defs:package_defs.bzl", "cmake_package")
 
 cmake_package(
     name = "dnf5",
-    version = "5.2.8.1",
-    src_uri = "https://github.com/rpm-software-management/dnf5/archive/refs/tags/5.2.8.1.tar.gz",
-    sha256 = "82280087c78f8f05a032adf7714ede8b762d02447ee47f6e3b27c1cbec2d41f1",
+    version = "5.4.0.0",
+    src_uri = "https://github.com/rpm-software-management/dnf5/archive/refs/tags/5.4.0.0.tar.gz",
+    sha256 = "9e8ed27088daaaaf9e76120a06cb320e2d6b5c50e75762facf2e5227d946e063",
     deps = [
         "//packages/linux/system/pkg-mgmt/libsolv:libsolv",
         "//packages/linux/system/pkg-mgmt/librepo:librepo",
         "//packages/linux/system/pkg-mgmt/rpm:rpm",
         "//packages/linux/system/libs/data/json-c:json-c",
-        "//packages/linux/system/libs/data/sqlite:sqlite",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/system/libs/crypto/gpgme:gpgme",
     ],
     cmake_args = [

@@ -2,18 +2,18 @@ load("//defs:package_defs.bzl", "cmake_package")
 
 cmake_package(
     name = "rpm",
-    version = "4.20.1",
-    src_uri = "https://github.com/rpm-software-management/rpm/releases/download/rpm-4.20.1/rpm-4.20.1.tar.bz2",
-    sha256 = "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5",
+    version = "6.0.1",
+    src_uri = "https://github.com/rpm-software-management/rpm/releases/download/rpm-6.0.1-release/rpm-6.0.1.tar.bz2",
+    sha256 = "44fd2e1425885288ce8e8da8f18e6b85bd380332c2972554a85860af10f86d0f",
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/core/zstd:zstd",
+        "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/crypto/gpgme:gpgme",
-        "//packages/linux/system/libs/data/popt:popt",
-        "//packages/linux/system/libs/data/sqlite:sqlite",
+        "//packages/linux/dev-libs/popt:popt",
+        "//packages/linux/system/libs/database/sqlite:sqlite",
         "//packages/linux/system/libs/compression/libarchive:libarchive",
-        "//packages/linux/system/scripting/lua:lua",
+        "//packages/linux/lang/lua:lua",
         "//packages/linux/core/file:file",
     ],
     cmake_args = [
