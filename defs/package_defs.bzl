@@ -985,22 +985,22 @@ unset CDPATH
 # Arguments:
 # $1 = install directory (output)
 # $2 = source directory (input)
-# $3 = build scratch directory (output, for writable build)
-# $4 = target architecture (x86_64 or aarch64)
-# $5 = config file (optional)
-# $6 = cross-toolchain directory (optional, for cross-compilation)
+# $3 = target architecture (x86_64 or aarch64)
+# $4 = config file (optional)
+# $5 = cross-toolchain directory (optional, for cross-compilation)
 
 # Save absolute paths before changing directory
 SRC_DIR="$(cd "$2" && pwd)"
 
-# Build scratch directory - passed from Buck2 for hermetic builds
-BUILD_DIR="$3"
+# Build scratch directory - use Buck2's per-action scratch path (cleaned on re-execution,
+# not tracked as a declared output) to avoid persisting the full build tree in buck-out/v2/gen/
+BUILD_DIR="$BUCK_SCRATCH_PATH/build"
 
 # Target architecture
-TARGET_ARCH="$4"
+TARGET_ARCH="$3"
 
 # Cross-toolchain directory (optional)
-CROSS_TOOLCHAIN_DIR="$6"
+CROSS_TOOLCHAIN_DIR="$5"
 
 # Set up cross-toolchain PATH if provided
 if [ -n "$CROSS_TOOLCHAIN_DIR" ] && [ -d "$CROSS_TOOLCHAIN_DIR" ]; then
@@ -1043,18 +1043,18 @@ export INSTALL_PATH="$INSTALL_BASE/boot"
 export INSTALL_MOD_PATH="$INSTALL_BASE"
 mkdir -p "$INSTALL_PATH"
 
-if [ -n "$5" ]; then
+if [ -n "$4" ]; then
     # Convert config path to absolute if it's relative
-    if [[ "$5" = /* ]]; then
-        CONFIG_PATH="$5"
+    if [[ "$4" = /* ]]; then
+        CONFIG_PATH="$4"
     else
-        CONFIG_PATH="$(pwd)/$5"
+        CONFIG_PATH="$(pwd)/$4"
     fi
 fi
 
 # Collect variable-length arguments: patches and module sources
-PATCH_COUNT="${7:-0}"
-shift 7 2>/dev/null || shift $#
+PATCH_COUNT="${6:-0}"
+shift 6 2>/dev/null || shift $#
 PATCH_FILES=()
 for ((i=0; i<PATCH_COUNT; i++)); do
     PATCH_FILES+=("$1")
@@ -1070,7 +1070,6 @@ for ((i=0; i<MODULE_COUNT; i++)); do
 done
 
 # Copy source to writable build directory (buck2 inputs are read-only)
-# BUILD_DIR is passed as $3 from Buck2 for hermetic, deterministic builds
 mkdir -p "$BUILD_DIR"
 
 # Check if we need to force GNU11 standard for GCC 14+ (C23 conflicts with kernel's bool/true/false)
@@ -1216,17 +1215,15 @@ fi
         is_executable = True,
     )
 
-    # Declare a scratch directory for the kernel build (Buck2 inputs are read-only)
-    # Using a declared output ensures deterministic paths instead of /tmp or $$
-    build_scratch_dir = ctx.actions.declare_output(ctx.attrs.name + "-build-scratch", dir = True)
-
     # Build command arguments
+    # The build working directory uses $BUCK_SCRATCH_PATH (per-action temp dir) instead
+    # of declare_output, so the full kernel build tree (~100K files, 2-4G) doesn't persist
+    # in buck-out/v2/gen/ as a tracked artifact.
     cmd = cmd_args([
         "bash",
         script,
         install_dir.as_output(),
         src_dir,
-        build_scratch_dir.as_output(),
         ctx.attrs.arch,  # Target architecture
     ])
 
@@ -1345,8 +1342,8 @@ def _binary_package_impl(ctx: AnalysisContext) -> list[Provider]:
     Environment variables available in install_script:
     - $SRCS: Directory containing extracted source files from all srcs dependencies
     - $OUT: Output/installation directory (like $DESTDIR)
-    - $WORK: Working directory for temporary files
-    - $BUILD_DIR: Build subdirectory
+    - $WORK: Working directory for temporary files (scratch, not persisted in buck-out)
+    - $BUILD_DIR: Build subdirectory under $WORK
     - $PN: Package name
     - $PV: Package version
     """
@@ -1386,12 +1383,14 @@ export PACKAGE_NAME="{name}"
 
 # Directory setup
 mkdir -p "$1"
-mkdir -p "$2"
 export OUT="$(cd "$1" && pwd)"
-export WORK="$(cd "$2" && pwd)"
-export SRCS="$(cd "$3" && pwd)"
+export SRCS="$(cd "$2" && pwd)"
+# Use Buck2's per-action scratch path for the work directory instead of a
+# declared output, so build artifacts don't persist in buck-out/v2/gen/.
+export WORK="$BUCK_SCRATCH_PATH/work"
+mkdir -p "$WORK"
 export BUILD_DIR="$WORK/build"
-shift 3  # Remove OUT, WORK, SRCS from args, remaining are dependency dirs
+shift 2  # Remove OUT, SRCS from args, remaining are dependency dirs
 
 # Set up PATH, LD_LIBRARY_PATH, PKG_CONFIG_PATH from dependency directories
 DEP_PATH=""
@@ -1797,7 +1796,6 @@ done
 
     # Create intermediate combined sources directory
     combined_srcs = ctx.actions.declare_output(ctx.attrs.name + "-combined-srcs", dir = True)
-    work_dir = ctx.actions.declare_output(ctx.attrs.name + "-work", dir = True)
 
     # First combine the sources
     combine_cmd = cmd_args(["bash", combine_script, combined_srcs.as_output()])
@@ -1811,11 +1809,12 @@ done
     )
 
     # Then run the installation
+    # The work directory uses $BUCK_SCRATCH_PATH (per-action temp dir) instead of
+    # declare_output, so build artifacts don't persist in buck-out/v2/gen/ as tracked outputs.
     install_cmd = cmd_args([
         "bash",
         script,
         install_dir.as_output(),
-        work_dir.as_output(),
         combined_srcs,
     ])
 
@@ -5222,8 +5221,10 @@ echo "=== Build parallelism: MAKE_JOBS=$MAKE_JOBS (cores=$(nproc 2>/dev/null || 
 # Buck2's download_source produces a single shared artifact - multiple packages using
 # the same source would modify the same directory, causing patch conflicts.
 # We MUST copy to a package-specific directory to ensure isolation.
+# Use BUCK_SCRATCH_PATH so the copy lives in buck-out/v2/tmp/ (cleaned on re-execution)
+# instead of creating untracked directories under buck-out/v2/gen/.
 if [ -d "$_EBUILD_SRCDIR" ]; then
-    BUILD_SRCDIR="$_EBUILD_DESTDIR/../source"
+    BUILD_SRCDIR="$BUCK_SCRATCH_PATH/source"
     # Ensure destination is writable before removing (Buck cached artifacts may be read-only)
     if [ -d "$BUILD_SRCDIR" ]; then
         chmod -R u+w "$BUILD_SRCDIR" 2>/dev/null || true

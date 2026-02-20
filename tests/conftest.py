@@ -196,6 +196,7 @@ def qemu_vm(buck2, repo_root):
     result = buck2(
         "build", "//packages/linux/system:qemu-boot-fedora",
         "-c", "use.fedora=true",
+        "-c", "buckos.use_host_toolchain=true",
         "--show-full-output",
         timeout=600,
     )
