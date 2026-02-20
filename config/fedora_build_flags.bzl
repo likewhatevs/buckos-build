@@ -230,12 +230,14 @@ def fedora_cmake_args():
 def fedora_meson_args():
     """Get Meson arguments for Fedora builds."""
     flags = get_fedora_flags()
+    # Note: -Dbuildtype is NOT included here because the meson eclass already
+    # passes --buildtype via the setup command. Meson errors when buildtype is
+    # specified as both -Dbuildtype and --buildtype.
     return [
         "-Dc_args={}".format(" ".join(flags["cflags"])),
         "-Dcpp_args={}".format(" ".join(flags["cxxflags"])),
         "-Dc_link_args={}".format(" ".join(flags["ldflags"])),
         "-Dcpp_link_args={}".format(" ".join(flags["ldflags"])),
-        "-Dbuildtype=release",
     ]
 
 # =============================================================================
