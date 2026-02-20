@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
-      - run: buck2 targets //...
+      - run: buck2 -c "cell_aliases.${{ secrets.PRELUDE_0 }}=buckos" -c "cell_aliases.${{ secrets.PRELUDE_1 }}=buckos" -c "cell_aliases.${{ secrets.PRELUDE_2 }}=buckos" targets //...
 
   bxl:
     name: bxl graph tests
@@ -31,7 +31,7 @@ jobs:
           for bxl in tests/graph/test_*.bxl; do
             name=$(basename "$bxl" .bxl)
             echo "::group::$name"
-            buck2 bxl "//tests/graph/${name}.bxl:${name}" || failed=1
+            buck2 bxl -c cell_aliases.${{ secrets.PRELUDE_0 }}=buckos -c cell_aliases.${{ secrets.PRELUDE_1 }}=buckos -c cell_aliases.${{ secrets.PRELUDE_2 }}=buckos "//tests/graph/${name}.bxl:${name}" || failed=1
             echo "::endgroup::"
           done
           exit $failed
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
-      - run: buck2 test //tests:
+      - run: "buck2 test -c cell_aliases.${{ secrets.PRELUDE_0 }}=buckos -c cell_aliases.${{ secrets.PRELUDE_1 }}=buckos -c cell_aliases.${{ secrets.PRELUDE_2 }}=buckos //tests:"
 
   required:
     name: required-checks
