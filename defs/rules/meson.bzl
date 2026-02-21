@@ -126,11 +126,12 @@ def _src_compile(ctx, configured):
     return output
 
 def _src_install(ctx, built):
-    """Run install into the output prefix."""
+    """Run ninja install into the output prefix."""
     output = ctx.actions.declare_output("installed", dir = True)
     cmd = cmd_args(ctx.attrs._install_tool[RunInfo])
     cmd.add("--build-dir", built)
     cmd.add("--prefix", output.as_output())
+    cmd.add("--build-system", "ninja")
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):

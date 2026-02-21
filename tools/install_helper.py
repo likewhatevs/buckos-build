@@ -59,6 +59,8 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--build-system", choices=["make", "ninja"], default="make",
+                        help="Build system to use (default: make)")
     parser.add_argument("--post-cmd", action="append", dest="post_cmds", default=[],
                         help="Shell command to run in prefix dir after install (repeatable)")
     args = parser.parse_args()
@@ -88,12 +90,21 @@ def main():
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
 
-    cmd = [
-        "make",
-        "-C", build_dir,
-        f"{args.destdir_var}={prefix}",
-        "install",
-    ]
+    if args.build_system == "ninja":
+        # Ninja uses DESTDIR as an env var, not a command-line arg
+        os.environ[args.destdir_var] = prefix
+        cmd = [
+            "ninja",
+            "-C", build_dir,
+            "install",
+        ]
+    else:
+        cmd = [
+            "make",
+            "-C", build_dir,
+            f"{args.destdir_var}={prefix}",
+            "install",
+        ]
     # Resolve paths in make args (e.g. CC=buck-out/.../gcc → absolute)
     for arg in args.make_args:
         if "=" in arg:

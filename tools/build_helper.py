@@ -97,6 +97,18 @@ def main():
         shutil.rmtree(output_dir)
     shutil.copytree(build_dir, output_dir, symlinks=True)
 
+    # Rewrite absolute paths in build.ninja — meson embeds the configured
+    # directory's absolute path into build rules.  After copying to output_dir
+    # those paths are stale.
+    ninja_file = os.path.join(output_dir, "build.ninja")
+    if os.path.isfile(ninja_file):
+        with open(ninja_file, "r") as f:
+            content = f.read()
+        if build_dir in content:
+            content = content.replace(build_dir, output_dir)
+            with open(ninja_file, "w") as f:
+                f.write(content)
+
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
     os.environ["CCACHE_DISABLE"] = "1"
