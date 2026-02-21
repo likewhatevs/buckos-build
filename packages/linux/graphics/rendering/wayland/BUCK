@@ -172,6 +172,10 @@ meson_package(
     ],
     # For cross-compilation, find the native wayland-scanner from exec_bdepend
     pre_configure = """
+# Fix wayland-util.h for C++ consumers: __STDC_VERSION__ is undefined in C++
+# mode, triggering -Werror=undef in KDE builds (ECM enables -Wundef globally).
+sed -i 's/#if __STDC_VERSION__ >= 202311L/#if defined(__STDC_VERSION__) \&\& __STDC_VERSION__ >= 202311L/g' src/wayland-util.h
+
 # Find native wayland-scanner from exec_bdepend
 WAYLAND_SCANNER=""
 IFS=':' read -ra _EXEC_BDEP_ARRAY <<< "${EXEC_BDEP_BASE_DIRS:-}"
