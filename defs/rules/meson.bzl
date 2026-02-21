@@ -123,6 +123,12 @@ def _src_compile(ctx, configured, source):
     cmd.add(cmd_args(hidden = source))
     for dep in ctx.attrs.deps:
         cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
+        if PackageInfo in dep:
+            prefix = dep[PackageInfo].prefix
+        else:
+            prefix = dep[DefaultInfo].default_outputs[0]
+        cmd.add("--path-prepend", cmd_args(prefix, format = "{}/usr/bin"))
+        cmd.add("--path-prepend", cmd_args(prefix, format = "{}/usr/sbin"))
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):

@@ -190,7 +190,7 @@ def _src_compile(ctx, configured):
     for pre_cmd in ctx.attrs.pre_build_cmds:
         cmd.add("--pre-cmd", pre_cmd)
     for arg in ctx.attrs.make_args:
-        cmd.add("--make-arg", arg)
+        cmd.add(cmd_args("--make-arg=", arg, delimiter = ""))
 
     ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
     return output
@@ -225,7 +225,7 @@ def _src_install(ctx, built):
     if ctx.attrs.install_prefix_var:
         cmd.add("--destdir-var", ctx.attrs.install_prefix_var)
     for arg in ctx.attrs.make_args:
-        cmd.add("--make-arg", arg)
+        cmd.add(cmd_args("--make-arg=", arg, delimiter = ""))
 
     # Post-install commands (run in the prefix dir after make install)
     for post_cmd in ctx.attrs.post_install_cmds:
