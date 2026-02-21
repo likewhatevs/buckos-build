@@ -186,25 +186,55 @@ def _normalize_use_configure(use_configure):
     return result
 
 def _normalize_use_deps(use_deps):
-    """Normalize old-style list use_deps to single target.
+    """Normalize old-style use_deps to new format.
 
-    Old format:
-        {"ssl": ["//path:openssl"]}
+    Handles two old patterns:
 
-    New format:
-        {"ssl": "//path:openssl"}
+    1. List values:
+        {"ssl": ["//path:openssl"]}  ->  {"ssl": "//path:openssl"}
+
+    2. Negative flag keys (Gentoo-style):
+        {"systemd": "//path:systemd", "-systemd": "//path:eudev"}
+        ->  {"systemd": ("//path:systemd", "//path:eudev")}
+
+    A tuple value means (on_dep, off_dep) — include on_dep when flag is
+    on, off_dep when flag is off.
     """
-    result = {}
+
+    # First pass: unwrap single-element lists
+    unwrapped = {}
     for key, value in use_deps.items():
         if type(value) == "list":
             if len(value) == 1:
-                result[key] = value[0]
+                unwrapped[key] = value[0]
             elif len(value) > 1:
-                # Multiple deps for one flag — keep first, warn
-                result[key] = value[0]
+                unwrapped[key] = value[0]
             # empty list = no dep, skip
         else:
+            unwrapped[key] = value
+
+    # Second pass: pair positive and negative keys
+    negative_keys = {}
+    for key, value in unwrapped.items():
+        if key.startswith("-"):
+            negative_keys[key[1:]] = value
+
+    result = {}
+    for key, value in unwrapped.items():
+        if key.startswith("-"):
+            continue  # handled via positive key lookup
+        off_dep = negative_keys.get(key)
+        if off_dep:
+            result[key] = (value, off_dep)
+        else:
             result[key] = value
+
+    # Handle negative keys without a matching positive key
+    for neg_flag, dep in negative_keys.items():
+        if neg_flag not in result:
+            # No positive key — dep only when flag is off
+            result[neg_flag] = (None, dep)
+
     return result
 
 def package(
@@ -339,7 +369,26 @@ def package(
     normalized_use_deps = _normalize_use_deps(use_deps)
     all_deps = list(build_kwargs.pop("deps", []))
     for flag, dep in normalized_use_deps.items():
-        all_deps += use_dep(flag, dep)
+        if type(dep) == "tuple":
+            on_dep, off_dep = dep
+            if on_dep and off_dep:
+                # Both on and off deps: select between them
+                all_deps += select({
+                    "//use/constraints:{}-on".format(flag): [on_dep],
+                    "//use/constraints:{}-off".format(flag): [off_dep],
+                    "DEFAULT": [off_dep],
+                })
+            elif on_dep:
+                all_deps += use_dep(flag, on_dep)
+            else:
+                # off_dep only: include when flag is off
+                all_deps += select({
+                    "//use/constraints:{}-on".format(flag): [],
+                    "//use/constraints:{}-off".format(flag): [off_dep],
+                    "DEFAULT": [off_dep],
+                })
+        else:
+            all_deps += use_dep(flag, dep)
 
     # -- 3. Normalize and resolve USE-conditional configure args ------------
     normalized_use_configure = _normalize_use_configure(use_configure)

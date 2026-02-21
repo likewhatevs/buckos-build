@@ -1830,14 +1830,14 @@ filegroup(
 http_file(
     name = "buckos-build-tarball",
     urls = ["https://github.com/buck-os/buckos-build/archive/refs/heads/main.tar.gz"],
-    sha256 = "",
+    sha256 = "6a1ab2fd9addeb0c5ee1dcfca31653b0288821fa6a2319a0e1c1e8c820535f5c",
     out = "buckos-build-main.tar.gz",
 )
 
 http_file(
     name = "buck2-prebuilt",
     urls = ["https://github.com/facebook/buck2/releases/download/2026-01-02/buck2-x86_64-unknown-linux-gnu.zst"],
-    sha256 = "",
+    sha256 = "42df0619771177915f274cbab930734a2f706a77ec537197c19e70702f35187a",
     out = "buck2-x86_64-unknown-linux-gnu.zst",
 )
 
