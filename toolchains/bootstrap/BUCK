@@ -2305,6 +2305,11 @@ sed -i 's|c++tools ||g' Makefile.in || true
 # Fix libcody C++ version check
 sed -i 's/__cplusplus != 201103/__cplusplus < 201103/' libcody/configure || true
 
+# GCC 14's libiberty/obstack.c expects the struct layout from GCC's bundled
+# include/obstack.h, but glibc >=2.41 changed the obstack struct which breaks
+# compilation.  Copy the bundled header so it's found before the system one.
+cp include/obstack.h libiberty/obstack.h
+
 echo "Source prepared for Stage 2 native GCC build"
 ''',
 
@@ -2346,9 +2351,11 @@ mkdir -p build && cd build
     --enable-plugin \
     --with-linker-hash-style=gnu
 
-# Remove c++tools from Makefiles
-sed -i 's/all-c++tools//g' Makefile || true
-sed -i 's/configure-c++tools//g' Makefile || true
+# Remove c++tools from Makefiles — clean up all target references
+# and any empty entries left behind to avoid "maybe-install-" errors
+sed -i -e 's/c++tools//g' Makefile || true
+# Clean up doubled spaces and trailing spaces in variable assignments
+sed -i -e 's/  */ /g' -e 's/ *$//' Makefile || true
 
 echo "Native GCC Stage 2 configured"
 ''',
