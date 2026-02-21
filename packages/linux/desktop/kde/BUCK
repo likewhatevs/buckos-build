@@ -3687,7 +3687,32 @@ sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.t
 sed -i '/add_subdirectory(killer)/d' src/helpers/CMakeLists.txt
 # Remove unused kkeyserver.h include (only available with X11 kwindowsystem)
 sed -i '/#include <kkeyserver.h>/d' src/tabbox/tabbox.cpp
-
+# Remove Qt6Sensors (not built in Qt6, only used for orientation detection on tablets)
+sed -i 's/Sensors//' CMakeLists.txt
+sed -i '/Qt::Sensors/d' src/CMakeLists.txt
+# Replace Qt Sensor includes with our stub
+sed -i 's|#include <QOrientationReading>|#include "utils/orientationsensor.h"|' src/outputconfigurationstore.cpp
+sed -i 's|#include <QOrientationSensor>||' src/outputconfigurationstore.cpp
+# Create stub header and implementation for orientationsensor (replaces Qt6Sensors dependency)
+cat > src/utils/orientationsensor.h << 'SENSOR_EOF'
+#pragma once
+#include <QObject>
+class QOrientationReading { public: enum Orientation { Undefined, TopUp, TopDown, LeftUp, RightUp, FaceUp, FaceDown }; Orientation orientation() const { return Undefined; } };
+namespace KWin {
+class OrientationSensor : public QObject { Q_OBJECT public: explicit OrientationSensor(QObject *parent = nullptr); ~OrientationSensor() override; QOrientationReading *reading() const; void setEnabled(bool); bool isEnabled() const; Q_SIGNALS: void orientationChanged(); };
+}
+SENSOR_EOF
+cat > src/utils/orientationsensor.cpp << 'SENSOR_CPP'
+#include "orientationsensor.h"
+namespace KWin {
+OrientationSensor::OrientationSensor(QObject *parent) : QObject(parent) {}
+OrientationSensor::~OrientationSensor() = default;
+QOrientationReading *OrientationSensor::reading() const { return nullptr; }
+void OrientationSensor::setEnabled(bool) {}
+bool OrientationSensor::isEnabled() const { return false; }
+}
+#include "moc_orientationsensor.cpp"
+SENSOR_CPP
 """],
     src_configure = KDE_ZSTD_LDFLAGS + KDE_HOST_LD_SETUP + """export CXXFLAGS="$CXXFLAGS -Wno-error=unused-but-set-variable -Wno-error=unused-parameter"
 """ + KDE_CMAKE_CONFIGURE,
@@ -4407,6 +4432,12 @@ package(
     ] + KDE_DISABLE_PYTHON_ARGS,
     patches = ["patches/plasma-workspace-6.2.4-wayland-only.patch"],
     pre_configure_cmds = ["""
+# Remove Qt6Positioning requirement (not built in Qt6, only used for location-based color correction)
+sed -i 's/Positioning//' CMakeLists.txt
+# Remove colorcorrect location updater (depends on Qt6::Positioning)
+sed -i '/add_subdirectory(kded)/d' libcolorcorrect/CMakeLists.txt || true
+# Disable autostart kcm - systemd header triggers -Werror=undef with __STDC_VERSION__ in C++ mode
+sed -i '/add_subdirectory.*autostart/d' kcms/CMakeLists.txt || true
 # Disable fonts kcm (requires X11 Qt6X11Extras)
 sed -i '/add_subdirectory.*fonts/d' kcms/CMakeLists.txt || true
 # Create stub headers for KX11Extras and KStartupInfo (Wayland-only build)
