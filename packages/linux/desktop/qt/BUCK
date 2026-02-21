@@ -900,58 +900,11 @@ package(
     homepage = "https://api.kde.org/polkit-qt-1/html/",
     license = "LGPL-2",
 
-    # Custom src_configure to pass EGL/GLESv2 as CMake cache variables
-    src_configure = """
-# Find mesa library path from CMAKE_PREFIX_PATH (already set by ebuild system)
-MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa | head -1)
-if [ -z "$MESA_PATH" ]; then
-    echo "Error: Mesa path not found in CMAKE_PREFIX_PATH"
-    exit 1
-fi
-
-EGL_LIB="$MESA_PATH/lib64/libEGL.so"
-GLESV2_LIB="$MESA_PATH/lib64/libGLESv2.so"
-EGL_INCLUDE="$MESA_PATH/include"
-
-echo "=== EGL/GLESv2 Configuration for polkit-qt ==="
-echo "MESA_PATH=$MESA_PATH"
-echo "EGL_LIB=$EGL_LIB"
-echo "GLESV2_LIB=$GLESV2_LIB"
-
-# Build CMAKE_PREFIX_PATH argument
-CMAKE_PREFIX_PATH_ARG=""
-if [ -n "${CMAKE_PREFIX_PATH:-}" ]; then
-    CMAKE_PREFIX_PATH_ARG="-DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-fi
-
-# Run cmake configure with EGL/GLESv2 cache variables pre-set
-rm -rf "$S/build"
-mkdir -p "$S/build"
-
-cmake -S "$S" -B "$S/build" \\
-    -DCMAKE_INSTALL_PREFIX="${EPREFIX:-/usr}" \\
-    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}" \\
-    -DCMAKE_INSTALL_LIBDIR="${LIBDIR:-lib64}" \\
-    -DCMAKE_C_FLAGS="${CFLAGS:-}" \\
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS:-}" \\
-    -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-}" \\
-    -DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS:-}" \\
-    -DCMAKE_MODULE_LINKER_FLAGS="${LDFLAGS:-}" \\
-    $CMAKE_PREFIX_PATH_ARG \\
-    -DEGL_FOUND=TRUE \\
-    -DEGL_LIBRARY="$EGL_LIB" \\
-    -DEGL_INCLUDE_DIR="$EGL_INCLUDE" \\
-    -DGLESv2_FOUND=TRUE \\
-    -DGLESv2_LIBRARY="$GLESV2_LIB" \\
-    -DGLESv2_INCLUDE_DIR="$EGL_INCLUDE" \\
-    -DHAVE_EGL=TRUE \\
-    -DHAVE_GLESv2=TRUE \\
-    -DBUILD_EXAMPLES=OFF \\
-    -DQT_MAJOR_VERSION=6 \\
-    -DQT_NO_PACKAGE_VERSION_CHECK=TRUE
-""",
-
-    configure_args = [],
+    cmake_defines = [
+        "QT_MAJOR_VERSION=6",
+        "QT_NO_PACKAGE_VERSION_CHECK=TRUE",
+        "BUILD_EXAMPLES=OFF",
+    ],
 
     deps = [
         ":qt6",

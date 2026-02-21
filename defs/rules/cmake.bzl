@@ -138,6 +138,19 @@ def _src_compile(ctx, configured, source):
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
+    # Set LD_LIBRARY_PATH so build tools (moc, rcc, qtwaylandscanner,
+    # etc.) can find shared libraries from deps at runtime.
+    lib_paths = []
+    for dep in ctx.attrs.deps:
+        if PackageInfo in dep:
+            prefix = dep[PackageInfo].prefix
+        else:
+            prefix = dep[DefaultInfo].default_outputs[0]
+        lib_paths.append(cmd_args(prefix, format = "{}/usr/lib64"))
+        lib_paths.append(cmd_args(prefix, format = "{}/usr/lib"))
+    if lib_paths:
+        cmd.add("--env", cmd_args("LD_LIBRARY_PATH=", cmd_args(lib_paths, delimiter = ":"), delimiter = ""))
+
     for arg in ctx.attrs.make_args:
         cmd.add("--make-arg", arg)
 
