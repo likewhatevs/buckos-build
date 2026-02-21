@@ -4,91 +4,27 @@ package(
     build_rule = "autotools",
     name = "fontconfig",
     url = "https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.15.0.tar.xz",
-
     sha256 = "63a0658d0e06e0fa886106452b58ef04f21f58202ea02a94c39de0d3335d7c0e",
+    version = "2.15.0",
+    description = "Library for configuring and customizing font access",
+    homepage = "https://www.freedesktop.org/wiki/Software/fontconfig/",
+    license = "MIT",
     use_configure = {
         "nls": ("--enable-nls", "--disable-nls"),
     },
-    version = "2.15.0",
-    description = "Library for configuring and customizing font access",  # Cache invalidation: 2026-01-30
-    homepage = "https://www.freedesktop.org/wiki/Software/fontconfig/",
-    license = "MIT",
-    # gperf is needed to generate hash tables during build
-    bdepend = [
-        "//packages/linux/dev-tools/dev-utils/gperf:gperf",
-    ],
     configure_args = [
         "--disable-static",
         "--sysconfdir=/etc",
         "--localstatedir=/var",
         "--disable-docs",
     ],
-    # Add freetype2 include path to CPPFLAGS for compilation
-    pre_configure = """
-# Set up pkg-config to find freetype2
-export FREETYPE_CFLAGS="$(pkg-config --cflags freetype2 2>/dev/null || echo '-I/usr/include/freetype2')"
-export FREETYPE_LIBS="$(pkg-config --libs freetype2 2>/dev/null || echo '-lfreetype')"
-export CPPFLAGS="$CPPFLAGS $FREETYPE_CFLAGS"
-echo "FREETYPE_CFLAGS=$FREETYPE_CFLAGS"
-echo "FREETYPE_LIBS=$FREETYPE_LIBS"
-""",
-    src_compile = """
-# Get freetype2 include path from pkg-config
-FREETYPE_CFLAGS="$(pkg-config --cflags freetype2 2>/dev/null || echo '-I/usr/include/freetype2')"
-echo "Using FREETYPE_CFLAGS=$FREETYPE_CFLAGS"
-
-# Ensure GCC internal headers (like stdatomic.h) are available
-# The bootstrap toolchain has stdatomic.h in GCC's internal include directory
-GCC_INTERNAL_INCLUDES=""
-if [ -n "$CC" ]; then
-    GCC_INCLUDE_DIR="$($CC -print-file-name=include 2>/dev/null || true)"
-    if [ -d "$GCC_INCLUDE_DIR" ] && [ -f "$GCC_INCLUDE_DIR/stdatomic.h" ]; then
-        GCC_INTERNAL_INCLUDES="-isystem $GCC_INCLUDE_DIR"
-        echo "Found GCC internal includes: $GCC_INCLUDE_DIR"
-    fi
-fi
-
-# Fix libtool .la file cross-compilation issue:
-# Dep .la files in read-only Buck2 artifacts reference absolute host paths
-# like /usr/lib64/libfreetype.la that don't exist on the build host.
-# Fix: Strip dependency_libs AND fix libdir in all dep .la files
-_LA_OVERRIDE=$(mktemp -d)
-_la_count=0
-shopt -s nullglob
-for lib_dir in $(echo "$LDFLAGS" | tr ' ' '\\n' | sed -n 's/^-L//p'); do
-    for la_file in "$lib_dir"/*.la; do
-        [ -f "$la_file" ] || continue
-        # Strip dependency_libs and fix libdir to point to the actual lib directory
-        sed -e "s|dependency_libs='[^']*'|dependency_libs=''|" \\
-            -e "s|^libdir=.*|libdir='$lib_dir'|" \\
-            "$la_file" > "$_LA_OVERRIDE/$(basename "$la_file")"
-        _la_count=$((_la_count + 1))
-    done
-done
-shopt -u nullglob
-echo "Copied $_la_count .la files to override dir: $_LA_OVERRIDE"
-ls "$_LA_OVERRIDE/" | head -20
-_NEW_LDFLAGS="-L$_LA_OVERRIDE $LDFLAGS"
-echo "LDFLAGS starts with: $(echo "$_NEW_LDFLAGS" | cut -c1-200)"
-
-# Also need to set FREETYPE_LIBS to point to the correct library path
-FREETYPE_LIBS="$(pkg-config --libs freetype2 2>/dev/null || echo '-lfreetype')"
-echo "Using FREETYPE_LIBS=$FREETYPE_LIBS"
-
-# Build with proper include paths (GCC internal + freetype2 + existing CPPFLAGS)
-FULL_CPPFLAGS="$GCC_INTERNAL_INCLUDES $CPPFLAGS $FREETYPE_CFLAGS"
-echo "CPPFLAGS: $FULL_CPPFLAGS"
-make -j${MAKEOPTS:-$(nproc)} ${EXTRA_EMAKE:-} LDFLAGS="$_NEW_LDFLAGS" CPPFLAGS="$FULL_CPPFLAGS" FREETYPE_LIBS="$FREETYPE_LIBS"
-""",
     deps = [
         "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/data/expat:expat",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/compression/bzip2:bzip2",
-    ],
-    # gperf is needed to generate fcobjshash.h during build
-    exec_bdepend = [
+        # gperf generates hash tables during build
         "//packages/linux/dev-tools/dev-utils/gperf:gperf",
     ],
     visibility = ["PUBLIC"],

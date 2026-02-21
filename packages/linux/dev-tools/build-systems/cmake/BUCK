@@ -3,58 +3,27 @@ load("//defs:package.bzl", "package")
 # =============================================================================
 # CMake - Cross-platform build system
 # =============================================================================
-# NOTE: cmake uses its own bootstrap script, not autotools.
-# We use custom src_configure/src_compile/src_install phases.
+# CMake uses its own bootstrap script, not autotools configure.
+# skip_configure + pre_build_cmds runs bootstrap in the copied source tree,
+# then the normal make phase builds from the generated Makefile.
 
 package(
     build_rule = "autotools",
     name = "cmake",
     version = "4.2.0",
-    # Use host toolchain - cmake needs C++ and is used as a build tool
-    use_bootstrap = False,
-    use_configure = {
-        "dap": ("--enable-dap", "--disable-dap"),
-        "gui": ("--enable-gui", "--disable-gui"),
-        "ncurses": ("--with-ncurses", "--without-ncurses"),
-    },
     url = "https://github.com/Kitware/CMake/releases/download/v4.2.0/cmake-4.2.0.tar.gz",
     sha256 = "4104e94657d247c811cb29985405a360b78130b5d51e7f6daceb2447830bd579",
     description = "Cross-platform, open-source build system",
     homepage = "https://cmake.org/",
     license = "BSD-3-Clause",
-
-    # CMAKE uses its own bootstrap script, not autotools configure
-    # NOTE: --no-system-cppdap avoids needing to build cppdap separately
-    # NOTE: Disable ccmake (curses GUI) to avoid NCURSES_BOOL/std::function conflict with GCC 15
-    # NOTE: When using host toolchain, use bundled libraries to avoid glibc version mismatch
-    src_configure = """
-echo "=== Configuring cmake with bootstrap ==="
-# CRITICAL: CMake is a host tool - use host compiler for bootstrap, not cross-compiler
-# The cross-compiler's libstdc++ (GCC 14.3) requires GLIBCXX_3.4.32 which the host may not have
-# Unset cross-compiler variables - bootstrap will find host g++
-unset CC CXX CFLAGS CXXFLAGS LDFLAGS
-# Run bootstrap with host compiler and bundled libraries
-# We don't use --system-* options because the deps are in buck-out paths that bootstrap can't find
-./bootstrap \\
-    --prefix=/usr \\
-    --parallel=${MAKEOPTS:-$(nproc)} \\
-    --no-qt-gui \\
-    -- -DCMAKE_USE_OPENSSL=OFF \\
-       -DBUILD_CursesDialog=OFF
-""",
-
-    src_compile = """
-echo "=== Building cmake ==="
-make -j${MAKEOPTS:-$(nproc)}
-""",
-
-    src_install = """
-echo "=== Installing cmake ==="
-make install DESTDIR="$DESTDIR"
-""",
-
-    # No external deps - cmake uses bundled versions when building with host toolchain
-    # This avoids glibc version mismatches between host and target libraries
+    skip_configure = True,
+    pre_build_cmds = [
+        # CMake is a host tool — unset cross-compiler vars so bootstrap
+        # finds the host g++.  Bundled libraries avoid glibc version
+        # mismatches.  Disable ccmake (curses GUI) to avoid
+        # NCURSES_BOOL/std::function conflict with GCC 15.
+        "unset CC CXX CFLAGS CXXFLAGS LDFLAGS CPPFLAGS && ./bootstrap --prefix=/usr --parallel=$(nproc) --no-qt-gui -- -DCMAKE_USE_OPENSSL=OFF -DBUILD_CursesDialog=OFF",
+    ],
     deps = [],
     visibility = ["PUBLIC"],
 )
