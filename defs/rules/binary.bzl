@@ -106,7 +106,7 @@ binary_package = rule(
         "version": attrs.string(),
 
         # Build configuration
-        "install_script": attrs.string(),
+        "install_script": attrs.string(default = "cp -a \"$SRCS\"/. \"$OUT/\""),
         "env": attrs.dict(attrs.string(), attrs.string(), default = {}),
         "deps": attrs.list(attrs.dep(), default = []),
         "patches": attrs.list(attrs.source(), default = []),
