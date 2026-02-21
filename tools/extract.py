@@ -70,10 +70,16 @@ def extract_tar_native(archive, output, strip_components, mode):
             # templates like system-systemd\x2dcryptsetup.slice.
             if "\\" in member.name:
                 continue
-            # Skip self-referential symlinks (e.g. include/alsa -> .)
-            # Buck2 can't materialise them and they serve no purpose.
-            if member.issym() and member.linkname in ("", "."):
-                continue
+            # Skip problematic symlinks that Buck2 can't materialise:
+            # - empty or "." targets (e.g. include/alsa -> .)
+            # - self-referencing (e.g. itself -> itself)
+            if member.issym():
+                target = member.linkname
+                if target in ("", "."):
+                    continue
+                # Self-referencing: target equals own filename
+                if target == os.path.basename(member.name):
+                    continue
             # Security: prevent path traversal
             dest = os.path.join(output, member.name)
             if not os.path.abspath(dest).startswith(os.path.abspath(output)):
