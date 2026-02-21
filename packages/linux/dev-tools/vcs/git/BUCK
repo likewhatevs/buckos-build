@@ -12,33 +12,13 @@ package(
     homepage = "https://git-scm.com/",
     license = "GPL-2",
 
-    # USE flags this package supports
-
-    # Default USE flags
-
-    # Conditional dependencies
-    use_deps = {
-        "curl": "//packages/linux/system/libs/network/curl:curl",
-        "perl": "//packages/linux/lang/perl:perl",
-        "python": "//packages/linux/lang/python:python",
-        "pcre2": "//packages/linux/system/libs/utility/pcre2:pcre2",
-        "nls": "//packages/linux/dev-libs/misc/gettext:gettext",
-    },
-
-    # Conditional configure arguments
-    use_configure = {
-        "curl": ("--with-curl", "--without-curl"),
-        "nls": ("--enable-nls", "--disable-nls"),
-        "pcre2": ("--with-libpcre2", "--without-libpcre2"),
-        "perl": ("--with-perl=/usr/bin/perl", "--without-perl"),
-        "python": ("--with-python=/usr/bin/python3", "--without-python"),
-    },
-
-    # Base configure arguments (always applied)
     configure_args = [
         "--with-expat",
         "--with-openssl",
         "--with-zlib",
+        "--without-curl",
+        "--without-libpcre2",
+        "--without-python",
         # Cross-compilation cache variables (cannot run test programs on target)
         "ac_cv_iconv_omits_bom=no",
         "ac_cv_fread_reads_directories=no",
@@ -55,6 +35,7 @@ package(
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/data/expat:expat",
+        "//packages/linux/lang/perl:perl",
     ],
     visibility = ["PUBLIC"],
 )
