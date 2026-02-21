@@ -43,6 +43,8 @@ BuildToolchainInfo = provider(fields = [
     "target_triple",    # str
     "sysroot",          # artifact | None: buckos-built sysroot (musl/glibc headers + libs)
     "python",           # RunInfo | None: bootstrap Python interpreter
+    "extra_cflags",     # list[str]: toolchain-injected CFLAGS (e.g. hardening flags)
+    "extra_ldflags",    # list[str]: toolchain-injected LDFLAGS (e.g. -fuse-ld=mold)
 ])
 
 BootstrapStageInfo = provider(fields = [
