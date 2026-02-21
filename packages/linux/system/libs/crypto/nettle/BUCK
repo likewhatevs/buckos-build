@@ -14,29 +14,19 @@ package(
 
     use_configure = {
         "asm": ("--enable-assembler", "--disable-assembler"),
-        "cpu_flags_arm_aes": ("--enable-cpu_flags_arm_aes", "--disable-cpu_flags_arm_aes"),
-        "cpu_flags_arm_neon": ("--enable-cpu_flags_arm_neon", "--disable-cpu_flags_arm_neon"),
-        "cpu_flags_arm_sha1": ("--enable-cpu_flags_arm_sha1", "--disable-cpu_flags_arm_sha1"),
-        "cpu_flags_arm_sha2": ("--enable-cpu_flags_arm_sha2", "--disable-cpu_flags_arm_sha2"),
-        "cpu_flags_ppc_altivec": ("--enable-cpu_flags_ppc_altivec", "--disable-cpu_flags_ppc_altivec"),
-        "cpu_flags_ppc_vsx2": ("--enable-cpu_flags_ppc_vsx2", "--disable-cpu_flags_ppc_vsx2"),
-        "cpu_flags_ppc_vsx3": ("--enable-cpu_flags_ppc_vsx3", "--disable-cpu_flags_ppc_vsx3"),
-        "cpu_flags_x86_aes": ("--enable-cpu_flags_x86_aes", "--disable-cpu_flags_x86_aes"),
-        "cpu_flags_x86_pclmul": ("--enable-cpu_flags_x86_pclmul", "--disable-cpu_flags_x86_pclmul"),
-        "cpu_flags_x86_sha": ("--enable-cpu_flags_x86_sha", "--disable-cpu_flags_x86_sha"),
         "doc": ("--enable-documentation", "--disable-documentation"),
-        "gmp": ("--enable-public-key", "--disable-public-key"),
         "openssl": ("--enable-openssl", "--disable-openssl"),
         "static-libs": ("--enable-static", "--disable-static"),
     },
 
     use_deps = {
         "openssl": "//packages/linux/system/libs/crypto/openssl:openssl",
-        "gmp": "//packages/linux/system/libs/utility/gmp:gmp",
     },
 
     configure_args = [
         "--enable-shared",
+        # hogweed (public key crypto) requires gmp — gnutls needs it
+        "--enable-public-key",
     ],
 
     pre_configure_cmds = [
@@ -45,6 +35,7 @@ package(
     ],
 
     deps = [
+        "//packages/linux/system/libs/utility/gmp:gmp",
         "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
         "//packages/linux/dev-tools/build-systems/automake:automake",
         "//packages/linux/dev-tools/build-systems/libtool:libtool",
