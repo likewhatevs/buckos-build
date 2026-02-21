@@ -1,30 +1,23 @@
 load("//defs:package.bzl", "package")
 
+# wireless-tools' Makefile doesn't support DESTDIR — install paths must
+# be specified explicitly as absolute paths.
 package(
     name = "wireless-tools",
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "binary",
     version = "29",
     url = "https://hewlettpackard.github.io/wireless-tools/wireless_tools.29.tar.gz",
     sha256 = "6fb80935fe208538131ce2c4178221bab1078a1656306bce8909c19887e2e5a1",
-    use_configure = {
-        "multicall": ("--enable-multicall", "--disable-multicall"),
-    },
 
-    make_args = [
-        "PREFIX=/usr",
-        "INSTALL_DIR=/usr/sbin",
-        "INSTALL_LIB=/usr/lib",
-        "INSTALL_INC=/usr/include",
-        "INSTALL_MAN=/usr/share/man",
-    ],
-
-    post_install = """
-make install PREFIX=/usr INSTALL_DIR="$DESTDIR/usr/sbin" INSTALL_LIB="$DESTDIR/usr/lib" INSTALL_INC="$DESTDIR/usr/include" INSTALL_MAN="$DESTDIR/usr/share/man"
+    install_script = """
+cd "$SRCS"
+make -j$(nproc) PREFIX=/usr
+make install PREFIX=/usr \
+    INSTALL_DIR="$OUT/usr/sbin" \
+    INSTALL_LIB="$OUT/usr/lib" \
+    INSTALL_INC="$OUT/usr/include" \
+    INSTALL_MAN="$OUT/usr/share/man"
 """,
-
-    deps = [
-    ],
 
     description = "Tools for manipulating Linux Wireless Extensions (iwconfig, iwlist, etc.)",
     homepage = "https://hewlettpackard.github.io/wireless-tools/",
