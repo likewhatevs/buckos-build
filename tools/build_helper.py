@@ -167,13 +167,20 @@ def main():
             with open(ninja_file, "w") as f:
                 f.write(content)
     elif os.path.isfile(ninja_file):
-        # Meson / plain ninja — simple string replacement
+        # Meson / plain ninja — string replacement + suppress regeneration
         with open(ninja_file, "r") as f:
             content = f.read()
         if build_dir in content:
             content = content.replace(build_dir, output_dir)
-            with open(ninja_file, "w") as f:
-                f.write(content)
+        # Suppress meson regeneration (source dir not available in build action)
+        import re
+        content = re.sub(
+            r'^build build\.ninja:.*?(?=\n(?:build |$))',
+            '# meson regeneration suppressed by build_helper',
+            content, count=1, flags=re.MULTILINE | re.DOTALL,
+        )
+        with open(ninja_file, "w") as f:
+            f.write(content)
 
     # Touch autotools-generated files so make doesn't try to regenerate
     # them.  The copytree preserves timestamps but configure may have

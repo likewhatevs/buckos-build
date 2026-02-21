@@ -103,13 +103,17 @@ def _meson_setup(ctx, source):
     ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
     return output
 
-def _src_compile(ctx, configured):
+def _src_compile(ctx, configured, source):
     """Run ninja in the meson build tree."""
     output = ctx.actions.declare_output("built", dir = True)
     cmd = cmd_args(ctx.attrs._build_tool[RunInfo])
     cmd.add("--build-dir", configured)
     cmd.add("--output-dir", output.as_output())
     cmd.add("--build-system", "ninja")
+
+    # Ensure source dir is available — meson out-of-tree builds reference
+    # it in build.ninja for compilation commands.
+    cmd.add(cmd_args(hidden = source))
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
@@ -125,13 +129,16 @@ def _src_compile(ctx, configured):
     ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
     return output
 
-def _src_install(ctx, built):
+def _src_install(ctx, built, source):
     """Run ninja install into the output prefix."""
     output = ctx.actions.declare_output("installed", dir = True)
     cmd = cmd_args(ctx.attrs._install_tool[RunInfo])
     cmd.add("--build-dir", built)
     cmd.add("--prefix", output.as_output())
     cmd.add("--build-system", "ninja")
+
+    # Ensure source dir is available for meson install rules
+    cmd.add(cmd_args(hidden = source))
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
@@ -163,11 +170,11 @@ def _meson_package_impl(ctx):
     # Phase 3: meson_setup
     configured = _meson_setup(ctx, prepared)
 
-    # Phase 4: src_compile
-    built = _src_compile(ctx, configured)
+    # Phase 4: src_compile (source passed as hidden input for out-of-tree builds)
+    built = _src_compile(ctx, configured, prepared)
 
     # Phase 5: src_install
-    installed = _src_install(ctx, built)
+    installed = _src_install(ctx, built, prepared)
 
     pkg_info = PackageInfo(
         name = ctx.attrs.name,
