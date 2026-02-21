@@ -17,8 +17,7 @@ package(
         "python": "//packages/linux/lang/python:python",
     },
     configure_args = [],
-    deps = [],
-    bdepend = [
+    deps = [
         "//packages/linux/dev-tools/dev-utils/gperf:gperf",
     ],
     visibility = ["PUBLIC"],
