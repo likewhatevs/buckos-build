@@ -8,6 +8,8 @@ package(
     build_rule = "binary",
     name = "aotriton",
     version = "0.3b",
+    url = "https://github.com/ROCm/aotriton/archive/refs/tags/0.3b.tar.gz",
+    sha256 = "b5585b4f052dfbb816d0c1d08620d4e86f7d217839d94fa59564333216df3ace",
     description = "Ahead-of-Time Triton compiler for AMD ROCm GPUs",
     homepage = "https://github.com/ROCm/aotriton",
     license = "MIT",

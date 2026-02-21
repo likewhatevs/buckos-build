@@ -13,6 +13,8 @@ package(
     build_rule = "binary",
     name = "firefox",
     version = "128.0",
+    url = "https://archive.mozilla.org/pub/firefox/releases/128.0/source/firefox-128.0.source.tar.xz",
+    sha256 = "65271ffefb235ea1e162a081f2074a0f06fce27b2f613f573c126ba8eef95172",
     description = "Mozilla Firefox web browser - fast, private, and secure",
     homepage = "https://www.mozilla.org/firefox/",
     license = "MPL-2.0",
