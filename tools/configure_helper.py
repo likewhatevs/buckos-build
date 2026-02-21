@@ -10,6 +10,7 @@ without running ./configure.
 """
 
 import argparse
+import glob as _glob
 import os
 import shutil
 import subprocess
@@ -39,7 +40,7 @@ def _resolve_env_paths(value):
                 resolved.append(p)
         return ":".join(resolved)
 
-    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath,"]
+    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath-link,", "-Wl,-rpath,"]
 
     parts = []
     for token in value.split():
@@ -87,6 +88,8 @@ def main():
                         help="Argument to pass to ./configure (repeatable)")
     parser.add_argument("--cflags", action="append", dest="cflags", default=[],
                         help="CFLAGS value (repeatable, joined with spaces)")
+    parser.add_argument("--cppflags", action="append", dest="cppflags", default=[],
+                        help="CPPFLAGS value (repeatable, joined with spaces)")
     parser.add_argument("--ldflags", action="append", dest="ldflags", default=[],
                         help="LDFLAGS value (repeatable, joined with spaces)")
     parser.add_argument("--pkg-config-path", action="append", dest="pkg_config_paths", default=[],
@@ -124,6 +127,15 @@ def main():
 
     configure = os.path.join(output_dir, args.configure_script)
 
+    # Create a pkg-config wrapper that always passes --define-prefix so
+    # .pc files in Buck2 dep directories resolve paths correctly.
+    wrapper_dir = os.path.join(output_dir, ".pkgconf-wrapper")
+    os.makedirs(wrapper_dir, exist_ok=True)
+    wrapper = os.path.join(wrapper_dir, "pkg-config")
+    with open(wrapper, "w") as f:
+        f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
+    os.chmod(wrapper, 0o755)
+
     env = os.environ.copy()
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
@@ -137,6 +149,8 @@ def main():
         env["CXX"] = args.cxx
     if args.cflags:
         env["CFLAGS"] = _resolve_env_paths(" ".join(args.cflags))
+    if args.cppflags:
+        env["CPPFLAGS"] = _resolve_env_paths(" ".join(args.cppflags))
     if args.ldflags:
         env["LDFLAGS"] = _resolve_env_paths(" ".join(args.ldflags))
     if args.pkg_config_paths:
@@ -149,6 +163,44 @@ def main():
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", os.environ.get("PATH", ""))
+
+        # Auto-detect automake Perl modules and aclocal dirs from dep
+        # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
+        # paths which don't resolve to the artifact directory.
+        perl5lib = []
+        aclocal_dirs = []
+        for bin_dir in args.path_prepend:
+            share_dir = os.path.join(os.path.dirname(os.path.abspath(bin_dir)), "share")
+            for d in _glob.glob(os.path.join(share_dir, "automake-*")):
+                if os.path.isdir(d):
+                    perl5lib.append(d)
+            for d in _glob.glob(os.path.join(share_dir, "aclocal-*")):
+                if os.path.isdir(d):
+                    aclocal_dirs.append(d)
+            # Also include the plain aclocal dir (for libtool m4 macros etc.)
+            plain_aclocal = os.path.join(share_dir, "aclocal")
+            if os.path.isdir(plain_aclocal):
+                aclocal_dirs.append(plain_aclocal)
+        if perl5lib:
+            existing = env.get("PERL5LIB", "")
+            env["PERL5LIB"] = ":".join(perl5lib) + (":" + existing if existing else "")
+            # AUTOMAKE_LIBDIR overrides automake's hardcoded pkgvdatadir
+            # (where am/*.am files and support scripts like install-sh live)
+            for d in perl5lib:
+                if os.path.isdir(os.path.join(d, "am")):
+                    env["AUTOMAKE_LIBDIR"] = d
+                    break
+        if aclocal_dirs:
+            # ACLOCAL_AUTOMAKE_DIR overrides the hardcoded automake acdir
+            for d in aclocal_dirs:
+                if "aclocal-" in os.path.basename(d):
+                    env["ACLOCAL_AUTOMAKE_DIR"] = d
+                    break
+            # ACLOCAL_PATH adds extra search directories
+            env["ACLOCAL_PATH"] = ":".join(aclocal_dirs)
+
+    # Prepend pkg-config wrapper to PATH
+    env["PATH"] = wrapper_dir + ":" + env.get("PATH", os.environ.get("PATH", ""))
 
     # Run pre-configure commands (e.g. autoreconf, libtoolize)
     for cmd_str in args.pre_cmds:

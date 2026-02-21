@@ -18,9 +18,9 @@ load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args")
 # ── Phase helpers ─────────────────────────────────────────────────────
 
 def _src_prepare(ctx, source):
-    """Apply patches.  Separate action so unpatched source stays cached."""
-    if not ctx.attrs.patches:
-        return source  # No patches — zero-cost passthrough
+    """Apply patches and pre-configure commands.  Separate action so unpatched source stays cached."""
+    if not ctx.attrs.patches and not ctx.attrs.pre_configure_cmds:
+        return source  # Nothing to do — zero-cost passthrough
 
     output = ctx.actions.declare_output("prepared", dir = True)
     cmd = cmd_args(ctx.attrs._patch_tool[RunInfo])
@@ -28,6 +28,8 @@ def _src_prepare(ctx, source):
     cmd.add("--output-dir", output.as_output())
     for p in ctx.attrs.patches:
         cmd.add("--patch", p)
+    for c in ctx.attrs.pre_configure_cmds:
+        cmd.add("--cmd", c)
 
     ctx.actions.run(cmd, category = "prepare", identifier = ctx.attrs.name)
     return output
@@ -47,56 +49,98 @@ def _cmake_configure(ctx, source):
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
-    # CMake arguments
+    # Source subdirectory (e.g. LLVM has CMakeLists.txt in llvm/)
+    if ctx.attrs.source_subdir:
+        cmd.add("--source-subdir", ctx.attrs.source_subdir)
+
+    # CMake arguments (use = form so argparse doesn't treat -D... as a flag)
     for arg in ctx.attrs.cmake_args:
-        cmd.add("--cmake-arg", arg)
+        cmd.add(cmd_args("--cmake-arg=", arg, delimiter = ""))
 
     # CMake defines (KEY=VALUE strings)
     for define in ctx.attrs.cmake_defines:
-        cmd.add("--cmake-define", define)
+        cmd.add(cmd_args("--cmake-define=", define, delimiter = ""))
 
     # Extra CFLAGS / LDFLAGS — pass as CMAKE_C_FLAGS / CMAKE_EXE_LINKER_FLAGS
     cflags = list(ctx.attrs.extra_cflags)
     ldflags = list(ctx.attrs.extra_ldflags)
 
-    # Propagate include/lib dirs and library names from dependencies
+    # Propagate flags, pkg-config paths, and cmake prefix paths from dependencies
+    pkg_config_paths = []
+    lib_paths = []
     for dep in ctx.attrs.deps:
         if PackageInfo in dep:
             pkg = dep[PackageInfo]
-            for d in pkg.include_dirs:
-                cflags.append(cmd_args("-I", d, delimiter = ""))
-            for d in pkg.lib_dirs:
-                ldflags.append(cmd_args("-L", d, delimiter = ""))
-            for lib in pkg.libraries:
-                ldflags.append("-l" + lib)
+            prefix = pkg.prefix
             if pkg.pkg_config_path:
-                cmd.add("--cmake-define", cmd_args("CMAKE_PREFIX_PATH=", pkg.pkg_config_path, delimiter = ""))
-
-            # Propagate any extra flags the dependency requires consumers to use
+                pkg_config_paths.append(pkg.pkg_config_path)
             for f in pkg.cflags:
                 cflags.append(f)
             for f in pkg.ldflags:
                 ldflags.append(f)
+        else:
+            prefix = dep[DefaultInfo].default_outputs[0]
 
+        # Derive standard include/lib/pkgconfig paths from dep prefix
+        cflags.append(cmd_args(prefix, format = "-I{}/usr/include"))
+        ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib64"))
+        ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib"))
+        pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
+        pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
+        pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
+
+        # Add dep prefix to CMAKE_PREFIX_PATH for find_package()
+        cmd.add("--prefix-path", cmd_args(prefix, format = "{}/usr"))
+        # Add dep bin dirs to PATH so cmake can run dep tools (qtpaths, etc.)
+        cmd.add("--path-prepend", cmd_args(prefix, format = "{}/usr/bin"))
+        # Collect lib paths for LD_LIBRARY_PATH (dep tools need shared libs)
+        lib_paths.append(cmd_args(prefix, format = "{}/usr/lib64"))
+        lib_paths.append(cmd_args(prefix, format = "{}/usr/lib"))
+
+    if lib_paths:
+        cmd.add("--env", cmd_args("LD_LIBRARY_PATH=", cmd_args(lib_paths, delimiter = ":"), delimiter = ""))
     if cflags:
-        cmd.add("--cmake-define", cmd_args("CMAKE_C_FLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))
+        _cf = cmd_args(cflags, delimiter = " ")
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_C_FLAGS=", _cf, delimiter = ""))
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_CXX_FLAGS=", _cf, delimiter = ""))
     if ldflags:
-        cmd.add("--cmake-define", cmd_args("CMAKE_EXE_LINKER_FLAGS=", cmd_args(ldflags, delimiter = " "), delimiter = ""))
+        _ld = cmd_args(ldflags, delimiter = " ")
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_EXE_LINKER_FLAGS=", _ld, delimiter = ""))
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_SHARED_LINKER_FLAGS=", _ld, delimiter = ""))
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_MODULE_LINKER_FLAGS=", _ld, delimiter = ""))
+    if pkg_config_paths:
+        cmd.add("--env", cmd_args("PKG_CONFIG_PATH=", cmd_args(pkg_config_paths, delimiter = ":"), delimiter = ""))
+
+    # Pass dep prefix paths as cmake defines (e.g. SPIRV-Headers_SOURCE_DIR)
+    for var_name, dep in ctx.attrs.cmake_dep_defines.items():
+        if PackageInfo in dep:
+            dep_prefix = dep[PackageInfo].prefix
+        else:
+            dep_prefix = dep[DefaultInfo].default_outputs[0]
+        cmd.add(cmd_args("--cmake-define=", var_name, "=", dep_prefix, "/usr", delimiter = ""))
 
     # Configure arguments from the common interface
     for arg in ctx.attrs.configure_args:
-        cmd.add("--cmake-arg", arg)
+        cmd.add(cmd_args("--cmake-arg=", arg, delimiter = ""))
 
     ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
     return output
 
-def _src_compile(ctx, configured):
+def _src_compile(ctx, configured, source):
     """Run ninja in the cmake build tree."""
     output = ctx.actions.declare_output("built", dir = True)
     cmd = cmd_args(ctx.attrs._build_tool[RunInfo])
     cmd.add("--build-dir", configured)
     cmd.add("--output-dir", output.as_output())
     cmd.add("--build-system", "ninja")
+
+    # Ensure source dir and dep artifacts are available — cmake
+    # out-of-tree builds reference them in build.ninja.
+    cmd.add(cmd_args(hidden = source))
+    for dep in ctx.attrs.deps:
+        cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
@@ -106,18 +150,37 @@ def _src_compile(ctx, configured):
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
+    # Set LD_LIBRARY_PATH and PATH so build tools (moc, rcc,
+    # qtwaylandscanner, etc.) can find shared libs and executables
+    # from deps at runtime.
+    lib_paths = []
+    for dep in ctx.attrs.deps:
+        if PackageInfo in dep:
+            prefix = dep[PackageInfo].prefix
+        else:
+            prefix = dep[DefaultInfo].default_outputs[0]
+        lib_paths.append(cmd_args(prefix, format = "{}/usr/lib64"))
+        lib_paths.append(cmd_args(prefix, format = "{}/usr/lib"))
+        cmd.add("--path-prepend", cmd_args(prefix, format = "{}/usr/bin"))
+    if lib_paths:
+        cmd.add("--env", cmd_args("LD_LIBRARY_PATH=", cmd_args(lib_paths, delimiter = ":"), delimiter = ""))
+
     for arg in ctx.attrs.make_args:
         cmd.add("--make-arg", arg)
 
     ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
     return output
 
-def _src_install(ctx, built):
-    """Run install into the output prefix."""
+def _src_install(ctx, built, source):
+    """Run ninja install into the output prefix."""
     output = ctx.actions.declare_output("installed", dir = True)
     cmd = cmd_args(ctx.attrs._install_tool[RunInfo])
     cmd.add("--build-dir", built)
     cmd.add("--prefix", output.as_output())
+    cmd.add("--build-system", "ninja")
+
+    # Ensure source dir is available for cmake install rules
+    cmd.add(cmd_args(hidden = source))
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
@@ -149,11 +212,11 @@ def _cmake_package_impl(ctx):
     # Phase 3: cmake_configure
     configured = _cmake_configure(ctx, prepared)
 
-    # Phase 4: src_compile
-    built = _src_compile(ctx, configured)
+    # Phase 4: src_compile (source passed as hidden input for cmake out-of-tree builds)
+    built = _src_compile(ctx, configured, prepared)
 
     # Phase 5: src_install
-    installed = _src_install(ctx, built)
+    installed = _src_install(ctx, built, prepared)
 
     pkg_info = PackageInfo(
         name = ctx.attrs.name,
@@ -187,11 +250,14 @@ cmake_package = rule(
         "version": attrs.string(),
 
         # Build configuration
+        "source_subdir": attrs.option(attrs.string(), default = None),
         "configure_args": attrs.list(attrs.string(), default = []),
         "cmake_args": attrs.list(attrs.string(), default = []),
         "cmake_defines": attrs.list(attrs.string(), default = []),
+        "cmake_dep_defines": attrs.dict(attrs.string(), attrs.dep(), default = {}),
         "make_args": attrs.list(attrs.string(), default = []),
         "post_install_cmds": attrs.list(attrs.string(), default = []),
+        "pre_configure_cmds": attrs.list(attrs.string(), default = []),
         "env": attrs.dict(attrs.string(), attrs.string(), default = {}),
         "deps": attrs.list(attrs.dep(), default = []),
         "patches": attrs.list(attrs.source(), default = []),

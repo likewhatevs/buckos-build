@@ -10,21 +10,14 @@ package(
     homepage = "https://www.greenwoodsoftware.com/less/",
     license = "GPL-3.0",
 
-    # USE flags this package supports
-
-    # Default USE flags
-
-    # Conditional dependencies
-    use_deps = {
-        "ncurses": "//packages/linux/system/terminal/ncurses:ncurses",
-    },
-
-    # Conditional configure arguments
     use_configure = {
-        "ncurses": ("--with-ncurses", "--without-ncurses"),
         "pcre": ("--with-regex=pcre", "--with-regex=posix"),
         "pcre2": ("--with-regex=pcre2", "--with-regex=posix"),
     },
+
+    deps = [
+        "//packages/linux/system/terminal/ncurses:ncurses",
+    ],
 
     visibility = ["PUBLIC"],
 )

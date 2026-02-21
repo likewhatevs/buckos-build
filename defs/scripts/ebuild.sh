@@ -1043,6 +1043,8 @@ for dep_dir in "${DEP_DIRS_ARRAY[@]}"; do
 done
 if [ -n "$RUST_TOOLCHAIN_DIR" ]; then
     export PATH="$RUST_TOOLCHAIN_DIR/bin:$PATH"
+    # rustc dynamically links librustc_driver — make sure it's findable
+    export LD_LIBRARY_PATH="$RUST_TOOLCHAIN_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     # Set CARGO_HOME if not already set
     if [ -z "$CARGO_HOME" ]; then
         export CARGO_HOME="$T/cargo"
@@ -1393,6 +1395,10 @@ if [ -n "$PHASES_CONTENT" ]; then
         echo "#!/bin/bash"
         echo "# Explicitly set PATH to ensure toolchain binaries are found"
         echo "export PATH=\"$PATH\""
+        # Disable sccache/ccache rustc wrappers — Buck2 handles caching and
+        # the sccache Unix socket path inside buck-out exceeds SUN_LEN.
+        echo 'export RUSTC_WRAPPER=""'
+        echo 'export CARGO_BUILD_RUSTC_WRAPPER=""'
         [ -n "$TOOLCHAIN_PATH" ] && echo "export TOOLCHAIN_PATH=\"$TOOLCHAIN_PATH\""
         [ -n "$DEP_PATH" ] && echo "export DEP_PATH=\"$DEP_PATH\""
         # Export phase script paths (needed for bootstrap builds that use env -i)
@@ -1452,11 +1458,33 @@ if [ -n "$PHASES_CONTENT" ]; then
             HOME="$HOME" \
             S="$S" \
             T="$T" \
+            WORKDIR="$WORKDIR" \
             DESTDIR="$DESTDIR" \
+            MAKE_JOBS="$MAKE_JOBS" \
             PN="$PN" \
             PV="$PV" \
             USE="$USE" \
             DEP_BASE_DIRS="$DEP_BASE_DIRS" \
+            TOOLCHAIN_ROOT="${TOOLCHAIN_ROOT:-}" \
+            CC="${CC:-}" \
+            CXX="${CXX:-}" \
+            CPP="${CPP:-}" \
+            AR="${AR:-}" \
+            AS="${AS:-}" \
+            LD="${LD:-}" \
+            NM="${NM:-}" \
+            RANLIB="${RANLIB:-}" \
+            STRIP="${STRIP:-}" \
+            OBJCOPY="${OBJCOPY:-}" \
+            OBJDUMP="${OBJDUMP:-}" \
+            READELF="${READELF:-}" \
+            CFLAGS="${CFLAGS:-}" \
+            CXXFLAGS="${CXXFLAGS:-}" \
+            LDFLAGS="${LDFLAGS:-}" \
+            CPPFLAGS="${CPPFLAGS:-}" \
+            CROSS_COMPILING="${CROSS_COMPILING:-}" \
+            BOOTSTRAP_SYSROOT="${BOOTSTRAP_SYSROOT:-}" \
+            BUCKOS_TARGET="${BUCKOS_TARGET:-}" \
             /bin/bash --norc --noprofile "$T/phases.sh"
     elif command -v unshare >/dev/null 2>&1; then
         # Use network namespace isolation like Gentoo Portage does.

@@ -57,10 +57,17 @@ HOST_SYSTEM=${CHOST:-$(${CC:-gcc} -dumpmachine)}
     --libdir=/usr/lib \\
     --sbindir=/usr/sbin \\
     --enable-securedir=/lib/security \\
+    --enable-pie \\
     --disable-nls \\
     --disable-db \\
     --build=$BUILD_SYSTEM \\
     --host=$HOST_SYSTEM
+
+# PAM upstream bug: bigcrypt helper is missing @EXE_CFLAGS@ (PIE flags)
+# while unix_chkpwd and unix_update include it.  Without -fpie the
+# cross-linker (which defaults to -pie via --enable-default-pie specs)
+# rejects the non-PIC relocations.
+sed -i 's/^bigcrypt_CFLAGS = .*/& $(EXE_CFLAGS)/' modules/pam_unix/Makefile
 ''',
 
     src_compile = '''

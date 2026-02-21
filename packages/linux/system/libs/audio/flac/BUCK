@@ -21,6 +21,10 @@ package(
         "--disable-thorough-tests",
         "--disable-programs",  # Don't build flac/metaflac tools (causes linking issues in cross-compile)
     ],
+    # Declare exported libraries so consumers get -lFLAC in LDFLAGS.
+    # Needed because .la files are stripped globally by install_helper,
+    # so libtool can't discover transitive deps from .la files anymore.
+    libraries = ["FLAC"],
     deps = [
         "//packages/linux/system/libs/audio/libogg:libogg",
     ],

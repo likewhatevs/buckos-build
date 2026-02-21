@@ -1,8 +1,5 @@
 load("//defs:package.bzl", "package")
 
-# USE flags: doc, bash-completion
-# Default: bash-completion
-
 package(
     build_rule = "binary",
     name = "ninja",
@@ -13,10 +10,13 @@ package(
     homepage = "https://ninja-build.org/",
     license = "Apache-2.0",
     install_script = """
-        # Source extracts without subdirectory
-        python3 "$SRCS/configure.py" --bootstrap
-        mkdir -p "$OUT/usr/bin"
-        cp ninja "$OUT/usr/bin/"
-    """,
+mkdir -p "$OUT"
+BUILD=$(mktemp -d)
+cp -a "$SRCS"/. "$BUILD/"
+cd "$BUILD"
+python3 configure.py --bootstrap
+mkdir -p "$OUT/usr/bin"
+cp ninja "$OUT/usr/bin/"
+""",
     visibility = ["PUBLIC"],
 )

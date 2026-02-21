@@ -26,5 +26,6 @@ package(
         "--disable-static",
         "--enable-custom-modes",
     ],
+    libraries = ["opus"],
     visibility = ["PUBLIC"],
 )

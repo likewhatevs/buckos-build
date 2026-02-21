@@ -26,7 +26,7 @@ package(
     name = "qt6-native",
     version = "6.8.3",
     url = "https://download.qt.io/official_releases/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz",
-    sha256 = "FIXME",
+    sha256 = "cdd3a69967208276bb01af7ace7dba0ba53e679f886a4cbe624225c60fb73f2c",
     description = "Qt6 native host tools for cross-compilation",
     homepage = "https://www.qt.io/",
     license = "LGPL-3.0-or-later OR GPL-3.0-or-later",
@@ -246,7 +246,7 @@ package(
     build_rule = "cmake",
     name = "qt6",
     url = "https://download.qt.io/official_releases/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz",
-    sha256 = "FIXME",
+    sha256 = "cdd3a69967208276bb01af7ace7dba0ba53e679f886a4cbe624225c60fb73f2c",
     version = "6.8.3",
     description = "Qt6 - Cross-platform application framework",
     homepage = "https://www.qt.io/",
@@ -754,7 +754,7 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
         "-DBUILD_qt3d=OFF",
         "-DBUILD_qtquick3d=OFF",
         "-DBUILD_qtquick3dphysics=OFF",
-        "-DBUILD_qtshadertools=OFF",
+        "-DBUILD_qtshadertools=ON",  # Needed for Qt6Quick (shader compilation)
         # Disable other optional modules not needed for KDE
         "-DBUILD_qtlanguageserver=OFF",
         "-DBUILD_qtquicktimeline=OFF",
@@ -785,12 +785,6 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
         "-DBUILD_qtwebsockets=OFF",
     ],
 
-    # USE-conditional cmake args
-    use_configure = {
-
-    },
-
-    # Base dependencies (always needed)
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/glib:glib",
@@ -798,81 +792,41 @@ cmake --build "$S/build" -j${MAKEOPTS:-$(nproc)}
         "//packages/linux/system/libs/utility/pcre2:pcre2",
         "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/system/libs/utility/icu:icu",
-        # GUI deps - using system freetype + fontconfig for font support
-        # (bundled harfbuzz, but system_freetype is REQUIRED for fontconfig to work)
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
         "//packages/linux/desktop/libdrm:libdrm",
         "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
-        # Freetype and Fontconfig - REQUIRED for Qt to find and render system fonts
-        # Qt's fontconfig feature requires system_freetype=ON
         "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/font/fontconfig:fontconfig",
-        # Transitive dependencies needed for linking:
-        # - expat: needed by Mesa's libEGL and fontconfig
-        # - libffi: needed by wayland
-        # - openssl: needed by Qt6Network for SSL/TLS
         "//packages/linux/system/libs/data/expat:expat",
         "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/system/libs/crypto/openssl:openssl",
-        "//packages/linux/system/libs/compression/bzip2:bzip2",  # transitive: freetype links libbz2
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+        # X11 (from use_deps)
+        "//packages/linux/graphics/xorg/libX11:libX11",
+        "//packages/linux/graphics/xorg/libxcb:libxcb",
+        "//packages/linux/graphics/xorg/xcb-util-cursor:xcb-util-cursor",
+        "//packages/linux/graphics/xorg/xcb-util-image:xcb-util-image",
+        "//packages/linux/graphics/xorg/xcb-util-keysyms:xcb-util-keysyms",
+        "//packages/linux/graphics/xorg/xcb-util-renderutil:xcb-util-renderutil",
+        "//packages/linux/graphics/xorg/xcb-util-wm:xcb-util-wm",
+        "//packages/linux/graphics/xorg/libICE:libICE",
+        "//packages/linux/graphics/xorg/libSM:libSM",
+        # Wayland (from use_deps)
+        "//packages/linux/graphics/rendering/wayland:wayland",
+        "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
+        # OpenGL/Mesa (from use_deps)
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/dev-libs/elfutils:elfutils",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        # SQLite (from use_deps)
+        "//packages/linux/system/libs/database/sqlite:sqlite",
+        # D-Bus (from use_deps)
+        "//packages/linux/system/libs/ipc/dbus:dbus",
+        "//packages/linux/system/init/systemd:systemd",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
     ],
-
-    # USE-conditional dependencies
-    use_deps = {
-        "X": [
-            "//packages/linux/graphics/xorg/libX11:libX11",
-            "//packages/linux/graphics/xorg/libxcb:libxcb",
-            "//packages/linux/graphics/xorg/xcb-util-cursor:xcb-util-cursor",
-            "//packages/linux/graphics/xorg/xcb-util-image:xcb-util-image",
-            "//packages/linux/graphics/xorg/xcb-util-keysyms:xcb-util-keysyms",
-            "//packages/linux/graphics/xorg/xcb-util-renderutil:xcb-util-renderutil",
-            "//packages/linux/graphics/xorg/xcb-util-wm:xcb-util-wm",
-            "//packages/linux/graphics/xorg/libICE:libICE",
-            "//packages/linux/graphics/xorg/libSM:libSM",
-        ],
-        "wayland": [
-            "//packages/linux/graphics/rendering/wayland:wayland",
-            "//packages/linux/graphics/rendering/wayland-protocols:wayland-protocols",
-        ],
-        "opengl": [
-            "//packages/linux/desktop/mesa:mesa",
-            # Mesa's radeonsi driver depends on LLVM and elfutils
-            # LLVM depends on libxml2
-            "//packages/linux/core/llvm:llvm",
-            "//packages/linux/dev-libs/elfutils:elfutils",
-            "//packages/linux/system/libs/data/libxml2:libxml2",
-        ],
-        "ssl": [
-            "//packages/linux/system/libs/crypto/openssl:openssl",
-        ],
-        "sqlite": [
-            "//packages/linux/system/libs/database/sqlite:sqlite",
-        ],
-        "dbus": [
-            "//packages/linux/system/libs/ipc/dbus:dbus",
-            "//packages/linux/system/init/systemd:systemd",  # dbus depends on libsystemd
-            "//packages/linux/system/libs/ipc/libcap:libcap",  # libsystemd depends on libcap
-        ],
-    },
-
-    # Patch Qt6QuickDependencies.cmake to remove Qt6QuickTools requirement
-    # The tools are provided by qt6-native via QT_HOST_PATH
-    src_install = """
-# Run default install
-cmake --install "$S/build" --prefix "$D/usr"
-
-# Patch Qt6QuickDependencies.cmake to remove Qt6QuickTools requirement
-DEPS_FILE="$D/usr/lib/cmake/Qt6Quick/Qt6QuickDependencies.cmake"
-if [ -f "$DEPS_FILE" ]; then
-    echo "Patching $DEPS_FILE to remove Qt6QuickTools requirement..."
-    # Remove the Qt6QuickTools line from __qt_Quick_tool_deps
-    sed -i 's/set(__qt_Quick_tool_deps "Qt6QuickTools\\;6.8.3")/set(__qt_Quick_tool_deps "")/' "$DEPS_FILE"
-    echo "Qt6QuickTools requirement removed from Qt6QuickDependencies.cmake"
-else
-    echo "Warning: $DEPS_FILE not found"
-fi
-""",
 
     visibility = ["PUBLIC"],
 )
@@ -884,8 +838,8 @@ fi
 package(
     build_rule = "binary",
     name = "qt5",
-    url = "https://download.qt.io/official_releases/qt/5.15/5.15.12/single/qt-everywhere-opensource-src-5.15.12.tar.xz",
-    sha256 = "FIXME",
+    url = "https://download.qt.io/archive/qt/5.15/5.15.12/single/qt-everywhere-opensource-src-5.15.12.tar.xz",
+    sha256 = "93f2c0889ee2e9cdf30c170d353c3f829de5f29ba21c119167dee5995e48ccce",
     version = "5.15.12",
     description = "Cross-platform application framework",
     homepage = "https://www.qt.io/",
@@ -946,58 +900,11 @@ package(
     homepage = "https://api.kde.org/polkit-qt-1/html/",
     license = "LGPL-2",
 
-    # Custom src_configure to pass EGL/GLESv2 as CMake cache variables
-    src_configure = """
-# Find mesa library path from CMAKE_PREFIX_PATH (already set by ebuild system)
-MESA_PATH=$(echo "$CMAKE_PREFIX_PATH" | tr ';' '\\n' | grep mesa | head -1)
-if [ -z "$MESA_PATH" ]; then
-    echo "Error: Mesa path not found in CMAKE_PREFIX_PATH"
-    exit 1
-fi
-
-EGL_LIB="$MESA_PATH/lib64/libEGL.so"
-GLESV2_LIB="$MESA_PATH/lib64/libGLESv2.so"
-EGL_INCLUDE="$MESA_PATH/include"
-
-echo "=== EGL/GLESv2 Configuration for polkit-qt ==="
-echo "MESA_PATH=$MESA_PATH"
-echo "EGL_LIB=$EGL_LIB"
-echo "GLESV2_LIB=$GLESV2_LIB"
-
-# Build CMAKE_PREFIX_PATH argument
-CMAKE_PREFIX_PATH_ARG=""
-if [ -n "${CMAKE_PREFIX_PATH:-}" ]; then
-    CMAKE_PREFIX_PATH_ARG="-DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-fi
-
-# Run cmake configure with EGL/GLESv2 cache variables pre-set
-rm -rf "$S/build"
-mkdir -p "$S/build"
-
-cmake -S "$S" -B "$S/build" \\
-    -DCMAKE_INSTALL_PREFIX="${EPREFIX:-/usr}" \\
-    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}" \\
-    -DCMAKE_INSTALL_LIBDIR="${LIBDIR:-lib64}" \\
-    -DCMAKE_C_FLAGS="${CFLAGS:-}" \\
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS:-}" \\
-    -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-}" \\
-    -DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS:-}" \\
-    -DCMAKE_MODULE_LINKER_FLAGS="${LDFLAGS:-}" \\
-    $CMAKE_PREFIX_PATH_ARG \\
-    -DEGL_FOUND=TRUE \\
-    -DEGL_LIBRARY="$EGL_LIB" \\
-    -DEGL_INCLUDE_DIR="$EGL_INCLUDE" \\
-    -DGLESv2_FOUND=TRUE \\
-    -DGLESv2_LIBRARY="$GLESV2_LIB" \\
-    -DGLESv2_INCLUDE_DIR="$EGL_INCLUDE" \\
-    -DHAVE_EGL=TRUE \\
-    -DHAVE_GLESv2=TRUE \\
-    -DBUILD_EXAMPLES=OFF \\
-    -DQT_MAJOR_VERSION=6 \\
-    -DQT_NO_PACKAGE_VERSION_CHECK=TRUE
-""",
-
-    configure_args = [],
+    cmake_defines = [
+        "QT_MAJOR_VERSION=6",
+        "QT_NO_PACKAGE_VERSION_CHECK=TRUE",
+        "BUILD_EXAMPLES=OFF",
+    ],
 
     deps = [
         ":qt6",

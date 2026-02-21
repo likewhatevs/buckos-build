@@ -3,11 +3,7 @@ load("//defs:package.bzl", "package")
 package(
     build_rule = "autotools",
     name = "libffi",
-    # GitHub releases/download tarball includes pre-generated configure script
-    bdepend = [],
-    src_prepare = "",
     url = "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz",
-
     sha256 = "b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e",
     use_configure = {
         "debug": ("--enable-debug", "--disable-debug"),
@@ -22,6 +18,9 @@ package(
     configure_args = [
         "--disable-static",
         "--disable-exec-static-tramp",
+    ],
+    make_args = [
+        "MAKEINFO=true",
     ],
     visibility = ["PUBLIC"],
 )

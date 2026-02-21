@@ -17,14 +17,6 @@ package(
     license = "LGPL-2.1",
     # Fix C23 bool conflict in ALAC encoder code
     env = {"CFLAGS": "-std=gnu17 -O2"},
-    # Remove problematic .la files that have hardcoded paths
-    src_prepare = """
-# Remove .la files from dependencies that have broken absolute paths
-find "$SYSROOT" -name '*.la' -delete 2>/dev/null || true
-for dir in ${DEP_BASE_DIRS//:/ }; do
-    find "$dir" -name '*.la' -delete 2>/dev/null || true
-done
-""",
     configure_args = [
         "--disable-static",
     ],

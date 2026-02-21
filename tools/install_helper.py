@@ -13,18 +13,57 @@ import sys
 
 
 def _resolve_env_paths(value):
-    """Resolve relative Buck2 artifact paths in env values to absolute."""
+    """Resolve relative Buck2 artifact paths in env values to absolute.
+
+    Buck2 runs actions from the project root, so artifact paths like
+    ``buck-out/v2/.../gcc`` are relative to that root.  When a subprocess
+    changes its CWD (e.g. make runs in a copied build tree), the
+    relative paths break.  This function makes them absolute while the
+    process is still in the project root.
+
+    Handles: bare paths, -I/path, -L/path, --flag=path, and
+    colon-separated paths (PKG_CONFIG_PATH).
+    """
+    # Handle colon-separated path lists (PKG_CONFIG_PATH)
+    if ":" in value and not value.startswith("-"):
+        resolved = []
+        for p in value.split(":"):
+            p = p.strip()
+            if p and not os.path.isabs(p) and (p.startswith("buck-out") or os.path.exists(p)):
+                resolved.append(os.path.abspath(p))
+            else:
+                resolved.append(p)
+        return ":".join(resolved)
+
+    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath,"]
+
     parts = []
     for token in value.split():
+        resolved = False
+        # Handle -I/path, -L/path, -Wl,-rpath,/path
+        for prefix in _FLAG_PREFIXES:
+            if token.startswith(prefix) and len(token) > len(prefix):
+                path = token[len(prefix):]
+                if not os.path.isabs(path) and path.startswith("buck-out"):
+                    parts.append(prefix + os.path.abspath(path))
+                elif not os.path.isabs(path) and os.path.exists(path):
+                    parts.append(prefix + os.path.abspath(path))
+                else:
+                    parts.append(token)
+                resolved = True
+                break
+        if resolved:
+            continue
+        # Handle --flag=path
         if token.startswith("--") and "=" in token:
             idx = token.index("=")
             flag = token[: idx + 1]
             path = token[idx + 1 :]
-            if path and os.path.exists(path):
+            if path and not os.path.isabs(path) and os.path.exists(path):
                 parts.append(flag + os.path.abspath(path))
             else:
                 parts.append(token)
-        elif os.path.exists(token):
+        elif not os.path.isabs(token) and os.path.exists(token):
             parts.append(os.path.abspath(token))
         else:
             parts.append(token)
@@ -45,6 +84,8 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--build-system", choices=["make", "ninja"], default="make",
+                        help="Build system to use (default: make)")
     parser.add_argument("--post-cmd", action="append", dest="post_cmds", default=[],
                         help="Shell command to run in prefix dir after install (repeatable)")
     args = parser.parse_args()
@@ -55,6 +96,16 @@ def main():
     if not os.path.isdir(build_dir):
         print(f"error: build directory not found: {build_dir}", file=sys.stderr)
         sys.exit(1)
+
+    # Create a pkg-config wrapper that always passes --define-prefix so
+    # .pc files in Buck2 dep directories resolve paths correctly.
+    import tempfile
+    wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
+    wrapper = os.path.join(wrapper_dir, "pkg-config")
+    with open(wrapper, "w") as f:
+        f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
+    os.chmod(wrapper, 0o755)
+    os.environ["PATH"] = wrapper_dir + ":" + os.environ.get("PATH", "")
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -74,12 +125,21 @@ def main():
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
 
-    cmd = [
-        "make",
-        "-C", build_dir,
-        f"{args.destdir_var}={prefix}",
-        "install",
-    ]
+    if args.build_system == "ninja":
+        # Ninja uses DESTDIR as an env var, not a command-line arg
+        os.environ[args.destdir_var] = prefix
+        cmd = [
+            "ninja",
+            "-C", build_dir,
+            "install",
+        ]
+    else:
+        cmd = [
+            "make",
+            "-C", build_dir,
+            f"{args.destdir_var}={prefix}",
+            "install",
+        ]
     # Resolve paths in make args (e.g. CC=buck-out/.../gcc → absolute)
     for arg in args.make_args:
         if "=" in arg:
@@ -92,6 +152,13 @@ def main():
     if result.returncode != 0:
         print(f"error: make install failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(1)
+
+    # Remove libtool .la files — they embed absolute build-time paths that
+    # break when consumed from Buck2 dep directories.  Modern pkg-config and
+    # cmake handle transitive deps without them.
+    import glob as _glob
+    for la in _glob.glob(os.path.join(prefix, "**", "*.la"), recursive=True):
+        os.remove(la)
 
     # Run post-install commands (e.g. ldconfig, cleanup)
     for cmd_str in args.post_cmds:

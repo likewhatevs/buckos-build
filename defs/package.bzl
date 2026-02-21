@@ -119,7 +119,7 @@ _IGNORED_FIELDS = [
     "install_args",
     "python",
     "rdepend",
-    "source_subdir",
+    # "source_subdir" is now forwarded to meson/cmake rules
     "src_prepare",
     "src_subdir",
     "subdir",
@@ -150,6 +150,14 @@ def _merge_private_registry(name, patches, configure_args, extra_cflags):
 
     return all_patches, all_configure_args, all_cflags
 
+def _split_flag_value(value):
+    """Split a space-separated flag string into a list, pass lists through."""
+    if type(value) == "list":
+        return value
+    if type(value) == "string" and " " in value:
+        return value.split(" ")
+    return value
+
 def _normalize_use_configure(use_configure):
     """Normalize old-style +/- USE configure to new tuple format.
 
@@ -159,7 +167,8 @@ def _normalize_use_configure(use_configure):
     New format:
         {"ssl": ("--with-ssl", "--without-ssl")}
 
-    Also handles the already-correct tuple format passthrough.
+    Also handles the already-correct tuple format passthrough,
+    and splits space-separated multi-flag strings into lists.
     """
     result = {}
     negative_keys = {}
@@ -168,15 +177,18 @@ def _normalize_use_configure(use_configure):
     for key, value in use_configure.items():
         if key.startswith("-"):
             flag = key[1:]  # strip the "-" prefix
-            negative_keys[flag] = value
+            negative_keys[flag] = _split_flag_value(value)
 
     # Second pass: build normalized dict
     for key, value in use_configure.items():
         if key.startswith("-"):
             continue  # skip, handled via positive key
         if type(value) == "tuple":
-            result[key] = value  # already normalized
+            on_val = _split_flag_value(value[0])
+            off_val = _split_flag_value(value[1]) if len(value) > 1 else None
+            result[key] = (on_val, off_val) if off_val != None else (on_val,)
         else:
+            value = _split_flag_value(value)
             off_arg = negative_keys.get(key)
             if off_arg:
                 result[key] = (value, off_arg)
@@ -186,25 +198,55 @@ def _normalize_use_configure(use_configure):
     return result
 
 def _normalize_use_deps(use_deps):
-    """Normalize old-style list use_deps to single target.
+    """Normalize old-style use_deps to new format.
 
-    Old format:
-        {"ssl": ["//path:openssl"]}
+    Handles two old patterns:
 
-    New format:
-        {"ssl": "//path:openssl"}
+    1. List values:
+        {"ssl": ["//path:openssl"]}  ->  {"ssl": "//path:openssl"}
+
+    2. Negative flag keys (Gentoo-style):
+        {"systemd": "//path:systemd", "-systemd": "//path:eudev"}
+        ->  {"systemd": ("//path:systemd", "//path:eudev")}
+
+    A tuple value means (on_dep, off_dep) — include on_dep when flag is
+    on, off_dep when flag is off.
     """
-    result = {}
+
+    # First pass: unwrap single-element lists
+    unwrapped = {}
     for key, value in use_deps.items():
         if type(value) == "list":
             if len(value) == 1:
-                result[key] = value[0]
+                unwrapped[key] = value[0]
             elif len(value) > 1:
-                # Multiple deps for one flag — keep first, warn
-                result[key] = value[0]
+                unwrapped[key] = value[0]
             # empty list = no dep, skip
         else:
+            unwrapped[key] = value
+
+    # Second pass: pair positive and negative keys
+    negative_keys = {}
+    for key, value in unwrapped.items():
+        if key.startswith("-"):
+            negative_keys[key[1:]] = value
+
+    result = {}
+    for key, value in unwrapped.items():
+        if key.startswith("-"):
+            continue  # handled via positive key lookup
+        off_dep = negative_keys.get(key)
+        if off_dep:
+            result[key] = (value, off_dep)
+        else:
             result[key] = value
+
+    # Handle negative keys without a matching positive key
+    for neg_flag, dep in negative_keys.items():
+        if neg_flag not in result:
+            # No positive key — dep only when flag is off
+            result[neg_flag] = (None, dep)
+
     return result
 
 def package(
@@ -339,7 +381,26 @@ def package(
     normalized_use_deps = _normalize_use_deps(use_deps)
     all_deps = list(build_kwargs.pop("deps", []))
     for flag, dep in normalized_use_deps.items():
-        all_deps += use_dep(flag, dep)
+        if type(dep) == "tuple":
+            on_dep, off_dep = dep
+            if on_dep and off_dep:
+                # Both on and off deps: select between them
+                all_deps += select({
+                    "//use/constraints:{}-on".format(flag): [on_dep],
+                    "//use/constraints:{}-off".format(flag): [off_dep],
+                    "DEFAULT": [off_dep],
+                })
+            elif on_dep:
+                all_deps += use_dep(flag, on_dep)
+            else:
+                # off_dep only: include when flag is off
+                all_deps += select({
+                    "//use/constraints:{}-on".format(flag): [],
+                    "//use/constraints:{}-off".format(flag): [off_dep],
+                    "DEFAULT": [off_dep],
+                })
+        else:
+            all_deps += use_dep(flag, dep)
 
     # -- 3. Normalize and resolve USE-conditional configure args ------------
     normalized_use_configure = _normalize_use_configure(use_configure)

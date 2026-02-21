@@ -175,9 +175,8 @@ lto = "thin"
 download-rustc = false
 
 [target.x86_64-unknown-linux-gnu]
-# Use bundled LLVM for simpler bootstrap
-# (system LLVM requires exact version match)
-llvm-config = ""
+# Omit llvm-config to build LLVM from source (bundled).
+# Setting llvm-config = "" is misinterpreted as a relative path.
 EOF
 
 # If we have system LLVM, optionally use it
@@ -197,7 +196,7 @@ echo "Rust build complete"
 ''',
 
     src_install = '''
-# Install Rust using x.py (force rebuild 2026-02-09)
+# Install Rust using x.py
 DESTDIR="$DESTDIR" python3 x.py install
 
 # Create symlinks if not already present
@@ -256,11 +255,14 @@ for dep_dir in "${DEP_ARRAY[@]}"; do
             fi
         done
 
-        # Copy libraries
+        # Copy libraries (rustlib tree and shared libs like librustc_driver)
         mkdir -p "$DESTDIR/tools/lib"
         if [ -d "$dep_dir/usr/lib/rustlib" ]; then
             cp -a "$dep_dir/usr/lib/rustlib" "$DESTDIR/tools/lib/"
         fi
+        for so in "$dep_dir"/usr/lib/*.so*; do
+            [ -e "$so" ] && cp -a "$so" "$DESTDIR/tools/lib/"
+        done
         break
     fi
 done

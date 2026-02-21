@@ -23,7 +23,8 @@ ebuild_package(
 # Extract GCC from bootstrap-toolchain
 mkdir -p "$DESTDIR/usr/bin" "$DESTDIR/usr/lib64" "$DESTDIR/usr/lib" "$DESTDIR/usr/include"
 
-for dep_dir in $DEPS_DIRS; do
+IFS=':' read -ra _deps <<< "$DEP_BASE_DIRS"
+for dep_dir in "${_deps[@]}"; do
     if [ -f "$dep_dir/tools/.bootstrap-toolchain" ]; then
         echo "Found bootstrap-toolchain at: $dep_dir"
         TOOLS="$dep_dir/tools"
@@ -49,11 +50,14 @@ for dep_dir in $DEPS_DIRS; do
             cp -a "$TOOLS/libexec/gcc"/* "$DESTDIR/usr/lib/gcc/"
         fi
 
-        # Copy compiler support libraries
-        for lib in libgcc_s.so* libstdc++.so* libgomp.so* libatomic.so* libitm.so* libquadmath.so*; do
-            for f in "$TOOLS/lib/$lib" "$TOOLS/lib64/$lib"; do
-                [ -f "$f" ] && cp -a "$f" "$DESTDIR/usr/lib64/" 2>/dev/null
-            done
+        # Copy compiler support libraries — glob in the library directory
+        for f in "$TOOLS"/lib/libgcc_s.so* "$TOOLS"/lib/libstdc++.so* \
+                 "$TOOLS"/lib/libgomp.so* "$TOOLS"/lib/libatomic.so* \
+                 "$TOOLS"/lib/libitm.so* "$TOOLS"/lib/libquadmath.so* \
+                 "$TOOLS"/lib64/libgcc_s.so* "$TOOLS"/lib64/libstdc++.so* \
+                 "$TOOLS"/lib64/libgomp.so* "$TOOLS"/lib64/libatomic.so* \
+                 "$TOOLS"/lib64/libitm.so* "$TOOLS"/lib64/libquadmath.so*; do
+            [ -f "$f" ] && cp -a "$f" "$DESTDIR/usr/lib64/" 2>/dev/null
         done
 
         # Copy headers (C++ stdlib headers)
@@ -97,15 +101,15 @@ ebuild_package(
     src_install = '''
 mkdir -p "$DESTDIR/usr/lib64"
 
-for dep_dir in $DEPS_DIRS; do
+IFS=':' read -ra _deps <<< "$DEP_BASE_DIRS"
+for dep_dir in "${_deps[@]}"; do
     if [ -f "$dep_dir/tools/.bootstrap-toolchain" ]; then
         echo "Found bootstrap-toolchain at: $dep_dir"
 
-        # Copy runtime libraries
-        for lib in libstdc++.so* libgcc_s.so*; do
-            for f in "$dep_dir/tools/lib/$lib"; do
-                [ -f "$f" ] && cp -a "$f" "$DESTDIR/usr/lib64/"
-            done
+        # Copy runtime libraries — glob in the library directory so the
+        # wildcard expands against actual files, not the cwd.
+        for f in "$dep_dir"/tools/lib/libstdc++.so* "$dep_dir"/tools/lib/libgcc_s.so*; do
+            [ -f "$f" ] && cp -a "$f" "$DESTDIR/usr/lib64/"
         done
 
         # Create symlinks

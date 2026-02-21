@@ -39,16 +39,13 @@ package(
     configure_args = [
         "--with-included-libtasn1",
         "--with-included-unistring",
-        "--without-brotli",  # Brotli not commonly needed for TLS
+        "--without-brotli",
     ],
     # brotli dlwrap files unconditionally reference brotli types even when
     # --without-brotli is set; stub them out so they compile to nothing
-    src_prepare = """
-for f in lib/dlwrap/brotlienc.c lib/dlwrap/brotlidec.c \
-         lib/dlwrap/brotlienc.h lib/dlwrap/brotlidec.h; do
-    echo '/* brotli disabled */' > "$f"
-done
-""",
+    pre_configure_cmds = [
+        "for f in lib/dlwrap/brotlienc.c lib/dlwrap/brotlidec.c lib/dlwrap/brotlienc.h lib/dlwrap/brotlidec.h; do echo '/* brotli disabled */' > \"$f\"; done",
+    ],
     deps = [
         "//packages/linux/system/libs/crypto/nettle:nettle",
         "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",

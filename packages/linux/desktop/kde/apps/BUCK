@@ -1,4 +1,5 @@
 load("//defs:package.bzl", "package")
+load("//packages/linux/desktop/kde:meta.bzl", "KF_FRAMEWORKS")
 
 # =============================================================================
 # KDE Applications - Popular KDE apps collection
@@ -108,7 +109,7 @@ _KDE_APP_COMPILE = _KDE_HOST_LD_SETUP + """cmake --build "$S/build" -j${MAKEOPTS
 
 # Shared transitive deps needed for rpath-link when linking against KDE/Qt6
 _KDE_COMMON_DEPS = [
-    "//packages/linux/desktop/kde:kf5",
+] + KF_FRAMEWORKS + [
     "//packages/linux/desktop/qt:qt6",
     "//packages/linux/desktop/kde/ecm:extra-cmake-modules",
     "//packages/linux/dev-libs/glib:glib",
@@ -161,8 +162,9 @@ package(
     configure_args = [
         "-DBUILD_TESTING=OFF",
         "-DWITHOUT_X11=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = """
+    pre_configure_cmds = ["""
 sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true
 # Remove Qt6Multimedia requirement (not built in Qt6, only used for media playback)
 sed -i 's/    Multimedia/    #Multimedia/' CMakeLists.txt || true
@@ -182,22 +184,7 @@ sed -i '/#include <QMediaPlayer>/d' src/terminalDisplay/TerminalBell.cpp || true
 sed -i 's/auto.*QMediaPlayer/\\/\\/ &/' src/terminalDisplay/TerminalBell.cpp || true
 sed -i 's/m_bell->setSource/\\/\\/ &/' src/terminalDisplay/TerminalBell.cpp || true
 sed -i 's/m_bell->play/\\/\\/ &/' src/terminalDisplay/TerminalBell.cpp || true
-""",
-    src_configure = _KDE_HOST_LD_SETUP + """
-# Find cross-compiled ICU (cmake's FindICU otherwise picks up host ICU)
-ICU_BASE=""
-IFS=':' read -ra _ICU_DEPS <<< "${DEP_BASE_DIRS:-}"
-for _d in "${_ICU_DEPS[@]}"; do
-    if [ -f "$_d/usr/include/unicode/ubidi.h" ]; then ICU_BASE="$_d/usr"; break; fi
-    for _sd in "$_d"/*/usr; do
-        if [ -f "$_sd/include/unicode/ubidi.h" ]; then ICU_BASE="$_sd"; break 2; fi
-    done
-done
-if [ -n "$ICU_BASE" ]; then
-    export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS:-} -DICU_ROOT=$ICU_BASE -DICU_INCLUDE_DIR=$ICU_BASE/include -DICU_UC_LIBRARY_RELEASE=$ICU_BASE/lib64/libicuuc.so -DICU_I18N_LIBRARY_RELEASE=$ICU_BASE/lib64/libicui18n.so"
-fi
-""" + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+"""],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -219,8 +206,9 @@ package(
         "-DBUILD_TESTING=OFF",
         "-DCMAKE_DISABLE_FIND_PACKAGE_PackageKitQt6=ON",
         "-DCMAKE_DISABLE_FIND_PACKAGE_PlasmaActivities=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = """
+    pre_configure_cmds = ["""
 # Force clean build directory
 rm -rf build
 sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true
@@ -236,9 +224,7 @@ sed -i 's/set(HAVE_X11 TRUE)/set(HAVE_X11 FALSE)/' CMakeLists.txt
 # Fix AUTOMOC for ALL kcfg-generated files in cross-compilation
 # Add GENERATE_MOC to all kconfig_add_kcfg_files calls that don't have it
 sed -i '/kconfig_add_kcfg_files(/{/GENERATE_MOC/!s/kconfig_add_kcfg_files(\\([^ ]*\\)/kconfig_add_kcfg_files(\\1 GENERATE_MOC/}' src/CMakeLists.txt
-""",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+"""],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -258,15 +244,15 @@ package(
     license = "LGPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = """rm -rf build
+    pre_configure_cmds = ["""rm -rf build
 sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true
 # Disable X11 (Wayland-only build)
 sed -i 's/set(HAVE_X11 TRUE)/set(HAVE_X11 FALSE)/' apps/kate/CMakeLists.txt
-""",
+"""],
     src_configure = _KDE_HOST_LD_SETUP + """export CXXFLAGS="$CXXFLAGS -Wno-error=unused-but-set-variable"
 """ + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -287,10 +273,9 @@ package(
     configure_args = [
         "-DBUILD_TESTING=OFF",
         "-DOKULAR_UI=desktop",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/editors/poppler:poppler",
     ],
@@ -313,10 +298,9 @@ package(
     configure_args = [
         "-DBUILD_TESTING=OFF",
         "-DGWENVIEW_SEMANTICINFO_BACKEND=None",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/dev-libs/exiv2:exiv2",
         "//packages/linux/system/libs/graphics/lcms2:lcms2",
@@ -339,10 +323,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/system/libs/compression/libarchive:libarchive",
         "//packages/linux/system/libs/compression/libzip:libzip",
@@ -365,10 +348,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -388,10 +370,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/system/libs/utility/gmp:gmp",
         "//packages/linux/system/libs/utility/mpfr:mpfr",
@@ -414,10 +395,9 @@ package(
     license = "LGPL-3.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -438,10 +418,9 @@ package(
     configure_args = [
         "-DBUILD_TESTING=OFF",
         "-DEXPERIMENTALAPP_ENABLED=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -461,10 +440,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/desktop/kde/apps:konsole",
     ],
@@ -486,10 +464,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -509,10 +486,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
@@ -532,10 +508,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
     ],
@@ -557,10 +532,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/desktop/kde/apps:ksystemstats",
     ],
@@ -592,10 +566,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS + [
         "//packages/linux/dev-libs/boost:boost",
     ],
@@ -616,10 +589,9 @@ package(
     license = "GPL-2.0-or-later",
     configure_args = [
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON",
     ],
-    src_prepare = "sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true",
-    src_configure = _KDE_HOST_LD_SETUP + _KDE_APP_CMAKE_CONFIGURE,
-    src_compile = _KDE_APP_COMPILE,
+    pre_configure_cmds = ["sed -i 's/^ecm_install_po_files_as_qm/#ecm_install_po_files_as_qm/' CMakeLists.txt || true"],
     deps = _KDE_COMMON_DEPS,
     visibility = ["PUBLIC"],
 )
