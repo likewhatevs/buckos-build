@@ -1,4 +1,5 @@
 load("//defs:package.bzl", "package")
+load("//defs:package_defs.bzl", "gen_pkgconfig")
 
 # =============================================================================
 # ROCm - AMD ROCm platform for GPU computing

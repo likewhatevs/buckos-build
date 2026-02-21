@@ -24,11 +24,8 @@ package(
         mkdir -p $OUT/usr/bin
         cp perf $OUT/usr/bin/
     """,
-    deps = use_dep(
-        {
-            "zlib": ["//packages/linux/core/zlib:zlib"],
-        },
-        ["zlib"],
-    ),
+    use_deps = {
+        "zlib": "//packages/linux/core/zlib:zlib",
+    },
     visibility = ["PUBLIC"],
 )

@@ -37,6 +37,8 @@ package(
     build_rule = "binary",
     name = "amd-ucode",
     version = "20241017",
+    local_only = True,
+    filename = "linux-firmware-20241017.tar.gz",
     description = "Microcode update files for AMD processors",
     homepage = "https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git",
     license = "AMD-UCODE",
