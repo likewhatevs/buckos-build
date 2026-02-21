@@ -90,9 +90,9 @@ def _meson_setup(ctx, source):
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
 
     if cflags:
-        cmd.add(cmd_args("--meson-define=", "c_args=", cmd_args(cflags, delimiter = ","), delimiter = ""))
+        cmd.add("--env", cmd_args("CFLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))
     if ldflags:
-        cmd.add(cmd_args("--meson-define=", "c_link_args=", cmd_args(ldflags, delimiter = ","), delimiter = ""))
+        cmd.add("--env", cmd_args("LDFLAGS=", cmd_args(ldflags, delimiter = " "), delimiter = ""))
     if pkg_config_paths:
         cmd.add("--env", cmd_args("PKG_CONFIG_PATH=", cmd_args(pkg_config_paths, delimiter = ":"), delimiter = ""))
 

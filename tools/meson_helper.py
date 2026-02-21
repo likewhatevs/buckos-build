@@ -13,6 +13,12 @@ import sys
 def _resolve_env_paths(value):
     """Resolve relative Buck2 artifact paths in env values to absolute.
 
+    Buck2 runs actions from the project root, so artifact paths like
+    ``buck-out/v2/.../gcc`` are relative to that root.  When a subprocess
+    changes its CWD (e.g. meson runs compiler checks in a temp dir), the
+    relative paths break.  This function makes them absolute while the
+    process is still in the project root.
+
     Handles: bare paths, -I/path, -L/path, --flag=path, and
     colon-separated paths (PKG_CONFIG_PATH).
     """
@@ -20,23 +26,42 @@ def _resolve_env_paths(value):
     if ":" in value and not value.startswith("-"):
         resolved = []
         for p in value.split(":"):
-            if p and os.path.exists(p):
+            p = p.strip()
+            if p and not os.path.isabs(p) and (p.startswith("buck-out") or os.path.exists(p)):
                 resolved.append(os.path.abspath(p))
-            elif p:
+            else:
                 resolved.append(p)
         return ":".join(resolved)
 
+    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath,"]
+
     parts = []
     for token in value.split():
+        resolved = False
+        # Handle -I/path, -L/path, -Wl,-rpath,/path
+        for prefix in _FLAG_PREFIXES:
+            if token.startswith(prefix) and len(token) > len(prefix):
+                path = token[len(prefix):]
+                if not os.path.isabs(path) and path.startswith("buck-out"):
+                    parts.append(prefix + os.path.abspath(path))
+                elif not os.path.isabs(path) and os.path.exists(path):
+                    parts.append(prefix + os.path.abspath(path))
+                else:
+                    parts.append(token)
+                resolved = True
+                break
+        if resolved:
+            continue
+        # Handle --flag=path
         if token.startswith("--") and "=" in token:
             idx = token.index("=")
             flag = token[: idx + 1]
             path = token[idx + 1 :]
-            if path and os.path.exists(path):
+            if path and not os.path.isabs(path) and os.path.exists(path):
                 parts.append(flag + os.path.abspath(path))
             else:
                 parts.append(token)
-        elif os.path.exists(token):
+        elif not os.path.isabs(token) and os.path.exists(token):
             parts.append(os.path.abspath(token))
         else:
             parts.append(token)
@@ -93,6 +118,23 @@ def main():
     ]
 
     for define in args.meson_defines:
+        # Resolve relative Buck2 paths in define values (e.g.
+        # c_args=-Ibuck-out/... or c_link_args=-Lbuck-out/...)
+        key, _, value = define.partition("=")
+        if value and ("buck-out" in value or value.startswith("-")):
+            parts = []
+            for token in value.split(","):
+                token = token.strip()
+                for prefix in ("-I", "-L"):
+                    if token.startswith(prefix):
+                        path = token[len(prefix):]
+                        if not os.path.isabs(path) and os.path.exists(path):
+                            token = prefix + os.path.abspath(path)
+                        elif not os.path.isabs(path) and path.startswith("buck-out"):
+                            token = prefix + os.path.abspath(path)
+                        break
+                parts.append(token)
+            define = key + "=" + ",".join(parts)
         cmd.extend(["-D", define])
 
     cmd.extend(args.meson_args)
