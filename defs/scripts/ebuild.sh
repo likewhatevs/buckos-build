@@ -1464,6 +1464,25 @@ if [ -n "$PHASES_CONTENT" ]; then
             USE="$USE" \
             DEP_BASE_DIRS="$DEP_BASE_DIRS" \
             TOOLCHAIN_ROOT="${TOOLCHAIN_ROOT:-}" \
+            CC="${CC:-}" \
+            CXX="${CXX:-}" \
+            CPP="${CPP:-}" \
+            AR="${AR:-}" \
+            AS="${AS:-}" \
+            LD="${LD:-}" \
+            NM="${NM:-}" \
+            RANLIB="${RANLIB:-}" \
+            STRIP="${STRIP:-}" \
+            OBJCOPY="${OBJCOPY:-}" \
+            OBJDUMP="${OBJDUMP:-}" \
+            READELF="${READELF:-}" \
+            CFLAGS="${CFLAGS:-}" \
+            CXXFLAGS="${CXXFLAGS:-}" \
+            LDFLAGS="${LDFLAGS:-}" \
+            CPPFLAGS="${CPPFLAGS:-}" \
+            CROSS_COMPILING="${CROSS_COMPILING:-}" \
+            BOOTSTRAP_SYSROOT="${BOOTSTRAP_SYSROOT:-}" \
+            BUCKOS_TARGET="${BUCKOS_TARGET:-}" \
             /bin/bash --norc --noprofile "$T/phases.sh"
     elif command -v unshare >/dev/null 2>&1; then
         # Use network namespace isolation like Gentoo Portage does.
