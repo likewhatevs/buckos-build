@@ -102,7 +102,9 @@ def _cmake_configure(ctx, source):
     if lib_paths:
         cmd.add("--env", cmd_args("LD_LIBRARY_PATH=", cmd_args(lib_paths, delimiter = ":"), delimiter = ""))
     if cflags:
-        cmd.add(cmd_args("--cmake-define=", "CMAKE_C_FLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))
+        _cf = cmd_args(cflags, delimiter = " ")
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_C_FLAGS=", _cf, delimiter = ""))
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_CXX_FLAGS=", _cf, delimiter = ""))
     if ldflags:
         _ld = cmd_args(ldflags, delimiter = " ")
         cmd.add(cmd_args("--cmake-define=", "CMAKE_EXE_LINKER_FLAGS=", _ld, delimiter = ""))
