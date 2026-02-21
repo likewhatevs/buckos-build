@@ -98,17 +98,51 @@ def main():
         shutil.rmtree(output_dir)
     shutil.copytree(build_dir, output_dir, symlinks=True)
 
-    # Rewrite absolute paths in build.ninja — meson embeds the configured
-    # directory's absolute path into build rules.  After copying to output_dir
-    # those paths are stale.
-    ninja_file = os.path.join(output_dir, "build.ninja")
-    if os.path.isfile(ninja_file):
-        with open(ninja_file, "r") as f:
+    # Rewrite absolute paths in build system files.
+    # Meson: simple string replacement in build.ninja (no auto-regeneration).
+    # CMake: re-run cmake to update internal path references (string
+    #   replacement triggers infinite regeneration loops).
+    cmake_cache = os.path.join(output_dir, "CMakeCache.txt")
+    if os.path.isfile(cmake_cache):
+        # Update CMAKE_CACHEFILE_DIR in CMakeCache.txt, then let cmake
+        # regenerate build.ninja and cmake_install.cmake consistently.
+        with open(cmake_cache, "r") as f:
             content = f.read()
-        if build_dir in content:
-            content = content.replace(build_dir, output_dir)
-            with open(ninja_file, "w") as f:
-                f.write(content)
+        content = content.replace(build_dir, output_dir)
+        with open(cmake_cache, "w") as f:
+            f.write(content)
+        # Also update cmake_install.cmake directly since ninja install
+        # reads it without triggering cmake regeneration.
+        for pattern in ["cmake_install.cmake", "*/cmake_install.cmake"]:
+            for fpath in _glob.glob(os.path.join(output_dir, pattern)):
+                try:
+                    with open(fpath, "r") as f:
+                        fc = f.read()
+                    if build_dir in fc:
+                        fc = fc.replace(build_dir, output_dir)
+                        with open(fpath, "w") as f:
+                            f.write(fc)
+                except (UnicodeDecodeError, PermissionError):
+                    pass
+        # Re-run cmake to regenerate build.ninja with updated paths
+        result = subprocess.run(
+            ["cmake", "."],
+            cwd=output_dir,
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            print(f"warning: cmake reconfigure returned {result.returncode}",
+                  file=sys.stderr)
+    else:
+        # Meson / plain ninja — simple string replacement
+        ninja_file = os.path.join(output_dir, "build.ninja")
+        if os.path.isfile(ninja_file):
+            with open(ninja_file, "r") as f:
+                content = f.read()
+            if build_dir in content:
+                content = content.replace(build_dir, output_dir)
+                with open(ninja_file, "w") as f:
+                    f.write(content)
 
     # Touch autotools-generated files so make doesn't try to regenerate
     # them.  The copytree preserves timestamps but configure may have
