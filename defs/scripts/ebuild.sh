@@ -1452,11 +1452,14 @@ if [ -n "$PHASES_CONTENT" ]; then
             HOME="$HOME" \
             S="$S" \
             T="$T" \
+            WORKDIR="$WORKDIR" \
             DESTDIR="$DESTDIR" \
+            MAKE_JOBS="$MAKE_JOBS" \
             PN="$PN" \
             PV="$PV" \
             USE="$USE" \
             DEP_BASE_DIRS="$DEP_BASE_DIRS" \
+            TOOLCHAIN_ROOT="${TOOLCHAIN_ROOT:-}" \
             /bin/bash --norc --noprofile "$T/phases.sh"
     elif command -v unshare >/dev/null 2>&1; then
         # Use network namespace isolation like Gentoo Portage does.
