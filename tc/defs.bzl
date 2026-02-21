@@ -23,6 +23,7 @@ def _buckos_execution_platforms_impl(ctx: AnalysisContext) -> list[Provider]:
         executor_config = CommandExecutorConfig(
             local_enabled = True,
             remote_enabled = False,
+            remote_cache_enabled = ctx.attrs.remote_cache_enabled,
             use_windows_path_separators = False,
         ),
     )
@@ -45,5 +46,6 @@ buckos_execution_platforms = rule(
             providers = [ConfigurationInfo],
             default = host_configuration.os,
         ),
+        "remote_cache_enabled": attrs.bool(default = False),
     },
 )
