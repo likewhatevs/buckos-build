@@ -84,6 +84,8 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--pre-cmd", action="append", dest="pre_cmds", default=[],
+                        help="Shell command to run in source dir before meson setup (repeatable)")
     args = parser.parse_args()
 
     if not os.path.isdir(args.source_dir):
@@ -131,11 +133,20 @@ def main():
     if args.cxx:
         env["CXX"] = _resolve_env_paths(args.cxx)
 
+    # Run pre-configure commands in the source directory
+    source_abs = os.path.abspath(args.source_dir)
+    for cmd_str in args.pre_cmds:
+        result = subprocess.run(cmd_str, shell=True, cwd=source_abs, env=env)
+        if result.returncode != 0:
+            print(f"error: pre-cmd failed with exit code {result.returncode}: {cmd_str}",
+                  file=sys.stderr)
+            sys.exit(1)
+
     cmd = [
         "meson",
         "setup",
         os.path.abspath(args.build_dir),
-        os.path.abspath(args.source_dir),
+        source_abs,
         f"--prefix={args.prefix}",
     ]
 

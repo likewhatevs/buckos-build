@@ -52,6 +52,10 @@ def _meson_setup(ctx, source):
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
+    # Pre-configure commands (run in the source dir before meson setup)
+    for pre_cmd in ctx.attrs.pre_configure_cmds:
+        cmd.add("--pre-cmd", pre_cmd)
+
     # Meson arguments (use = form so argparse doesn't treat -D... as a flag)
     for arg in ctx.attrs.meson_args:
         cmd.add(cmd_args("--meson-arg=", arg, delimiter = ""))
@@ -224,6 +228,7 @@ meson_package = rule(
 
         # Build configuration
         "configure_args": attrs.list(attrs.string(), default = []),
+        "pre_configure_cmds": attrs.list(attrs.string(), default = []),
         "meson_args": attrs.list(attrs.string(), default = []),
         "meson_defines": attrs.list(attrs.string(), default = []),
         "source_subdir": attrs.string(default = ""),

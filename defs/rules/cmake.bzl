@@ -47,6 +47,10 @@ def _cmake_configure(ctx, source):
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
+    # Source subdirectory (e.g. LLVM has CMakeLists.txt in llvm/)
+    if ctx.attrs.source_subdir:
+        cmd.add("--source-subdir", ctx.attrs.source_subdir)
+
     # CMake arguments (use = form so argparse doesn't treat -D... as a flag)
     for arg in ctx.attrs.cmake_args:
         cmd.add(cmd_args("--cmake-arg=", arg, delimiter = ""))
@@ -65,8 +69,6 @@ def _cmake_configure(ctx, source):
         if PackageInfo in dep:
             pkg = dep[PackageInfo]
             prefix = pkg.prefix
-            for lib in pkg.libraries:
-                ldflags.append("-l" + lib)
             if pkg.pkg_config_path:
                 pkg_config_paths.append(pkg.pkg_config_path)
             for f in pkg.cflags:
@@ -80,6 +82,8 @@ def _cmake_configure(ctx, source):
         cflags.append(cmd_args(prefix, format = "-I{}/usr/include"))
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib64"))
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
@@ -90,7 +94,10 @@ def _cmake_configure(ctx, source):
     if cflags:
         cmd.add(cmd_args("--cmake-define=", "CMAKE_C_FLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))
     if ldflags:
-        cmd.add(cmd_args("--cmake-define=", "CMAKE_EXE_LINKER_FLAGS=", cmd_args(ldflags, delimiter = " "), delimiter = ""))
+        _ld = cmd_args(ldflags, delimiter = " ")
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_EXE_LINKER_FLAGS=", _ld, delimiter = ""))
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_SHARED_LINKER_FLAGS=", _ld, delimiter = ""))
+        cmd.add(cmd_args("--cmake-define=", "CMAKE_MODULE_LINKER_FLAGS=", _ld, delimiter = ""))
     if pkg_config_paths:
         cmd.add("--env", cmd_args("PKG_CONFIG_PATH=", cmd_args(pkg_config_paths, delimiter = ":"), delimiter = ""))
 
@@ -216,6 +223,7 @@ cmake_package = rule(
         "version": attrs.string(),
 
         # Build configuration
+        "source_subdir": attrs.option(attrs.string(), default = None),
         "configure_args": attrs.list(attrs.string(), default = []),
         "cmake_args": attrs.list(attrs.string(), default = []),
         "cmake_defines": attrs.list(attrs.string(), default = []),

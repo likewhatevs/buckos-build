@@ -33,7 +33,7 @@ def _resolve_env_paths(value):
                 resolved.append(p)
         return ":".join(resolved)
 
-    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath,"]
+    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath-link,", "-Wl,-rpath,"]
 
     parts = []
     for token in value.split():
@@ -75,6 +75,8 @@ def main():
     parser.add_argument("--install-prefix", default="/usr", help="Install prefix (default: /usr)")
     parser.add_argument("--cc", default=None, help="C compiler")
     parser.add_argument("--cxx", default=None, help="C++ compiler")
+    parser.add_argument("--source-subdir", default=None,
+                        help="Subdirectory within source containing CMakeLists.txt")
     parser.add_argument("--cmake-arg", action="append", dest="cmake_args", default=[],
                         help="Extra argument to pass to cmake (repeatable)")
     parser.add_argument("--cmake-define", action="append", dest="cmake_defines", default=[],
@@ -111,9 +113,13 @@ def main():
     if args.cxx:
         env["CXX"] = _resolve_env_paths(args.cxx)
 
+    source_path = os.path.abspath(args.source_dir)
+    if args.source_subdir:
+        source_path = os.path.join(source_path, args.source_subdir)
+
     cmd = [
         "cmake",
-        "-S", os.path.abspath(args.source_dir),
+        "-S", source_path,
         "-B", os.path.abspath(args.build_dir),
         f"-DCMAKE_INSTALL_PREFIX={args.install_prefix}",
         "-G", "Ninja",
