@@ -19,6 +19,13 @@ package(
         # Stub the doc/help2man script — it tries to run the versioned
         # binaries (aclocal-1.16, automake-1.16) that we are building.
         "printf '#!/bin/sh\\nfor arg; do case \"$arg\" in --output=*) f=\"${arg#--output=}\"; echo \".TH A 1\" > \"$f\"; exit 0;; esac; done\\nexit 0\\n' > doc/help2man && chmod +x doc/help2man",
+        # Touch amhello tarball — its recipe runs aclocal-1.16 which we
+        # are currently building.
+        "touch doc/amhello-1.0.tar.gz",
+    ],
+    make_args = [
+        # Stub out makeinfo — the build host may not have texinfo installed.
+        "MAKEINFO=true",
     ],
     deps = [
         "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
