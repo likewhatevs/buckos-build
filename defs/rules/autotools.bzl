@@ -84,7 +84,6 @@ def _src_configure(ctx, source):
         # Propagate include/lib/pkgconfig paths from dependencies.
         # Works with both new-style PackageInfo deps and old-style
         # ebuild_package deps (DefaultInfo only).
-        dep_libs = []
         for dep in ctx.attrs.deps:
             if PackageInfo in dep:
                 prefix = dep[PackageInfo].prefix
@@ -97,9 +96,8 @@ def _src_configure(ctx, source):
             cmd.add(cmd_args("--cflags=", inc, delimiter = ""))
             cmd.add(cmd_args("--ldflags=", lib64, delimiter = ""))
             cmd.add(cmd_args("--ldflags=", lib, delimiter = ""))
-            if PackageInfo in dep:
-                for libname in dep[PackageInfo].libraries:
-                    dep_libs.append("-l" + libname)
+            cmd.add(cmd_args("--ldflags=", cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"), delimiter = ""))
+            cmd.add(cmd_args("--ldflags=", cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib"), delimiter = ""))
             cmd.add("--pkg-config-path", cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
             cmd.add("--pkg-config-path", cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
             cmd.add("--pkg-config-path", cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
@@ -111,13 +109,6 @@ def _src_configure(ctx, source):
                     cmd.add(cmd_args("--cflags=", f, delimiter = ""))
                 for f in dep[PackageInfo].ldflags:
                     cmd.add(cmd_args("--ldflags=", f, delimiter = ""))
-
-        # Pass dep -l flags via LIBS (not LDFLAGS) so autotools configure
-        # test programs don't fail trying to run binaries linked against
-        # libraries in buck-out paths.  LIBS is appended after LDFLAGS in
-        # the link command, which is the correct position for -l flags.
-        if dep_libs:
-            cmd.add("--env", "LIBS=" + " ".join(dep_libs))
 
     ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
     return output
@@ -150,6 +141,8 @@ def _dep_env_args(ctx):
         cflags.append(inc)
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib64"))
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))

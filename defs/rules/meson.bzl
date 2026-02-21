@@ -64,14 +64,15 @@ def _meson_setup(ctx, source):
     cflags = list(ctx.attrs.extra_cflags)
     ldflags = list(ctx.attrs.extra_ldflags)
 
-    # Propagate flags and pkg-config paths from dependencies
+    # Propagate flags and pkg-config paths from dependencies.
+    # Note: dep libraries (-l flags) are NOT passed here — meson discovers
+    # them via pkg-config.  Putting -l flags in LDFLAGS breaks meson's
+    # C compiler sanity check (test binaries can't find .so files at runtime).
     pkg_config_paths = []
     for dep in ctx.attrs.deps:
         if PackageInfo in dep:
             pkg = dep[PackageInfo]
             prefix = pkg.prefix
-            for lib in pkg.libraries:
-                ldflags.append("-l" + lib)
             if pkg.pkg_config_path:
                 pkg_config_paths.append(pkg.pkg_config_path)
             for f in pkg.cflags:
@@ -85,6 +86,10 @@ def _meson_setup(ctx, source):
         cflags.append(cmd_args(prefix, format = "-I{}/usr/include"))
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib64"))
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib"))
+        # rpath-link lets the linker resolve transitive DT_NEEDED entries
+        # (e.g. libsndfile.so → libFLAC.so) without adding runtime rpath.
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"))
+        ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
