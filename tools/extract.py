@@ -58,6 +58,12 @@ def extract_tar_native(archive, output, strip_components, mode):
                 member.name = parts[-1]
                 if not member.name:
                     continue
+                # Strip the same prefix from hardlink targets so tarfile
+                # can resolve them after renaming.
+                if member.islnk() and member.linkname:
+                    link_parts = member.linkname.split("/", strip_components)
+                    if len(link_parts) > strip_components:
+                        member.linkname = link_parts[-1]
             member.name = os.path.normpath(member.name)
             # Security: prevent path traversal
             dest = os.path.join(output, member.name)
