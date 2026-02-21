@@ -88,6 +88,8 @@ def _meson_setup(ctx, source):
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
+        cmd.add("--path-prepend", cmd_args(prefix, format = "{}/usr/bin"))
+        cmd.add("--path-prepend", cmd_args(prefix, format = "{}/usr/sbin"))
 
     if cflags:
         cmd.add("--env", cmd_args("CFLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))

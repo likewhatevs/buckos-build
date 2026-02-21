@@ -81,6 +81,8 @@ def main():
                         help="Meson option as KEY=VALUE (repeatable)")
     parser.add_argument("--env", action="append", dest="extra_env", default=[],
                         help="Extra environment variable KEY=VALUE (repeatable)")
+    parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
+                        help="Directory to prepend to PATH (repeatable, resolved to absolute)")
     args = parser.parse_args()
 
     if not os.path.isdir(args.source_dir):
@@ -100,6 +102,10 @@ def main():
 
     env = os.environ.copy()
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
+    if args.path_prepend:
+        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
+        if prepend:
+            env["PATH"] = prepend + ":" + env["PATH"]
     for entry in args.extra_env:
         key, _, value = entry.partition("=")
         if key:
