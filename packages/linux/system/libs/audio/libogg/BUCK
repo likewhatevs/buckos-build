@@ -15,6 +15,7 @@ package(
     configure_args = [
         "--disable-static",
     ],
+    libraries = ["ogg"],
     # Skip test programs — they fail to link in the install phase
     # because the build dir is a read-only Buck2 artifact.
     make_args = ["noinst_PROGRAMS="],
