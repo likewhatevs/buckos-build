@@ -65,6 +65,11 @@ def extract_tar_native(archive, output, strip_components, mode):
                     if len(link_parts) > strip_components:
                         member.linkname = link_parts[-1]
             member.name = os.path.normpath(member.name)
+            # Skip filenames with backslashes — Buck2 treats them as path
+            # separators and rejects the output.  Affects systemd unit
+            # templates like system-systemd\x2dcryptsetup.slice.
+            if "\\" in member.name:
+                continue
             # Security: prevent path traversal
             dest = os.path.join(output, member.name)
             if not os.path.abspath(dest).startswith(os.path.abspath(output)):
