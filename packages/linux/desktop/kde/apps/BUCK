@@ -1,4 +1,5 @@
 load("//defs:package.bzl", "package")
+load("//packages/linux/desktop/kde:meta.bzl", "KF_FRAMEWORKS")
 
 # =============================================================================
 # KDE Applications - Popular KDE apps collection
@@ -108,7 +109,7 @@ _KDE_APP_COMPILE = _KDE_HOST_LD_SETUP + """cmake --build "$S/build" -j${MAKEOPTS
 
 # Shared transitive deps needed for rpath-link when linking against KDE/Qt6
 _KDE_COMMON_DEPS = [
-    "//packages/linux/desktop/kde:kf5",
+] + KF_FRAMEWORKS + [
     "//packages/linux/desktop/qt:qt6",
     "//packages/linux/desktop/kde/ecm:extra-cmake-modules",
     "//packages/linux/dev-libs/glib:glib",

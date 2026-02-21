@@ -1,5 +1,6 @@
 load("//defs:package_defs.bzl", "binary_package", "rootfs", "autotools_package")
 load("//defs:package_defs.bzl", "binary_package", "rootfs", "initramfs", "dracut_initramfs", "qemu_boot_script", "iso_image", "stage3_tarball", "autotools_package")
+load("//packages/linux/desktop/kde:meta.bzl", "KDE_PLASMA")
 
 # =============================================================================
 # Helper files for live environment
@@ -2023,55 +2024,10 @@ rootfs(
         "//packages/linux/fonts/collections/liberation-fonts:liberation-fonts",
         ":fontconfig-symlinks-gen",  # Enable font configurations
 
-        # KDE Plasma Desktop
-        "//packages/linux/desktop/kde:kde-plasma",
-        "//packages/linux/desktop/kde:plasma-desktop",  # Provides org.kde.plasma.desktop shell
-        "//packages/linux/desktop/kde/apps:konsole",
-        "//packages/linux/desktop/kde/apps:dolphin",
-        "//packages/linux/desktop/kde/apps:kate",
-        # KDE Frameworks (QML modules required for Plasma)
-        "//packages/linux/desktop/kde:kservice",  # Provides kbuildsycoca6 for application menu
-        "//packages/linux/desktop/kde:kirigami",
-        "//packages/linux/desktop/kde:kcmutils",
-        "//packages/linux/desktop/kde:kdeclarative",
-        "//packages/linux/desktop/kde:kitemmodels",
-        "//packages/linux/desktop/kde:ksvg",
-        "//packages/linux/desktop/kde:krunner",
-        "//packages/linux/desktop/kde:kpackage",
-        "//packages/linux/desktop/kde:plasma-activities",
-        "//packages/linux/desktop/kde:kactivitymanagerd",
-        "//packages/linux/desktop/kde:breeze",
-        "//packages/linux/desktop/kde:breeze-icons",
-        "//packages/linux/desktop/kde:kiconthemes",
-        # KDE/Graphics libraries (explicit dependencies - not auto-pulled from filegroup)
-        "//packages/linux/desktop/kde:libplasma",
-        "//packages/linux/desktop/kde:plasma5support",
-        "//packages/linux/desktop/kde:kdecoration2",
-        "//packages/linux/desktop/kde:kwayland",
-        "//packages/linux/desktop/kde:kscreenlocker",
-        "//packages/linux/desktop/kde:kglobalacceld",
-        "//packages/linux/desktop/kde:layer-shell-qt",
-        "//packages/linux/desktop/kde:kquickcharts",
-        "//packages/linux/desktop/kde:kholidays",
-        "//packages/linux/desktop/kde:kirigami-addons",
-        "//packages/linux/desktop/kde:milou",
-        # plasma-integration requires X11 - skip for Wayland-only build
-        # knighttime is new in Plasma 6.5.x - not available in 6.2.4
-        "//packages/linux/graphics/libepoxy:libepoxy",
-        # Graphics/Display libraries required by KWin
-        "//packages/linux/system/libs/graphics/lcms2:lcms2",
-        "//packages/linux/graphics/xorg/libxcvt:libxcvt",
-        "//packages/linux/graphics/utilities/libdisplay-info:libdisplay-info",
-        "//packages/linux/graphics/xorg/xcb-util-cursor:xcb-util-cursor",
-        "//packages/linux/graphics/xorg/xcb-util-image:xcb-util-image",
-        "//packages/linux/graphics/xorg/xcb-util-renderutil:xcb-util-renderutil",
-
+        # KDE Plasma Desktop (expanded from meta.bzl KDE_PLASMA list)
+    ] + KDE_PLASMA + [
         # Note: Using getty autologin + startplasma-wayland instead of plasma-login-manager
         # (plasma-login-manager 6.5.91 requires PlasmaQuick 6.5.90, but we have 6.2.4)
-
-        # Audio (PipeWire with systemd support)
-        "//packages/linux/audio/daemons/pipewire:pipewire",
-        "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
 
         # Development tools and build toolchain
         "//packages/linux/dev-tools/vcs/git:git",
