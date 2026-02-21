@@ -108,6 +108,43 @@ def _src_configure(ctx, source):
     ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
     return output
 
+def _dep_env_args(ctx):
+    """Build PKG_CONFIG_PATH/CFLAGS/LDFLAGS env args from deps.
+
+    Needed so that build and install phases (not just configure) can find
+    dependency headers, libraries, and pkg-config files.  Critical for
+    skip_configure packages that never run ./configure.
+    """
+    pkg_config_paths = []
+    cflags = list(ctx.attrs.extra_cflags)
+    ldflags = list(ctx.attrs.extra_ldflags)
+    for dep in ctx.attrs.deps:
+        if PackageInfo in dep:
+            prefix = dep[PackageInfo].prefix
+            for libname in dep[PackageInfo].libraries:
+                ldflags.append("-l" + libname)
+            for f in dep[PackageInfo].cflags:
+                cflags.append(f)
+            for f in dep[PackageInfo].ldflags:
+                ldflags.append(f)
+        else:
+            prefix = dep[DefaultInfo].default_outputs[0]
+        cflags.append(cmd_args(prefix, format = "-I{}/usr/include"))
+        ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib64"))
+        ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib"))
+        pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib64/pkgconfig"))
+        pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/lib/pkgconfig"))
+        pkg_config_paths.append(cmd_args(prefix, format = "{}/usr/share/pkgconfig"))
+
+    result = []
+    if pkg_config_paths:
+        result.append(cmd_args("PKG_CONFIG_PATH=", cmd_args(pkg_config_paths, delimiter = ":"), delimiter = ""))
+    if cflags:
+        result.append(cmd_args("CFLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))
+    if ldflags:
+        result.append(cmd_args("LDFLAGS=", cmd_args(ldflags, delimiter = " "), delimiter = ""))
+    return result
+
 def _src_compile(ctx, configured):
     """Run make (or equivalent) in the configured source tree.
 
@@ -120,6 +157,10 @@ def _src_compile(ctx, configured):
     cmd.add("--output-dir", output.as_output())
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
+        cmd.add("--env", env_arg)
+
+    # Propagate dep paths so make can find headers/libs/pkg-config
+    for env_arg in _dep_env_args(ctx):
         cmd.add("--env", env_arg)
 
     # Inject user-specified environment variables
@@ -148,6 +189,10 @@ def _src_install(ctx, built):
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
+        cmd.add("--env", env_arg)
+
+    # Propagate dep paths so make install can find headers/libs/pkg-config
+    for env_arg in _dep_env_args(ctx):
         cmd.add("--env", env_arg)
 
     # Inject user-specified environment variables
