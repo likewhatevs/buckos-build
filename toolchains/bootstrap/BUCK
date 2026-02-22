@@ -1,4 +1,5 @@
-load("@buckos//defs:package_defs.bzl", "download_source", "ebuild_package")
+load("@buckos//defs:package.bzl", "package")
+load("@buckos//defs/rules:source.bzl", "extract_source")
 
 # =============================================================================
 # Bootstrap Toolchain for BuckOS
@@ -23,31 +24,33 @@ load("@buckos//defs:package_defs.bzl", "download_source", "ebuild_package")
 # Stage 1.1: Cross Binutils
 # =============================================================================
 
-download_source(
-    name = "binutils-src",
-    src_uri = "https://mirrors.kernel.org/gnu/binutils/binutils-2.44.tar.xz",
+http_file(
+    name = "binutils-archive",
+    urls = ["https://mirrors.kernel.org/gnu/binutils/binutils-2.44.tar.xz"],
     sha256 = "ce2017e059d63e67ddb9240e9d4ec49c2893605035cd60e92ad53177f4377237",
-    signature_required = False,
+    out = "binutils-2.44.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "binutils-src",
+    source = ":binutils-archive",
+)
+
+package(
     name = "cross-binutils",
+    build_rule = "binary",
+    local_only = True,
     source = ":binutils-src",
     version = "2.44",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Cross binutils for bootstrap toolchain",
     homepage = "https://www.gnu.org/software/binutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Uses host compiler to build cross-toolchain
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # Clean any stale config.cache files that might have old PKG_CONFIG paths
 find . -name 'config.cache' -delete 2>/dev/null || true
 echo "Cleaned stale config.cache files"
-''',
-
-    src_configure = '''
+'''],
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 mkdir -p build && cd build
 ../configure \
@@ -64,10 +67,8 @@ mkdir -p build && cd build
     --enable-gprofng=no \
     --enable-default-hash-style=gnu \
     MAKEINFO=true
-''',
 
-    src_compile = '''
-cd build
+# build (already in build/ from mkdir above)
 # Build binutils and ld with full parallelism
 make -j$MAKE_JOBS MAKEINFO=true all-binutils all-ld
 
@@ -75,31 +76,26 @@ make -j$MAKE_JOBS MAKEINFO=true all-binutils all-ld
 # (tc-i386.o can fail when conftest .s files are deleted before as reads them)
 GAS_JOBS=$((MAKE_JOBS > 4 ? 4 : MAKE_JOBS))
 make -j$GAS_JOBS MAKEINFO=true all-gas
-''',
 
-    src_install = '''
-cd build
+# install (still in build/)
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-binutils install-gas install-ld MAKEINFO=true
+make -j$MAKE_JOBS DESTDIR="$OUT" install-binutils install-gas install-ld MAKEINFO=true
 # Also install target libraries that were built
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-bfd install-libiberty install-libsframe MAKEINFO=true || true
+make -j$MAKE_JOBS DESTDIR="$OUT" install-bfd install-libiberty install-libsframe MAKEINFO=true || true
 
 # Replace unprefixed tools with symlinks to prefixed versions
 # Cross-binutils installs both prefixed (x86_64-buckos-linux-gnu-as) and unprefixed (as) tools.
 # The unprefixed tools are for the build host, but we want glibc's configure to find our
 # newer cross-ld (2.44) instead of host ld (2.35.2). Creating symlinks ensures that when
 # cross-glibc configure checks for "ld", it finds our version.
-cd "$DESTDIR/tools/bin"
+cd "$OUT/tools/bin"
 for tool in addr2line ar as c++filt elfedit gprof ld ld.bfd nm objcopy objdump ranlib readelf size strings strip; do
     if [ -f "${BUCKOS_TARGET}-${tool}" ]; then
         echo "Creating symlink: $tool -> ${BUCKOS_TARGET}-${tool}"
         rm -f "$tool"
         ln -sf "${BUCKOS_TARGET}-${tool}" "$tool"
     fi
-done
-''',
-
-    depend = [],
+done""",
     visibility = ["PUBLIC"],
 )
 
@@ -109,41 +105,66 @@ done
 
 # GCC 14.3.0 - Used for bootstrap (Stages 1-2)
 # Stable, proven bootstrap toolchain without libcody complications
-download_source(
-    name = "gcc-14-src",
-    src_uri = "https://mirror.buckos.org/g/gcc-14.3.0.tar.gz",
+http_file(
+    name = "gcc-14-archive",
+    urls = ["https://mirror.buckos.org/g/gcc-14.3.0.tar.gz"],
     sha256 = "ace8b8b0dbfe6abfc22f821cb093e195aa5498b7ccf7cd23e4424b9f14afed22",
-    signature_required = False,
+    out = "gcc-14.3.0.tar.gz",
+)
+
+extract_source(
+    name = "gcc-14-src",
+    source = ":gcc-14-archive",
 )
 
 # GCC 15.2.0 - Used for Stage 3 verification only
 # See docs/gcc-15.2-bootstrap-issues.md for why not used in bootstrap
-download_source(
-    name = "gcc-15-src",
-    src_uri = "https://mirror.buckos.org/g/gcc-15.2.0.tar.gz",
+http_file(
+    name = "gcc-15-archive",
+    urls = ["https://mirror.buckos.org/g/gcc-15.2.0.tar.gz"],
     sha256 = "7294d65cc1a0558cb815af0ca8c7763d86f7a31199794ede3f630c0d1b0a5723",
-    signature_required = False,
+    out = "gcc-15.2.0.tar.gz",
 )
 
-download_source(
-    name = "mpfr-src",
-    src_uri = "https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.1.tar.xz",
+extract_source(
+    name = "gcc-15-src",
+    source = ":gcc-15-archive",
+)
+
+http_file(
+    name = "mpfr-archive",
+    urls = ["https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.1.tar.xz"],
     sha256 = "277807353a6726978996945af13e52829e3abd7a9a5b7fb2793894e18f1fcbb2",
-    signature_required = False,
+    out = "mpfr-4.2.1.tar.xz",
 )
 
-download_source(
-    name = "gmp-src",
-    src_uri = "https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz",
+extract_source(
+    name = "mpfr-src",
+    source = ":mpfr-archive",
+)
+
+http_file(
+    name = "gmp-archive",
+    urls = ["https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz"],
     sha256 = "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
-    signature_required = False,
+    out = "gmp-6.3.0.tar.xz",
 )
 
-download_source(
-    name = "mpc-src",
-    src_uri = "https://mirrors.kernel.org/gnu/mpc/mpc-1.3.1.tar.gz",
+extract_source(
+    name = "gmp-src",
+    source = ":gmp-archive",
+)
+
+http_file(
+    name = "mpc-archive",
+    urls = ["https://mirrors.kernel.org/gnu/mpc/mpc-1.3.1.tar.gz"],
     sha256 = "ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8",
-    signature_required = False,
+    out = "mpc-1.3.1.tar.gz",
+)
+
+extract_source(
+    name = "mpc-src",
+    source = ":mpc-archive",
 )
 
 # =============================================================================
@@ -153,70 +174,53 @@ download_source(
 # They are used as dependencies for cross-gcc-pass2 to avoid circular dependencies
 # and C++26 compatibility issues with in-tree builds
 
-ebuild_package(
+package(
     name = "bootstrap-gmp",
+    build_rule = "binary",
+    local_only = True,
     source = ":gmp-src",
     version = "6.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GMP (GNU Multiple Precision) library built with host compiler",
     homepage = "https://gmplib.org/",
     license = "LGPL-3.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Built with host compiler for GCC dependencies
+    install_script = """export CC="gcc -std=gnu17"
+export CXX="g++ -std=gnu++17"
+export CFLAGS="-O2 -std=gnu17"
+export CXXFLAGS="-O2 -std=gnu++17"
 
-    # Force C17/C++17 to avoid GCC 15 C23/C++26 compatibility issues
-    env = {
-        "CC": "gcc -std=gnu17",
-        "CXX": "g++ -std=gnu++17",
-        "CFLAGS": "-O2 -std=gnu17",
-        "CXXFLAGS": "-O2 -std=gnu++17",
-    },
-
-    src_configure = '''
+# configure
 mkdir -p build && cd build
 ../configure \
     --prefix=/usr \
     --enable-cxx \
     --disable-static \
     --enable-shared
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Remove libtool archive files (.la) as they're deprecated and cause build issues
-find "$DESTDIR" -name '*.la' -delete
-''',
-
-    bdepend = [],
-    depend = [],
+find "$OUT" -name '*.la' -delete""",
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-mpfr",
+    build_rule = "binary",
+    local_only = True,
     source = ":mpfr-src",
     version = "4.2.1",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "MPFR (Multiple Precision Floating-Point) library built with host compiler",
     homepage = "https://www.mpfr.org/",
     license = "LGPL-3.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Built with host compiler for GCC dependencies
+    install_script = """export CC="gcc -std=gnu17"
+export CXX="g++ -std=gnu++17"
+export CFLAGS="-O2 -std=gnu17"
+export CXXFLAGS="-O2 -std=gnu++17"
 
-    env = {
-        "CC": "gcc -std=gnu17",
-        "CXX": "g++ -std=gnu++17",
-        "CFLAGS": "-O2 -std=gnu17",
-        "CXXFLAGS": "-O2 -std=gnu++17",
-    },
-
-    src_configure = '''
+# configure
 # Find GMP from dependency directories
 GMP_DIR=""
 IFS=':' read -ra DEPS <<< "$DEP_BASE_DIRS"
@@ -238,44 +242,35 @@ mkdir -p build && cd build
     --with-gmp="$GMP_DIR" \
     --disable-static \
     --enable-shared
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Remove libtool archive files (.la) as they're deprecated and cause build issues
-find "$DESTDIR" -name '*.la' -delete
-''',
-
-    bdepend = [":bootstrap-gmp"],
-    depend = [],
+find "$OUT" -name '*.la' -delete""",
+    deps = [
+        ":bootstrap-gmp",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-mpc",
+    build_rule = "binary",
+    local_only = True,
     source = ":mpc-src",
     version = "1.3.1",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "MPC (Multiple Precision Complex) library built with host compiler",
     homepage = "http://www.multiprecision.org/mpc/",
     license = "LGPL-3.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Built with host compiler for GCC dependencies
+    install_script = """export CC="gcc -std=gnu17"
+export CXX="g++ -std=gnu++17"
+export CFLAGS="-O2 -std=gnu17"
+export CXXFLAGS="-O2 -std=gnu++17"
 
-    env = {
-        "CC": "gcc -std=gnu17",
-        "CXX": "g++ -std=gnu++17",
-        "CFLAGS": "-O2 -std=gnu17",
-        "CXXFLAGS": "-O2 -std=gnu++17",
-    },
-
-    src_configure = '''
+# configure
 # Find GMP and MPFR from dependency directories
 GMP_DIR=""
 MPFR_DIR=""
@@ -306,22 +301,18 @@ mkdir -p build && cd build
     --with-mpfr="$MPFR_DIR" \
     --disable-static \
     --enable-shared
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Remove libtool archive files (.la) as they're deprecated and cause build issues
-find "$DESTDIR" -name '*.la' -delete
-''',
-
-    bdepend = [":bootstrap-gmp", ":bootstrap-mpfr"],
-    depend = [],
+find "$OUT" -name '*.la' -delete""",
+    deps = [
+        ":bootstrap-gmp",
+        ":bootstrap-mpfr",
+    ],
     visibility = ["PUBLIC"],
 )
 
@@ -330,32 +321,16 @@ find "$DESTDIR" -name '*.la' -delete
 # =============================================================================
 # First pass of the cross compiler - minimal GCC without libc support
 
-ebuild_package(
+package(
     name = "cross-gcc-pass1",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-14-src",
     version = "14.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Cross GCC pass 1 - C compiler only for bootstrap",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Minimal cross-compiler built with host GCC
-
-    # GCC 15 C23/C++26 compatibility: Force host compiler to use C11/C++11
-    # C11 is more permissive with implicit function declarations than C17/C23
-    # Downgrade implicit-function-declaration from error to warning for libiberty
-    # NOTE: Must use C++11 (not C++17) because libcody's configure has a broken
-    # check that requires __cplusplus == 201103 (exactly C++11), not >= C++11
-    env = {
-        "CC": "gcc -std=gnu11 -Wno-error=implicit-function-declaration",
-        "CFLAGS": "-O2 -std=gnu11 -Wno-error=implicit-function-declaration",
-        "CXX": "g++ -std=gnu++11",
-        "CXXFLAGS": "-O2 -std=gnu++11",
-    },
-
-    patches = [],
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # GCC 14's libiberty/obstack.c expects the struct layout from GCC's bundled
 # include/obstack.h, but the host compiler picks up the system header first.
 # glibc >=2.41 changed the obstack struct which breaks compilation.
@@ -459,9 +434,13 @@ if [ -d c++tools ]; then
     rm -rf c++tools
     echo "c++tools directory removed"
 fi
-''',
+'''],
+    install_script = """export CC="gcc -std=gnu11 -Wno-error=implicit-function-declaration"
+export CFLAGS="-O2 -std=gnu11 -Wno-error=implicit-function-declaration"
+export CXX="g++ -std=gnu++11"
+export CXXFLAGS="-O2 -std=gnu++11"
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 # Clear stale config.cache files that break rebuilds with changed LDFLAGS
@@ -540,10 +519,8 @@ mkdir -p build && cd build
     --disable-libgcov \
     --disable-fixincludes \
     --disable-bootstrap
-''',
 
-    src_compile = '''
-cd build
+# build
 
 # GCC's build system can trigger configure during parallel make if subdirectories
 # aren't pre-configured. Pre-configure the specific components we need.
@@ -613,21 +590,19 @@ fi
 echo "Successfully built libgcc.a"
 
 cd ../..
-''',
 
-    src_install = '''
-cd build
+# install
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 # For pass1, we only need to install the compiler and libgcc.a
 # "make install" tries to install everything including fixincludes which needs libiberty.a
 
 echo "Installing GCC compiler..."
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-gcc
+make -j$MAKE_JOBS DESTDIR="$OUT" install-gcc
 
 # Manually install libgcc.a (we can't use install-target-libgcc as it tries to install libgcov)
 GCC_VERSION=$(cat gcc/BASE-VER 2>/dev/null || echo "14.3.0")
-LIBGCC_DIR="$DESTDIR/tools/lib/gcc/$BUCKOS_TARGET/$GCC_VERSION"
+LIBGCC_DIR="$OUT/tools/lib/gcc/$BUCKOS_TARGET/$GCC_VERSION"
 mkdir -p "$LIBGCC_DIR"
 
 if [ ! -f "$BUCKOS_TARGET/libgcc/libgcc.a" ]; then
@@ -648,7 +623,7 @@ for crt in crtbegin.o crtend.o crtbeginS.o crtendS.o crtbeginT.o; do
 done
 
 # Remove unprefixed tools to prevent shadowing host tools in subsequent builds
-cd "$DESTDIR/tools/bin"
+cd "$OUT/tools/bin"
 for tool in gcc g++ cpp gcov gcov-dump gcov-tool lto-dump; do
     if [ -f "$tool" ] && [ -f "${BUCKOS_TARGET}-${tool}" ]; then
         echo "Removing unprefixed $tool (keeping ${BUCKOS_TARGET}-${tool})"
@@ -656,17 +631,14 @@ for tool in gcc g++ cpp gcov gcov-dump gcov-tool lto-dump; do
     fi
 done
 # Also remove cc symlink if it exists (will be recreated in pass2)
-rm -f cc c++ 2>/dev/null || true
-''',
-
-    bdepend = [
-        ":cross-binutils",  # For AR/AS/LD tools
-        ":linux-headers",   # Kernel headers needed for libgcc compilation (sys/mman.h, etc.) - even with --without-headers
+rm -f cc c++ 2>/dev/null || true""",
+    deps = [
+        ":cross-binutils",
+        ":linux-headers",
         ":gmp-src",
         ":mpfr-src",
         ":mpc-src",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
@@ -674,39 +646,45 @@ rm -f cc c++ 2>/dev/null || true
 # Stage 1.3: Linux API Headers
 # =============================================================================
 
-download_source(
-    name = "linux-headers-src",
-    src_uri = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.6.tar.xz",
+http_file(
+    name = "linux-headers-archive",
+    urls = ["https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.6.tar.xz"],
     sha256 = "d450ab215de4e1f8bb85e0f4216760fa33fd024b4526b144f4ce0d9012b29c9e",
-    signature_required = False,
+    out = "linux-6.12.6.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "linux-headers-src",
+    source = ":linux-headers-archive",
+)
+
+package(
     name = "linux-headers",
+    build_rule = "binary",
+    local_only = True,
     source = ":linux-headers-src",
     version = "6.12.6",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Linux kernel headers for glibc build",
     homepage = "https://kernel.org/",
     license = "GPL-2.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Kernel headers extracted with host tools
+    install_script = """# configure
+true
 
-    src_configure = "true",
-    src_compile = "true",
+# build
+true
 
-    src_install = '''
+# install
 # Build x86_64 headers explicitly - without ARCH, it uses host arch which may be aarch64
 make ARCH=x86_64 mrproper
 make ARCH=x86_64 headers
 find usr/include -type f ! -name '*.h' -delete
-mkdir -p "$DESTDIR/usr/include"
-cp -rv usr/include/* "$DESTDIR/usr/include/"
+mkdir -p "$OUT/usr/include"
+cp -rv usr/include/* "$OUT/usr/include/"
 
 # Create stub sys/sdt.h for SystemTap SDT probes (required by libstdc++)
 # This provides empty probe macros when SystemTap is not available
-mkdir -p "$DESTDIR/usr/include/sys"
-cat > "$DESTDIR/usr/include/sys/sdt.h" << 'EOF'
+mkdir -p "$OUT/usr/include/sys"
+cat > "$OUT/usr/include/sys/sdt.h" << 'EOF'
 /* Stub sys/sdt.h for SystemTap SDT probes */
 /* This file provides empty macros when SystemTap is not installed */
 
@@ -741,9 +719,7 @@ cat > "$DESTDIR/usr/include/sys/sdt.h" << 'EOF'
 #endif /* _SYS_SDT_H */
 EOF
 echo "Created stub sys/sdt.h for SDT probe support"
-''',
-
-    depend = [],
+""",
     visibility = ["PUBLIC"],
 )
 
@@ -751,40 +727,40 @@ echo "Created stub sys/sdt.h for SDT probe support"
 # Stage 1.4: Glibc (built with cross-gcc)
 # =============================================================================
 
-download_source(
-    name = "glibc-src",
-    src_uri = "https://mirror.buckos.org/g/glibc-2.42.tar.gz",
+http_file(
+    name = "glibc-archive",
+    urls = ["https://mirror.buckos.org/g/glibc-2.42.tar.gz"],
     sha256 = "d4468d3e3267068c1b0623ca6424aac9a28766df774c8d8fb4978127fca7125a",
-    signature_required = False,
+    out = "glibc-2.42.tar.gz",
+)
+
+extract_source(
+    name = "glibc-src",
+    source = ":glibc-archive",
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "cross-glibc",
+    build_rule = "binary",
+    local_only = True,
     source = ":glibc-src",
     version = "2.42",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU C Library for bootstrap toolchain",
     homepage = "https://www.gnu.org/software/libc/",
     license = "LGPL-2.1+",
-    bootstrap_stage = "stage1",  # STAGE 1: C library built with cross-gcc-pass1
+    install_script = """export CFLAGS="-O2 -g"
+export CXXFLAGS="-O2 -g"
 
-    # glibc requires optimization flags - it won't compile without -O2
-    env = {
-        "CFLAGS": "-O2 -g",
-        "CXXFLAGS": "-O2 -g",
-    },
-
-    src_configure = '''
+# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 # Create directories for final system layout
-mkdir -p "$DESTDIR/usr/lib64"
-mkdir -p "$DESTDIR/lib64"
+mkdir -p "$OUT/usr/lib64"
+mkdir -p "$OUT/lib64"
 
 # Create symlink for LSB compliance
-ln -sfv ../lib/ld-linux-x86-64.so.2 "$DESTDIR/usr/lib64/ld-lsb-x86-64.so.3" || true
+ln -sfv ../lib/ld-linux-x86-64.so.2 "$OUT/usr/lib64/ld-lsb-x86-64.so.3" || true
 
 mkdir -p build && cd build
 
@@ -871,10 +847,8 @@ CROSS_CPP="$CROSS_CC -E"
     libc_cv_pde_load_address=0x0000000000400000 \
     libc_cv_cxx_link_ok=no \
     CXX=""
-''',
 
-    src_compile = '''
-cd build
+# build
 # Build without the support test programs that need C++ (libstdc++/libgcc_s not available in stage1)
 # Skip building 'support/others' which contains C++ test programs
 make -j$MAKE_JOBS || {
@@ -883,11 +857,9 @@ make -j$MAKE_JOBS || {
     make -j$MAKE_JOBS subdirs="csu elf gmon io misc posix setjmp signal stdlib string time"
     make -j$MAKE_JOBS lib
 }
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 
 # Fix linker scripts to use relative paths instead of absolute paths
 # This is critical for cross-compilation with --sysroot
@@ -896,7 +868,7 @@ make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
 # We need to change these to relative paths that work with sysroot:
 #   GROUP ( libc.so.6 libc_nonshared.a AS_NEEDED ( ld-linux-x86-64.so.2 ) )
 echo "Fixing glibc linker scripts for cross-compilation..."
-for script in "$DESTDIR"/usr/lib*/libc.so "$DESTDIR"/usr/lib*/libpthread.so "$DESTDIR"/usr/lib*/libm.so; do
+for script in "$OUT"/usr/lib*/libc.so "$OUT"/usr/lib*/libpthread.so "$OUT"/usr/lib*/libm.so; do
     if [ -f "$script" ] && file "$script" | grep -q "ASCII"; then
         echo "Fixing linker script: $script"
         # Remove absolute paths, keeping just the filename
@@ -911,22 +883,23 @@ for script in "$DESTDIR"/usr/lib*/libc.so "$DESTDIR"/usr/lib*/libpthread.so "$DE
 done
 
 # Create /lib64/ld-linux-x86-64.so.2 symlink (required for dynamic linker to be found)
-ln -sfv ../usr/lib64/ld-linux-x86-64.so.2 "$DESTDIR/lib64/ld-linux-x86-64.so.2"
+ln -sfv ../usr/lib64/ld-linux-x86-64.so.2 "$OUT/lib64/ld-linux-x86-64.so.2"
 
 # Create /etc/ld.so.conf for library search paths
-mkdir -p "$DESTDIR/etc/ld.so.conf.d"
-cat > "$DESTDIR/etc/ld.so.conf" << 'LDCONF'
+mkdir -p "$OUT/etc/ld.so.conf.d"
+cat > "$OUT/etc/ld.so.conf" << 'LDCONF'
 # Multilib support
 /usr/lib64
 /usr/lib
 /lib64
 /lib
 include /etc/ld.so.conf.d/*.conf
-LDCONF
-''',
-
-    bdepend = [":cross-binutils", ":cross-gcc-pass1", ":linux-headers"],
-    depend = [],
+LDCONF""",
+    deps = [
+        ":cross-binutils",
+        ":cross-gcc-pass1",
+        ":linux-headers",
+    ],
     visibility = ["PUBLIC"],
 )
 
@@ -934,43 +907,16 @@ LDCONF
 # Stage 1.6: GCC Pass 2 (full compiler with libc)
 # =============================================================================
 
-ebuild_package(
+package(
     name = "cross-gcc-pass2",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-14-src",
     version = "14.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Cross GCC pass 2 - full compiler with libc support (C-only)",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage1",  # STAGE 1: Full cross-compiler built with host GCC
-
-    # CRITICAL: Don't pass LDFLAGS/CFLAGS from dependencies to GCC build
-    # GCC's build system manages flags for HOST and TARGET separately.
-    # The HOST side (cc1, etc.) must link against HOST libraries, not cross-glibc.
-    # The --with-build-sysroot configure option handles TARGET libraries.
-    # GCC 14.3.0 built with GCC 15.2.1 host: Need permissive flags
-    # -Wno-error=implicit-function-declaration allows old code patterns in libiberty
-    # -fcf-protection=none disables Intel CET to avoid configure errors
-    env = {
-        "LDFLAGS": "",
-        "CC": "gcc -std=gnu11 -Wno-error=implicit-function-declaration -fcf-protection=none",
-        "CFLAGS": "-O2 -std=gnu11 -Wno-error=implicit-function-declaration -fcf-protection=none",
-        "CXX": "g++ -std=gnu++11 -fcf-protection=none",
-        "CXXFLAGS": "-O2 -std=gnu++11 -fcf-protection=none",
-        "CPATH": "",
-        "C_INCLUDE_PATH": "",
-        "CPLUS_INCLUDE_PATH": "",
-        # Use -std=gnu11 for host tools to avoid glibc 2.38+ C23 symbol redirects
-        "CC_FOR_BUILD": "gcc -std=gnu11",
-        "CXX_FOR_BUILD": "g++ -std=gnu++11",
-        "CFLAGS_FOR_BUILD": "-O2 -std=gnu11",
-        "CXXFLAGS_FOR_BUILD": "-O2 -std=gnu++11",
-    },
-
-    patches = [],
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # Fix file that causes issues with glibc-2.39+
 sed '/thread_header =/s/@.*@/gthr-posix.h/' \
     -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in || true
@@ -1038,9 +984,21 @@ fi
 
 echo "GCC source dependencies linked successfully"
 ls -la gmp mpfr mpc
-''',
+'''],
+    install_script = """export LDFLAGS=""
+export CC="gcc -std=gnu11 -Wno-error=implicit-function-declaration -fcf-protection=none"
+export CFLAGS="-O2 -std=gnu11 -Wno-error=implicit-function-declaration -fcf-protection=none"
+export CXX="g++ -std=gnu++11 -fcf-protection=none"
+export CXXFLAGS="-O2 -std=gnu++11 -fcf-protection=none"
+export CPATH=""
+export C_INCLUDE_PATH=""
+export CPLUS_INCLUDE_PATH=""
+export CC_FOR_BUILD="gcc -std=gnu11"
+export CXX_FOR_BUILD="g++ -std=gnu++11"
+export CFLAGS_FOR_BUILD="-O2 -std=gnu11"
+export CXXFLAGS_FOR_BUILD="-O2 -std=gnu++11"
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 # Find the sysroot from dependencies (where glibc was installed)
@@ -1226,10 +1184,7 @@ stage1_ldflags="" poststage1_ldflags="" BOOT_LDFLAGS="" CET_FLAGS="-fcf-protecti
     --disable-systemtap \
     --with-system-zlib
 
-''',
-
-    src_compile = '''
-cd build
+# build
 
 # Find cross-binutils ar/ranlib from PATH (same logic as src_configure)
 CROSS_AR=$(which x86_64-buckos-linux-gnu-ar 2>/dev/null || true)
@@ -1306,18 +1261,16 @@ make -j$MAKE_JOBS \
     CXXFLAGS_FOR_BUILD="-std=gnu++11 -O2 -fcf-protection=none -D_GNU_SOURCE" \
     LDFLAGS_FOR_BUILD="" \
     all-target-libstdc++-v3
-''',
 
-    src_install = '''
-cd build
+# install
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 # Install GCC, libgcc, and libstdc++ explicitly
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-gcc install-target-libgcc install-target-libstdc++-v3
+make -j$MAKE_JOBS DESTDIR="$OUT" install-gcc install-target-libgcc install-target-libstdc++-v3
 
 # For cross-gcc-pass2 (the final cross-compiler), we DO want unprefixed symlinks
 # so that build systems looking for 'cc' or 'gcc' in /tools/bin find our cross-compiler.
 # These symlinks point to the prefixed tools.
-cd "$DESTDIR/tools/bin"
+cd "$OUT/tools/bin"
 
 # First remove any unprefixed tools that were installed (they're duplicates)
 for tool in gcc g++ cpp gcov gcov-dump gcov-tool lto-dump cc c++; do
@@ -1341,7 +1294,7 @@ ls -la gcc g++ cc c++ cpp
 # i.e., /tools/x86_64-buckos-linux-gnu/sys-root
 echo ""
 echo "=== Creating cross-compiler sysroot at /tools/${BUCKOS_TARGET}/sys-root ==="
-cd "$DESTDIR"
+cd "$OUT"
 mkdir -p "tools/${BUCKOS_TARGET}/sys-root"
 
 # Find glibc dependency
@@ -1397,25 +1350,21 @@ cp -a "$LINUX_HEADERS_DIR/"* "tools/${BUCKOS_TARGET}/sys-root/" || {
     exit 1
 }
 
-echo "Sysroot created successfully at: $DESTDIR/tools/${BUCKOS_TARGET}/sys-root"
+echo "Sysroot created successfully at: $OUT/tools/${BUCKOS_TARGET}/sys-root"
 echo "Sysroot contains:"
 ls -la "tools/${BUCKOS_TARGET}/sys-root/"
 echo ""
 echo "Sysroot usr/lib64 contents:"
-ls -la "tools/${BUCKOS_TARGET}/sys-root/usr/lib64/" | head -20
-''',
-
-    bdepend = [
-        ":cross-binutils",  # For AR_FOR_BUILD/RANLIB_FOR_BUILD without LTO plugin issues
+ls -la "tools/${BUCKOS_TARGET}/sys-root/usr/lib64/" | head -20""",
+    deps = [
+        ":cross-binutils",
         ":cross-gcc-pass1",
         ":cross-glibc",
-        ":linux-headers",  # Kernel headers needed for libgcc compilation (sys/mman.h, etc.)
-        # NOTE: cross-libstdcxx removed - cross-gcc-pass2 builds its own libstdc++ (--enable-libstdcxx)
+        ":linux-headers",
         ":gmp-src",
         ":mpfr-src",
         ":mpc-src",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
@@ -1425,25 +1374,28 @@ ls -la "tools/${BUCKOS_TARGET}/sys-root/usr/lib64/" | head -20
 # These are cross-compiled using the bootstrap toolchain and provide the
 # basic utilities needed to run build scripts without depending on host tools.
 
-download_source(
-    name = "ncurses-src",
-    src_uri = "https://mirrors.kernel.org/gnu/ncurses/ncurses-6.5.tar.gz",
+http_file(
+    name = "ncurses-archive",
+    urls = ["https://mirrors.kernel.org/gnu/ncurses/ncurses-6.5.tar.gz"],
     sha256 = "136d91bc269a9a5785e5f9e980bc76ab57428f604ce3e5a5a90cebc767971cc6",
-    signature_required = False,
+    out = "ncurses-6.5.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "ncurses-src",
+    source = ":ncurses-archive",
+)
+
+package(
     name = "bootstrap-ncurses",
+    build_rule = "binary",
+    local_only = True,
     source = ":ncurses-src",
     version = "6.5",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Terminal handling library for bootstrap",
     homepage = "https://invisible-island.net/ncurses/",
     license = "MIT",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 # Force C17 standard to avoid GCC 15 C23 bool keyword conflict
 export CFLAGS="$CFLAGS -std=gnu17"
@@ -1464,18 +1416,14 @@ mkdir -p build && cd build
     --without-manpages \
     --without-progs \
     --without-tests
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Create non-wide symlinks
-cd "$DESTDIR/tools/lib"
+cd "$OUT/tools/lib"
 for lib in ncurses form panel menu; do
     ln -sf lib${lib}w.so lib${lib}.so 2>/dev/null || true
     ln -sf lib${lib}w.a lib${lib}.a 2>/dev/null || true
@@ -1483,33 +1431,37 @@ done
 ln -sf libncursesw.so libcurses.so 2>/dev/null || true
 # tinfo compatibility
 ln -sf libncursesw.so libtinfo.so 2>/dev/null || true
-ln -sf libncursesw.so libtinfow.so 2>/dev/null || true
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+ln -sf libncursesw.so libtinfow.so 2>/dev/null || true""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "readline-src",
-    src_uri = "https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz",
+http_file(
+    name = "readline-archive",
+    urls = ["https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz"],
     sha256 = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
-    signature_required = False,
+    out = "readline-8.3.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "readline-src",
+    source = ":readline-archive",
+)
+
+package(
     name = "bootstrap-readline",
+    build_rule = "binary",
+    local_only = True,
     source = ":readline-src",
     version = "8.3",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Command line editing library for bootstrap",
     homepage = "https://tiswww.case.edu/php/chet/readline/rltop.html",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
@@ -1517,40 +1469,44 @@ BUCKOS_TARGET="x86_64-buckos-linux-gnu"
     --build=$(./support/config.guess) \
     --disable-static \
     --with-curses
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS SHLIB_LIBS="-lncursesw"
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install SHLIB_LIBS="-lncursesw"
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc", ":bootstrap-ncurses"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install SHLIB_LIBS="-lncursesw"
+""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+        ":bootstrap-ncurses",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "bash-src",
-    src_uri = "https://mirrors.kernel.org/gnu/bash/bash-5.3.tar.gz",
+http_file(
+    name = "bash-archive",
+    urls = ["https://mirrors.kernel.org/gnu/bash/bash-5.3.tar.gz"],
     sha256 = "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba",
-    signature_required = False,
+    out = "bash-5.3.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "bash-src",
+    source = ":bash-archive",
+)
+
+package(
     name = "bootstrap-bash",
+    build_rule = "binary",
+    local_only = True,
     source = ":bash-src",
     version = "5.3",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Bourne Again SHell for bootstrap",
     homepage = "https://www.gnu.org/software/bash/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 # Find ncurses and readline libraries from dependencies
@@ -1582,55 +1538,55 @@ export LDFLAGS="$LDFLAGS -Wl,-rpath-link,$NCURSES_LIB -Wl,-rpath-link,$READLINE_
     --build=$(support/config.guess) \
     --without-bash-malloc \
     --with-installed-readline
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-ln -sf bash "$DESTDIR/tools/bin/sh"
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc", ":bootstrap-readline", ":bootstrap-ncurses"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
+ln -sf bash "$OUT/tools/bin/sh"
+""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+        ":bootstrap-readline",
+        ":bootstrap-ncurses",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "coreutils-src",
-    src_uri = "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.4.tar.xz",
+http_file(
+    name = "coreutils-archive",
+    urls = ["https://mirrors.kernel.org/gnu/coreutils/coreutils-9.4.tar.xz"],
     sha256 = "ea613a4cf44612326e917201bbbcdfbd301de21ffc3b59b6e5c07e040b275e52",
-    signature_required = False,
+    out = "coreutils-9.4.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "coreutils-src",
+    source = ":coreutils-archive",
+)
+
+package(
     name = "bootstrap-coreutils",
+    build_rule = "binary",
+    local_only = True,
     source = ":coreutils-src",
     version = "9.4",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Core utilities for bootstrap",
     homepage = "https://www.gnu.org/software/coreutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    # Coreutils Makefile writes man pages to $(srcdir)/man/ which is read-only in Buck2
-    # Solution: Build in separate directory with srcdir pointing to writable source copy
-    src_prepare = '''
-# Copy source to writable location
-cp -a "$S" "$WORKDIR/src"
+    install_script = """# Copy source to writable location for out-of-tree build
+cp -a "$SRCS" "$WORKDIR/src"
 mkdir -p "$WORKDIR/build"
 # Prevent autotools regeneration — timestamps get skewed by cp -a
 find "$WORKDIR/src" -name 'aclocal.m4' -exec touch {} +
 find "$WORKDIR/src" -name 'configure' -exec touch {} +
 find "$WORKDIR/src" -name 'config.h.in' -exec touch {} +
 find "$WORKDIR/src" -name 'Makefile.in' -exec touch {} +
-''',
 
-    src_configure = '''
-# Configure from build directory with srcdir pointing to writable source
+# configure
 cd "$WORKDIR/build"
 
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
@@ -1640,97 +1596,93 @@ BUCKOS_TARGET="x86_64-buckos-linux-gnu"
     --build=$("$WORKDIR/src/build-aux/config.guess") \
     --enable-install-program=hostname \
     --enable-no-install-program=kill,uptime
-''',
 
-    src_compile = '''
-# Build from build directory - srcdir points to writable source copy
-cd "$WORKDIR/build"
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd "$WORKDIR/build"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "make-src",
-    src_uri = "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
+http_file(
+    name = "make-archive",
+    urls = ["https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz"],
     sha256 = "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
-    signature_required = False,
+    out = "make-4.4.1.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "make-src",
+    source = ":make-archive",
+)
+
+package(
     name = "bootstrap-make",
+    build_rule = "binary",
+    local_only = True,
     source = ":make-src",
     version = "4.4.1",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Make for bootstrap",
     homepage = "https://www.gnu.org/software/make/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --without-guile
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "sed-src",
-    src_uri = "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
+http_file(
+    name = "sed-archive",
+    urls = ["https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz"],
     sha256 = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
-    signature_required = False,
+    out = "sed-4.9.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "sed-src",
+    source = ":sed-archive",
+)
+
+package(
     name = "bootstrap-sed",
+    build_rule = "binary",
+    local_only = True,
     source = ":sed-src",
     version = "4.9",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Stream editor for bootstrap",
     homepage = "https://www.gnu.org/software/sed/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    # Sed Makefile writes man pages to $(srcdir)/doc/ which is read-only in Buck2
-    # Solution: Build in separate directory with srcdir pointing to writable source copy
-    src_prepare = '''
-# Copy source to writable location
-cp -a "$S" "$WORKDIR/src"
+    install_script = """# Copy source to writable location for out-of-tree build
+cp -a "$SRCS" "$WORKDIR/src"
 mkdir -p "$WORKDIR/build"
 # Prevent autotools regeneration — timestamps get skewed by cp -a
 find "$WORKDIR/src" -name 'aclocal.m4' -exec touch {} +
 find "$WORKDIR/src" -name 'configure' -exec touch {} +
 find "$WORKDIR/src" -name 'config.h.in' -exec touch {} +
 find "$WORKDIR/src" -name 'Makefile.in' -exec touch {} +
-''',
 
-    src_configure = '''
-# Configure from build directory with srcdir pointing to writable source
+# configure
 cd "$WORKDIR/build"
 
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
@@ -1738,297 +1690,308 @@ BUCKOS_TARGET="x86_64-buckos-linux-gnu"
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$("$WORKDIR/src/build-aux/config.guess")
-''',
 
-    src_compile = '''
-# Build from build directory - srcdir points to writable source copy
-cd "$WORKDIR/build"
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd "$WORKDIR/build"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "gawk-src",
-    src_uri = "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
+http_file(
+    name = "gawk-archive",
+    urls = ["https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz"],
     sha256 = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
-    signature_required = False,
+    out = "gawk-5.3.2.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "gawk-src",
+    source = ":gawk-archive",
+)
+
+package(
     name = "bootstrap-gawk",
+    build_rule = "binary",
+    local_only = True,
     source = ":gawk-src",
     version = "5.3.2",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Awk for bootstrap",
     homepage = "https://www.gnu.org/software/gawk/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-ln -sf gawk "$DESTDIR/tools/bin/awk"
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
+ln -sf gawk "$OUT/tools/bin/awk"
+""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "grep-src",
-    src_uri = "https://mirrors.kernel.org/gnu/grep/grep-3.11.tar.xz",
+http_file(
+    name = "grep-archive",
+    urls = ["https://mirrors.kernel.org/gnu/grep/grep-3.11.tar.xz"],
     sha256 = "1db2aedde89d0dea42b16d9528f894c8d15dae4e190b59aecc78f5a951276eab",
-    signature_required = False,
+    out = "grep-3.11.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "grep-src",
+    source = ":grep-archive",
+)
+
+package(
     name = "bootstrap-grep",
+    build_rule = "binary",
+    local_only = True,
     source = ":grep-src",
     version = "3.11",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Grep for bootstrap",
     homepage = "https://www.gnu.org/software/grep/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "findutils-src",
-    src_uri = "https://mirrors.kernel.org/gnu/findutils/findutils-4.9.0.tar.xz",
+http_file(
+    name = "findutils-archive",
+    urls = ["https://mirrors.kernel.org/gnu/findutils/findutils-4.9.0.tar.xz"],
     sha256 = "a2bfb8c09d436770edc59f50fa483e785b161a3b7b9d547573cb08065fd462fe",
-    signature_required = False,
+    out = "findutils-4.9.0.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "findutils-src",
+    source = ":findutils-archive",
+)
+
+package(
     name = "bootstrap-findutils",
+    build_rule = "binary",
+    local_only = True,
     source = ":findutils-src",
     version = "4.9.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Find utilities for bootstrap",
     homepage = "https://www.gnu.org/software/findutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --localstatedir=/tools/var/lib/locate
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "diffutils-src",
-    src_uri = "https://mirrors.kernel.org/gnu/diffutils/diffutils-3.10.tar.xz",
+http_file(
+    name = "diffutils-archive",
+    urls = ["https://mirrors.kernel.org/gnu/diffutils/diffutils-3.10.tar.xz"],
     sha256 = "90e5e93cc724e4ebe12ede80df1634063c7a855692685919bfe60b556c9bd09e",
-    signature_required = False,
+    out = "diffutils-3.10.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "diffutils-src",
+    source = ":diffutils-archive",
+)
+
+package(
     name = "bootstrap-diffutils",
+    build_rule = "binary",
+    local_only = True,
     source = ":diffutils-src",
     version = "3.10",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Diff utilities for bootstrap",
     homepage = "https://www.gnu.org/software/diffutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "tar-src",
-    src_uri = "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
+http_file(
+    name = "tar-archive",
+    urls = ["https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz"],
     sha256 = "4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16",
-    signature_required = False,
+    out = "tar-1.35.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "tar-src",
+    source = ":tar-archive",
+)
+
+package(
     name = "bootstrap-tar",
+    build_rule = "binary",
+    local_only = True,
     source = ":tar-src",
     version = "1.35",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Tar for bootstrap",
     homepage = "https://www.gnu.org/software/tar/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "gzip-src",
-    src_uri = "https://mirrors.kernel.org/gnu/gzip/gzip-1.13.tar.xz",
+http_file(
+    name = "gzip-archive",
+    urls = ["https://mirrors.kernel.org/gnu/gzip/gzip-1.13.tar.xz"],
     sha256 = "7454eb6935db17c6655576c2e1b0fabefd38b4d0936e0f87f48cd062ce91a057",
-    signature_required = False,
+    out = "gzip-1.13.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "gzip-src",
+    source = ":gzip-archive",
+)
+
+package(
     name = "bootstrap-gzip",
+    build_rule = "binary",
+    local_only = True,
     source = ":gzip-src",
     version = "1.13",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Gzip for bootstrap",
     homepage = "https://www.gnu.org/software/gzip/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "xz-src",
-    src_uri = "https://github.com/tukaani-project/xz/releases/download/v5.4.5/xz-5.4.5.tar.xz",
+http_file(
+    name = "xz-archive",
+    urls = ["https://github.com/tukaani-project/xz/releases/download/v5.4.5/xz-5.4.5.tar.xz"],
     sha256 = "da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803",
-    signature_required = False,
+    out = "xz-5.4.5.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "xz-src",
+    source = ":xz-archive",
+)
+
+package(
     name = "bootstrap-xz",
+    build_rule = "binary",
+    local_only = True,
     source = ":xz-src",
     version = "5.4.5",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "XZ Utils for bootstrap",
     homepage = "https://tukaani.org/xz/",
     license = "public-domain LGPL-2.1+ GPL-2+",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --disable-static
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
@@ -2036,27 +1999,31 @@ make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
 # Stage 2: Additional Build Tools (NEW - Critical for self-hosting)
 # =============================================================================
 
-download_source(
-    name = "bzip2-src",
-    src_uri = "https://mirror.buckos.org/b/bzip2-1.0.8.tar.gz",
+http_file(
+    name = "bzip2-archive",
+    urls = ["https://mirror.buckos.org/b/bzip2-1.0.8.tar.gz"],
     sha256 = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
-    signature_required = False,
+    out = "bzip2-1.0.8.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "bzip2-src",
+    source = ":bzip2-archive",
+)
+
+package(
     name = "bootstrap-bzip2",
+    build_rule = "binary",
+    local_only = True,
     source = ":bzip2-src",
     version = "1.0.8",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "High-quality block-sorting file compressor for bootstrap",
     homepage = "https://sourceware.org/bzip2/",
     license = "BSD",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
+    install_script = """# configure
+true
 
-    src_configure = "true",  # bzip2 doesn't use configure
-
-    src_compile = '''
+# build
 # bzip2 Makefile hardcodes gcc - override for cross-compilation
 # -fPIC is required so libbz2.a can be linked into shared libraries
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
@@ -2076,61 +2043,63 @@ make -j$MAKE_JOBS \
     LDFLAGS="${LDFLAGS:-}" \
     PREFIX=/tools \
     bzip2 bzip2recover
-''',
 
-    src_install = '''
-mkdir -p "$DESTDIR/tools/bin"
-mkdir -p "$DESTDIR/tools/lib"
-mkdir -p "$DESTDIR/tools/include"
-mkdir -p "$DESTDIR/tools/share/man/man1"
+# install
+mkdir -p "$OUT/tools/bin"
+mkdir -p "$OUT/tools/lib"
+mkdir -p "$OUT/tools/include"
+mkdir -p "$OUT/tools/share/man/man1"
 
 # Install binaries
-install -m 755 bzip2 "$DESTDIR/tools/bin/"
-install -m 755 bzip2recover "$DESTDIR/tools/bin/"
-ln -sf bzip2 "$DESTDIR/tools/bin/bzcat"
-ln -sf bzip2 "$DESTDIR/tools/bin/bunzip2"
+install -m 755 bzip2 "$OUT/tools/bin/"
+install -m 755 bzip2recover "$OUT/tools/bin/"
+ln -sf bzip2 "$OUT/tools/bin/bzcat"
+ln -sf bzip2 "$OUT/tools/bin/bunzip2"
 
 # Install shared library
-install -m 755 libbz2.so.1.0.8 "$DESTDIR/tools/lib/"
-ln -sf libbz2.so.1.0.8 "$DESTDIR/tools/lib/libbz2.so.1.0"
-ln -sf libbz2.so.1.0.8 "$DESTDIR/tools/lib/libbz2.so"
+install -m 755 libbz2.so.1.0.8 "$OUT/tools/lib/"
+ln -sf libbz2.so.1.0.8 "$OUT/tools/lib/libbz2.so.1.0"
+ln -sf libbz2.so.1.0.8 "$OUT/tools/lib/libbz2.so"
 
 # Install static library and header
-install -m 644 libbz2.a "$DESTDIR/tools/lib/"
-install -m 644 bzlib.h "$DESTDIR/tools/include/"
+install -m 644 libbz2.a "$OUT/tools/lib/"
+install -m 644 bzlib.h "$OUT/tools/include/"
 
 # Install manual page
-install -m 644 bzip2.1 "$DESTDIR/tools/share/man/man1/"
-ln -sf bzip2.1 "$DESTDIR/tools/share/man/man1/bzcat.1"
-ln -sf bzip2.1 "$DESTDIR/tools/share/man/man1/bunzip2.1"
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    # NOTE: Do NOT add bootstrap-make here - it's cross-compiled and can't run on the host.
-    #       The host system's make is used for building (via PATH fallback).
-    depend = [],
+install -m 644 bzip2.1 "$OUT/tools/share/man/man1/"
+ln -sf bzip2.1 "$OUT/tools/share/man/man1/bzcat.1"
+ln -sf bzip2.1 "$OUT/tools/share/man/man1/bunzip2.1"
+""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "pkg-config-src",
-    src_uri = "https://mirror.buckos.org/p/pkg-config-0.29.2.tar.gz",
+http_file(
+    name = "pkg-config-archive",
+    urls = ["https://mirror.buckos.org/p/pkg-config-0.29.2.tar.gz"],
     sha256 = "6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591",
-    signature_required = False,
+    out = "pkg-config-0.29.2.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "pkg-config-src",
+    source = ":pkg-config-archive",
+)
+
+package(
     name = "bootstrap-pkg-config",
+    build_rule = "binary",
+    local_only = True,
     source = ":pkg-config-src",
     version = "0.29.2",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Package config system for finding libraries",
     homepage = "https://www.freedesktop.org/wiki/Software/pkg-config/",
     license = "GPL-2.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 CFLAGS="$CFLAGS -std=gnu17"  # Force C17 for old glib code compatibility
 ./configure \
@@ -2139,110 +2108,113 @@ CFLAGS="$CFLAGS -std=gnu17"  # Force C17 for old glib code compatibility
     --build=$(build-aux/config.guess) \
     --with-internal-glib \
     --disable-host-tool
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Create pkg-config symlink (some scripts expect this name)
-ln -sf pkg-config "$DESTDIR/tools/bin/${BUCKOS_TARGET}-pkg-config" || true
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+ln -sf pkg-config "$OUT/tools/bin/${BUCKOS_TARGET}-pkg-config" || true""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "file-src",
-    src_uri = "http://ftp.astron.com/pub/file/file-5.45.tar.gz",
+http_file(
+    name = "file-archive",
+    urls = ["http://ftp.astron.com/pub/file/file-5.45.tar.gz"],
     sha256 = "fc97f51029bb0e2c9f4e3bffefdaf678f0e039ee872b9de5c002a6d09c784d82",
-    signature_required = False,
+    out = "file-5.45.tar.gz",
 )
 
-ebuild_package(
+extract_source(
+    name = "file-src",
+    source = ":file-archive",
+)
+
+package(
     name = "bootstrap-file",
+    build_rule = "binary",
+    local_only = True,
     source = ":file-src",
     version = "5.45",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "File type identification utility for bootstrap",
     homepage = "https://www.darwinsys.com/file/",
     license = "BSD",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(config.guess)
-''',
 
-    src_compile = '''
+# build
 # When cross-compiling, skip the magic directory - we'll use the host's magic.mgc
 # Building magic/ requires running the just-compiled 'file' binary which won't work
 # during cross-compilation. Build only in src/ directory.
 make -C src -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS -C src DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS -C src DESTDIR="$OUT" install
 # Install the host system's magic database
-mkdir -p "$DESTDIR/tools/share/misc"
+mkdir -p "$OUT/tools/share/misc"
 if [ -f /usr/share/misc/magic.mgc ]; then
-    cp /usr/share/misc/magic.mgc "$DESTDIR/tools/share/misc/"
+    cp /usr/share/misc/magic.mgc "$OUT/tools/share/misc/"
 elif [ -f /usr/share/file/magic.mgc ]; then
-    cp /usr/share/file/magic.mgc "$DESTDIR/tools/share/misc/"
+    cp /usr/share/file/magic.mgc "$OUT/tools/share/misc/"
 else
     echo "Warning: Could not find host magic.mgc, file utility may not work correctly"
-fi
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+fi""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
-download_source(
-    name = "patch-src",
-    src_uri = "https://mirrors.kernel.org/gnu/patch/patch-2.7.6.tar.xz",
+http_file(
+    name = "patch-archive",
+    urls = ["https://mirrors.kernel.org/gnu/patch/patch-2.7.6.tar.xz"],
     sha256 = "ac610bda97abe0d9f6b7c963255a11dcb196c25e337c61f94e4778d632f1d8fd",
-    signature_required = False,
+    out = "patch-2.7.6.tar.xz",
 )
 
-ebuild_package(
+extract_source(
+    name = "patch-src",
+    source = ":patch-archive",
+)
+
+package(
     name = "bootstrap-patch",
+    build_rule = "binary",
+    local_only = True,
     source = ":patch-src",
     version = "2.7.6",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Patch utility for applying diffs",
     homepage = "https://www.gnu.org/software/patch/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Built with cross-compiler, strong isolation
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-pass2", ":cross-binutils", ":cross-glibc"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-pass2",
+        ":cross-binutils",
+        ":cross-glibc",
+    ],
     visibility = ["PUBLIC"],
 )
 
@@ -2252,24 +2224,16 @@ make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
 # This builds a native (not cross) GCC using the Stage 1 cross-compiler.
 # This native GCC provides gcc/g++/ar/as/ld for Stage 3 builds.
 
-ebuild_package(
+package(
     name = "bootstrap-gcc",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-14-src",
     version = "14.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Native GCC for bootstrap (built with cross-compiler, C/C++)",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",  # STAGE 2: Native compiler built with cross-compiler
-
-    env = {
-        "CFLAGS": "-O2 -g",
-        "CXXFLAGS": "-O2 -g",
-        "LDFLAGS": "",
-    },
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # Link GMP, MPFR, MPC into source tree
 GMP_DIR=""
 MPFR_DIR=""
@@ -2311,9 +2275,12 @@ sed -i 's/__cplusplus != 201103/__cplusplus < 201103/' libcody/configure || true
 cp include/obstack.h libiberty/obstack.h
 
 echo "Source prepared for Stage 2 native GCC build"
-''',
+'''],
+    install_script = """export CFLAGS="-O2 -g"
+export CXXFLAGS="-O2 -g"
+export LDFLAGS=""
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 mkdir -p build && cd build
@@ -2358,29 +2325,24 @@ sed -i -e 's/c++tools//g' Makefile || true
 sed -i -e 's/  */ /g' -e 's/ *$//' Makefile || true
 
 echo "Native GCC Stage 2 configured"
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
 echo "Native GCC Stage 2 compilation complete"
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 
 # Create marker
-cat > "$DESTDIR/tools/lib/gcc/x86_64-buckos-linux-gnu/15.2.0/.stage2-marker" << 'EOF'
+cat > "$OUT/tools/lib/gcc/x86_64-buckos-linux-gnu/15.2.0/.stage2-marker" << 'EOF'
 GCC 15.2.0 Stage 2
 Native build with Stage 1 cross-compiler
 Provides native gcc/g++ for Stage 3 builds
 EOF
 
 echo "Native GCC Stage 2 installed to /tools"
-''',
-
-    bdepend = [
+""",
+    deps = [
         ":cross-gcc-pass2",
         ":cross-binutils",
         ":cross-glibc",
@@ -2397,7 +2359,6 @@ echo "Native GCC Stage 2 installed to /tools"
         ":mpfr-src",
         ":mpc-src",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
@@ -2414,22 +2375,24 @@ echo "Native GCC Stage 2 installed to /tools"
 #   - Libstdc++
 #   - Core utilities (bash, coreutils, make, sed, awk, grep, etc.)
 
-ebuild_package(
+package(
     name = "bootstrap-toolchain",
-    source = ":gcc-14-src",  # Dummy source, we just aggregate deps
+    build_rule = "binary",
+    local_only = True,
+    source = ":gcc-14-src",
     version = "2.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Complete bootstrap toolchain for BuckOS",
     homepage = "https://buckos.org/",
     license = "GPL-3.0",
+    install_script = """# configure
+true
 
-    src_configure = "true",
-    src_compile = "true",
+# build
+true
 
-    src_install = '''
+# install
 # Create the tools directory structure by copying/symlinking from all bdepends
-mkdir -p "$DESTDIR/tools/bin" "$DESTDIR/tools/lib" "$DESTDIR/tools/include"
+mkdir -p "$OUT/tools/bin" "$OUT/tools/lib" "$OUT/tools/include"
 
 # Copy tools from each dependency's tools directory
 # DEP_BASE_DIRS is set by ebuild.sh and contains all dependency directories
@@ -2437,40 +2400,40 @@ IFS=':' read -ra DEP_ARRAY <<< "$DEP_BASE_DIRS"
 for dep_dir in "${DEP_ARRAY[@]}"; do
     # Copy binaries
     if [ -d "$dep_dir/tools/bin" ]; then
-        cp -a "$dep_dir/tools/bin/"* "$DESTDIR/tools/bin/" 2>/dev/null || true
+        cp -a "$dep_dir/tools/bin/"* "$OUT/tools/bin/" 2>/dev/null || true
     fi
     # Copy libraries (preserving symlinks)
     if [ -d "$dep_dir/tools/lib" ]; then
-        cp -a "$dep_dir/tools/lib/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+        cp -a "$dep_dir/tools/lib/"* "$OUT/tools/lib/" 2>/dev/null || true
     fi
     # Copy includes
     if [ -d "$dep_dir/tools/include" ]; then
-        cp -a "$dep_dir/tools/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+        cp -a "$dep_dir/tools/include/"* "$OUT/tools/include/" 2>/dev/null || true
     fi
     # Copy share directory (terminfo, etc)
     if [ -d "$dep_dir/tools/share" ]; then
-        mkdir -p "$DESTDIR/tools/share"
-        cp -a "$dep_dir/tools/share/"* "$DESTDIR/tools/share/" 2>/dev/null || true
+        mkdir -p "$OUT/tools/share"
+        cp -a "$dep_dir/tools/share/"* "$OUT/tools/share/" 2>/dev/null || true
     fi
     # Copy libexec directory (GCC internal programs like cc1, cc1plus, etc.)
     if [ -d "$dep_dir/tools/libexec" ]; then
-        mkdir -p "$DESTDIR/tools/libexec"
-        cp -a "$dep_dir/tools/libexec/"* "$DESTDIR/tools/libexec/" 2>/dev/null || true
+        mkdir -p "$OUT/tools/libexec"
+        cp -a "$dep_dir/tools/libexec/"* "$OUT/tools/libexec/" 2>/dev/null || true
     fi
     # Copy target-specific libraries (e.g., tools/x86_64-buckos-linux-gnu/lib64/libgcc_s.so)
     # and C++ headers (e.g., tools/x86_64-buckos-linux-gnu/include/c++/14.3.0/)
     for target_dir in "$dep_dir/tools/"*-*-*-*/; do
         if [ -d "$target_dir" ]; then
             if [ -d "$target_dir/lib" ]; then
-                cp -a "$target_dir/lib/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+                cp -a "$target_dir/lib/"* "$OUT/tools/lib/" 2>/dev/null || true
             fi
             if [ -d "$target_dir/lib64" ]; then
-                cp -a "$target_dir/lib64/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+                cp -a "$target_dir/lib64/"* "$OUT/tools/lib/" 2>/dev/null || true
             fi
             # Copy C++ headers (libstdc++ installs to target/include/c++/VERSION/)
             if [ -d "$target_dir/include" ]; then
-                mkdir -p "$DESTDIR/tools/include"
-                cp -a "$target_dir/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+                mkdir -p "$OUT/tools/include"
+                cp -a "$target_dir/include/"* "$OUT/tools/include/" 2>/dev/null || true
                 echo "Copied C++ headers from $target_dir/include/"
             fi
         fi
@@ -2485,20 +2448,20 @@ for dep_dir in "${DEP_ARRAY[@]}"; do
         # Copy libraries from usr/lib and usr/lib64 to tools/lib
         # Use -L to follow symlinks and copy actual files instead of broken symlinks
         if [ -d "$dep_dir/usr/lib" ]; then
-            cp -rL "$dep_dir/usr/lib/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+            cp -rL "$dep_dir/usr/lib/"* "$OUT/tools/lib/" 2>/dev/null || true
         fi
         if [ -d "$dep_dir/usr/lib64" ]; then
-            cp -rL "$dep_dir/usr/lib64/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+            cp -rL "$dep_dir/usr/lib64/"* "$OUT/tools/lib/" 2>/dev/null || true
         fi
         # Copy headers from usr/include to tools/include
         if [ -d "$dep_dir/usr/include" ]; then
-            cp -a "$dep_dir/usr/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+            cp -a "$dep_dir/usr/include/"* "$OUT/tools/include/" 2>/dev/null || true
         fi
 
         # Fix libc.so linker script - rewrite paths to use /lib/ (will be prefixed with sysroot)
-        if [ -f "$DESTDIR/tools/lib/libc.so" ]; then
+        if [ -f "$OUT/tools/lib/libc.so" ]; then
             echo "Rewriting libc.so linker script to use /lib/ paths..."
-            sed -i 's|/usr/lib64/|/lib/|g; s|/usr/lib/|/lib/|g' "$DESTDIR/tools/lib/libc.so"
+            sed -i 's|/usr/lib64/|/lib/|g; s|/usr/lib/|/lib/|g' "$OUT/tools/lib/libc.so"
         fi
 
         # ALSO copy libraries to /tools/usr/lib64/ for sysroot compatibility
@@ -2506,15 +2469,15 @@ for dep_dir in "${DEP_ARRAY[@]}"; do
         # scripts reference absolute paths like /usr/lib64/libm.so.6, the linker looks
         # for /tools/usr/lib64/libm.so.6. We need to create this structure.
         echo "Creating /tools/usr/lib64/ directory structure for sysroot compatibility..."
-        mkdir -p "$DESTDIR/tools/usr/lib64"
+        mkdir -p "$OUT/tools/usr/lib64"
         if [ -d "$dep_dir/usr/lib64" ]; then
-            cp -rL "$dep_dir/usr/lib64/"* "$DESTDIR/tools/usr/lib64/" 2>/dev/null || true
+            cp -rL "$dep_dir/usr/lib64/"* "$OUT/tools/usr/lib64/" 2>/dev/null || true
             echo "Copied libraries to /tools/usr/lib64/ for absolute path references"
         fi
         # Also copy to usr/lib if it exists
         if [ -d "$dep_dir/usr/lib" ]; then
-            mkdir -p "$DESTDIR/tools/usr/lib"
-            cp -rL "$dep_dir/usr/lib/"* "$DESTDIR/tools/usr/lib/" 2>/dev/null || true
+            mkdir -p "$OUT/tools/usr/lib"
+            cp -rL "$dep_dir/usr/lib/"* "$OUT/tools/usr/lib/" 2>/dev/null || true
         fi
 
         echo "Copied cross-glibc files to tools directory (both /tools/lib and /tools/usr/lib64)"
@@ -2529,7 +2492,7 @@ for dep_dir in "${DEP_ARRAY[@]}"; do
         echo "Found linux-headers at: $dep_dir"
         # Copy headers from usr/include to tools/include
         if [ -d "$dep_dir/usr/include" ]; then
-            cp -a "$dep_dir/usr/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+            cp -a "$dep_dir/usr/include/"* "$OUT/tools/include/" 2>/dev/null || true
         fi
 
         echo "Copied linux-headers files to tools directory"
@@ -2540,7 +2503,7 @@ done
 # Create symlinks for cross-compiler tools so they can be used as native tools
 # Stage 3 expects gcc, g++, ar, as, ld, etc. but we only have x86_64-buckos-linux-gnu-* versions
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
-cd "$DESTDIR/tools/bin"
+cd "$OUT/tools/bin"
 
 # Create symlinks for GCC toolchain
 for tool in gcc g++ cpp c++ cc; do
@@ -2562,10 +2525,10 @@ cd -
 
 # Create the x86_64-buckos-linux-gnu/bin/ directory for GCC to find binutils
 # GCC's internal search paths look for binutils in <prefix>/x86_64-buckos-linux-gnu/bin/
-mkdir -p "$DESTDIR/tools/x86_64-buckos-linux-gnu/bin"
-cd "$DESTDIR/tools/x86_64-buckos-linux-gnu/bin"
+mkdir -p "$OUT/tools/x86_64-buckos-linux-gnu/bin"
+cd "$OUT/tools/x86_64-buckos-linux-gnu/bin"
 for tool in ar as ld ld.bfd nm objcopy objdump ranlib readelf size strings strip; do
-    if [ -f "$DESTDIR/tools/bin/${BUCKOS_TARGET}-${tool}" ] && [ ! -e "$tool" ]; then
+    if [ -f "$OUT/tools/bin/${BUCKOS_TARGET}-${tool}" ] && [ ! -e "$tool" ]; then
         ln -s "../../bin/${BUCKOS_TARGET}-${tool}" "$tool"
         echo "Created target bin symlink: $tool -> ../../bin/${BUCKOS_TARGET}-${tool}"
     fi
@@ -2574,20 +2537,20 @@ cd -
 
 # Create x86_64-buckos-linux-gnu/lib -> ../lib symlink for GCC linker to find CRT files
 # GCC's linker spec searches for CRT files (Scrt1.o, crti.o, crtn.o) in $prefix/$target/lib/
-if [ ! -e "$DESTDIR/tools/x86_64-buckos-linux-gnu/lib" ]; then
-    ln -s ../lib "$DESTDIR/tools/x86_64-buckos-linux-gnu/lib"
+if [ ! -e "$OUT/tools/x86_64-buckos-linux-gnu/lib" ]; then
+    ln -s ../lib "$OUT/tools/x86_64-buckos-linux-gnu/lib"
     echo "Created symlink: x86_64-buckos-linux-gnu/lib -> ../lib"
 fi
 
 # Create lib64 -> lib symlink for GCC library path compatibility
 # GCC 14+ looks in lib64/gcc/ but we install to lib/gcc/
-if [ ! -e "$DESTDIR/tools/lib64" ]; then
-    ln -s lib "$DESTDIR/tools/lib64"
+if [ ! -e "$OUT/tools/lib64" ]; then
+    ln -s lib "$OUT/tools/lib64"
     echo "Created symlink: lib64 -> lib"
 fi
 
 # Create a marker file
-cat > "$DESTDIR/tools/.bootstrap-toolchain" << 'EOF'
+cat > "$OUT/tools/.bootstrap-toolchain" << 'EOF'
 BuckOS Bootstrap Toolchain v2.0
 Target: x86_64-buckos-linux-gnu
 Glibc: 2.42
@@ -2604,16 +2567,13 @@ Compiler tools:
 - gcc, g++, ar, as, ld (symlinks to cross-compiler)
 EOF
 
-echo "Bootstrap toolchain assembled: $(ls -1 $DESTDIR/tools/bin | wc -l) binaries, $(ls -1 $DESTDIR/tools/lib/*.so* 2>/dev/null | wc -l) libraries"
-''',
-
-    bdepend = [
-        # Stage 1: Cross-compiler
+echo "Bootstrap toolchain assembled: $(ls -1 $OUT/tools/bin | wc -l) binaries, $(ls -1 $OUT/tools/lib/*.so* 2>/dev/null | wc -l) libraries"
+""",
+    deps = [
         ":cross-binutils",
         ":cross-gcc-pass2",
         ":cross-glibc",
         ":linux-headers",
-        # Stage 2: Core utilities
         ":bootstrap-ncurses",
         ":bootstrap-readline",
         ":bootstrap-bash",
@@ -2628,14 +2588,11 @@ echo "Bootstrap toolchain assembled: $(ls -1 $DESTDIR/tools/bin | wc -l) binarie
         ":bootstrap-gzip",
         ":bootstrap-xz",
         ":bootstrap-bzip2",
-        # Stage 2: Build tools
         ":bootstrap-pkg-config",
         ":bootstrap-file",
         ":bootstrap-patch",
-        # Stage 2: Native compiler (for build ordering and Stage 3)
         ":bootstrap-gcc",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
@@ -2648,25 +2605,16 @@ echo "Bootstrap toolchain assembled: $(ls -1 $DESTDIR/tools/bin | wc -l) binarie
 # -----------------------------------------------------------------------------
 # bootstrap-gcc-stage3 - Native GCC rebuild using Stage 2 toolchain
 # -----------------------------------------------------------------------------
-ebuild_package(
+package(
     name = "bootstrap-gcc-stage3",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-15-src",
     version = "15.2.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GCC Stage 3 - Native rebuild for bootstrap verification",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage3",  # Uses Stage 2 toolchain (complete isolation)
-
-    env = {
-        "CFLAGS": "-O2 -g",
-        "CXXFLAGS": "-O2 -g",
-        "LDFLAGS": "",
-        "CXX": "g++ -std=gnu++17",  # Force C++17 (not C++26)
-    },
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # Find GMP, MPFR, MPC sources from dependencies and link into source tree
 GMP_DIR=""
 MPFR_DIR=""
@@ -2718,9 +2666,13 @@ sed -i 's|c++tools ||g' Makefile.in || true
 sed -i 's/__cplusplus != 201103/__cplusplus < 201103/' libcody/configure || true
 
 echo "Source prepared for Stage 3 native GCC build"
-''',
+'''],
+    install_script = """export CFLAGS="-O2 -g"
+export CXXFLAGS="-O2 -g"
+export LDFLAGS=""
+export CXX="g++ -std=gnu++17"
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 mkdir -p build && cd build
@@ -2837,10 +2789,8 @@ sed -i 's/all-c++tools//g' Makefile || true
 sed -i 's/configure-c++tools//g' Makefile || true
 
 echo "GCC Stage 3 configured for native build"
-''',
 
-    src_compile = '''
-cd build
+# build
 
 # Must set up same sysroot environment as src_configure
 BOOTSTRAP_SYSROOT=""
@@ -2875,10 +2825,8 @@ make -j$MAKE_JOBS \
     CET_FLAGS="-fcf-protection=none"
 
 echo "GCC Stage 3 compilation complete"
-''',
 
-    src_install = '''
-cd build
+# install
 
 # Must set up same sysroot environment as src_configure/src_compile
 BOOTSTRAP_SYSROOT=""
@@ -2902,14 +2850,14 @@ fi
 # Install GCC components - use subshell to isolate errors
 # Stage 3 install may have partial failures (missing libgcc_eh.a etc.) which is OK
 (
-    make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-gcc || echo "install-gcc had errors (non-fatal)"
-    make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-target-libgcc || echo "install-target-libgcc had errors (non-fatal)"
-    make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-target-libstdc++-v3 2>/dev/null || echo "install-target-libstdc++-v3 had errors (non-fatal)"
+    make -j$MAKE_JOBS DESTDIR="$OUT" install-gcc || echo "install-gcc had errors (non-fatal)"
+    make -j$MAKE_JOBS DESTDIR="$OUT" install-target-libgcc || echo "install-target-libgcc had errors (non-fatal)"
+    make -j$MAKE_JOBS DESTDIR="$OUT" install-target-libstdc++-v3 2>/dev/null || echo "install-target-libstdc++-v3 had errors (non-fatal)"
 ) || true
 
 # Create stage3 marker
-mkdir -p "$DESTDIR/usr/lib/gcc/x86_64-buckos-linux-gnu/15.2.0"
-cat > "$DESTDIR/usr/lib/gcc/x86_64-buckos-linux-gnu/15.2.0/.stage3-marker" << 'EOF'
+mkdir -p "$OUT/usr/lib/gcc/x86_64-buckos-linux-gnu/15.2.0"
+cat > "$OUT/usr/lib/gcc/x86_64-buckos-linux-gnu/15.2.0/.stage3-marker" << 'EOF'
 GCC 15.2.0 Stage 3
 Native build with Stage 2 bootstrap toolchain
 Verification build for bootstrap reproducibility
@@ -2917,16 +2865,13 @@ EOF
 
 echo "GCC Stage 3 installed to /usr"
 # The ": true" ensures this block returns 0 regardless of earlier errors
-: true
-''',
-
-    bdepend = [
+: true""",
+    deps = [
         ":bootstrap-toolchain",
         ":gmp-src",
         ":mpfr-src",
         ":mpc-src",
         ":linux-headers",
-        # Explicit Stage 2 dependencies to ensure they're built
         ":bootstrap-bash",
         ":bootstrap-make",
         ":bootstrap-sed",
@@ -2937,38 +2882,33 @@ echo "GCC Stage 3 installed to /usr"
         ":bootstrap-coreutils",
         ":bootstrap-gcc",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
 # -----------------------------------------------------------------------------
 # bootstrap-glibc-stage3 - Native glibc rebuild using Stage 2 toolchain
 # -----------------------------------------------------------------------------
-ebuild_package(
+package(
     name = "bootstrap-glibc-stage3",
+    build_rule = "binary",
+    local_only = True,
     source = ":glibc-src",
     version = "2.42",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Glibc Stage 3 - Native rebuild for bootstrap verification",
     homepage = "https://www.gnu.org/software/libc/",
     license = "LGPL-2.1+",
-    bootstrap_stage = "stage3",  # Uses Stage 2 toolchain (complete isolation)
+    install_script = """export CFLAGS="-O2 -g"
+export CXXFLAGS="-O2 -g"
 
-    env = {
-        "CFLAGS": "-O2 -g",
-        "CXXFLAGS": "-O2 -g",
-    },
-
-    src_configure = '''
+# configure
 BUCKOS_TARGET="x86_64-buckos-linux-gnu"
 
 # Create directory structure
-mkdir -p "$DESTDIR/usr/lib64"
-mkdir -p "$DESTDIR/lib64"
+mkdir -p "$OUT/usr/lib64"
+mkdir -p "$OUT/lib64"
 
 # LSB compliance symlink
-ln -sfv ../lib/ld-linux-x86-64.so.2 "$DESTDIR/usr/lib64/ld-lsb-x86-64.so.3" || true
+ln -sfv ../lib/ld-linux-x86-64.so.2 "$OUT/usr/lib64/ld-lsb-x86-64.so.3" || true
 
 mkdir -p build && cd build
 
@@ -3003,25 +2943,21 @@ fi
     libc_cv_slibdir=/usr/lib64
 
 echo "Glibc Stage 3 configured for native build"
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
 
 echo "Glibc Stage 3 compilation complete"
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 
 # Create dynamic linker symlink
-ln -sfv ../usr/lib64/ld-linux-x86-64.so.2 "$DESTDIR/lib64/ld-linux-x86-64.so.2"
+ln -sfv ../usr/lib64/ld-linux-x86-64.so.2 "$OUT/lib64/ld-linux-x86-64.so.2"
 
 # Create ld.so.conf
-mkdir -p "$DESTDIR/etc/ld.so.conf.d"
-cat > "$DESTDIR/etc/ld.so.conf" << 'LDCONF'
+mkdir -p "$OUT/etc/ld.so.conf.d"
+cat > "$OUT/etc/ld.so.conf" << 'LDCONF'
 # Multilib support
 /usr/lib64
 /usr/lib
@@ -3031,19 +2967,17 @@ include /etc/ld.so.conf.d/*.conf
 LDCONF
 
 # Create stage3 marker
-cat > "$DESTDIR/usr/lib64/.stage3-marker" << 'EOF'
+cat > "$OUT/usr/lib64/.stage3-marker" << 'EOF'
 Glibc 2.42 Stage 3
 Native build with Stage 2 bootstrap toolchain
 Verification build for bootstrap reproducibility
 EOF
 
 echo "Glibc Stage 3 installed to /usr"
-''',
-
-    bdepend = [
+""",
+    deps = [
         ":bootstrap-toolchain",
         ":linux-headers",
-        # Explicit Stage 2 dependencies to ensure they're built
         ":bootstrap-bash",
         ":bootstrap-make",
         ":bootstrap-sed",
@@ -3054,69 +2988,70 @@ echo "Glibc Stage 3 installed to /usr"
         ":bootstrap-coreutils",
         ":bootstrap-gcc",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
 # -----------------------------------------------------------------------------
 # bootstrap-stage3-system - Complete Stage 3 system (aggregate)
 # -----------------------------------------------------------------------------
-ebuild_package(
+package(
     name = "bootstrap-stage3-system",
-    source = ":gcc-14-src",  # Dummy source
+    build_rule = "binary",
+    local_only = True,
+    source = ":gcc-14-src",
     version = "3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Stage 3 complete system - GCC and glibc natively rebuilt",
     homepage = "https://buckos.org/",
     license = "GPL-3.0",
+    install_script = """# configure
+true
 
-    src_configure = "true",
-    src_compile = "true",
+# build
+true
 
-    src_install = '''
+# install
 # Aggregate Stage 3 GCC and glibc into /usr
-mkdir -p "$DESTDIR/usr/bin" "$DESTDIR/usr/lib" "$DESTDIR/usr/lib64" "$DESTDIR/usr/include"
-mkdir -p "$DESTDIR/usr/sbin" "$DESTDIR/usr/libexec" "$DESTDIR/usr/share"
-mkdir -p "$DESTDIR/lib64" "$DESTDIR/etc"
+mkdir -p "$OUT/usr/bin" "$OUT/usr/lib" "$OUT/usr/lib64" "$OUT/usr/include"
+mkdir -p "$OUT/usr/sbin" "$OUT/usr/libexec" "$OUT/usr/share"
+mkdir -p "$OUT/lib64" "$OUT/etc"
 
 # Copy from all dependencies
 IFS=':' read -ra DEP_ARRAY <<< "$DEP_BASE_DIRS"
 for dep_dir in "${DEP_ARRAY[@]}"; do
     # Copy /usr directory contents
     if [ -d "$dep_dir/usr/bin" ]; then
-        cp -a "$dep_dir/usr/bin/"* "$DESTDIR/usr/bin/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/bin/"* "$OUT/usr/bin/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/usr/sbin" ]; then
-        cp -a "$dep_dir/usr/sbin/"* "$DESTDIR/usr/sbin/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/sbin/"* "$OUT/usr/sbin/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/usr/lib" ]; then
-        cp -a "$dep_dir/usr/lib/"* "$DESTDIR/usr/lib/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/lib/"* "$OUT/usr/lib/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/usr/lib64" ]; then
-        cp -a "$dep_dir/usr/lib64/"* "$DESTDIR/usr/lib64/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/lib64/"* "$OUT/usr/lib64/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/usr/libexec" ]; then
-        cp -a "$dep_dir/usr/libexec/"* "$DESTDIR/usr/libexec/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/libexec/"* "$OUT/usr/libexec/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/usr/include" ]; then
-        cp -a "$dep_dir/usr/include/"* "$DESTDIR/usr/include/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/include/"* "$OUT/usr/include/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/usr/share" ]; then
-        cp -a "$dep_dir/usr/share/"* "$DESTDIR/usr/share/" 2>/dev/null || true
+        cp -a "$dep_dir/usr/share/"* "$OUT/usr/share/" 2>/dev/null || true
     fi
 
     # Copy /lib64 and /etc if present
     if [ -d "$dep_dir/lib64" ]; then
-        cp -a "$dep_dir/lib64/"* "$DESTDIR/lib64/" 2>/dev/null || true
+        cp -a "$dep_dir/lib64/"* "$OUT/lib64/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/etc" ]; then
-        cp -a "$dep_dir/etc/"* "$DESTDIR/etc/" 2>/dev/null || true
+        cp -a "$dep_dir/etc/"* "$OUT/etc/" 2>/dev/null || true
     fi
 done
 
 # Create master marker file
-cat > "$DESTDIR/usr/.stage3-system" << 'EOF'
+cat > "$OUT/usr/.stage3-system" << 'EOF'
 BuckOS Stage 3 Complete System
 ================================
 Self-hosting verification build
@@ -3135,16 +3070,14 @@ EOF
 
 # Summary
 echo "Stage 3 system assembled:"
-echo "  Binaries: $(find $DESTDIR/usr/bin -type f 2>/dev/null | wc -l)"
-echo "  Libraries: $(find $DESTDIR/usr/lib64 -name '*.so*' 2>/dev/null | wc -l)"
-echo "  Headers: $(find $DESTDIR/usr/include -name '*.h' 2>/dev/null | wc -l)"
-''',
-
-    bdepend = [
+echo "  Binaries: $(find $OUT/usr/bin -type f 2>/dev/null | wc -l)"
+echo "  Libraries: $(find $OUT/usr/lib64 -name '*.so*' 2>/dev/null | wc -l)"
+echo "  Headers: $(find $OUT/usr/include -name '*.h' 2>/dev/null | wc -l)"
+""",
+    deps = [
         ":bootstrap-gcc-stage3",
         ":bootstrap-glibc-stage3",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
@@ -3385,23 +3318,20 @@ filegroup(
 # =============================================================================
 
 # ARM64 Cross Binutils
-ebuild_package(
+package(
     name = "cross-binutils-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":binutils-src",
     version = "2.44",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Cross binutils for aarch64 bootstrap toolchain",
     homepage = "https://www.gnu.org/software/binutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage1",
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 find . -name 'config.cache' -delete 2>/dev/null || true
 echo "Cleaned stale config.cache files"
-''',
-
-    src_configure = '''
+'''],
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 mkdir -p build && cd build
 ../configure \
@@ -3418,69 +3348,45 @@ mkdir -p build && cd build
     --enable-gprofng=no \
     --enable-default-hash-style=gnu \
     MAKEINFO=true
-''',
 
-    src_compile = '''
-cd build
+# build
 # Build binutils and ld with full parallelism
 make -j$MAKE_JOBS MAKEINFO=true all-binutils all-ld
 
 # Build gas with reduced parallelism to avoid race condition with temp .s files
 GAS_JOBS=$((MAKE_JOBS > 4 ? 4 : MAKE_JOBS))
 make -j$GAS_JOBS MAKEINFO=true all-gas
-''',
 
-    src_install = '''
-cd build
+# install
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-binutils install-gas install-ld MAKEINFO=true
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-bfd install-libiberty install-libsframe MAKEINFO=true || true
+make -j$MAKE_JOBS DESTDIR="$OUT" install-binutils install-gas install-ld MAKEINFO=true
+make -j$MAKE_JOBS DESTDIR="$OUT" install-bfd install-libiberty install-libsframe MAKEINFO=true || true
 
 # Create unprefixed symlinks in the standard cross-toolchain location
 # GCC looks in <prefix>/<target>/bin/ for target tools (as, ld, etc.)
 # This keeps them separate from tools/bin/ so they don't shadow host tools
-mkdir -p "$DESTDIR/tools/$BUCKOS_TARGET/bin"
-cd "$DESTDIR/tools/$BUCKOS_TARGET/bin"
+mkdir -p "$OUT/tools/$BUCKOS_TARGET/bin"
+cd "$OUT/tools/$BUCKOS_TARGET/bin"
 for tool in as ld ar nm ranlib objcopy objdump strip readelf; do
     if [ -f "../../bin/${BUCKOS_TARGET}-${tool}" ] && [ ! -e "$tool" ]; then
         ln -sf "../../bin/${BUCKOS_TARGET}-${tool}" "$tool"
         echo "Created symlink in sysroot: $tool -> ../../bin/${BUCKOS_TARGET}-${tool}"
     fi
-done
-''',
-
-    depend = [],
+done""",
     visibility = ["PUBLIC"],
 )
 
 # ARM64 Cross GCC Pass 1 (C compiler only, no libc)
-ebuild_package(
+package(
     name = "cross-gcc-aarch64-pass1",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-14-src",
     version = "14.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Cross GCC pass 1 for aarch64 - C compiler only",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage1",
-
-    env = {
-        "CC": "gcc -std=gnu11 -Wno-error=implicit-function-declaration",
-        "CFLAGS": "-O2 -std=gnu11 -Wno-error=implicit-function-declaration",
-        "CXX": "g++ -std=gnu++11",
-        "CXXFLAGS": "-O2 -std=gnu++11",
-        # Explicitly set host tools to prevent GCC from using cross-tools for host builds
-        "CC_FOR_BUILD": "gcc",
-        "CXX_FOR_BUILD": "g++",
-        "AS_FOR_BUILD": "/usr/bin/as",
-        "AR_FOR_BUILD": "/usr/bin/ar",
-        "LD_FOR_BUILD": "/usr/bin/ld",
-        "NM_FOR_BUILD": "/usr/bin/nm",
-        "RANLIB_FOR_BUILD": "/usr/bin/ranlib",
-    },
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 echo "Available dependency paths via DEP_BASE_DIRS:"
 echo "$DEP_BASE_DIRS"
 
@@ -3569,9 +3475,20 @@ if [ -d c++tools ]; then
     rm -rf c++tools
     echo "c++tools directory removed"
 fi
-''',
+'''],
+    install_script = """export CC="gcc -std=gnu11 -Wno-error=implicit-function-declaration"
+export CFLAGS="-O2 -std=gnu11 -Wno-error=implicit-function-declaration"
+export CXX="g++ -std=gnu++11"
+export CXXFLAGS="-O2 -std=gnu++11"
+export CC_FOR_BUILD="gcc"
+export CXX_FOR_BUILD="g++"
+export AS_FOR_BUILD="/usr/bin/as"
+export AR_FOR_BUILD="/usr/bin/ar"
+export LD_FOR_BUILD="/usr/bin/ld"
+export NM_FOR_BUILD="/usr/bin/nm"
+export RANLIB_FOR_BUILD="/usr/bin/ranlib"
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Find cross-binutils directory but DON'T add to PATH yet
@@ -3644,10 +3561,8 @@ mkdir -p build && cd build
     NM_FOR_TARGET="$CROSS_NM" \
     RANLIB_FOR_TARGET="$CROSS_RANLIB" \
     MAKEINFO=true
-''',
 
-    src_compile = '''
-cd build
+# build
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Find cross-binutils directory but DON'T add to PATH yet!
@@ -3729,10 +3644,8 @@ fi
 echo "Successfully built libgcc.a"
 
 cd ../..
-''',
 
-    src_install = '''
-cd build
+# install
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Add cross-binutils to PATH for install (some GCC install scripts may need them)
@@ -3747,44 +3660,44 @@ done
 
 # For pass1, we only need to install the compiler and libgcc.a
 echo "Installing GCC compiler..."
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-gcc MAKEINFO=true 2>&1 | tee install.log
+make -j$MAKE_JOBS DESTDIR="$OUT" install-gcc MAKEINFO=true 2>&1 | tee install.log
 
 # Check if install created the bin directory
-if [ ! -d "$DESTDIR/tools/bin" ]; then
+if [ ! -d "$OUT/tools/bin" ]; then
     echo "WARNING: install-gcc did not create bin directory!"
     echo "Contents of DESTDIR:"
-    find "$DESTDIR" -type f | head -20
+    find "$OUT" -type f | head -20
     echo ""
     echo "Last 50 lines of install.log:"
     tail -50 install.log
 
     # Try to manually install gcc binaries if they exist
     echo "Attempting manual installation of gcc binaries..."
-    mkdir -p "$DESTDIR/tools/bin"
+    mkdir -p "$OUT/tools/bin"
     if [ -f gcc/xgcc ]; then
-        cp gcc/xgcc "$DESTDIR/tools/bin/${BUCKOS_TARGET}-gcc"
-        chmod +x "$DESTDIR/tools/bin/${BUCKOS_TARGET}-gcc"
+        cp gcc/xgcc "$OUT/tools/bin/${BUCKOS_TARGET}-gcc"
+        chmod +x "$OUT/tools/bin/${BUCKOS_TARGET}-gcc"
         echo "Manually installed xgcc as ${BUCKOS_TARGET}-gcc"
     fi
     if [ -f gcc/cpp ]; then
-        cp gcc/cpp "$DESTDIR/tools/bin/${BUCKOS_TARGET}-cpp"
-        chmod +x "$DESTDIR/tools/bin/${BUCKOS_TARGET}-cpp"
+        cp gcc/cpp "$OUT/tools/bin/${BUCKOS_TARGET}-cpp"
+        chmod +x "$OUT/tools/bin/${BUCKOS_TARGET}-cpp"
         echo "Manually installed cpp as ${BUCKOS_TARGET}-cpp"
     fi
 fi
 
 # Verify bin directory now exists
-if [ ! -d "$DESTDIR/tools/bin" ] || [ -z "$(ls -A $DESTDIR/tools/bin 2>/dev/null)" ]; then
+if [ ! -d "$OUT/tools/bin" ] || [ -z "$(ls -A $OUT/tools/bin 2>/dev/null)" ]; then
     echo "ERROR: bin directory still not populated after install!"
     exit 1
 fi
 
 echo "Contents of installed bin directory:"
-ls -la "$DESTDIR/tools/bin/"
+ls -la "$OUT/tools/bin/"
 
 # Manually install libgcc.a (we can't use install-target-libgcc as it tries to install libgcov)
 GCC_VERSION=$(cat gcc/BASE-VER 2>/dev/null || echo "14.3.0")
-LIBGCC_DIR="$DESTDIR/tools/lib/gcc/$BUCKOS_TARGET/$GCC_VERSION"
+LIBGCC_DIR="$OUT/tools/lib/gcc/$BUCKOS_TARGET/$GCC_VERSION"
 mkdir -p "$LIBGCC_DIR"
 
 if [ ! -f "$BUCKOS_TARGET/libgcc/libgcc.a" ]; then
@@ -3801,82 +3714,75 @@ for crt in crtbegin.o crtend.o crtbeginS.o crtendS.o crtbeginT.o; do
         cp "$BUCKOS_TARGET/libgcc/$crt" "$LIBGCC_DIR/"
         echo "Installed $crt"
     fi
-done
-''',
-
-    bdepend = [":gmp-src", ":mpfr-src", ":mpc-src", ":cross-binutils-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+done""",
+    deps = [
+        ":gmp-src",
+        ":mpfr-src",
+        ":mpc-src",
+        ":cross-binutils-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
 # ARM64 Linux Headers
-ebuild_package(
+package(
     name = "cross-linux-headers-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":linux-headers-src",
     version = "6.12.6",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Linux kernel headers for aarch64 bootstrap",
     homepage = "https://www.kernel.org/",
     license = "GPL-2.0",
-    bootstrap_stage = "stage1",
-
-    src_configure = '''
+    install_script = """# configure
 # No configure needed for headers
 true
-''',
 
-    src_compile = '''
+# build
 # No compilation needed
 true
-''',
 
-    src_install = '''
+# install
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 # Install to sysroot location for cross-compilation
-HEADER_DEST="$DESTDIR/tools/$BUCKOS_TARGET/include"
+HEADER_DEST="$OUT/tools/$BUCKOS_TARGET/include"
 mkdir -p "$HEADER_DEST"
 
 # Use ARCH=arm64 for aarch64 headers
-make -j$MAKE_JOBS ARCH=arm64 INSTALL_HDR_PATH="$DESTDIR/tools/$BUCKOS_TARGET" headers_install
+make -j$MAKE_JOBS ARCH=arm64 INSTALL_HDR_PATH="$OUT/tools/$BUCKOS_TARGET" headers_install
 
 # Also install to /tools/include for compatibility
-mkdir -p "$DESTDIR/tools/include"
-cp -a "$HEADER_DEST"/* "$DESTDIR/tools/include/" 2>/dev/null || true
+mkdir -p "$OUT/tools/include"
+cp -a "$HEADER_DEST"/* "$OUT/tools/include/" 2>/dev/null || true
 
 echo "Installed ARM64 Linux headers to $HEADER_DEST"
-''',
-
-    depend = [],
+""",
     visibility = ["PUBLIC"],
 )
 
 # ARM64 Cross glibc
-ebuild_package(
+package(
     name = "cross-glibc-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":glibc-src",
     version = "2.42",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU C Library for aarch64 cross-compilation",
     homepage = "https://www.gnu.org/software/libc/",
     license = "LGPL-2.1",
-    bootstrap_stage = "stage1",
+    install_script = """export CC="aarch64-buckos-linux-gnu-gcc"
+export CXX="aarch64-buckos-linux-gnu-g++"
+export AR="aarch64-buckos-linux-gnu-ar"
+export AS="aarch64-buckos-linux-gnu-as"
+export LD="aarch64-buckos-linux-gnu-ld"
+export NM="aarch64-buckos-linux-gnu-nm"
+export RANLIB="aarch64-buckos-linux-gnu-ranlib"
+export OBJCOPY="aarch64-buckos-linux-gnu-objcopy"
+export OBJDUMP="aarch64-buckos-linux-gnu-objdump"
+export STRIP="aarch64-buckos-linux-gnu-strip"
 
-    env = {
-        "CC": "aarch64-buckos-linux-gnu-gcc",
-        "CXX": "aarch64-buckos-linux-gnu-g++",
-        "AR": "aarch64-buckos-linux-gnu-ar",
-        "AS": "aarch64-buckos-linux-gnu-as",
-        "LD": "aarch64-buckos-linux-gnu-ld",
-        "NM": "aarch64-buckos-linux-gnu-nm",
-        "RANLIB": "aarch64-buckos-linux-gnu-ranlib",
-        "OBJCOPY": "aarch64-buckos-linux-gnu-objcopy",
-        "OBJDUMP": "aarch64-buckos-linux-gnu-objdump",
-        "STRIP": "aarch64-buckos-linux-gnu-strip",
-    },
-
-    src_configure = '''
+# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Setup PATH to find cross-compiler and cross-binutils
@@ -3966,10 +3872,8 @@ echo "rootsbindir=/usr/sbin" > configparms
     libc_cv_pde=yes \
     libc_cv_cxx_link_ok=no \
     CXX=""
-''',
 
-    src_compile = '''
-cd build
+# build
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Setup PATH to find cross-compiler and cross-binutils
@@ -4007,25 +3911,23 @@ make -j$MAKE_JOBS || {
     echo "Full parallel build failed, trying with fewer jobs..."
     make -j4
 }
-''',
 
-    src_install = '''
-cd build
+# install
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # First install headers explicitly (glibc cross-compile may not install them with regular install)
 echo "Installing glibc headers..."
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install-headers || echo "install-headers failed, continuing..."
+make -j$MAKE_JOBS DESTDIR="$OUT" install-headers || echo "install-headers failed, continuing..."
 
 # Then run full install (libraries, etc.)
 echo "Installing glibc..."
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install || echo "install failed, will manually copy files..."
+make -j$MAKE_JOBS DESTDIR="$OUT" install || echo "install failed, will manually copy files..."
 
 # Create a dummy stubs.h if it wasn't generated
-if [ ! -f "$DESTDIR/usr/include/gnu/stubs.h" ]; then
+if [ ! -f "$OUT/usr/include/gnu/stubs.h" ]; then
     echo "Creating stub gnu/stubs.h..."
-    mkdir -p "$DESTDIR/usr/include/gnu"
-    cat > "$DESTDIR/usr/include/gnu/stubs.h" << 'STUBSEOF'
+    mkdir -p "$OUT/usr/include/gnu"
+    cat > "$OUT/usr/include/gnu/stubs.h" << 'STUBSEOF'
 /* This file is automatically generated.
    This file selects the right generated file of `__stub_FUNCTION' macros
    based on the architecture being compiled for.  */
@@ -4035,19 +3937,19 @@ if [ ! -f "$DESTDIR/usr/include/gnu/stubs.h" ]; then
 #endif
 STUBSEOF
     # Also create the stubs-lp64.h file
-    touch "$DESTDIR/usr/include/gnu/stubs-lp64.h"
+    touch "$OUT/usr/include/gnu/stubs-lp64.h"
 fi
 
 # Manually copy CRT files if they weren't installed
 echo "Checking for CRT files..."
-if [ ! -f "$DESTDIR/usr/lib/crti.o" ]; then
+if [ ! -f "$OUT/usr/lib/crti.o" ]; then
     echo "Manually copying CRT files from build directory..."
-    mkdir -p "$DESTDIR/usr/lib"
-    cp -v csu/crt1.o "$DESTDIR/usr/lib/" 2>/dev/null || true
-    cp -v csu/crti.o "$DESTDIR/usr/lib/" 2>/dev/null || true
-    cp -v csu/crtn.o "$DESTDIR/usr/lib/" 2>/dev/null || true
-    cp -v csu/Scrt1.o "$DESTDIR/usr/lib/" 2>/dev/null || true
-    cp -v csu/gcrt1.o "$DESTDIR/usr/lib/" 2>/dev/null || true
+    mkdir -p "$OUT/usr/lib"
+    cp -v csu/crt1.o "$OUT/usr/lib/" 2>/dev/null || true
+    cp -v csu/crti.o "$OUT/usr/lib/" 2>/dev/null || true
+    cp -v csu/crtn.o "$OUT/usr/lib/" 2>/dev/null || true
+    cp -v csu/Scrt1.o "$OUT/usr/lib/" 2>/dev/null || true
+    cp -v csu/gcrt1.o "$OUT/usr/lib/" 2>/dev/null || true
 fi
 
 # Copy all shared libraries and archive files to /usr/lib
@@ -4056,35 +3958,35 @@ for dir in . elf nptl dlfcn io misc posix setjmp signal stdlib string time diren
            ctype wctype math malloc debug resource login crypt intl inet resolv nss sunrpc nis \
            nscd hesiod timezone iconv iconvdata nptl_db argp sysvipc rt conform wcsmbs conform conform; do
     if [ -d "$dir" ]; then
-        find "$dir" -maxdepth 1 -name "*.so*" -exec cp -v {} "$DESTDIR/usr/lib/" \; 2>/dev/null || true
-        find "$dir" -maxdepth 1 -name "*.a" -exec cp -v {} "$DESTDIR/usr/lib/" \; 2>/dev/null || true
-        find "$dir" -maxdepth 1 -name "*.o" -exec cp -v {} "$DESTDIR/usr/lib/" \; 2>/dev/null || true
+        find "$dir" -maxdepth 1 -name "*.so*" -exec cp -v {} "$OUT/usr/lib/" \; 2>/dev/null || true
+        find "$dir" -maxdepth 1 -name "*.a" -exec cp -v {} "$OUT/usr/lib/" \; 2>/dev/null || true
+        find "$dir" -maxdepth 1 -name "*.o" -exec cp -v {} "$OUT/usr/lib/" \; 2>/dev/null || true
     fi
 done
 
 # Copy the dynamic linker
 echo "Copying dynamic linker..."
 if [ -f "elf/ld.so" ]; then
-    cp -v elf/ld.so "$DESTDIR/usr/lib/ld-linux-aarch64.so.1" 2>/dev/null || true
-    cp -v elf/ld.so "$DESTDIR/usr/lib/ld.so" 2>/dev/null || true
+    cp -v elf/ld.so "$OUT/usr/lib/ld-linux-aarch64.so.1" 2>/dev/null || true
+    cp -v elf/ld.so "$OUT/usr/lib/ld.so" 2>/dev/null || true
 fi
 
 # CRITICAL: Fix libc.so - it must be a linker script, not an ELF binary
 # glibc's make install sometimes creates libc.so as the actual library
 # We need to check if it's an ELF and fix it
 echo "Checking and fixing libc.so..."
-if [ -f "$DESTDIR/usr/lib/libc.so" ]; then
+if [ -f "$OUT/usr/lib/libc.so" ]; then
     # Check if it's an ELF binary (not a linker script)
-    if file "$DESTDIR/usr/lib/libc.so" | grep -q "ELF"; then
+    if file "$OUT/usr/lib/libc.so" | grep -q "ELF"; then
         echo "libc.so is an ELF binary - fixing by creating linker script..."
         # libc.so is the same as libc.so.6, so just replace it with a linker script
-        rm -f "$DESTDIR/usr/lib/libc.so"
+        rm -f "$OUT/usr/lib/libc.so"
     fi
 fi
 
 # Create proper libc.so linker script
 echo "Creating libc.so linker script..."
-cat > "$DESTDIR/usr/lib/libc.so" << 'LIBCEOF'
+cat > "$OUT/usr/lib/libc.so" << 'LIBCEOF'
 /* GNU ld script
    Use the shared library, but some functions are only in the static library. */
 OUTPUT_FORMAT(elf64-littleaarch64)
@@ -4092,47 +3994,47 @@ GROUP ( libc.so.6 libc_nonshared.a AS_NEEDED ( ld-linux-aarch64.so.1 ) )
 LIBCEOF
 
 echo "Install completed, checking output structure:"
-find "$DESTDIR" -type d | head -20
+find "$OUT" -type d | head -20
 echo "Library files in usr/lib:"
-ls -la "$DESTDIR/usr/lib/" 2>/dev/null | head -30
+ls -la "$OUT/usr/lib/" 2>/dev/null | head -30
 
 # Create the dynamic linker symlink for aarch64
-mkdir -p "$DESTDIR/lib"
-if [ -f "$DESTDIR/usr/lib/ld-linux-aarch64.so.1" ]; then
-    ln -sf ../usr/lib/ld-linux-aarch64.so.1 "$DESTDIR/lib/ld-linux-aarch64.so.1"
+mkdir -p "$OUT/lib"
+if [ -f "$OUT/usr/lib/ld-linux-aarch64.so.1" ]; then
+    ln -sf ../usr/lib/ld-linux-aarch64.so.1 "$OUT/lib/ld-linux-aarch64.so.1"
 fi
 
 # Also create /tools directory structure for compatibility with GCC pass2
-mkdir -p "$DESTDIR/tools/$BUCKOS_TARGET/lib"
-mkdir -p "$DESTDIR/tools/$BUCKOS_TARGET/include"
+mkdir -p "$OUT/tools/$BUCKOS_TARGET/lib"
+mkdir -p "$OUT/tools/$BUCKOS_TARGET/include"
 
 # Copy headers to tools sysroot structure for GCC pass2
-if [ -d "$DESTDIR/usr/include" ]; then
+if [ -d "$OUT/usr/include" ]; then
     echo "Copying headers to tools sysroot..."
-    cp -a "$DESTDIR/usr/include"/* "$DESTDIR/tools/$BUCKOS_TARGET/include/" 2>/dev/null || true
+    cp -a "$OUT/usr/include"/* "$OUT/tools/$BUCKOS_TARGET/include/" 2>/dev/null || true
     # Also copy to /tools/include for fallback
-    mkdir -p "$DESTDIR/tools/include"
-    cp -a "$DESTDIR/usr/include"/* "$DESTDIR/tools/include/" 2>/dev/null || true
+    mkdir -p "$OUT/tools/include"
+    cp -a "$OUT/usr/include"/* "$OUT/tools/include/" 2>/dev/null || true
 fi
 
 # Copy libraries to tools sysroot structure for GCC pass2
-if [ -d "$DESTDIR/usr/lib" ]; then
+if [ -d "$OUT/usr/lib" ]; then
     echo "Copying libraries to tools sysroot..."
-    cp -a "$DESTDIR/usr/lib"/* "$DESTDIR/tools/$BUCKOS_TARGET/lib/" 2>/dev/null || true
+    cp -a "$OUT/usr/lib"/* "$OUT/tools/$BUCKOS_TARGET/lib/" 2>/dev/null || true
     # Also copy to /tools/lib for fallback
-    mkdir -p "$DESTDIR/tools/lib"
-    cp -a "$DESTDIR/usr/lib"/* "$DESTDIR/tools/lib/" 2>/dev/null || true
+    mkdir -p "$OUT/tools/lib"
+    cp -a "$OUT/usr/lib"/* "$OUT/tools/lib/" 2>/dev/null || true
 fi
 
 echo "Checking for stubs.h:"
-find "$DESTDIR" -name "stubs*" -type f 2>/dev/null
+find "$OUT" -name "stubs*" -type f 2>/dev/null
 
 echo "Checking for CRT files:"
-ls -la "$DESTDIR/usr/lib/crt*.o" 2>/dev/null || echo "No CRT files found"
+ls -la "$OUT/usr/lib/crt*.o" 2>/dev/null || echo "No CRT files found"
 
 # Create /etc/ld.so.conf for library search paths
-mkdir -p "$DESTDIR/etc/ld.so.conf.d"
-cat > "$DESTDIR/etc/ld.so.conf" << 'LDCONF'
+mkdir -p "$OUT/etc/ld.so.conf.d"
+cat > "$OUT/etc/ld.so.conf" << 'LDCONF'
 # Library search paths
 # Include lib64 for compatibility with packages that install there
 /usr/lib
@@ -4140,45 +4042,26 @@ cat > "$DESTDIR/etc/ld.so.conf" << 'LDCONF'
 /usr/lib64
 /lib64
 include /etc/ld.so.conf.d/*.conf
-LDCONF
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass1", ":cross-binutils-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+LDCONF""",
+    deps = [
+        ":cross-gcc-aarch64-pass1",
+        ":cross-binutils-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
 # ARM64 Cross GCC Pass 2 (full compiler with C++ support)
-ebuild_package(
+package(
     name = "cross-gcc-aarch64-pass2",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-14-src",
     version = "14.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Cross GCC pass 2 for aarch64 - full compiler with C++ support",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage1",
-
-    env = {
-        "CC": "gcc -std=gnu11 -Wno-error=implicit-function-declaration",
-        "CFLAGS": "-O2 -std=gnu11 -Wno-error=implicit-function-declaration",
-        "CXX": "g++ -std=gnu++11",
-        "CXXFLAGS": "-O2 -std=gnu++11",
-        # Explicitly set host tools to prevent GCC from using cross-tools for host builds
-        # Use -std=gnu11 to avoid glibc 2.38+ C23 symbol redirects (__isoc23_strtol, etc.)
-        "CC_FOR_BUILD": "gcc -std=gnu11",
-        "CXX_FOR_BUILD": "g++ -std=gnu++11",
-        "CFLAGS_FOR_BUILD": "-O2 -std=gnu11",
-        "CXXFLAGS_FOR_BUILD": "-O2 -std=gnu++11",
-        "AS_FOR_BUILD": "/usr/bin/as",
-        "AR_FOR_BUILD": "/usr/bin/ar",
-        "LD_FOR_BUILD": "/usr/bin/ld",
-        "NM_FOR_BUILD": "/usr/bin/nm",
-        "RANLIB_FOR_BUILD": "/usr/bin/ranlib",
-    },
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # Link GMP, MPFR, MPC sources
 GMP_DIR=""
 MPFR_DIR=""
@@ -4198,9 +4081,22 @@ done
 [[ -n "$GMP_DIR" ]] && ln -sfn "$GMP_DIR" gmp
 [[ -n "$MPFR_DIR" ]] && ln -sfn "$MPFR_DIR" mpfr
 [[ -n "$MPC_DIR" ]] && ln -sfn "$MPC_DIR" mpc
-''',
+'''],
+    install_script = """export CC="gcc -std=gnu11 -Wno-error=implicit-function-declaration"
+export CFLAGS="-O2 -std=gnu11 -Wno-error=implicit-function-declaration"
+export CXX="g++ -std=gnu++11"
+export CXXFLAGS="-O2 -std=gnu++11"
+export CC_FOR_BUILD="gcc -std=gnu11"
+export CXX_FOR_BUILD="g++ -std=gnu++11"
+export CFLAGS_FOR_BUILD="-O2 -std=gnu11"
+export CXXFLAGS_FOR_BUILD="-O2 -std=gnu++11"
+export AS_FOR_BUILD="/usr/bin/as"
+export AR_FOR_BUILD="/usr/bin/ar"
+export LD_FOR_BUILD="/usr/bin/ld"
+export NM_FOR_BUILD="/usr/bin/nm"
+export RANLIB_FOR_BUILD="/usr/bin/ranlib"
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Setup PATH to find cross-tools
@@ -4411,10 +4307,8 @@ find . -name 'config.cache' -delete 2>/dev/null || true
     CFLAGS_FOR_BUILD="-O2 -std=gnu11" \
     CXXFLAGS_FOR_BUILD="-O2 -std=gnu++11" \
     MAKEINFO=true
-''',
 
-    src_compile = '''
-cd build
+# build
 # Pass _FOR_BUILD variables to make to ensure host tools use -std=gnu11
 # This prevents __isoc23_* symbol usage from glibc 2.38+
 make -j$MAKE_JOBS MAKEINFO=true \
@@ -4426,15 +4320,17 @@ make -j$MAKE_JOBS MAKEINFO=true \
     BOOT_CXXFLAGS="-O2 -std=gnu++11" \
     BUILD_CFLAGS="-O2 -std=gnu11" \
     BUILD_CXXFLAGS="-O2 -std=gnu++11"
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install MAKEINFO=true
-''',
-
-    bdepend = [":gmp-src", ":mpfr-src", ":mpc-src", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install MAKEINFO=true""",
+    deps = [
+        ":gmp-src",
+        ":mpfr-src",
+        ":mpc-src",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
@@ -4456,55 +4352,57 @@ filegroup(
 # Complete bootstrap toolchain for building aarch64 packages natively.
 # This mirrors bootstrap-toolchain but uses aarch64 cross-compiler targets.
 
-ebuild_package(
+package(
     name = "bootstrap-toolchain-aarch64",
-    source = ":gcc-14-src",  # Dummy source, we just aggregate deps
+    build_rule = "binary",
+    local_only = True,
+    source = ":gcc-14-src",
     version = "2.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Complete bootstrap toolchain for BuckOS ARM64",
     homepage = "https://buckos.org/",
     license = "GPL-3.0",
+    install_script = """# configure
+true
 
-    src_configure = "true",
-    src_compile = "true",
+# build
+true
 
-    src_install = '''
+# install
 # Create the tools directory structure by copying/symlinking from all bdepends
-mkdir -p "$DESTDIR/tools/bin" "$DESTDIR/tools/lib" "$DESTDIR/tools/include"
+mkdir -p "$OUT/tools/bin" "$OUT/tools/lib" "$OUT/tools/include"
 
 # Copy tools from each dependency's tools directory
 IFS=':' read -ra DEP_ARRAY <<< "$DEP_BASE_DIRS"
 for dep_dir in "${DEP_ARRAY[@]}"; do
     if [ -d "$dep_dir/tools/bin" ]; then
-        cp -a "$dep_dir/tools/bin/"* "$DESTDIR/tools/bin/" 2>/dev/null || true
+        cp -a "$dep_dir/tools/bin/"* "$OUT/tools/bin/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/tools/lib" ]; then
-        cp -a "$dep_dir/tools/lib/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+        cp -a "$dep_dir/tools/lib/"* "$OUT/tools/lib/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/tools/include" ]; then
-        cp -a "$dep_dir/tools/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+        cp -a "$dep_dir/tools/include/"* "$OUT/tools/include/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/tools/share" ]; then
-        mkdir -p "$DESTDIR/tools/share"
-        cp -a "$dep_dir/tools/share/"* "$DESTDIR/tools/share/" 2>/dev/null || true
+        mkdir -p "$OUT/tools/share"
+        cp -a "$dep_dir/tools/share/"* "$OUT/tools/share/" 2>/dev/null || true
     fi
     if [ -d "$dep_dir/tools/libexec" ]; then
-        mkdir -p "$DESTDIR/tools/libexec"
-        cp -a "$dep_dir/tools/libexec/"* "$DESTDIR/tools/libexec/" 2>/dev/null || true
+        mkdir -p "$OUT/tools/libexec"
+        cp -a "$dep_dir/tools/libexec/"* "$OUT/tools/libexec/" 2>/dev/null || true
     fi
     # Copy target-specific libraries
     for target_dir in "$dep_dir/tools/"*-*-*-*/; do
         if [ -d "$target_dir" ]; then
             if [ -d "$target_dir/lib" ]; then
-                cp -a "$target_dir/lib/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+                cp -a "$target_dir/lib/"* "$OUT/tools/lib/" 2>/dev/null || true
             fi
             if [ -d "$target_dir/lib64" ]; then
-                cp -a "$target_dir/lib64/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+                cp -a "$target_dir/lib64/"* "$OUT/tools/lib/" 2>/dev/null || true
             fi
             if [ -d "$target_dir/include" ]; then
-                mkdir -p "$DESTDIR/tools/include"
-                cp -a "$target_dir/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+                mkdir -p "$OUT/tools/include"
+                cp -a "$target_dir/include/"* "$OUT/tools/include/" 2>/dev/null || true
             fi
         fi
     done
@@ -4515,17 +4413,17 @@ for dep_dir in "${DEP_ARRAY[@]}"; do
     if [ -f "$dep_dir/usr/lib64/libc.so.6" ] || [ -f "$dep_dir/usr/lib/libc.so.6" ]; then
         echo "Found cross-glibc at: $dep_dir"
         if [ -d "$dep_dir/usr/lib" ]; then
-            cp -rL "$dep_dir/usr/lib/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+            cp -rL "$dep_dir/usr/lib/"* "$OUT/tools/lib/" 2>/dev/null || true
         fi
         if [ -d "$dep_dir/usr/lib64" ]; then
-            cp -rL "$dep_dir/usr/lib64/"* "$DESTDIR/tools/lib/" 2>/dev/null || true
+            cp -rL "$dep_dir/usr/lib64/"* "$OUT/tools/lib/" 2>/dev/null || true
         fi
         if [ -d "$dep_dir/usr/include" ]; then
-            cp -a "$dep_dir/usr/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+            cp -a "$dep_dir/usr/include/"* "$OUT/tools/include/" 2>/dev/null || true
         fi
-        mkdir -p "$DESTDIR/tools/usr/lib64"
+        mkdir -p "$OUT/tools/usr/lib64"
         if [ -d "$dep_dir/usr/lib64" ]; then
-            cp -rL "$dep_dir/usr/lib64/"* "$DESTDIR/tools/usr/lib64/" 2>/dev/null || true
+            cp -rL "$dep_dir/usr/lib64/"* "$OUT/tools/usr/lib64/" 2>/dev/null || true
         fi
     fi
 done
@@ -4535,7 +4433,7 @@ for dep_dir in "${DEP_ARRAY[@]}"; do
     if [ -f "$dep_dir/usr/include/linux/limits.h" ]; then
         echo "Found linux-headers at: $dep_dir"
         if [ -d "$dep_dir/usr/include" ]; then
-            cp -a "$dep_dir/usr/include/"* "$DESTDIR/tools/include/" 2>/dev/null || true
+            cp -a "$dep_dir/usr/include/"* "$OUT/tools/include/" 2>/dev/null || true
         fi
         echo "Copied linux-headers files to tools directory"
         break
@@ -4545,7 +4443,7 @@ done
 # Create symlinks for cross-compiler tools so they can be used as native tools
 # Packages expect gcc, g++, ar, as, ld, etc. but we only have aarch64-buckos-linux-gnu-* versions
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
-cd "$DESTDIR/tools/bin"
+cd "$OUT/tools/bin"
 
 # Create symlinks for GCC toolchain
 for tool in gcc g++ cpp c++ cc; do
@@ -4566,10 +4464,10 @@ done
 cd -
 
 # Create the aarch64-buckos-linux-gnu/bin/ directory for GCC to find binutils
-mkdir -p "$DESTDIR/tools/aarch64-buckos-linux-gnu/bin"
-cd "$DESTDIR/tools/aarch64-buckos-linux-gnu/bin"
+mkdir -p "$OUT/tools/aarch64-buckos-linux-gnu/bin"
+cd "$OUT/tools/aarch64-buckos-linux-gnu/bin"
 for tool in ar as ld ld.bfd nm objcopy objdump ranlib readelf size strings strip; do
-    if [ -f "$DESTDIR/tools/bin/${BUCKOS_TARGET}-${tool}" ] && [ ! -e "$tool" ]; then
+    if [ -f "$OUT/tools/bin/${BUCKOS_TARGET}-${tool}" ] && [ ! -e "$tool" ]; then
         ln -s "../../bin/${BUCKOS_TARGET}-${tool}" "$tool"
         echo "Created target bin symlink: $tool -> ../../bin/${BUCKOS_TARGET}-${tool}"
     fi
@@ -4577,21 +4475,18 @@ done
 cd -
 
 # Create lib64 -> lib symlink for GCC library path compatibility
-if [ ! -e "$DESTDIR/tools/lib64" ]; then
-    ln -s lib "$DESTDIR/tools/lib64"
+if [ ! -e "$OUT/tools/lib64" ]; then
+    ln -s lib "$OUT/tools/lib64"
     echo "Created symlink: lib64 -> lib"
 fi
 
-echo "ARM64 Bootstrap toolchain assembled: $(ls -1 $DESTDIR/tools/bin 2>/dev/null | wc -l) binaries"
-''',
-
-    bdepend = [
-        # Stage 1: ARM64 Cross-compiler
+echo "ARM64 Bootstrap toolchain assembled: $(ls -1 $OUT/tools/bin 2>/dev/null | wc -l) binaries"
+""",
+    deps = [
         ":cross-binutils-aarch64",
         ":cross-gcc-aarch64-pass2",
         ":cross-glibc-aarch64",
         ":cross-linux-headers-aarch64",
-        # Stage 2: Core utilities
         ":bootstrap-ncurses-aarch64",
         ":bootstrap-readline-aarch64",
         ":bootstrap-bash-aarch64",
@@ -4606,14 +4501,11 @@ echo "ARM64 Bootstrap toolchain assembled: $(ls -1 $DESTDIR/tools/bin 2>/dev/nul
         ":bootstrap-gzip-aarch64",
         ":bootstrap-xz-aarch64",
         ":bootstrap-bzip2-aarch64",
-        # Stage 2: Build tools
         ":bootstrap-pkg-config-aarch64",
         ":bootstrap-file-aarch64",
         ":bootstrap-patch-aarch64",
-        # Stage 2: Native compiler (for build ordering and Stage 3)
         ":bootstrap-gcc-aarch64",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
@@ -4623,28 +4515,21 @@ echo "ARM64 Bootstrap toolchain assembled: $(ls -1 $DESTDIR/tools/bin 2>/dev/nul
 # These are cross-compiled using the aarch64 bootstrap toolchain and provide the
 # basic utilities needed to run build scripts without depending on host tools.
 
-ebuild_package(
+package(
     name = "bootstrap-ncurses-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":ncurses-src",
     version = "6.5",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Terminal handling library for aarch64 bootstrap",
     homepage = "https://invisible-island.net/ncurses/",
     license = "MIT",
-    bootstrap_stage = "stage2",
+    install_script = """export BUILD_CC="/usr/bin/gcc -B/usr/bin"
+export BUILD_CFLAGS=""
+export BUILD_LDFLAGS=""
+export BUILD_CPPFLAGS=""
 
-    # ncurses cross-build requires a native build compiler. We must clear the
-    # cross-compilation flags so the build-compiler test doesn't pick up the
-    # aarch64 sysroot from LDFLAGS.
-    env = {
-        "BUILD_CC": "/usr/bin/gcc -B/usr/bin",
-        "BUILD_CFLAGS": "",
-        "BUILD_LDFLAGS": "",
-        "BUILD_CPPFLAGS": "",
-    },
-
-    src_configure = '''
+# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 # Force C17 standard to avoid GCC 15 C23 bool keyword conflict
 export CFLAGS="$CFLAGS -std=gnu17"
@@ -4669,18 +4554,14 @@ mkdir -p build && cd build
     --without-manpages \
     --without-progs \
     --without-tests
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Create non-wide symlinks
-cd "$DESTDIR/tools/lib"
+cd "$OUT/tools/lib"
 for lib in ncurses form panel menu; do
     ln -sf lib${lib}w.so lib${lib}.so 2>/dev/null || true
     ln -sf lib${lib}w.a lib${lib}.a 2>/dev/null || true
@@ -4688,26 +4569,26 @@ done
 ln -sf libncursesw.so libcurses.so 2>/dev/null || true
 # tinfo compatibility
 ln -sf libncursesw.so libtinfo.so 2>/dev/null || true
-ln -sf libncursesw.so libtinfow.so 2>/dev/null || true
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+ln -sf libncursesw.so libtinfow.so 2>/dev/null || true""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-readline-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":readline-src",
     version = "8.3",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Command line editing library for aarch64 bootstrap",
     homepage = "https://tiswww.case.edu/php/chet/readline/rltop.html",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
@@ -4715,33 +4596,33 @@ BUCKOS_TARGET="aarch64-buckos-linux-gnu"
     --build=$(./support/config.guess) \
     --disable-static \
     --with-curses
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS SHLIB_LIBS="-lncursesw"
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install SHLIB_LIBS="-lncursesw"
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64", ":bootstrap-ncurses-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install SHLIB_LIBS="-lncursesw"
+""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+        ":bootstrap-ncurses-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-bash-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":bash-src",
     version = "5.3",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Bourne Again SHell for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/bash/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 # Find ncurses and readline libraries from dependencies
@@ -4773,45 +4654,44 @@ export LDFLAGS="$LDFLAGS -Wl,-rpath-link,$NCURSES_LIB -Wl,-rpath-link,$READLINE_
     --build=$(support/config.guess) \
     --without-bash-malloc \
     --with-installed-readline
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-ln -sf bash "$DESTDIR/tools/bin/sh"
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64", ":bootstrap-readline-aarch64", ":bootstrap-ncurses-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
+ln -sf bash "$OUT/tools/bin/sh"
+""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+        ":bootstrap-readline-aarch64",
+        ":bootstrap-ncurses-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-coreutils-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":coreutils-src",
     version = "9.4",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Core utilities for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/coreutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_prepare = '''
-# Copy source to writable location
-cp -a "$S" "$WORKDIR/src"
+    install_script = """# Copy source to writable location for out-of-tree build
+cp -a "$SRCS" "$WORKDIR/src"
 mkdir -p "$WORKDIR/build"
 # Prevent autotools regeneration — timestamps get skewed by cp -a
 find "$WORKDIR/src" -name 'aclocal.m4' -exec touch {} +
 find "$WORKDIR/src" -name 'configure' -exec touch {} +
 find "$WORKDIR/src" -name 'config.h.in' -exec touch {} +
 find "$WORKDIR/src" -name 'Makefile.in' -exec touch {} +
-''',
 
-    src_configure = '''
+# configure
 cd "$WORKDIR/build"
 
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
@@ -4821,79 +4701,71 @@ BUCKOS_TARGET="aarch64-buckos-linux-gnu"
     --build=$("$WORKDIR/src/build-aux/config.guess") \
     --enable-install-program=hostname \
     --enable-no-install-program=kill,uptime
-''',
 
-    src_compile = '''
-cd "$WORKDIR/build"
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd "$WORKDIR/build"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-make-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":make-src",
     version = "4.4.1",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Make for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/make/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --without-guile
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-sed-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":sed-src",
     version = "4.9",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Stream editor for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/sed/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_prepare = '''
-# Copy source to writable location
-cp -a "$S" "$WORKDIR/src"
+    install_script = """# Copy source to writable location for out-of-tree build
+cp -a "$SRCS" "$WORKDIR/src"
 mkdir -p "$WORKDIR/build"
 # Prevent autotools regeneration — timestamps get skewed by cp -a
 find "$WORKDIR/src" -name 'aclocal.m4' -exec touch {} +
 find "$WORKDIR/src" -name 'configure' -exec touch {} +
 find "$WORKDIR/src" -name 'config.h.in' -exec touch {} +
 find "$WORKDIR/src" -name 'Makefile.in' -exec touch {} +
-''',
 
-    src_configure = '''
+# configure
 cd "$WORKDIR/build"
 
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
@@ -4901,264 +4773,248 @@ BUCKOS_TARGET="aarch64-buckos-linux-gnu"
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$("$WORKDIR/src/build-aux/config.guess")
-''',
 
-    src_compile = '''
-cd "$WORKDIR/build"
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-cd "$WORKDIR/build"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-gawk-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":gawk-src",
     version = "5.3.2",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Awk for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/gawk/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-ln -sf gawk "$DESTDIR/tools/bin/awk"
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
+ln -sf gawk "$OUT/tools/bin/awk"
+""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-grep-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":grep-src",
     version = "3.11",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Grep for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/grep/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-findutils-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":findutils-src",
     version = "4.9.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Find utilities for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/findutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --localstatedir=/tools/var/lib/locate
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-diffutils-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":diffutils-src",
     version = "3.10",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Diff utilities for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/diffutils/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-tar-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":tar-src",
     version = "1.35",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Tar for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/tar/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-gzip-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":gzip-src",
     version = "1.13",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Gzip for aarch64 bootstrap",
     homepage = "https://www.gnu.org/software/gzip/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-xz-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":xz-src",
     version = "5.4.5",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "XZ Utils for aarch64 bootstrap",
     homepage = "https://tukaani.org/xz/",
     license = "public-domain LGPL-2.1+ GPL-2+",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess) \
     --disable-static
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-bzip2-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":bzip2-src",
     version = "1.0.8",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "High-quality block-sorting file compressor for aarch64 bootstrap",
     homepage = "https://sourceware.org/bzip2/",
     license = "BSD",
-    bootstrap_stage = "stage2",
+    install_script = """# configure
+true
 
-    src_configure = "true",  # bzip2 doesn't use configure
-
-    src_compile = '''
+# build
 # bzip2 Makefile hardcodes gcc - override for cross-compilation
 # CFLAGS and LDFLAGS are set by stage2 script with sysroot
 # -fPIC is required so libbz2.a can be linked into shared libraries
@@ -5179,52 +5035,52 @@ make -j$MAKE_JOBS \
     LDFLAGS="$LDFLAGS" \
     PREFIX=/tools \
     bzip2 bzip2recover
-''',
 
-    src_install = '''
-mkdir -p "$DESTDIR/tools/bin"
-mkdir -p "$DESTDIR/tools/lib"
-mkdir -p "$DESTDIR/tools/include"
-mkdir -p "$DESTDIR/tools/share/man/man1"
+# install
+mkdir -p "$OUT/tools/bin"
+mkdir -p "$OUT/tools/lib"
+mkdir -p "$OUT/tools/include"
+mkdir -p "$OUT/tools/share/man/man1"
 
 # Install binaries
-install -m 755 bzip2 "$DESTDIR/tools/bin/"
-install -m 755 bzip2recover "$DESTDIR/tools/bin/"
-ln -sf bzip2 "$DESTDIR/tools/bin/bzcat"
-ln -sf bzip2 "$DESTDIR/tools/bin/bunzip2"
+install -m 755 bzip2 "$OUT/tools/bin/"
+install -m 755 bzip2recover "$OUT/tools/bin/"
+ln -sf bzip2 "$OUT/tools/bin/bzcat"
+ln -sf bzip2 "$OUT/tools/bin/bunzip2"
 
 # Install shared library
-install -m 755 libbz2.so.1.0.8 "$DESTDIR/tools/lib/"
-ln -sf libbz2.so.1.0.8 "$DESTDIR/tools/lib/libbz2.so.1.0"
-ln -sf libbz2.so.1.0.8 "$DESTDIR/tools/lib/libbz2.so"
+install -m 755 libbz2.so.1.0.8 "$OUT/tools/lib/"
+ln -sf libbz2.so.1.0.8 "$OUT/tools/lib/libbz2.so.1.0"
+ln -sf libbz2.so.1.0.8 "$OUT/tools/lib/libbz2.so"
 
 # Install static library and header
-install -m 644 libbz2.a "$DESTDIR/tools/lib/"
-install -m 644 bzlib.h "$DESTDIR/tools/include/"
+install -m 644 libbz2.a "$OUT/tools/lib/"
+install -m 644 bzlib.h "$OUT/tools/include/"
 
 # Install manual page
-install -m 644 bzip2.1 "$DESTDIR/tools/share/man/man1/"
-ln -sf bzip2.1 "$DESTDIR/tools/share/man/man1/bzcat.1"
-ln -sf bzip2.1 "$DESTDIR/tools/share/man/man1/bunzip2.1"
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+install -m 644 bzip2.1 "$OUT/tools/share/man/man1/"
+ln -sf bzip2.1 "$OUT/tools/share/man/man1/bzcat.1"
+ln -sf bzip2.1 "$OUT/tools/share/man/man1/bunzip2.1"
+""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-pkg-config-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":pkg-config-src",
     version = "0.29.2",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Package config system for finding libraries (aarch64)",
     homepage = "https://www.freedesktop.org/wiki/Software/pkg-config/",
     license = "GPL-2.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 CFLAGS="$CFLAGS -std=gnu17"  # Force C17 for old glib code compatibility
 
@@ -5246,97 +5102,93 @@ EOF
     --with-internal-glib \
     --disable-host-tool \
     --cache-file=config.cache
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
+# install
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 # Create pkg-config symlink (some scripts expect this name)
-ln -sf pkg-config "$DESTDIR/tools/bin/${BUCKOS_TARGET}-pkg-config" || true
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+ln -sf pkg-config "$OUT/tools/bin/${BUCKOS_TARGET}-pkg-config" || true""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-file-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":file-src",
     version = "5.45",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "File type identification utility for aarch64 bootstrap",
     homepage = "https://www.darwinsys.com/file/",
     license = "BSD",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(config.guess)
-''',
 
-    src_compile = '''
+# build
 # When cross-compiling, skip the magic directory - we'll use the host's magic.mgc
 # Building magic/ requires running the just-compiled 'file' binary which won't work
 # during cross-compilation. Build only in src/ directory.
 make -C src -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS -C src DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS -C src DESTDIR="$OUT" install
 # Install the host system's magic database
-mkdir -p "$DESTDIR/tools/share/misc"
+mkdir -p "$OUT/tools/share/misc"
 if [ -f /usr/share/misc/magic.mgc ]; then
-    cp /usr/share/misc/magic.mgc "$DESTDIR/tools/share/misc/"
+    cp /usr/share/misc/magic.mgc "$OUT/tools/share/misc/"
 elif [ -f /usr/share/file/magic.mgc ]; then
-    cp /usr/share/file/magic.mgc "$DESTDIR/tools/share/misc/"
+    cp /usr/share/file/magic.mgc "$OUT/tools/share/misc/"
 else
     echo "Warning: Could not find host magic.mgc, file utility may not work correctly"
-fi
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+fi""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
-ebuild_package(
+package(
     name = "bootstrap-patch-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":patch-src",
     version = "2.7.6",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "GNU Patch utility for applying diffs (aarch64)",
     homepage = "https://www.gnu.org/software/patch/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    src_configure = '''
+    install_script = """# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 ./configure \
     --prefix=/tools \
     --host=$BUCKOS_TARGET \
     --build=$(build-aux/config.guess)
-''',
 
-    src_compile = '''
+# build
 make -j$MAKE_JOBS
-''',
 
-    src_install = '''
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
-''',
-
-    bdepend = [":cross-gcc-aarch64-pass2", ":cross-binutils-aarch64", ":cross-glibc-aarch64", ":cross-linux-headers-aarch64"],
-    depend = [],
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install""",
+    deps = [
+        ":cross-gcc-aarch64-pass2",
+        ":cross-binutils-aarch64",
+        ":cross-glibc-aarch64",
+        ":cross-linux-headers-aarch64",
+    ],
     visibility = ["PUBLIC"],
 )
 
@@ -5346,24 +5198,16 @@ make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
 # This builds a native (not cross) GCC for aarch64 using the Stage 1 cross-compiler.
 # This native GCC provides gcc/g++/ar/as/ld for Stage 3 builds.
 
-ebuild_package(
+package(
     name = "bootstrap-gcc-aarch64",
+    build_rule = "binary",
+    local_only = True,
     source = ":gcc-14-src",
     version = "14.3.0",
-    category = "toolchain/bootstrap",
-    slot = "0",
     description = "Native GCC for aarch64 bootstrap (built with cross-compiler, C/C++)",
     homepage = "https://gcc.gnu.org/",
     license = "GPL-3.0",
-    bootstrap_stage = "stage2",
-
-    env = {
-        "CFLAGS": "-O2 -g",
-        "CXXFLAGS": "-O2 -g",
-        "LDFLAGS": "",
-    },
-
-    src_prepare = '''
+    pre_configure_cmds = ['''
 # Link GMP, MPFR, MPC into source tree
 GMP_DIR=""
 MPFR_DIR=""
@@ -5400,9 +5244,12 @@ sed -i 's|c++tools ||g' Makefile.in || true
 sed -i 's/__cplusplus != 201103/__cplusplus < 201103/' libcody/configure || true
 
 echo "Source prepared for Stage 2 native aarch64 GCC build"
-''',
+'''],
+    install_script = """export CFLAGS="-O2 -g"
+export CXXFLAGS="-O2 -g"
+export LDFLAGS=""
 
-    src_configure = '''
+# configure
 BUCKOS_TARGET="aarch64-buckos-linux-gnu"
 
 mkdir -p build && cd build
@@ -5446,30 +5293,25 @@ sed -i 's/all-c++tools//g' Makefile || true
 sed -i 's/configure-c++tools//g' Makefile || true
 
 echo "Native GCC Stage 2 for aarch64 configured"
-''',
 
-    src_compile = '''
-cd build
+# build
 make -j$MAKE_JOBS
 echo "Native GCC Stage 2 for aarch64 compilation complete"
-''',
 
-    src_install = '''
-cd build
-make -j$MAKE_JOBS DESTDIR="$DESTDIR" install
+# install
+make -j$MAKE_JOBS DESTDIR="$OUT" install
 
 # Create marker
-mkdir -p "$DESTDIR/tools/lib/gcc/aarch64-buckos-linux-gnu/14.3.0"
-cat > "$DESTDIR/tools/lib/gcc/aarch64-buckos-linux-gnu/14.3.0/.stage2-marker" << 'EOF'
+mkdir -p "$OUT/tools/lib/gcc/aarch64-buckos-linux-gnu/14.3.0"
+cat > "$OUT/tools/lib/gcc/aarch64-buckos-linux-gnu/14.3.0/.stage2-marker" << 'EOF'
 GCC 14.3.0 Stage 2 (aarch64)
 Native build with Stage 1 cross-compiler
 Provides native gcc/g++ for Stage 3 builds
 EOF
 
 echo "Native GCC Stage 2 for aarch64 installed to /tools"
-''',
-
-    bdepend = [
+""",
+    deps = [
         ":cross-gcc-aarch64-pass2",
         ":cross-binutils-aarch64",
         ":cross-glibc-aarch64",
@@ -5486,7 +5328,6 @@ echo "Native GCC Stage 2 for aarch64 installed to /tools"
         ":mpfr-src",
         ":mpc-src",
     ],
-    depend = [],
     visibility = ["PUBLIC"],
 )
 
