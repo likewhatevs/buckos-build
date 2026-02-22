@@ -8,7 +8,7 @@ Four discrete cacheable actions:
 3. python_install — run pip install via python_helper.py
 """
 
-load("//defs:providers.bzl", "PackageInfo")
+load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
@@ -34,6 +34,11 @@ def _python_install(ctx, source):
     cmd = cmd_args(ctx.attrs._python_tool[RunInfo])
     cmd.add("--source-dir", source)
     cmd.add("--output-dir", output.as_output())
+
+    # Inject bootstrap Python if available from toolchain
+    tc = ctx.attrs._toolchain[BuildToolchainInfo]
+    if tc.python:
+        cmd.add("--python", tc.python.args)
 
     # Inject toolchain CC/CXX/AR (for C extensions)
     for env_arg in toolchain_env_args(ctx):

@@ -537,6 +537,8 @@ def _bootstrap_gcc_impl(ctx):
             ar = installed.project("tools/bin/" + target_triple + "-ar") if ctx.attrs.binutils else installed.project("tools/bin/ar"),
             sysroot = installed.project("tools/" + target_triple + "/sys-root"),
             target_triple = target_triple,
+            python = None,
+            python_version = None,
         ))
 
     return providers
@@ -886,5 +888,148 @@ bootstrap_package = rule(
         "_install_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:install_helper"),
         ),
+    },
+)
+
+# ── bootstrap_python ─────────────────────────────────────────────────
+# Python requires special handling: it needs deps (zlib, libffi, expat)
+# merged into a sysroot, and configure cache variables to bypass tests
+# that fail during cross-compilation.
+
+def _bootstrap_python_impl(ctx):
+    source = ctx.attrs.source[DefaultInfo].default_outputs[0]
+    stage = ctx.attrs.stage[BootstrapStageInfo]
+    stage_output = ctx.attrs.stage[DefaultInfo].default_outputs[0]
+
+    # Collect dependency prefixes for merged sysroot
+    dep_dirs = []
+    for dep in ctx.attrs.deps:
+        dep_dirs.append(dep[DefaultInfo].default_outputs[0])
+
+    # Phase 1: prepare — copy source
+    prepared = ctx.actions.declare_output("prepared", dir = True)
+    prep_script = cmd_args("/bin/bash", "-ce")
+    prep_body = cmd_args(
+        "cp -a ", source, "/. ", prepared.as_output(), "/",
+        delimiter = "",
+    )
+    prep_script.add(prep_body)
+    ctx.actions.run(prep_script, category = "prepare", identifier = ctx.attrs.name)
+
+    # Phase 2: configure — merge deps into build sysroot, run configure
+    configured = ctx.actions.declare_output("configured", dir = True)
+    conf_script = cmd_args("/bin/bash", "-ce")
+    conf_body = cmd_args("PROJECT_ROOT=$PWD && ", delimiter = "")
+
+    # Resolve all paths
+    conf_body.add(cmd_args("STAGE_DIR=$PROJECT_ROOT/", stage_output, " && ", delimiter = ""))
+    conf_body.add(cmd_args("SYSROOT=$PROJECT_ROOT/", stage.sysroot, " && ", delimiter = ""))
+    for i, dep_dir in enumerate(dep_dirs):
+        conf_body.add(cmd_args("DEP", str(i), "_DIR=$PROJECT_ROOT/", dep_dir, " && ", delimiter = ""))
+
+    conf_body.add(cmd_args(
+        "cp -a ", prepared, "/. ", configured.as_output(), "/ && ",
+        "cd ", configured.as_output(), " && ",
+        delimiter = "",
+    ))
+
+    # Create merged build sysroot with deps
+    conf_body.add(
+        "BUILD_SYSROOT=$PWD/build-sysroot && " +
+        "mkdir -p $BUILD_SYSROOT && " +
+        "cp -a $SYSROOT/. $BUILD_SYSROOT/ && ",
+    )
+    for i, _ in enumerate(dep_dirs):
+        conf_body.add(
+            "cp -an $DEP" + str(i) + "_DIR/usr/. $BUILD_SYSROOT/usr/ 2>/dev/null || true && ",
+        )
+
+    # Export PATH with stage tools
+    conf_body.add(
+        "export PATH=$STAGE_DIR/tools/bin:$PATH && ",
+    )
+
+    # Set cross-compilation env vars
+    target_triple = stage.target_triple
+    conf_body.add(cmd_args(
+        "export CC=\"$PROJECT_ROOT/", stage.cc, " --sysroot=$BUILD_SYSROOT\" && ",
+        "export CXX=\"$PROJECT_ROOT/", stage.cxx, " --sysroot=$BUILD_SYSROOT\" && ",
+        "export AR=$PROJECT_ROOT/", stage.ar, " && ",
+        delimiter = "",
+    ))
+
+    # Configure with cross-compilation cache variables
+    # These bypass runtime tests that fail during cross-compilation
+    conf_body.add(
+        "mkdir -p build && cd build && " +
+        "ac_cv_file__dev_ptmx=yes " +
+        "ac_cv_file__dev_ptc=no " +
+        "../configure ",
+    )
+
+    for arg in ctx.attrs.configure_args:
+        conf_body.add(arg + " ")
+
+    # Add sysroot paths for includes/libs
+    conf_body.add(
+        "CFLAGS=\"-I$BUILD_SYSROOT/usr/include\" " +
+        "LDFLAGS=\"-L$BUILD_SYSROOT/usr/lib64 -L$BUILD_SYSROOT/usr/lib -Wl,-rpath-link,$BUILD_SYSROOT/usr/lib64\"",
+    )
+
+    conf_script.add(conf_body)
+    ctx.actions.run(conf_script, category = "configure", identifier = ctx.attrs.name)
+
+    # Phase 3: compile
+    built = ctx.actions.declare_output("built", dir = True)
+    build_script = cmd_args("/bin/bash", "-ce")
+    build_body = cmd_args("PROJECT_ROOT=$PWD && ", delimiter = "")
+    build_body.add(cmd_args("STAGE_DIR=$PROJECT_ROOT/", stage_output, " && ", delimiter = ""))
+    build_body.add(cmd_args("SYSROOT=$PROJECT_ROOT/", stage.sysroot, " && ", delimiter = ""))
+    build_body.add(
+        "export PATH=$STAGE_DIR/tools/bin:$PATH && ",
+    )
+    build_body.add(cmd_args(
+        "cp -a ", configured, "/. ", built.as_output(), "/ && ",
+        "cd ", built.as_output(), "/build && ",
+        "make -j$(nproc)",
+        delimiter = "",
+    ))
+    build_script.add(build_body)
+    ctx.actions.run(build_script, category = "compile", identifier = ctx.attrs.name)
+
+    # Phase 4: install
+    installed = ctx.actions.declare_output("installed", dir = True)
+    install_script = cmd_args("/bin/bash", "-ce")
+    install_body = cmd_args("PROJECT_ROOT=$PWD && ", delimiter = "")
+    install_body.add(cmd_args("STAGE_DIR=$PROJECT_ROOT/", stage_output, " && ", delimiter = ""))
+    install_body.add(
+        "export PATH=$STAGE_DIR/tools/bin:$PATH && ",
+    )
+    install_body.add(cmd_args(
+        "BUILD_DIR=$PROJECT_ROOT/", built, "/build && ",
+        "INSTALL_DIR=$PROJECT_ROOT/", installed.as_output(), " && ",
+        "cd $BUILD_DIR && ",
+        "make -j$(nproc) DESTDIR=$INSTALL_DIR install && ",
+        # Ensure pip is installed
+        "if [ ! -f $INSTALL_DIR/usr/bin/pip3 ]; then " +
+        "  $INSTALL_DIR/usr/bin/python3 -m ensurepip --upgrade 2>/dev/null || true; " +
+        "fi",
+        delimiter = "",
+    ))
+    install_script.add(install_body)
+    ctx.actions.run(install_script, category = "install", identifier = ctx.attrs.name)
+
+    return [DefaultInfo(default_output = installed)]
+
+bootstrap_python = rule(
+    impl = _bootstrap_python_impl,
+    attrs = {
+        "source": attrs.dep(),
+        "stage": attrs.dep(providers = [BootstrapStageInfo]),
+        "deps": attrs.list(attrs.dep(), default = []),
+        "version": attrs.string(default = ""),
+        "configure_args": attrs.list(attrs.string(), default = []),
+        "license": attrs.string(default = "UNKNOWN"),
+        "description": attrs.string(default = ""),
     },
 )

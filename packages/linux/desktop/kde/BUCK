@@ -4066,6 +4066,7 @@ package(
         "-DWITH_TOOLS=OFF",
         "-DWITH_TESTS=OFF",
         "-DWITHOUT_PNG=ON",
+        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     ] + KDE_DISABLE_PYTHON_ARGS,
     deps = [
         "//packages/linux/core/zlib:zlib",
