@@ -35,7 +35,7 @@ def _resolve_env_paths(value):
                 resolved.append(p)
         return ":".join(resolved)
 
-    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath,"]
+    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath-link,", "-Wl,-rpath,"]
 
     parts = []
     for token in value.split():
@@ -111,6 +111,7 @@ def main():
     # and external caches can poison results across build contexts.
     os.environ["CCACHE_DISABLE"] = "1"
     os.environ["RUSTC_WRAPPER"] = ""
+    os.environ["CARGO_BUILD_RUSTC_WRAPPER"] = ""
 
     # Pin timestamps for reproducible builds.
     os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")

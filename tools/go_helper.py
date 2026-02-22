@@ -94,6 +94,7 @@ def main():
     # and external caches can poison results across build contexts.
     env["CCACHE_DISABLE"] = "1"
     env["RUSTC_WRAPPER"] = ""
+    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
 
     # Pin timestamps for reproducible builds.
     env.setdefault("SOURCE_DATE_EPOCH", "315576000")

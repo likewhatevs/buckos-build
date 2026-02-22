@@ -142,6 +142,7 @@ def main():
     # and external caches can poison results across build contexts.
     env["CCACHE_DISABLE"] = "1"
     env["RUSTC_WRAPPER"] = ""
+    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
 
     # Pin timestamps for reproducible builds.  Many build systems (autotools,
     # cmake, meson, kernel) embed __DATE__/__TIME__ or query the system clock.
