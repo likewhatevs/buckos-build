@@ -81,7 +81,7 @@ package(
         "directx": ("--enable-directx", "--disable-directx"),
         "dts": ("--enable-dts", "--disable-dts"),
         "dvbpsi": ("--enable-dvbpsi", "--disable-dvbpsi"),
-        "dvd": ("--enable-dvdread --enable-dvdnav", "--disable-dvdread --disable-dvdnav"),
+        "dvd": (["--enable-dvdread", "--enable-dvdnav"], ["--disable-dvdread", "--disable-dvdnav"]),
         "encode": ("--enable-encode", "--disable-encode"),
         "faad": ("--enable-faad", "--disable-faad"),
         "fdk": ("--enable-fdk", "--disable-fdk"),
@@ -127,7 +127,7 @@ package(
         "png": ("--with-png", "--without-png"),
         "projectm": ("--enable-projectm", "--disable-projectm"),
         "pulseaudio": ("--enable-pulse", "--disable-pulse"),
-        "qt5": ("--enable-qt --enable-skins2", "--disable-qt --disable-skins2"),
+        "qt5": (["--enable-qt", "--enable-skins2"], ["--disable-qt", "--disable-skins2"]),
         "run-as-root": ("--enable-run-as-root", "--disable-run-as-root"),
         "samba": ("--enable-samba", "--disable-samba"),
         "sdl-image": ("--enable-sdl-image", "--disable-sdl-image"),
@@ -169,23 +169,21 @@ package(
         "ssl": "//packages/linux/system/libs/crypto/gnutls:gnutls",
     },
     make_args = [],
-    post_install = """
+    post_install_cmds = ["""
 DESTDIR=$OUT make install
-""",
+"""],
     deps = [
         "//packages/linux/media/video/x264:x264",
-        "//packages/linux/media/video/x265:x265",
-        "//packages/linux/media/video/libvpx:libvpx",
-        "//packages/linux/media/video/dav1d:dav1d",
-        "//packages/linux/graphics/video/aom:aom",
-        "//packages/linux/system/libs/audio/opus:opus",
-        "//packages/linux/system/libs/audio/libvorbis:libvorbis",
-        "//packages/linux/system/libs/audio/flac:flac",
-        "//packages/linux/system/libs/crypto/openssl:openssl",
-        "//packages/linux/lang/lua:lua",
-    ],
-    bdepend = [
-        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+                "//packages/linux/media/video/x265:x265",
+                "//packages/linux/media/video/libvpx:libvpx",
+                "//packages/linux/media/video/dav1d:dav1d",
+                "//packages/linux/graphics/video/aom:aom",
+                "//packages/linux/system/libs/audio/opus:opus",
+                "//packages/linux/system/libs/audio/libvorbis:libvorbis",
+                "//packages/linux/system/libs/audio/flac:flac",
+                "//packages/linux/system/libs/crypto/openssl:openssl",
+                "//packages/linux/lang/lua:lua",
+                "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config"
     ],
     visibility = ["PUBLIC"],
 )

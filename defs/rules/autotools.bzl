@@ -19,7 +19,7 @@ inputs haven't changed.
 """
 
 load("//defs:providers.bzl", "PackageInfo")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_extra_cflags", "toolchain_extra_ldflags")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
 
@@ -75,6 +75,12 @@ def _src_configure(ctx, source):
         for arg in ctx.attrs.configure_args:
             cmd.add(cmd_args("--configure-arg=", arg, delimiter = ""))
 
+        # Toolchain-injected CFLAGS / LDFLAGS (e.g. -fuse-ld=mold)
+        for flag in toolchain_extra_cflags(ctx):
+            cmd.add(cmd_args("--cflags=", flag, delimiter = ""))
+        for flag in toolchain_extra_ldflags(ctx):
+            cmd.add(cmd_args("--ldflags=", flag, delimiter = ""))
+
         # Extra CFLAGS / LDFLAGS from this package's attrs
         for flag in ctx.attrs.extra_cflags:
             cmd.add(cmd_args("--cflags=", flag, delimiter = ""))
@@ -82,8 +88,6 @@ def _src_configure(ctx, source):
             cmd.add(cmd_args("--ldflags=", flag, delimiter = ""))
 
         # Propagate include/lib/pkgconfig paths from dependencies.
-        # Works with both new-style PackageInfo deps and old-style
-        # ebuild_package deps (DefaultInfo only).
         for dep in ctx.attrs.deps:
             if PackageInfo in dep:
                 prefix = dep[PackageInfo].prefix
@@ -122,8 +126,8 @@ def _dep_env_args(ctx):
     pkg_config_paths = []
     path_dirs = []
     cppflags = []
-    cflags = list(ctx.attrs.extra_cflags)
-    ldflags = list(ctx.attrs.extra_ldflags)
+    cflags = list(toolchain_extra_cflags(ctx)) + list(ctx.attrs.extra_cflags)
+    ldflags = list(toolchain_extra_ldflags(ctx)) + list(ctx.attrs.extra_ldflags)
     libs = []
     for dep in ctx.attrs.deps:
         if PackageInfo in dep:
@@ -187,6 +191,12 @@ def _src_compile(ctx, configured):
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
+    # Suppress autotools regeneration — build_helper.py resets all timestamps
+    # to epoch, so make thinks generated files (configure, Makefile.in) are stale.
+    # Override the autotools tool variables so make uses `true` (no-op) instead
+    # of trying to run aclocal/automake/autoconf which may not be available.
+    for var in ["ACLOCAL=true", "AUTOMAKE=true", "AUTOCONF=true", "AUTOHEADER=true", "MAKEINFO=true"]:
+        cmd.add(cmd_args("--make-arg=", var, delimiter = ""))
     for pre_cmd in ctx.attrs.pre_build_cmds:
         cmd.add("--pre-cmd", pre_cmd)
     for arg in ctx.attrs.make_args:
@@ -224,6 +234,9 @@ def _src_install(ctx, built):
 
     if ctx.attrs.install_prefix_var:
         cmd.add("--destdir-var", ctx.attrs.install_prefix_var)
+    # Suppress autotools regeneration during install (same as compile phase)
+    for var in ["ACLOCAL=true", "AUTOMAKE=true", "AUTOCONF=true", "AUTOHEADER=true", "MAKEINFO=true"]:
+        cmd.add(cmd_args("--make-arg=", var, delimiter = ""))
     for arg in ctx.attrs.make_args:
         cmd.add(cmd_args("--make-arg=", arg, delimiter = ""))
 

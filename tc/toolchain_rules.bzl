@@ -33,6 +33,8 @@ def _buckos_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = ctx.attrs.target_triple,
         sysroot = None,
         python = None,
+        extra_cflags = ctx.attrs.extra_cflags,
+        extra_ldflags = ctx.attrs.extra_ldflags,
     )
     return [DefaultInfo(), info]
 
@@ -47,6 +49,8 @@ buckos_toolchain = rule(
         "make": attrs.string(default = "make"),
         "pkg_config": attrs.string(default = "pkg-config"),
         "target_triple": attrs.string(default = "x86_64-linux-gnu"),
+        "extra_cflags": attrs.list(attrs.string(), default = []),
+        "extra_ldflags": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -82,6 +86,8 @@ def _buckos_cross_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = ctx.attrs.target_triple,
         sysroot = sysroot_dir,
         python = None,
+        extra_cflags = ctx.attrs.extra_cflags,
+        extra_ldflags = ctx.attrs.extra_ldflags,
     )
     return [DefaultInfo(), info]
 
@@ -97,6 +103,8 @@ buckos_cross_toolchain = rule(
         "pkg_config": attrs.string(default = "pkg-config"),
         "sysroot": attrs.dep(providers = [PackageInfo]),
         "target_triple": attrs.string(default = "x86_64-buckos-linux-musl"),
+        "extra_cflags": attrs.list(attrs.string(), default = []),
+        "extra_ldflags": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -130,6 +138,8 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = stage.target_triple,
         sysroot = stage.sysroot,
         python = python_run_info,
+        extra_cflags = ctx.attrs.extra_cflags,
+        extra_ldflags = ctx.attrs.extra_ldflags,
     )
     return [DefaultInfo(), info]
 
@@ -141,6 +151,8 @@ buckos_bootstrap_toolchain = rule(
         "strip_bin": attrs.string(default = "strip"),
         "make": attrs.string(default = "make"),
         "pkg_config": attrs.string(default = "pkg-config"),
+        "extra_cflags": attrs.list(attrs.string(), default = []),
+        "extra_ldflags": attrs.list(attrs.string(), default = []),
     },
 )
 
@@ -172,6 +184,8 @@ def _buckos_prebuilt_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = triple,
         sysroot = sysroot,
         python = None,
+        extra_cflags = ctx.attrs.extra_cflags,
+        extra_ldflags = ctx.attrs.extra_ldflags,
     )
     return [DefaultInfo(), info]
 
@@ -183,5 +197,7 @@ buckos_prebuilt_toolchain = rule(
         "target_triple": attrs.string(default = "x86_64-buckos-linux-gnu"),
         "make": attrs.string(default = "make"),
         "pkg_config": attrs.string(default = "pkg-config"),
+        "extra_cflags": attrs.list(attrs.string(), default = []),
+        "extra_ldflags": attrs.list(attrs.string(), default = []),
     },
 )

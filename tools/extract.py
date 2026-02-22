@@ -2,7 +2,7 @@
 """Universal archive extractor.
 
 Supports: .tar.gz, .tgz, .tar.xz, .txz, .tar.bz2, .tbz2, .tar.zst,
-          .tar.lz, .tar.lz4, .tar, .zip
+          .tar.lz, .tar.lz4, .tar, .zip, .whl
 
 Auto-detects format from filename. --format overrides detection.
 Uses Python tarfile/zipfile for natively supported formats; pipes through
@@ -31,6 +31,7 @@ _FORMATS = {
     "tar.lz4": (None,     "lz4"),
     "tar":     ("r:",     None),
     "zip":     (None,     None),    # handled separately
+    "whl":     (None,     None),    # Python wheels are zip files
 }
 
 
@@ -41,14 +42,21 @@ def detect_format(path):
     for fmt in ("tar.gz", "tar.xz", "tar.bz2", "tar.zst", "tar.lz4", "tar.lz"):
         if name.endswith("." + fmt):
             return fmt
-    for fmt in ("tgz", "txz", "tbz2", "tar", "zip"):
+    for fmt in ("tgz", "txz", "tbz2", "tar", "zip", "whl"):
         if name.endswith("." + fmt):
             return fmt
     return None
 
 
-def extract_tar_native(archive, output, strip_components, mode):
+def _matches_exclude(name, patterns):
+    """Check if name matches any exclude glob pattern."""
+    import fnmatch
+    return any(fnmatch.fnmatch(name, p) for p in patterns)
+
+
+def extract_tar_native(archive, output, strip_components, mode, exclude_patterns=None):
     """Extract using Python's tarfile module."""
+    exclude_patterns = exclude_patterns or []
     with tarfile.open(archive, mode) as tf:
         for member in tf.getmembers():
             if strip_components > 0:
@@ -65,6 +73,9 @@ def extract_tar_native(archive, output, strip_components, mode):
                     if len(link_parts) > strip_components:
                         member.linkname = link_parts[-1]
             member.name = os.path.normpath(member.name)
+            # Skip excluded patterns
+            if exclude_patterns and _matches_exclude(member.name, exclude_patterns):
+                continue
             # Skip filenames with backslashes — Buck2 treats them as path
             # separators and rejects the output.  Affects systemd unit
             # templates like system-systemd\x2dcryptsetup.slice.
@@ -145,6 +156,8 @@ def main():
                         help="Strip leading path components (default: 0)")
     parser.add_argument("--format", default=None, choices=list(_FORMATS.keys()),
                         help="Archive format (auto-detected from filename if omitted)")
+    parser.add_argument("--exclude", action="append", default=[],
+                        help="Glob pattern to exclude from extraction (repeatable)")
     args = parser.parse_args()
 
     if not os.path.isfile(args.archive):
@@ -158,14 +171,15 @@ def main():
 
     os.makedirs(args.output, exist_ok=True)
 
-    if fmt == "zip":
+    if fmt in ("zip", "whl"):
         extract_zip(args.archive, args.output, args.strip_components)
     else:
         tar_mode, decompressor = _FORMATS[fmt]
         if decompressor:
             extract_tar_external(args.archive, args.output, args.strip_components, decompressor)
         else:
-            extract_tar_native(args.archive, args.output, args.strip_components, tar_mode)
+            extract_tar_native(args.archive, args.output, args.strip_components, tar_mode,
+                               exclude_patterns=args.exclude)
 
 
 if __name__ == "__main__":

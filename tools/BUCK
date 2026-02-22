@@ -59,12 +59,6 @@ python_binary(
 )
 
 python_binary(
-    name = "initramfs_helper",
-    main = "initramfs_helper.py",
-    visibility = ["PUBLIC"],
-)
-
-python_binary(
     name = "cargo_helper",
     main = "cargo_helper.py",
     visibility = ["PUBLIC"],
@@ -83,8 +77,8 @@ python_binary(
 )
 
 python_binary(
-    name = "sysroot_merge",
-    main = "sysroot_merge.py",
+    name = "mozbuild_helper",
+    main = "mozbuild_helper.py",
     visibility = ["PUBLIC"],
 )
 

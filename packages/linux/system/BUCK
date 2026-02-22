@@ -1,5 +1,8 @@
-load("//defs:package_defs.bzl", "binary_package", "rootfs", "autotools_package")
-load("//defs:package_defs.bzl", "binary_package", "rootfs", "initramfs", "dracut_initramfs", "qemu_boot_script", "iso_image", "stage3_tarball", "autotools_package")
+load("//defs:package.bzl", "package")
+load("//defs/rules:rootfs.bzl", "rootfs")
+load("//defs/rules:initramfs.bzl", "dracut_initramfs", "initramfs")
+load("//defs/rules:boot.bzl", "qemu_boot_script")
+load("//defs/rules:image.bzl", "iso_image", "stage3_tarball")
 load("//packages/linux/desktop/kde:meta.bzl", "KDE_PLASMA")
 
 # =============================================================================
@@ -1831,7 +1834,7 @@ filegroup(
 http_file(
     name = "buckos-build-tarball",
     urls = ["https://github.com/buck-os/buckos-build/archive/refs/heads/main.tar.gz"],
-    sha256 = "da388cad2eca006e1395f05786a94a3ddc8085f116ca9f726a1fe68d43d2f3bc",
+    sha256 = "baaabb6363897ff63a1a6fa65edd01d18eb00b5731a604d20dc304ab6eb39fc8",
     out = "buckos-build-main.tar.gz",
 )
 
@@ -1992,7 +1995,7 @@ rootfs(
         # Graphics stack
         "//packages/linux/desktop/mesa:mesa",
         # Mesa's radeonsi driver depends on LLVM at runtime
-        "//packages/linux/core/llvm:llvm",
+        # "//packages/linux/core/llvm:llvm",  # disabled: long build, not needed yet
         "//packages/linux/dev-libs/elfutils:elfutils",
         "//packages/linux/system/libs/data/libxml2:libxml2",
         "//packages/linux/graphics/rendering/wayland:wayland",
@@ -2049,7 +2052,7 @@ rootfs(
         "//packages/linux/apps/buckos-tools/cli:buckos-cli",
 
         # Web browser
-        "//packages/linux/www/firefox:firefox",
+        # "//packages/linux/www/firefox:firefox",  # disabled: mozbuild not implemented
 
         # Installer dependencies - filesystem tools
         "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",  # mkfs.ext4

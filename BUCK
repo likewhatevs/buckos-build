@@ -1,7 +1,7 @@
 # BuckOs Linux Distribution - Root Build File
 # A Buck2-based Linux distribution similar to Gentoo's ebuild system
 
-load("//defs:package_defs.bzl", "rootfs")
+load("//defs/rules:rootfs.bzl", "rootfs")
 
 # =============================================================================
 # Main build targets
@@ -354,12 +354,6 @@ filegroup(
     visibility = ["PUBLIC"],
 )
 
-filegroup(
-    name = "init-lightweight",
-    srcs = [
-    ],
-    visibility = ["PUBLIC"],
-)
 
 # =============================================================================
 # Desktop environment aliases

@@ -142,11 +142,12 @@ def main():
     # and external caches can poison results across build contexts.
     env["CCACHE_DISABLE"] = "1"
     env["RUSTC_WRAPPER"] = ""
+    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
 
     # Pin timestamps for reproducible builds.  Many build systems (autotools,
     # cmake, meson, kernel) embed __DATE__/__TIME__ or query the system clock.
     # SOURCE_DATE_EPOCH is the standard mechanism to override this.
-    env.setdefault("SOURCE_DATE_EPOCH", "0")
+    env.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
     if args.cc:
         env["CC"] = args.cc
@@ -201,6 +202,11 @@ def main():
                 if "aclocal-" in os.path.basename(d):
                     env["ACLOCAL_AUTOMAKE_DIR"] = d
                     break
+            # Include host system aclocal dir for m4 macros from
+            # host-installed packages (e.g. pkg.m4 from pkg-config)
+            host_aclocal = "/usr/share/aclocal"
+            if os.path.isdir(host_aclocal) and host_aclocal not in aclocal_dirs:
+                aclocal_dirs.append(host_aclocal)
             # ACLOCAL_PATH adds extra search directories
             env["ACLOCAL_PATH"] = ":".join(aclocal_dirs)
 

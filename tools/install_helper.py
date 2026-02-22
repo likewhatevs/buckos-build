@@ -35,7 +35,7 @@ def _resolve_env_paths(value):
                 resolved.append(p)
         return ":".join(resolved)
 
-    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath,"]
+    _FLAG_PREFIXES = ["-I", "-L", "-Wl,-rpath-link,", "-Wl,-rpath,"]
 
     parts = []
     for token in value.split():
@@ -111,9 +111,10 @@ def main():
     # and external caches can poison results across build contexts.
     os.environ["CCACHE_DISABLE"] = "1"
     os.environ["RUSTC_WRAPPER"] = ""
+    os.environ["CARGO_BUILD_RUSTC_WRAPPER"] = ""
 
     # Pin timestamps for reproducible builds.
-    os.environ.setdefault("SOURCE_DATE_EPOCH", "0")
+    os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
     # Apply extra environment variables
     for entry in args.extra_env:
@@ -127,6 +128,18 @@ def main():
 
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
+
+    # Reset all file timestamps in the build tree to a uniform instant.
+    # Buck2 normalises artifact timestamps after the build phase, so make
+    # install can see stale dependencies and try to regenerate files.
+    _epoch = float(os.environ.get("SOURCE_DATE_EPOCH", "315576000"))
+    _stamp = (_epoch, _epoch)
+    for dirpath, _dirnames, filenames in os.walk(build_dir):
+        for fname in filenames:
+            try:
+                os.utime(os.path.join(dirpath, fname), _stamp)
+            except (PermissionError, OSError):
+                pass
 
     if args.build_system == "ninja":
         # Ninja uses DESTDIR as an env var, not a command-line arg
@@ -164,6 +177,9 @@ def main():
         os.remove(la)
 
     # Run post-install commands (e.g. ldconfig, cleanup)
+    # Set DESTDIR so legacy scripts that reference $DESTDIR work correctly.
+    os.environ["DESTDIR"] = prefix
+    os.environ["OUT"] = prefix
     for cmd_str in args.post_cmds:
         result = subprocess.run(cmd_str, shell=True, cwd=prefix)
         if result.returncode != 0:
