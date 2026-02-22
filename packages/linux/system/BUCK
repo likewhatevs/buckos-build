@@ -1831,7 +1831,7 @@ filegroup(
 http_file(
     name = "buckos-build-tarball",
     urls = ["https://github.com/buck-os/buckos-build/archive/refs/heads/main.tar.gz"],
-    sha256 = "7c31b03b5972481a6a95775042c1abadd2c86fb22257b4d59c0069e7fedb4746",
+    sha256 = "da388cad2eca006e1395f05786a94a3ddc8085f116ca9f726a1fe68d43d2f3bc",
     out = "buckos-build-main.tar.gz",
 )
 
@@ -2047,6 +2047,9 @@ rootfs(
         # BuckOS tools (uses cargo_workspace_package with vendor tarball)
         "//packages/linux/apps/buckos-tools/installer:buckos-installer",
         "//packages/linux/apps/buckos-tools/cli:buckos-cli",
+
+        # Web browser
+        "//packages/linux/www/firefox:firefox",
 
         # Installer dependencies - filesystem tools
         "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",  # mkfs.ext4

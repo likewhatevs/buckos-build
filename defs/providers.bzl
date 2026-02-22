@@ -42,6 +42,7 @@ BuildToolchainInfo = provider(fields = [
     "pkg_config",       # RunInfo
     "target_triple",    # str
     "sysroot",          # artifact | None: buckos-built sysroot (musl/glibc headers + libs)
+    "python",           # RunInfo | None: bootstrap Python interpreter
 ])
 
 BootstrapStageInfo = provider(fields = [
@@ -51,6 +52,8 @@ BootstrapStageInfo = provider(fields = [
     "ar",               # artifact
     "sysroot",          # artifact
     "target_triple",    # str
+    "python",           # artifact | None: bootstrap Python interpreter
+    "python_version",   # str | None: Python version (e.g., "3.12.1")
 ])
 
 # ── Kernel providers ────────────────────────────────────────────────

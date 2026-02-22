@@ -187,6 +187,32 @@ http_file(
 )
 extract_source(name = "linux-src", source = ":linux-archive")
 
+# ── Python dependency sources (for Stage 3 Python) ───────────────────
+
+http_file(
+    name = "zlib-archive",
+    urls = ["https://zlib.net/zlib-1.3.1.tar.xz"],
+    sha256 = "38ef96b8dfe510d42707d9c781877914792541133e1870841463bfa73f883e32",
+    out = "zlib-1.3.1.tar.xz",
+)
+extract_source(name = "zlib-src", source = ":zlib-archive")
+
+http_file(
+    name = "libffi-archive",
+    urls = ["https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz"],
+    sha256 = "b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e",
+    out = "libffi-3.4.6.tar.gz",
+)
+extract_source(name = "libffi-src", source = ":libffi-archive")
+
+http_file(
+    name = "expat-archive",
+    urls = ["https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.xz"],
+    sha256 = "274db254a6979bde5aad404763a704956940e465843f2a9bd9ed7af22e2c0efc",
+    out = "expat-2.6.3.tar.xz",
+)
+extract_source(name = "expat-src", source = ":expat-archive")
+
 # ── Common configure args for Canadian cross ─────────────────────────
 
 _CANADIAN_CROSS_ARGS = [
@@ -418,6 +444,45 @@ bootstrap_package(
     destdir_var = "PREFIX",
     license = "BSD",
     description = "bzip2 compression",
+    visibility = ["PUBLIC"],
+)
+
+# ── Python dependencies (for Stage 3 Python build) ──────────────────
+
+bootstrap_package(
+    name = "native-zlib",
+    source = ":zlib-src",
+    stage = "//tc/bootstrap/stage1:stage1",
+    version = "1.3.1",
+    configure_args = _SIMPLE_CROSS_ARGS,
+    license = "Zlib",
+    description = "Compression library",
+    visibility = ["PUBLIC"],
+)
+
+bootstrap_package(
+    name = "native-libffi",
+    source = ":libffi-src",
+    stage = "//tc/bootstrap/stage1:stage1",
+    version = "3.4.6",
+    configure_args = _SIMPLE_CROSS_ARGS + [
+        "--disable-docs",
+    ],
+    license = "MIT",
+    description = "Foreign function interface library",
+    visibility = ["PUBLIC"],
+)
+
+bootstrap_package(
+    name = "native-expat",
+    source = ":expat-src",
+    stage = "//tc/bootstrap/stage1:stage1",
+    version = "2.6.3",
+    configure_args = _SIMPLE_CROSS_ARGS + [
+        "--without-docbook",
+    ],
+    license = "MIT",
+    description = "XML parser library",
     visibility = ["PUBLIC"],
 )
 

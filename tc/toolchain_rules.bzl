@@ -32,6 +32,7 @@ def _buckos_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         pkg_config = RunInfo(args = cmd_args(ctx.attrs.pkg_config)),
         target_triple = ctx.attrs.target_triple,
         sysroot = None,
+        python = None,
     )
     return [DefaultInfo(), info]
 
@@ -80,6 +81,7 @@ def _buckos_cross_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         pkg_config = RunInfo(args = cmd_args(ctx.attrs.pkg_config)),
         target_triple = ctx.attrs.target_triple,
         sysroot = sysroot_dir,
+        python = None,
     )
     return [DefaultInfo(), info]
 
@@ -113,6 +115,11 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
     cxx_args = cmd_args(stage.cxx)
     cxx_args.add(cmd_args("--sysroot=", stage.sysroot, delimiter = ""))
 
+    # Expose Python from bootstrap stage if available
+    python_run_info = None
+    if stage.python:
+        python_run_info = RunInfo(args = cmd_args(stage.python))
+
     info = BuildToolchainInfo(
         cc = RunInfo(args = cc_args),
         cxx = RunInfo(args = cxx_args),
@@ -122,6 +129,7 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         pkg_config = RunInfo(args = cmd_args(ctx.attrs.pkg_config)),
         target_triple = stage.target_triple,
         sysroot = stage.sysroot,
+        python = python_run_info,
     )
     return [DefaultInfo(), info]
 
@@ -163,6 +171,7 @@ def _buckos_prebuilt_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         pkg_config = RunInfo(args = cmd_args(ctx.attrs.pkg_config)),
         target_triple = triple,
         sysroot = sysroot,
+        python = None,
     )
     return [DefaultInfo(), info]
 
