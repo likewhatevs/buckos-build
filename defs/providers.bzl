@@ -43,6 +43,7 @@ BuildToolchainInfo = provider(fields = [
     "target_triple",    # str
     "sysroot",          # artifact | None: buckos-built sysroot (musl/glibc headers + libs)
     "python",           # RunInfo | None: bootstrap Python interpreter
+    "host_bin_dir",     # artifact | None: hermetic PATH directory (seed host tools)
     "extra_cflags",     # list[str]: toolchain-injected CFLAGS (e.g. hardening flags)
     "extra_ldflags",    # list[str]: toolchain-injected LDFLAGS (e.g. -fuse-ld=mold)
 ])

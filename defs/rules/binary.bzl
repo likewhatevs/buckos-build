@@ -183,7 +183,14 @@ _INSTALL_SCRIPT="$(_resolve "$1")"
 [[ -n "${_DEP_BIN_PATHS:-}" ]]  && export _DEP_BIN_PATHS="$(_resolve_colon_paths "$_DEP_BIN_PATHS")"
 [[ -n "${DEP_BASE_DIRS:-}" ]]   && export DEP_BASE_DIRS="$(_resolve_colon_paths "$DEP_BASE_DIRS")"
 [[ -n "${LD_LIBRARY_PATH:-}" ]] && export LD_LIBRARY_PATH="$(_resolve_colon_paths "$LD_LIBRARY_PATH")"
+[[ -n "${_HERMETIC_PATH:-}" ]]  && export _HERMETIC_PATH="$(_resolve_colon_paths "$_HERMETIC_PATH")"
 
+# Set hermetic base PATH if provided (replaces host PATH)
+if [[ -n "${_HERMETIC_PATH:-}" ]]; then
+    export PATH="$_HERMETIC_PATH"
+    # Clear host build env vars not explicitly set by the build system
+    unset PYTHONPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH ACLOCAL_PATH 2>/dev/null || true
+fi
 # Prepend dep bin paths to PATH
 [[ -n "${_DEP_BIN_PATHS:-}" ]] && export PATH="$_DEP_BIN_PATHS:$PATH"
 
@@ -224,6 +231,10 @@ source "$_INSTALL_SCRIPT"
     env["CC"] = cmd_args(tc.cc.args, delimiter = " ")
     env["CXX"] = cmd_args(tc.cxx.args, delimiter = " ")
     env["AR"] = cmd_args(tc.ar.args, delimiter = " ")
+
+    # Hermetic PATH from toolchain (replaces host PATH in wrapper)
+    if tc.host_bin_dir:
+        env["_HERMETIC_PATH"] = cmd_args(tc.host_bin_dir)
 
     # Inject dep environment (CFLAGS, LDFLAGS, PKG_CONFIG_PATH, PATH)
     dep_env, dep_paths = _dep_env_args(ctx)

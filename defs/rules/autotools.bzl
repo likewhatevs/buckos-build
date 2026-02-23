@@ -19,7 +19,7 @@ inputs haven't changed.
 """
 
 load("//defs:providers.bzl", "PackageInfo")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_extra_cflags", "toolchain_extra_ldflags")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_extra_cflags", "toolchain_extra_ldflags", "toolchain_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
 
@@ -53,6 +53,10 @@ def _src_configure(ctx, source):
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
         cmd.add("--env", env_arg)
+
+    # Hermetic PATH from seed toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
 
     # Inject user-specified environment variables
     for key, value in ctx.attrs.env.items():
@@ -180,6 +184,10 @@ def _src_compile(ctx, configured):
     for env_arg in toolchain_env_args(ctx):
         cmd.add("--env", env_arg)
 
+    # Hermetic PATH from seed toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     # Propagate dep paths so make can find headers/libs/pkg-config/tools
     dep_env, dep_paths = _dep_env_args(ctx)
     for env_arg in dep_env:
@@ -220,6 +228,10 @@ def _src_install(ctx, built):
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
         cmd.add("--env", env_arg)
+
+    # Hermetic PATH from seed toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
 
     # Propagate dep paths so make install can find headers/libs/pkg-config/tools
     dep_env, dep_paths = _dep_env_args(ctx)

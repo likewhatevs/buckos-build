@@ -3,9 +3,10 @@
 Provides TOOLCHAIN_ATTRS (merge into rule attrs dicts) and
 toolchain_env_args() (inject CC/CXX/AR into Python helper cmd_args).
 
-Package rules never hard-code a toolchain target.  The _toolchain attr
-uses select() on tc.mode config_settings so --config tc.mode=... picks
-the right toolchain at analysis time.
+The _toolchain attr uses select() on the bootstrap mode constraint.
+In normal builds, toolchains//:buckos provides the seed toolchain.
+During bootstrap (cfg transition), the host PATH toolchain is used
+instead, breaking the circular dependency.
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo")
@@ -13,15 +14,12 @@ load("//defs:providers.bzl", "BuildToolchainInfo")
 def _buckos_toolchain_select():
     """Config-driven toolchain selection via select().
 
-    Returns the appropriate toolchain target based on --config tc.mode=...
-    Falls back to host toolchain when tc.mode is unset.
+    Returns the seed toolchain by default, falls back to host PATH
+    toolchain when the bootstrap transition is active.
     """
     return select({
-        "//tc/exec:mode-host": "//tc/host:host-toolchain",
-        "//tc/exec:mode-cross": "//tc/cross:cross-toolchain",
-        "//tc/exec:mode-bootstrap": "//tc/bootstrap:bootstrap-toolchain",
-        "//tc/exec:mode-prebuilt": "//tc/prebuilt:prebuilt-toolchain",
-        "DEFAULT": "//tc/host:host-toolchain",
+        "//tc/exec:is-bootstrap-mode": "//tc/host:host-toolchain",
+        "DEFAULT": "toolchains//:buckos",
     })
 
 # Merge into rule attrs dicts via: attrs = { ... } | TOOLCHAIN_ATTRS
@@ -48,6 +46,19 @@ def toolchain_env_args(ctx):
     result.append(cmd_args("CC=", cmd_args(tc.cc.args, delimiter = " "), delimiter = ""))
     result.append(cmd_args("CXX=", cmd_args(tc.cxx.args, delimiter = " "), delimiter = ""))
     result.append(cmd_args("AR=", cmd_args(tc.ar.args, delimiter = " "), delimiter = ""))
+    return result
+
+def toolchain_path_args(ctx):
+    """Return --hermetic-path flags for hermetic builds.
+
+    When the toolchain provides a host_bin_dir, the build runs with
+    PATH replaced (not prepended) to that directory.  This ensures
+    only explicitly declared tools are available.
+    """
+    tc = ctx.attrs._toolchain[BuildToolchainInfo]
+    result = []
+    if tc.host_bin_dir:
+        result.append(cmd_args("--hermetic-path", tc.host_bin_dir))
     return result
 
 def toolchain_extra_cflags(ctx):

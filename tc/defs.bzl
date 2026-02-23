@@ -7,9 +7,9 @@ load("@prelude//platforms:defs.bzl", "host_configuration")
 def _buckos_execution_platforms_impl(ctx: AnalysisContext) -> list[Provider]:
     """Create a local execution platform suitable for BuckOS package builds.
 
-    All BuckOS toolchain modes (host, cross, bootstrap) run actions on
-    the local machine.  The distinction between modes is which
-    BuildToolchainInfo the rules consume, not where actions execute.
+    All BuckOS builds run actions on the local machine.  The seed
+    toolchain provides BuildToolchainInfo; the bootstrap transition
+    temporarily switches to host PATH tools when building the seed.
     """
     constraints = dict()
     constraints.update(ctx.attrs.cpu_configuration[ConfigurationInfo].constraints)
@@ -22,9 +22,10 @@ def _buckos_execution_platforms_impl(ctx: AnalysisContext) -> list[Provider]:
         configuration = cfg,
         executor_config = CommandExecutorConfig(
             local_enabled = True,
-            remote_enabled = False,
+            remote_enabled = ctx.attrs.remote_execution_enabled,
             remote_cache_enabled = True if ctx.attrs.remote_cache_enabled else None,
             allow_cache_uploads = ctx.attrs.remote_cache_enabled,
+            use_limited_hybrid = ctx.attrs.remote_execution_enabled,
             use_windows_path_separators = False,
         ),
     )
@@ -48,5 +49,6 @@ buckos_execution_platforms = rule(
             default = host_configuration.os,
         ),
         "remote_cache_enabled": attrs.bool(default = False),
+        "remote_execution_enabled": attrs.bool(default = False),
     },
 )

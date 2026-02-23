@@ -3,10 +3,10 @@ Toolchain rule definitions for BuckOS.
 
 Four rules:
 
-  buckos_toolchain           -- wraps PATH tools, no sysroot (host mode)
-  buckos_cross_toolchain     -- wraps PATH tools + buckos-built sysroot (cross mode)
-  buckos_bootstrap_toolchain -- wraps BootstrapStageInfo artifacts (bootstrap mode)
-  buckos_prebuilt_toolchain  -- wraps an unpacked prebuilt toolchain dir (prebuilt mode)
+  buckos_toolchain           -- wraps PATH tools, no sysroot (bootstrap fallback)
+  buckos_cross_toolchain     -- wraps PATH tools + buckos-built sysroot (monorepo integration)
+  buckos_bootstrap_toolchain -- wraps BootstrapStageInfo artifacts (seed bootstrap)
+  buckos_prebuilt_toolchain  -- wraps an unpacked prebuilt toolchain dir (legacy compat)
 
 All return BuildToolchainInfo from defs/providers.bzl.
 
@@ -33,6 +33,7 @@ def _buckos_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = ctx.attrs.target_triple,
         sysroot = None,
         python = None,
+        host_bin_dir = None,
         extra_cflags = ctx.attrs.extra_cflags,
         extra_ldflags = ctx.attrs.extra_ldflags,
     )
@@ -86,6 +87,7 @@ def _buckos_cross_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = ctx.attrs.target_triple,
         sysroot = sysroot_dir,
         python = None,
+        host_bin_dir = None,
         extra_cflags = ctx.attrs.extra_cflags,
         extra_ldflags = ctx.attrs.extra_ldflags,
     )
@@ -138,6 +140,7 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = stage.target_triple,
         sysroot = stage.sysroot,
         python = python_run_info,
+        host_bin_dir = None,
         extra_cflags = ctx.attrs.extra_cflags,
         extra_ldflags = ctx.attrs.extra_ldflags,
     )
@@ -184,6 +187,7 @@ def _buckos_prebuilt_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         target_triple = triple,
         sysroot = sysroot,
         python = None,
+        host_bin_dir = None,
         extra_cflags = ctx.attrs.extra_cflags,
         extra_ldflags = ctx.attrs.extra_ldflags,
     )

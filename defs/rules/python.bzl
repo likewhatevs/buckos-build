@@ -9,7 +9,7 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
 
@@ -36,6 +36,10 @@ def _python_install(ctx, source):
     cmd = cmd_args(ctx.attrs._python_tool[RunInfo])
     cmd.add("--source-dir", source)
     cmd.add("--output-dir", output.as_output())
+
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
 
     # Inject bootstrap Python if available from toolchain
     tc = ctx.attrs._toolchain[BuildToolchainInfo]

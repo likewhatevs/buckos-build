@@ -11,7 +11,7 @@ Five cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
 
@@ -134,6 +134,10 @@ def _configure(ctx, source):
     if dep_dirs:
         cmd.add(cmd_args("--dep-base-dirs=", dep_dirs, delimiter = ""))
 
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     ctx.actions.run(cmd, env = env, category = "configure", identifier = ctx.attrs.name)
     return output
 
@@ -160,6 +164,10 @@ def _build(ctx, source, configured):
     if dep_dirs:
         cmd.add(cmd_args("--dep-base-dirs=", dep_dirs, delimiter = ""))
 
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     ctx.actions.run(cmd, env = env, category = "build", identifier = ctx.attrs.name)
     return output
 
@@ -180,6 +188,10 @@ def _install(ctx, source, built):
     dep_dirs = _dep_base_dirs_args(ctx)
     if dep_dirs:
         cmd.add(cmd_args("--dep-base-dirs=", dep_dirs, delimiter = ""))
+
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
 
     ctx.actions.run(cmd, env = env, category = "install", identifier = ctx.attrs.name)
     return output

@@ -47,3 +47,15 @@ noop_remote_test_execution_toolchain(
     name = "remote_test_execution",
     visibility = ["PUBLIC"],
 )
+
+# ── BuckOS seed toolchain ────────────────────────────────────────────
+#
+# The sole integration point for package builds.  In standalone mode,
+# this resolves to the seed toolchain (cross-compiler + host tools).
+# In a monorepo subcell, the monorepo root overrides this with its own
+# toolchains//:buckos target.
+toolchain_alias(
+    name = "buckos",
+    actual = "buckos//tc/seed:seed-toolchain",
+    visibility = ["PUBLIC"],
+)
