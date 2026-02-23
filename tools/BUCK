@@ -136,6 +136,12 @@ python_binary(
     visibility = ["PUBLIC"],
 )
 
+python_binary(
+    name = "iso_helper",
+    main = "iso_helper.py",
+    visibility = ["PUBLIC"],
+)
+
 export_file(
     name = "sbom.bxl",
     src = "sbom.bxl",

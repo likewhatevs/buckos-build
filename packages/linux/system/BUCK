@@ -1566,7 +1566,7 @@ qemu_boot_script(
 # ISO images for distribution
 # =============================================================================
 
-# Minimal bootable ISO image
+# Minimal bootable ISO image (hybrid BIOS+EFI)
 iso_image(
     name = "buckos-iso",
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
@@ -1574,64 +1574,6 @@ iso_image(
     boot_mode = "hybrid",
     volume_label = "BUCKOS",
     kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# ISO with BIOS-only boot (for older systems)
-iso_image(
-    name = "buckos-iso-bios",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    boot_mode = "bios",
-    volume_label = "BUCKOS",
-    kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# ISO with EFI-only boot (for modern systems)
-iso_image(
-    name = "buckos-iso-efi",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    boot_mode = "efi",
-    volume_label = "BUCKOS",
-    kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# Live ISO with full rootfs (squashfs compressed)
-iso_image(
-    name = "buckos-live-iso",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    modules = "//packages/linux/kernel/buckos-kernel:linux-modules",
-    rootfs = ":buckos-rootfs",
-    boot_mode = "hybrid",
-    volume_label = "BUCKOS_LIVE",
-    kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# Full bootable ISO with dracut initramfs - commented out until buckos-bootable is defined
-# iso_image(
-#     name = "buckos-full-iso",
-#     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-#     initramfs = ":buckos-bootable-initramfs",
-#     rootfs = ":buckos-bootable",
-#     boot_mode = "hybrid",
-#     volume_label = "BUCKOS_FULL",
-#     kernel_args = "quiet rdinit=/init",
-#     visibility = ["PUBLIC"],
-# )
-
-# Development ISO with verbose boot
-iso_image(
-    name = "buckos-iso-dev",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    boot_mode = "hybrid",
-    volume_label = "BUCKOS_DEV",
-    kernel_args = "rdinit=/init loglevel=7 debug",
     visibility = ["PUBLIC"],
 )
 
@@ -2663,7 +2605,6 @@ iso_image(
     rootfs = ":buckos-live-kde-rootfs",
     boot_mode = "hybrid",
     volume_label = "BUCKOS_LIVE",
-    version = "0.0.3",
     # Systemd initrd boot parameters (no serial console)
     kernel_args = "console=tty0 loglevel=7 rd.systemd.show_status=true",
     visibility = ["PUBLIC"],
@@ -2687,7 +2628,7 @@ iso_image(
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
     initramfs = ":buckos-live-initramfs",
     rootfs = ":buckos-live-kde-rootfs",
-    boot_mode = "uefi",  # ARM boards typically use UEFI
+    boot_mode = "efi",  # ARM boards typically use UEFI
     volume_label = "BUCKOS_LIVE_ARM64",
     kernel_args = "console=tty0 console=ttyAMA0,115200 init=/init quiet systemd.unified_cgroup_hierarchy=1",
     default_target_platform = "//platforms:linux-aarch64-target",

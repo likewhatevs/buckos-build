@@ -89,6 +89,13 @@ KernelBtfInfo = provider(fields = [
 
 # ── Image providers ────────────────────────────────────────────────
 
+IsoImageInfo = provider(fields = [
+    "iso",              # artifact: the .iso file
+    "boot_mode",        # str: hybrid, efi, bios
+    "volume_label",     # str
+    "arch",             # str: x86_64, aarch64
+])
+
 Stage3Info = provider(fields = [
     "tarball",          # artifact: the stage3 tarball
     "checksum",         # artifact: sha256 checksum file

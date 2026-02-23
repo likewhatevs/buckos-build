@@ -81,13 +81,6 @@ export_file(
     visibility = ["PUBLIC"],
 )
 
-# The create-live-iso.sh script creates bootable ISO images
-export_file(
-    name = "create-live-iso",
-    src = "create-live-iso.sh",
-    visibility = ["PUBLIC"],
-)
-
 # Live CD initramfs init script - mounts CD/USB, finds squashfs, and switches root
 # This is used as the /init script inside the initramfs for live boot
 export_file(
