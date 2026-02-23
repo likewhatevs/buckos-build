@@ -104,6 +104,8 @@ def main():
                         help="Subdirectory to create and run configure from (for out-of-tree builds)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--pre-cmd", action="append", dest="pre_cmds", default=[],
                         help="Shell command to run in source dir before configure (repeatable)")
     args = parser.parse_args()
@@ -120,13 +122,6 @@ def main():
         shutil.rmtree(output_dir)
     shutil.copytree(source_dir, output_dir, symlinks=True)
 
-    # For Kconfig-based packages, just copying is enough -- the actual
-    # configuration happens via make targets in the build phase.
-    if args.skip_configure:
-        return
-
-    configure = os.path.join(output_dir, args.configure_script)
-
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
     wrapper_dir = os.path.join(output_dir, ".pkgconf-wrapper")
@@ -137,6 +132,18 @@ def main():
     os.chmod(wrapper, 0o755)
 
     env = os.environ.copy()
+
+    # Expose the project root so pre-cmds can resolve Buck2 artifact
+    # paths (which are relative to the project root, not to output_dir).
+    env["PROJECT_ROOT"] = os.getcwd()
+
+    # In hermetic mode, clear host build env vars that could poison
+    # the build.  Deps inject these explicitly via --env args.
+    if args.hermetic_path:
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            env.pop(var, None)
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -165,17 +172,21 @@ def main():
         key, _, value = entry.partition("=")
         if key:
             env[key] = _resolve_env_paths(value)
-    if args.path_prepend:
+    if args.hermetic_path:
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+    elif args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", os.environ.get("PATH", ""))
 
-        # Auto-detect automake Perl modules and aclocal dirs from dep
-        # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
-        # paths which don't resolve to the artifact directory.
+    # Auto-detect automake Perl modules and aclocal dirs from dep
+    # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
+    # paths which don't resolve to the artifact directory.
+    _path_sources = args.hermetic_path or args.path_prepend
+    if _path_sources:
         perl5lib = []
         aclocal_dirs = []
-        for bin_dir in args.path_prepend:
+        for bin_dir in _path_sources:
             share_dir = os.path.join(os.path.dirname(os.path.abspath(bin_dir)), "share")
             for d in _glob.glob(os.path.join(share_dir, "automake-*")):
                 if os.path.isdir(d):
@@ -213,7 +224,10 @@ def main():
     # Prepend pkg-config wrapper to PATH
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", os.environ.get("PATH", ""))
 
-    # Run pre-configure commands (e.g. autoreconf, libtoolize)
+    # Run pre-configure commands (e.g. autoreconf, libtoolize, or
+    # bootstrap src_prepare steps like symlinking in-tree libraries).
+    # These run before the skip-configure check so they're available
+    # for prepare-only actions (--skip-configure --pre-cmd "...").
     for cmd_str in args.pre_cmds:
         result = subprocess.run(cmd_str, shell=True, cwd=output_dir, env=env)
         if result.returncode != 0:
@@ -221,6 +235,10 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
 
+    if args.skip_configure:
+        return
+
+    configure = os.path.join(output_dir, args.configure_script)
     if not os.path.isfile(configure):
         print(f"error: configure script not found in {output_dir}", file=sys.stderr)
         sys.exit(1)

@@ -59,6 +59,8 @@ def main():
                         help="Extra argument to pass to cargo (repeatable)")
     parser.add_argument("--env", action="append", dest="extra_env", default=[],
                         help="Extra environment variable KEY=VALUE (repeatable)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--bin", action="append", dest="bins", default=[],
                         help="Specific binary name to install (repeatable; default: all executables)")
     parser.add_argument("--vendor-dir", default=None,
@@ -78,6 +80,14 @@ def main():
 
     env = os.environ.copy()
 
+    # In hermetic mode, clear host build env vars that could poison
+    # the build.  Deps inject these explicitly via --env args.
+    if args.hermetic_path:
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            env.pop(var, None)
+
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
     env["CCACHE_DISABLE"] = "1"
@@ -91,6 +101,8 @@ def main():
         key, _, value = entry.partition("=")
         if key:
             env[key] = _resolve_env_paths(value)
+    if args.hermetic_path:
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
 
     # Set up vendored dependencies if provided
     if args.vendor_dir:

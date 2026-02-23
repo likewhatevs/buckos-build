@@ -122,7 +122,13 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
+
+    # Expose the project root so pre-cmds can resolve Buck2 artifact
+    # paths (which are relative to the project root, not to the build dir).
+    os.environ["PROJECT_ROOT"] = os.getcwd()
 
     build_dir = os.path.abspath(args.build_dir)
     output_dir = os.path.abspath(args.output_dir)
@@ -195,13 +201,21 @@ def main():
             except (UnicodeDecodeError, PermissionError):
                 pass
 
-    # Comprehensive rewrite of stale build-dir paths in cmake/meson artefacts.
+    # Comprehensive rewrite of stale build-dir paths.  Autotools configure
+    # generates scripts (tests/*, libtool wrappers) with hardcoded paths
+    # that the pattern-based rewrite above misses.  cmake/meson similarly
+    # embed paths throughout the tree.  Detect by config.status (autotools),
+    # CMakeCache.txt (cmake), or build.ninja (meson/cmake).
     _BINARY_EXTS = frozenset((
         ".o", ".a", ".so", ".gch", ".pcm", ".pch", ".d",
         ".png", ".jpg", ".gif", ".ico", ".gz", ".xz", ".bz2",
         ".wasm", ".pyc", ".qm",
     ))
-    if os.path.isfile(cmake_cache) or os.path.isfile(ninja_file):
+    config_status = os.path.join(output_dir, "config.status")
+    _needs_comprehensive = (os.path.isfile(cmake_cache)
+                            or os.path.isfile(ninja_file)
+                            or os.path.isfile(config_status))
+    if _needs_comprehensive:
         for dirpath, _dirnames, filenames in os.walk(output_dir):
             for fname in filenames:
                 if os.path.splitext(fname)[1] in _BINARY_EXTS:
@@ -237,7 +251,6 @@ def main():
     with open(wrapper, "w") as f:
         f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
-    os.environ["PATH"] = wrapper_dir + ":" + os.environ.get("PATH", "")
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -250,20 +263,32 @@ def main():
     # the standard mechanism to override this.
     os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
+    # In hermetic mode, clear host build env vars that could poison
+    # the build.  Deps inject these explicitly via --env args.
+    if args.hermetic_path:
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            os.environ.pop(var, None)
+
     # Apply extra environment variables
     for entry in args.extra_env:
         key, _, value = entry.partition("=")
         if key:
             os.environ[key] = _resolve_env_paths(value)
-    if args.path_prepend:
+    if args.hermetic_path:
+        os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+    elif args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
             os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
 
-        # Auto-detect Python site-packages from dep prefixes so build-time
-        # Python modules (e.g. mako for mesa) are found by custom generators.
+    # Auto-detect Python site-packages from dep prefixes so build-time
+    # Python modules (e.g. mako for mesa) are found by custom generators.
+    _path_sources = args.hermetic_path or args.path_prepend
+    if _path_sources:
         python_paths = []
-        for bin_dir in args.path_prepend:
+        for bin_dir in _path_sources:
             usr_dir = os.path.dirname(os.path.abspath(bin_dir))
             for sp in _glob.glob(os.path.join(usr_dir, "lib", "python*", "site-packages")):
                 if os.path.isdir(sp):
@@ -271,6 +296,10 @@ def main():
         if python_paths:
             existing = os.environ.get("PYTHONPATH", "")
             os.environ["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")
+
+    # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
+    # so the wrapper is always available regardless of PATH mode)
+    os.environ["PATH"] = wrapper_dir + ":" + os.environ.get("PATH", "")
 
     # Run pre-build commands (e.g. Kconfig setup)
     for cmd_str in args.pre_cmds:

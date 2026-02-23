@@ -33,6 +33,8 @@ def main():
     parser.add_argument("--input", required=True, help="Input directory")
     parser.add_argument("--output", required=True, help="Output directory")
     parser.add_argument("--key", required=True, help="Path to signing key (PEM)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
 
     if not os.path.isdir(args.input):
@@ -42,6 +44,13 @@ def main():
     if not os.path.isfile(args.key):
         print(f"error: signing key not found: {args.key}", file=sys.stderr)
         sys.exit(1)
+
+    if args.hermetic_path:
+        os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            os.environ.pop(var, None)
 
     evmctl = shutil.which("evmctl")
     if evmctl is None:

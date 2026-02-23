@@ -42,6 +42,8 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--python", default=None,
                         help="Path to Python interpreter to use (default: sys.executable)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
 
     if not os.path.isdir(args.source_dir):
@@ -65,6 +67,14 @@ def main():
     cmd.append(os.path.abspath(args.source_dir))
 
     env = os.environ.copy()
+
+    # In hermetic mode, clear host build env vars that could poison
+    # the build.  Deps inject these explicitly via --env args.
+    if args.hermetic_path:
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            env.pop(var, None)
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -93,6 +103,9 @@ def main():
             new_lib_path = f"{new_lib_path}:{existing_lib_path}"
         if new_lib_path:
             env["LD_LIBRARY_PATH"] = new_lib_path
+
+    if args.hermetic_path:
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
 
     result = subprocess.run(cmd, env=env)
     if result.returncode != 0:

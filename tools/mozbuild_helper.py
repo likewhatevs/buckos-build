@@ -55,7 +55,7 @@ def _setup_pkg_config_wrapper(bin_dir):
     return bin_dir
 
 
-def _build_dep_env(dep_base_dirs, pkg_config_path):
+def _build_dep_env(dep_base_dirs, pkg_config_path, base_path=None):
     """Build environment from dep base dirs for mach builds.
 
     Unlike binary.bzl, we DON'T set CFLAGS/LDFLAGS — mach manages those
@@ -96,7 +96,9 @@ def _build_dep_env(dep_base_dirs, pkg_config_path):
         env["PKG_CONFIG_PATH"] = ":".join(all_pc)
 
     if bin_paths:
-        env["PATH"] = ":".join(bin_paths) + ":" + os.environ.get("PATH", "")
+        if base_path is None:
+            base_path = os.environ.get("PATH", "")
+        env["PATH"] = ":".join(bin_paths) + ":" + base_path
 
     # LIBRARY_PATH for the linker (NOT LD_LIBRARY_PATH — that poisons
     # system Python's shared libs like pyexpat against our older expat)
@@ -160,14 +162,24 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
     for var in ["CFLAGS", "CXXFLAGS", "LDFLAGS", "CPPFLAGS", "RUSTFLAGS"]:
         env[var] = ""
 
+    # Hermetic PATH: replace host PATH with only specified dirs
+    if hasattr(args, 'hermetic_path') and args.hermetic_path:
+        base_path = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+    else:
+        base_path = None
+
     # Dep environment (before PATH so we can prepend pkg-config wrapper)
     # Don't inherit PKG_CONFIG_PATH from os.environ — the Starlark layer sets
     # it with relative buck-out paths that break after cd.  We build everything
     # from resolved dep_base_dirs.
     if args.dep_base_dirs:
         dep_dirs = [_resolve(d) for d in args.dep_base_dirs.split(":") if d]
-        dep_env = _build_dep_env(dep_dirs, None)
+        dep_env = _build_dep_env(dep_dirs, None, base_path=base_path)
         env.update(dep_env)
+
+    # Set hermetic base PATH even when no deps provided bin paths
+    if "PATH" not in env and base_path:
+        env["PATH"] = base_path
 
     # pkg-config wrapper with --define-prefix (MUST be first in PATH)
     env["PATH"] = pkg_config_bin_dir + ":" + env.get("PATH", os.environ.get("PATH", ""))
@@ -365,8 +377,18 @@ def main():
                         help="Mozconfig ac_add_options value (repeatable)")
     parser.add_argument("--dep-base-dirs", default=None,
                         help="Colon-separated dep base directories")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
 
     args = parser.parse_args()
+
+    # In hermetic mode, clear host build env vars that could poison
+    # the build.  Deps inject these explicitly via the helper.
+    if args.hermetic_path:
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            os.environ.pop(var, None)
 
     args.source_dir = _resolve(args.source_dir)
     args.output_dir = _resolve(args.output_dir)

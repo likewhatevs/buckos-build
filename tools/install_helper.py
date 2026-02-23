@@ -7,6 +7,7 @@ packages that use a non-standard name (e.g. CONFIG_PREFIX for busybox).
 """
 
 import argparse
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -84,11 +85,19 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--build-system", choices=["make", "ninja"], default="make",
                         help="Build system to use (default: make)")
+    parser.add_argument("--make-target", action="append", dest="make_targets", default=None,
+                        help="Make target to install (repeatable, default: install)")
     parser.add_argument("--post-cmd", action="append", dest="post_cmds", default=[],
                         help="Shell command to run in prefix dir after install (repeatable)")
     args = parser.parse_args()
+
+    # Expose the project root so post-cmds can resolve Buck2 artifact
+    # paths (which are relative to the project root, not to the prefix).
+    os.environ["PROJECT_ROOT"] = os.getcwd()
 
     build_dir = os.path.abspath(args.build_dir)
     if args.build_subdir:
@@ -96,6 +105,10 @@ def main():
     if not os.path.isdir(build_dir):
         print(f"error: build directory not found: {build_dir}", file=sys.stderr)
         sys.exit(1)
+
+    # Expose the build directory so post-cmds can reference build
+    # artifacts (e.g. copying objects not handled by make install).
+    os.environ["BUILD_DIR"] = build_dir
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
@@ -105,7 +118,6 @@ def main():
     with open(wrapper, "w") as f:
         f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
-    os.environ["PATH"] = wrapper_dir + ":" + os.environ.get("PATH", "")
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -116,15 +128,29 @@ def main():
     # Pin timestamps for reproducible builds.
     os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
+    # In hermetic mode, clear host build env vars that could poison
+    # the build.  Deps inject these explicitly via --env args.
+    if args.hermetic_path:
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            os.environ.pop(var, None)
+
     # Apply extra environment variables
     for entry in args.extra_env:
         key, _, value = entry.partition("=")
         if key:
             os.environ[key] = _resolve_env_paths(value)
-    if args.path_prepend:
+    if args.hermetic_path:
+        os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+    elif args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
             os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
+
+    # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
+    # so the wrapper is always available regardless of PATH mode)
+    os.environ["PATH"] = wrapper_dir + ":" + os.environ.get("PATH", "")
 
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
@@ -141,21 +167,21 @@ def main():
             except (PermissionError, OSError):
                 pass
 
+    targets = args.make_targets or ["install"]
+
+    jobs = multiprocessing.cpu_count()
+
     if args.build_system == "ninja":
         # Ninja uses DESTDIR as an env var, not a command-line arg
         os.environ[args.destdir_var] = prefix
-        cmd = [
-            "ninja",
-            "-C", build_dir,
-            "install",
-        ]
+        cmd = ["ninja", "-C", build_dir, f"-j{jobs}"] + targets
     else:
         cmd = [
             "make",
             "-C", build_dir,
+            f"-j{jobs}",
             f"{args.destdir_var}={prefix}",
-            "install",
-        ]
+        ] + targets
     # Resolve paths in make args (e.g. CC=buck-out/.../gcc → absolute)
     for arg in args.make_args:
         if "=" in arg:

@@ -51,11 +51,20 @@ def main():
                         help="Dependency dir with .buckos-provenance.jsonl (repeatable)")
     parser.add_argument("--objcopy", default="objcopy",
                         help="Path to objcopy binary")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
 
     if not os.path.isdir(args.input):
         print(f"error: input directory not found: {args.input}", file=sys.stderr)
         sys.exit(1)
+
+    if args.hermetic_path:
+        os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                    "ACLOCAL_PATH"]:
+            os.environ.pop(var, None)
 
     # Copy input to output
     if os.path.exists(args.output):
