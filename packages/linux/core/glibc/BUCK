@@ -18,7 +18,7 @@ genrule(
     name = "glibc",
     build_rule = "binary",
     version = "2.42",
-    url = "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
+    url = "https://ftpmirror.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
     sha256 = None,
     source = "toolchains//bootstrap:glibc-src",
     description = "GNU C Library (glibc) - the standard C library for GNU/Linux systems",

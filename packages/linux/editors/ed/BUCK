@@ -5,7 +5,7 @@ load("//defs:package.bzl", "package")
 package(
     build_rule = "autotools",
     name = "ed",
-    url = "https://ftp.gnu.org/gnu/ed/ed-1.20.2.tar.lz",
+    url = "https://ftpmirror.gnu.org/gnu/ed/ed-1.20.2.tar.lz",
 
     sha256 = "65fec7318f48c2ca17f334ac0f4703defe62037bb13cc23920de077b5fa24523",
     version = "1.20.2",
