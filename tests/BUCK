@@ -234,6 +234,22 @@ sh_test(
     labels = ["vm", "slow", "integration"],
 )
 
+# ── Seed isolation ────────────────────────────────────────────────
+# Verifies the seed archive has no build-path leaks in RPATH/RUNPATH,
+# no cross-contamination between host-tools and sysroot, valid metadata.
+# Requires full bootstrap so tagged slow.
+
+sh_test(
+    name = "test-seed-isolation",
+    test = "verify_seed_isolation.py",
+    deps = ["//tc/bootstrap:seed-export"],
+    env = {
+        "SEED_ARCHIVE": "$(location //tc/bootstrap:seed-export)",
+    },
+    run_test_separately = True,
+    labels = ["slow"],
+)
+
 # IMA enforce: unsigned binary rejected
 sh_test(
     name = "test-ch-ima-enforce-unsigned",
