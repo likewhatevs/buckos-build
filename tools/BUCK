@@ -83,6 +83,12 @@ python_binary(
 )
 
 python_binary(
+    name = "merge_host_tools",
+    main = "merge_host_tools.py",
+    visibility = ["PUBLIC"],
+)
+
+python_binary(
     name = "toolchain_pack",
     main = "toolchain_pack.py",
     visibility = ["PUBLIC"],

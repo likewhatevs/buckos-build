@@ -86,6 +86,71 @@ echo "GCC installed from bootstrap-toolchain"
 )
 
 # =============================================================================
+# GCC Native - from-source build for hermetic host tools
+# =============================================================================
+# Builds GCC from source as a regular autotools package.  Used as a
+# host-tools dependency so the hermetic seed PATH has a native C/C++
+# compiler.  Packages like busybox need a host `cc` for Kconfig.
+#
+# Built via bootstrap transition (host PATH), so the host's existing
+# GCC bootstraps this one — proper compiler bootstrapping.
+
+package(
+    build_rule = "autotools",
+    name = "gcc-native",
+    version = "14.3.0",
+    url = "https://mirror.buckos.org/g/gcc-14.3.0.tar.gz",
+    sha256 = "ace8b8b0dbfe6abfc22f821cb093e195aa5498b7ccf7cd23e4424b9f14afed22",
+    description = "GNU Compiler Collection - native host compiler for bootstrap",
+    homepage = "https://gcc.gnu.org/",
+    license = "GPL-3.0",
+    pre_configure_cmds = [
+        # Fix obstack.h conflict with glibc >= 2.41
+        "cp include/obstack.h libiberty/obstack.h",
+        # Remove libcody (C++ modules) and c++tools — their sub-configures
+        # don't inherit top-level CXXFLAGS and fail C++11 detection.
+        # Not needed for a host bootstrap compiler.  Must scrub all
+        # dependency references in Makefile.in or make fails.
+        # Scrub all build, configure, and install references to libcody/c++tools.
+        # The generic 's|libcody ||g' leaves broken compound targets like
+        # 'maybe-install-' so we must remove those specifically too.
+        "sed -i 's/[a-z-]*libcody[a-z-]*//g; s/[a-z-]*c++tools[a-z-]*//g' Makefile.in && " +
+        "rm -rf libcody c++tools",
+    ],
+    configure_args = [
+        "--disable-bootstrap",
+        "--disable-multilib",
+        "--enable-languages=c",
+        "--disable-nls",
+        "--disable-libsanitizer",
+        "--disable-libatomic",
+        "--disable-libgomp",
+        "--disable-libquadmath",
+        "--disable-libssp",
+        "--disable-libvtv",
+        "--disable-libstdcxx-sdt",
+        "--disable-cet",
+        "--disable-fixincludes",
+        "--with-system-zlib",
+    ],
+    env = {
+        "CFLAGS": "-O2 -std=gnu17 -Wno-error=implicit-function-declaration",
+        "CXXFLAGS": "-O2 -std=gnu++17",
+    },
+    deps = [
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
+        "//packages/linux/system/libs/utility/mpc:mpc",
+        "//packages/linux/core/zlib:zlib",
+    ],
+    post_install_cmds = [
+        # Create cc symlink so packages find the standard name
+        "cd usr/bin && ln -sf gcc cc",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
 # GCC Runtime Libraries - C/C++ runtime for target systems
 # =============================================================================
 
