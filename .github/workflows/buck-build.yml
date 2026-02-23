@@ -11,22 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  targets:
-    name: graph parse
-    runs-on: ubuntu-latest
+  test:
+    name: build & test
+    runs-on: [self-hosted, bigly]
     steps:
       - uses: actions/checkout@v4
+        with:
+          clean: false
       - uses: ./.github/actions/ci-setup
-      - run: buck2 targets //...
-
-  bxl:
-    name: bxl graph tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/ci-setup
-      - name: Run BXL tests
+      - name: Run all checks
         run: |
+          buck2 targets //... &&
           failed=0
           for bxl in tests/graph/test_*.bxl; do
             name=$(basename "$bxl" .bxl)
@@ -34,38 +29,5 @@ jobs:
             buck2 bxl "//tests/graph/${name}.bxl:${name}" || failed=1
             echo "::endgroup::"
           done
-          exit $failed
-
-  test:
-    name: buck2 test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/ci-setup
-      - run: "buck2 test //tests:"
-
-  test_selfhosted:
-    name: buck2 test (self-hosted)
-    runs-on: [self-hosted, bigly]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          clean: false
-      - uses: ./.github/actions/ci-setup
-      - run: "buck2 test //tests:"
-
-  required:
-    name: required-checks
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [targets, bxl, test, test_selfhosted]
-    steps:
-      - run: |
-          results=("${{ needs.targets.result }}" "${{ needs.bxl.result }}" "${{ needs.test.result }}" "${{ needs.test_selfhosted.result }}")
-          names=(targets bxl test test_selfhosted)
-          for i in "${!names[@]}"; do
-            if [[ "${results[$i]}" != "success" ]]; then
-              echo "::error::${names[$i]} failed: ${results[$i]}"
-              exit 1
-            fi
-          done
+          [ "$failed" -eq 0 ] &&
+          buck2 test //tests:
