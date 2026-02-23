@@ -191,6 +191,17 @@ unset PYTHONPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH ACLOCAL_PATH 2>/
 # Set hermetic base PATH if provided (replaces host PATH)
 if [[ -n "${_HERMETIC_PATH:-}" ]]; then
     export PATH="$_HERMETIC_PATH"
+    # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+    # linked tools (e.g. cross-ar needing libzstd) find their libs.
+    _ld_lib_path=""
+    IFS=':' read -ra _herm_dirs <<< "$_HERMETIC_PATH"
+    for _bd in "${_herm_dirs[@]}"; do
+        _parent="$(dirname "$_bd")"
+        for _ld in lib lib64; do
+            [[ -d "$_parent/$_ld" ]] && _ld_lib_path="${_ld_lib_path:+$_ld_lib_path:}$_parent/$_ld"
+        done
+    done
+    [[ -n "$_ld_lib_path" ]] && export LD_LIBRARY_PATH="${_ld_lib_path}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 fi
 # Prepend dep bin paths to PATH
 [[ -n "${_DEP_BIN_PATHS:-}" ]] && export PATH="$_DEP_BIN_PATHS:$PATH"

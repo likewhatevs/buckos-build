@@ -433,6 +433,18 @@ def main():
         resolved = [os.path.abspath(p) if not os.path.isabs(p) else p
                     for p in args.hermetic_path]
         os.environ["PATH"] = ":".join(resolved)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in resolved:
+            _parent = os.path.dirname(_bp)
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = os.environ.get("LD_LIBRARY_PATH", "")
+            os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
 
     # Deterministic build environment
     os.environ["CCACHE_DISABLE"] = "1"

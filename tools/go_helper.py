@@ -114,6 +114,18 @@ def main():
             env[key] = _resolve_env_paths(value)
     if args.hermetic_path:
         env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
     env["GOFLAGS"] = env.get("GOFLAGS", "")
 
     # Set up vendored dependencies if provided

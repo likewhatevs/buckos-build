@@ -165,6 +165,18 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
     # Hermetic PATH: replace host PATH with only specified dirs
     if hasattr(args, 'hermetic_path') and args.hermetic_path:
         base_path = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = os.environ.get("LD_LIBRARY_PATH", "")
+            os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
     else:
         base_path = None
 
