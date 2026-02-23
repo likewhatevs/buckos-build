@@ -47,6 +47,9 @@ package(
         "--with-ensurepip=install",
     ],
 
+    # GCC 14+ false positive in libmpdec io.c (upstream CPython issue)
+    extra_cflags = ["-Wno-stringop-overflow"],
+
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/data/expat:expat",
