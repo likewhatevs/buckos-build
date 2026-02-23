@@ -50,7 +50,9 @@ def _setup_pkg_config_wrapper(bin_dir):
     os.makedirs(bin_dir, exist_ok=True)
     wrapper = os.path.join(bin_dir, "pkg-config")
     with open(wrapper, "w") as f:
-        f.write("#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix \"$@\"\n")
+        f.write('#!/bin/sh\n'
+                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
+                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
     return bin_dir
 
@@ -177,6 +179,17 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
         if _lib_dirs:
             _existing = os.environ.get("LD_LIBRARY_PATH", "")
             os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+        _py_paths = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(_sp):
+                        _py_paths.append(_sp)
+        if _py_paths:
+            _existing = os.environ.get("PYTHONPATH", "")
+            os.environ["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
     else:
         base_path = None
 

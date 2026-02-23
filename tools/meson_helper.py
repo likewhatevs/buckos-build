@@ -102,7 +102,9 @@ def main():
     wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
     wrapper = os.path.join(wrapper_dir, "pkg-config")
     with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
+        f.write('#!/bin/sh\n'
+                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
+                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
     env = os.environ.copy()
@@ -151,9 +153,11 @@ def main():
         python_paths = []
         for bin_dir in _path_sources:
             usr_dir = os.path.dirname(os.path.abspath(bin_dir))
-            for sp in _glob.glob(os.path.join(usr_dir, "lib", "python*", "site-packages")):
-                if os.path.isdir(sp):
-                    python_paths.append(sp)
+            for pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                            "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for sp in _glob.glob(os.path.join(usr_dir, pattern)):
+                    if os.path.isdir(sp):
+                        python_paths.append(sp)
         if python_paths:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")

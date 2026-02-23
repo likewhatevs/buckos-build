@@ -117,6 +117,17 @@ def main():
         if _lib_dirs:
             _existing = env.get("LD_LIBRARY_PATH", "")
             env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+        _py_paths = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(_sp):
+                        _py_paths.append(_sp)
+        if _py_paths:
+            _existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
 
     result = subprocess.run(cmd, env=env)
     if result.returncode != 0:

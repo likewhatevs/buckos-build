@@ -202,6 +202,16 @@ if [[ -n "${_HERMETIC_PATH:-}" ]]; then
         done
     done
     [[ -n "$_ld_lib_path" ]] && export LD_LIBRARY_PATH="${_ld_lib_path}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    # Auto-detect Python site/dist-packages so tools (meson, etc.) work.
+    _py_path=""
+    for _bd in "${_herm_dirs[@]}"; do
+        _parent="$(dirname "$_bd")"
+        for _sp in "$_parent"/lib/python*/site-packages "$_parent"/lib/python*/dist-packages \
+                   "$_parent"/lib64/python*/site-packages "$_parent"/lib64/python*/dist-packages; do
+            [[ -d "$_sp" ]] && _py_path="${_py_path:+$_py_path:}$_sp"
+        done
+    done
+    [[ -n "$_py_path" ]] && export PYTHONPATH="${_py_path}${PYTHONPATH:+:$PYTHONPATH}"
 fi
 # Prepend dep bin paths to PATH
 [[ -n "${_DEP_BIN_PATHS:-}" ]] && export PATH="$_DEP_BIN_PATHS:$PATH"
