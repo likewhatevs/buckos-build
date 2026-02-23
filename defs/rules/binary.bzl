@@ -217,6 +217,16 @@ fi
 # Prepend dep bin paths to PATH
 [[ -n "${_DEP_BIN_PATHS:-}" ]] && export PATH="$_DEP_BIN_PATHS:$PATH"
 
+# Stub makeinfo if not already on PATH — texinfo requires perl and is not
+# needed for bootstrap builds.  Without this, GCC/binutils sub-configures
+# fall back to the autotools 'missing' script and fail.
+if ! command -v makeinfo >/dev/null 2>&1; then
+    mkdir -p "$WORKDIR/.stub-bin"
+    printf '#!/bin/sh\\nexit 0\\n' > "$WORKDIR/.stub-bin/makeinfo"
+    chmod +x "$WORKDIR/.stub-bin/makeinfo"
+    export PATH="$WORKDIR/.stub-bin:$PATH"
+fi
+
 # Copy source to writable directory — Buck2 source artifacts are read-only,
 # but install scripts need to write (mkdir build, in-source builds, etc.).
 # This mirrors what configure_helper.py / build_helper.py do for autotools.

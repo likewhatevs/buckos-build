@@ -364,6 +364,8 @@ def _bootstrap_gcc_impl(ctx):
     for arg in ctx.attrs.extra_configure_args:
         configure_args.append(arg)
 
+    configure_args.append("MAKEINFO=true")
+
     # Build the ../configure command with env vars
     env = _toolchain_env(ctx)
     for k, v in env.items():
@@ -419,9 +421,13 @@ def _bootstrap_gcc_impl(ctx):
     _host_tools_path(build_cmd, ctx)
     _env_args(build_cmd, _toolchain_env(ctx))
 
+    # Ensure makeinfo stub is on PATH for GMP/MPFR sub-configures
+    _mi = 'command -v makeinfo >/dev/null 2>&1 || { mkdir -p .stub-bin && printf "#!/bin/sh\\nexit 0\\n" > .stub-bin/makeinfo && chmod +x .stub-bin/makeinfo && export PATH="$PWD/.stub-bin:$PATH"; } && '
+
     if not ctx.attrs.with_headers:
         # Pass1: build just gcc and minimal libgcc
         build_cmd.add("--pre-cmd",
+            _mi +
             "cd build && make -j$(nproc) all-gcc && " +
             "make configure-target-libgcc && " +
             "cd " + target_triple + "/libgcc && " +
@@ -431,6 +437,7 @@ def _bootstrap_gcc_impl(ctx):
     else:
         # Pass2: full build
         build_cmd.add("--pre-cmd",
+            _mi +
             "cd build && " +
             "make -j$(nproc) all-gcc && " +
             "make -j$(nproc) all-target-libgcc && " +

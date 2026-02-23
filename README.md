@@ -55,7 +55,7 @@ buckos-build/
 ## Quick Start
 
 The fastest way to get building is with `setup.sh`, which installs system
-packages, downloads Buck2, and configures host toolchain mode:
+packages and downloads Buck2:
 
 ```bash
 bash setup.sh
@@ -272,15 +272,7 @@ buck2 build //packages/linux/editors/entr:entr --target-platforms //platforms:li
 
 #### Host Toolchain Mode (For Development)
 
-Uses the host system's GCC/clang directly. Enable globally via
-`.buckconfig.local` (gitignored, created by `setup.sh`):
-
-```ini
-[buckos]
-use_host_toolchain = true
-```
-
-Or per-build with a platform flag:
+Per-build with a platform flag:
 
 ```bash
 buck2 build //packages/linux/editors/entr:entr --target-platforms //platforms:linux-target-host

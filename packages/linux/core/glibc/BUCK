@@ -3,18 +3,8 @@ load("//defs:package.bzl", "package")
 # System glibc package
 # This repackages the cross-glibc from the bootstrap toolchain for the final system.
 # The cross-glibc is now built with --prefix=/usr so it can be copied directly.
-#
-# When use_host_toolchain = true, we use the host system's glibc instead.
 
-_use_host_toolchain = read_config("buckos", "use_host_toolchain", "false").lower() in ["true", "1", "yes"]
-
-# When using host toolchain, provide a no-op target since we use system glibc
-genrule(
-    name = "glibc",
-    out = "glibc-host-passthrough",
-    cmd = "echo 'Using host system glibc' > $OUT",
-    visibility = ["PUBLIC"],
-) if _use_host_toolchain else package(
+package(
     name = "glibc",
     build_rule = "binary",
     version = "2.42",
@@ -54,20 +44,13 @@ genrule(
 # Copy glibc from cross-glibc build output
 # The cross-glibc is built with --prefix=/usr so paths are already correct
 
-# TOOLCHAIN_ROOT is set by the build system from bdepend directories
-CROSS_GLIBC="${TOOLCHAIN_ROOT%%:*}"  # Get first path from colon-separated list
-
-# Convert relative path to absolute
-if [[ "$CROSS_GLIBC" != /* ]]; then
-    PROJECT_ROOT="${S%/buck-out/*}"
-    CROSS_GLIBC="$PROJECT_ROOT/$CROSS_GLIBC"
-fi
+# DEP_BASE_DIRS is set by binary_package from deps
+CROSS_GLIBC="${DEP_BASE_DIRS%%:*}"  # Get first path from colon-separated list
 
 if [ -z "$CROSS_GLIBC" ] || [ ! -d "$CROSS_GLIBC" ]; then
     echo "ERROR: Could not find cross-glibc." >&2
-    echo "  TOOLCHAIN_ROOT=$TOOLCHAIN_ROOT" >&2
+    echo "  DEP_BASE_DIRS=$DEP_BASE_DIRS" >&2
     echo "  CROSS_GLIBC=$CROSS_GLIBC" >&2
-    echo "  S=$S" >&2
     exit 1
 fi
 
