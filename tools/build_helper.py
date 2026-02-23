@@ -229,6 +229,35 @@ def main():
                         FileNotFoundError):
                     pass
 
+    # Rewrite paths in meson's install.dat (binary pickle).  The text
+    # rewrite above skips it due to UnicodeDecodeError.  Unpickle, patch
+    # path attributes, and re-pickle so `meson install` finds files at
+    # the new location.
+    _install_dat = os.path.join(output_dir, "meson-private", "install.dat")
+    if os.path.isfile(_install_dat):
+        import pickle as _pickle
+        stat = os.stat(_install_dat)
+        with open(_install_dat, "rb") as f:
+            _idata = _pickle.load(f)
+        def _patch_paths(obj, old, new):
+            """Recursively replace old prefix with new in string attributes."""
+            if isinstance(obj, str):
+                return obj.replace(old, new) if old in obj else obj
+            if isinstance(obj, list):
+                return [_patch_paths(item, old, new) for item in obj]
+            if isinstance(obj, tuple):
+                return tuple(_patch_paths(item, old, new) for item in obj)
+            if hasattr(obj, "__dict__"):
+                for k, v in obj.__dict__.items():
+                    patched = _patch_paths(v, old, new)
+                    if patched is not v:
+                        setattr(obj, k, patched)
+            return obj
+        _patch_paths(_idata, build_dir, output_dir)
+        with open(_install_dat, "wb") as f:
+            _pickle.dump(_idata, f)
+        os.utime(_install_dat, (stat.st_atime, stat.st_mtime))
+
     # Reset all file timestamps to a single fixed instant so make doesn't
     # try to regenerate autotools/cmake/meson outputs.  The copytree
     # preserves original timestamps but path rewriting modifies some

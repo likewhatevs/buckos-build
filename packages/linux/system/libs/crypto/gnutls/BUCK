@@ -50,6 +50,7 @@ package(
         "//packages/linux/system/libs/crypto/nettle:nettle",
         "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
         "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     visibility = ["PUBLIC"],
 )

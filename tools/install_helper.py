@@ -156,8 +156,17 @@ def main():
         if _lib_dirs:
             _existing = os.environ.get("LD_LIBRARY_PATH", "")
             os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+    if args.path_prepend:
+        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
+        if prepend:
+            os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
+
+    # Auto-detect Python site-packages from dep prefixes so build-time
+    # Python modules (e.g. packaging for gdbus-codegen) are found.
+    _path_sources = list(args.hermetic_path) + list(args.path_prepend)
+    if _path_sources:
         _py_paths = []
-        for _bp in args.hermetic_path:
+        for _bp in _path_sources:
             _parent = os.path.dirname(os.path.abspath(_bp))
             for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
                              "lib64/python*/site-packages", "lib64/python*/dist-packages"):
@@ -167,10 +176,6 @@ def main():
         if _py_paths:
             _existing = os.environ.get("PYTHONPATH", "")
             os.environ["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
-    if args.path_prepend:
-        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
-        if prepend:
-            os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
 
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)

@@ -15,6 +15,7 @@ package(
         "--disable-werror",
         "--enable-gprofng=no",
         "--disable-gdb",
+        "--disable-shared",
     ],
 
     visibility = ["PUBLIC"],
