@@ -1,0 +1,29 @@
+load("//defs:package.bzl", "package")
+
+package(
+    build_rule = "autotools",
+    name = "lvm2",
+    # Use pre-generated configure from tarball to avoid AX_PYTHON_MODULE macro issues
+    # Add library search paths for cross-compilation via LDFLAGS -L flags
+    # LVM2's Makefile uses CLDFLAGS (configure-time LDFLAGS), not make-time LDFLAGS
+    # CLDFLAGS is now exported by ebuild.sh alongside LDFLAGS
+    version = "2.03.23",
+    url = "https://mirrors.kernel.org/sourceware/lvm2/LVM2.2.03.23.tgz",
+    sha256 = "74e794a9e9dee1bcf8a2065f65b9196c44fdf321e22d63b98ed7de8c9aa17a5d",
+    description = "Logical Volume Manager 2 utilities",
+    homepage = "https://sourceware.org/lvm2/",
+    license = "GPL-2.0",
+    use_deps = {
+        "systemd": ("//packages/linux/system/init/systemd:systemd", "//packages/linux/system/init/eudev:eudev"),
+    },
+    deps = [
+        "//packages/linux/system/libs/io/libaio:libaio",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
+        "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
+        "//packages/linux/dev-tools/build-systems/automake:automake",
+        "//packages/linux/dev-tools/build-systems/libtool:libtool",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
+        "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+    ],
+    visibility = ["PUBLIC"],
+)

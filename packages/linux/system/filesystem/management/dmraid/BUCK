@@ -18,7 +18,7 @@ package(
     license = "GPL-2.0",
     configure_args = [],
     deps = [
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
     ],
     visibility = ["PUBLIC"],
 )

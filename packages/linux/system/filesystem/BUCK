@@ -168,7 +168,7 @@ filegroup(
         "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
         "//packages/linux/system/filesystem/management/parted:parted",
         "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
     ],
     default_target_platform = "//platforms:linux-target",

@@ -1776,7 +1776,7 @@ filegroup(
 http_file(
     name = "buckos-build-tarball",
     urls = ["https://github.com/buck-os/buckos-build/archive/refs/heads/main.tar.gz"],
-    sha256 = "baaabb6363897ff63a1a6fa65edd01d18eb00b5731a604d20dc304ab6eb39fc8",
+    sha256 = "f41ded2c83fd6486e490733eaa98609c347233a5b37c385211d49357420a2d30",
     out = "buckos-build-main.tar.gz",
 )
 
@@ -2003,7 +2003,7 @@ rootfs(
         # xfsprogs requires libinih - TODO: add libinih package
         "//packages/linux/system/filesystem/native/dosfstools:dosfstools",  # mkfs.vfat (EFI)
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",  # LUKS encryption
-        "//packages/linux/system/security/cryptsetup:lvm2",  # LVM2 utilities
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",  # LVM2 utilities
 
         # Installer dependencies - file operations
         "//packages/linux/system/apps/rsync:rsync",  # rsync (file sync during install)
@@ -2569,7 +2569,7 @@ rootfs(
         "//packages/linux/editors/grep:grep",
         "//packages/linux/system/libs/cpio:cpio",
         # Device-mapper for dmsquash-live (dmsetup)
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         # Network utilities (ip command)
         "//packages/linux/network/iproute2:iproute2",
         # ncurses for bash/readline (libtinfow)

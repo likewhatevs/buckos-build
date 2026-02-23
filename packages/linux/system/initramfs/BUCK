@@ -105,7 +105,7 @@ filegroup(
         # Device management
         "//packages/linux/system/init/eudev:eudev",
         # Filesystem tools
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         # Bootloader

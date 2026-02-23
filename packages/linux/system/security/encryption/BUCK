@@ -384,7 +384,7 @@ package(
         "TC_NO_GUI=1",
     ],
     deps = [
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         ":fuse3",
     ],

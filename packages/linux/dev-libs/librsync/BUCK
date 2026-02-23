@@ -16,7 +16,7 @@ package(
         "-DUSE_LIBB2=OFF",
     ],
     deps = [
-        "//packages/linux/system/security/cryptsetup:popt",
+        "//packages/linux/dev-libs/popt:popt",
     ],
     visibility = ["PUBLIC"],
 )
