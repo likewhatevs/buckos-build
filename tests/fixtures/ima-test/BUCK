@@ -47,7 +47,8 @@ genrule(
         IMA_UTILS=$(location //packages/linux/system/security/ima-evm-utils:ima-evm-utils)
         OPENSSL=$(location //packages/linux/system/libs/crypto/openssl:openssl)
         KEYUTILS=$(location //packages/linux/system/security/keyutils:keyutils)
-        export PATH="$IMA_UTILS/usr/bin:$IMA_UTILS/usr/sbin:$PATH"
+        E2FS=$(location //packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs)
+        export PATH="$IMA_UTILS/usr/bin:$IMA_UTILS/usr/sbin:$E2FS/usr/sbin:$E2FS/usr/bin:$PATH"
         export LD_LIBRARY_PATH="$IMA_UTILS/usr/lib64:$IMA_UTILS/usr/lib:$OPENSSL/usr/lib64:$OPENSSL/usr/lib:$KEYUTILS/usr/lib64:$KEYUTILS/usr/lib"
 
         BINARY=$(location :ima-test-binary)/usr/bin/ima-test
@@ -86,6 +87,9 @@ genrule(
     out = "disk-unsigned.img",
     cmd = """
         set -e
+        E2FS=$(location //packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs)
+        export PATH="$E2FS/usr/sbin:$E2FS/usr/bin:$PATH"
+
         BINARY=$(location :ima-test-binary)/usr/bin/ima-test
         WORK=$BUCK_SCRATCH_PATH/work
         mkdir -p "$WORK/empty"
@@ -114,7 +118,8 @@ genrule(
         IMA_UTILS=$(location //packages/linux/system/security/ima-evm-utils:ima-evm-utils)
         OPENSSL=$(location //packages/linux/system/libs/crypto/openssl:openssl)
         KEYUTILS=$(location //packages/linux/system/security/keyutils:keyutils)
-        export PATH="$IMA_UTILS/usr/bin:$IMA_UTILS/usr/sbin:$PATH"
+        E2FS=$(location //packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs)
+        export PATH="$IMA_UTILS/usr/bin:$IMA_UTILS/usr/sbin:$E2FS/usr/sbin:$E2FS/usr/bin:$PATH"
         export LD_LIBRARY_PATH="$IMA_UTILS/usr/lib64:$IMA_UTILS/usr/lib:$OPENSSL/usr/lib64:$OPENSSL/usr/lib:$KEYUTILS/usr/lib64:$KEYUTILS/usr/lib"
 
         BINARY=$(location :ima-test-binary)/usr/bin/ima-test
@@ -147,6 +152,13 @@ genrule(
     out = "initramfs.cpio.gz",
     cmd = """
         set -e
+        OPENSSL=$(location //packages/linux/system/libs/crypto/openssl:openssl)
+        CPIO=$(location //packages/linux/system/libs/cpio:cpio)
+        GZIP=$(location //packages/linux/system/libs/compression/gzip:gzip)
+        FINDUTILS=$(location //packages/linux/system/apps/findutils:findutils)
+        COREUTILS=$(location //packages/linux/system/apps/coreutils:coreutils)
+        export PATH="$OPENSSL/usr/bin:$CPIO/usr/bin:$GZIP/usr/bin:$FINDUTILS/usr/bin:$COREUTILS/usr/bin:$PATH"
+
         INIT=$(location :ima-init)/usr/bin/init
         CERT=$(location //defs/keys:ima-test-cert)
         WORK=$BUCK_SCRATCH_PATH/rootfs
