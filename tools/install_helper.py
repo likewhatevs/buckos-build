@@ -7,13 +7,14 @@ packages that use a non-standard name (e.g. CONFIG_PREFIX for busybox).
 """
 
 import argparse
+import glob as _glob
 import multiprocessing
 import os
+import re
 import shutil
 import stat
 import subprocess
 import sys
-import tempfile
 
 from _env import sanitize_global_env
 
@@ -29,6 +30,64 @@ def _rewrite_file(fpath, old, new):
     with open(fpath, "w") as f:
         f.write(fc)
     os.utime(fpath, (stat.st_atime, stat.st_mtime))
+
+
+_BINARY_EXTS = frozenset((
+    ".o", ".a", ".so", ".gch", ".pcm", ".pch", ".d",
+    ".png", ".jpg", ".gif", ".ico", ".gz", ".xz", ".bz2",
+    ".wasm", ".pyc", ".qm",
+))
+
+_BUCK_OUT_RE = re.compile(r'(/[^\s"\']+?)/buck-out/')
+
+
+def _detect_stale_project_root(build_dir):
+    """Scan config.status for absolute paths containing /buck-out/.
+
+    If the prefix before /buck-out/ differs from os.getcwd(), return the
+    stale root.  Otherwise return None.
+    """
+    current_root = os.getcwd()
+    for cs in _glob.glob(os.path.join(build_dir, "**/config.status"), recursive=True):
+        try:
+            with open(cs, "r") as f:
+                content = f.read()
+        except (UnicodeDecodeError, PermissionError, OSError):
+            continue
+        m = _BUCK_OUT_RE.search(content)
+        if m and m.group(1) != current_root:
+            return m.group(1)
+    return None
+
+
+def _fix_stale_symlinks(build_dir, old_root, new_root):
+    """Rewrite absolute symlink targets that contain old_root."""
+    for dirpath, dirnames, filenames in os.walk(build_dir):
+        for entries in (dirnames, filenames):
+            for name in entries:
+                p = os.path.join(dirpath, name)
+                if not os.path.islink(p):
+                    continue
+                target = os.readlink(p)
+                if old_root in target:
+                    os.unlink(p)
+                    os.symlink(target.replace(old_root, new_root), p)
+
+
+def _rewrite_stale_paths(build_dir, old_root, new_root):
+    """Rewrite old_root to new_root in all non-binary text files."""
+    for dirpath, _dirnames, filenames in os.walk(build_dir):
+        for fname in filenames:
+            if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                continue
+            fpath = os.path.join(dirpath, fname)
+            if os.path.islink(fpath):
+                continue
+            try:
+                _rewrite_file(fpath, old_root, new_root)
+            except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                    FileNotFoundError):
+                pass
 
 
 def _resolve_env_paths(value):
@@ -103,7 +162,6 @@ def _suppress_phony_rebuilds(build_dir):
     existing files as up-to-date.  Literal .PHONY targets (install,
     clean, all, etc.) are preserved.
     """
-    import re
     _var_re = re.compile(r'\$[({][^)}]*[)}]')
 
     for dirpath, _dirnames, filenames in os.walk(build_dir):
@@ -170,49 +228,12 @@ def main():
     # paths (which are relative to the project root, not to the prefix).
     os.environ["PROJECT_ROOT"] = os.getcwd()
 
-    _orig_build = os.path.abspath(args.build_dir)
-    if not os.path.isdir(_orig_build):
-        print(f"error: build directory not found: {_orig_build}", file=sys.stderr)
-        sys.exit(1)
-
-    # Copy build tree to a writable working directory.  Buck2
-    # compile-phase outputs are read-only artifacts; make install may
-    # need to patch libtool scripts, reset timestamps, or re-link
-    # binaries (mmap-based linkers like mold SIGBUS on read-only
-    # files, and hard-linked archives can appear truncated).
-    _work_base = tempfile.mkdtemp(prefix="install-build-")
-    _work_tree = os.path.join(_work_base, "tree")
-    shutil.copytree(_orig_build, _work_tree, symlinks=True)
-
-    # Fix symlinks that point back into the read-only original.
-    for dirpath, dirnames, filenames in os.walk(_work_tree):
-        for entries in (dirnames, filenames):
-            for name in entries:
-                p = os.path.join(dirpath, name)
-                if not os.path.islink(p):
-                    continue
-                target = os.readlink(p)
-                if target == ".":
-                    os.unlink(p)
-                    os.makedirs(p, exist_ok=True)
-                elif _orig_build in target:
-                    os.unlink(p)
-                    os.symlink(target.replace(_orig_build, _work_tree), p)
-
-    # Ensure every file and directory in the copy is writable.
-    for dirpath, dirnames, filenames in os.walk(_work_tree):
-        for d in dirnames:
-            dp = os.path.join(dirpath, d)
-            if not os.path.islink(dp):
-                os.chmod(dp, os.stat(dp).st_mode | stat.S_IWUSR)
-        for f in filenames:
-            fp = os.path.join(dirpath, f)
-            if not os.path.islink(fp):
-                os.chmod(fp, os.stat(fp).st_mode | stat.S_IWUSR)
-
-    build_dir = _work_tree
+    build_dir = os.path.abspath(args.build_dir)
     if args.build_subdir:
         build_dir = os.path.join(build_dir, args.build_subdir)
+    if not os.path.isdir(build_dir):
+        print(f"error: build directory not found: {build_dir}", file=sys.stderr)
+        sys.exit(1)
 
     # Expose the build directory so post-cmds can reference build
     # artifacts (e.g. copying objects not handled by make install).
@@ -220,6 +241,7 @@ def main():
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
+    import tempfile
     wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
     wrapper = os.path.join(wrapper_dir, "pkg-config")
     with open(wrapper, "w") as f:
@@ -261,7 +283,7 @@ def main():
             _parent = os.path.dirname(os.path.abspath(_bp))
             for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
                              "lib64/python*/site-packages", "lib64/python*/dist-packages"):
-                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                for _sp in _glob.glob(os.path.join(_parent, _pattern)):
                     if os.path.isdir(_sp):
                         _py_paths.append(_sp)
         if _py_paths:
@@ -275,6 +297,41 @@ def main():
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
 
+    # The build tree is a read-only Buck2 output from the compile action.
+    # Make it writable so we can patch libtool scripts and reset timestamps.
+    # Also break hard links — Buck2 may share inodes across actions, and
+    # mmap-based linkers (mold) SIGBUS when writing to shared mappings.
+    for dirpath, dirnames, filenames in os.walk(build_dir):
+        for d in dirnames:
+            dp = os.path.join(dirpath, d)
+            if not os.path.islink(dp):
+                try:
+                    os.chmod(dp, os.stat(dp).st_mode | stat.S_IWUSR)
+                except OSError:
+                    pass
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if os.path.islink(fp):
+                continue
+            try:
+                st = os.stat(fp)
+                os.chmod(fp, st.st_mode | stat.S_IWUSR)
+                if st.st_nlink > 1:
+                    tmp = fp + ".hlbreak"
+                    shutil.copy2(fp, tmp)
+                    os.rename(tmp, fp)
+            except OSError:
+                pass
+
+    # Detect and rewrite stale absolute paths from cross-machine cache.
+    # When build ran on CI and install runs locally, autotools files
+    # (config.status, Makefiles) contain CI's project root.
+    _stale_root = _detect_stale_project_root(build_dir)
+    if _stale_root:
+        _new_root = os.getcwd()
+        _fix_stale_symlinks(build_dir, _stale_root, _new_root)
+        _rewrite_stale_paths(build_dir, _stale_root, _new_root)
+
     # Suppress libtool re-linking during install.
     #
     # Libtool's --mode=install re-links binaries when it sees .la files
@@ -286,7 +343,6 @@ def main():
     #
     # This is the same technique distros like Gentoo and Arch use to
     # avoid libtool re-link failures in staged installs.
-    import glob as _glob
     for lt_script in _glob.glob(os.path.join(build_dir, "**/libtool"), recursive=True):
         try:
             _rewrite_file(lt_script, "need_relink=yes", "need_relink=no")
@@ -303,14 +359,13 @@ def main():
     # Clear relink_command from .la files so libtool --mode=install doesn't
     # re-link libraries/binaries.  relink_command embeds build-tree paths
     # (often relative) that may not resolve in Buck2's split-action model.
-    import re as _re
     for la_file in _glob.glob(os.path.join(build_dir, "**", "*.la"), recursive=True):
         try:
             with open(la_file, "r") as f:
                 la_content = f.read()
             if "relink_command=" not in la_content:
                 continue
-            la_new = _re.sub(r"relink_command=.*", 'relink_command=""', la_content)
+            la_new = re.sub(r"relink_command=.*", 'relink_command=""', la_content)
             if la_new != la_content:
                 la_stat = os.stat(la_file)
                 with open(la_file, "w") as f:
@@ -366,7 +421,6 @@ def main():
     # Remove libtool .la files — they embed absolute build-time paths that
     # break when consumed from Buck2 dep directories.  Modern pkg-config and
     # cmake handle transitive deps without them.
-    import glob as _glob
     for la in _glob.glob(os.path.join(prefix, "**", "*.la"), recursive=True):
         os.remove(la)
 
@@ -381,8 +435,6 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
 
-    # Clean up the writable build-tree copy.
-    shutil.rmtree(_work_base, ignore_errors=True)
 
 
 if __name__ == "__main__":
