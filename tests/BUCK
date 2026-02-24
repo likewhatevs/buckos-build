@@ -94,6 +94,24 @@ sh_test(
     labels = ["unit", "tools-unit"],
 )
 
+sh_test(
+    name = "test-sysroot-merge",
+    test = "test_sysroot_merge.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-toolchain-unpack",
+    test = "test_toolchain_unpack.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-vm-helpers",
+    test = "test_vm_helpers.py",
+    labels = ["unit", "tools-unit"],
+)
+
 # ── Provenance integration: hello executable ─────────────────────────
 
 sh_test(
