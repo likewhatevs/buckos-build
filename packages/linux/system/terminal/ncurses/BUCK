@@ -49,8 +49,10 @@ package(
         # pkg-config symlinks
         "cd usr/lib64/pkgconfig && for pc in ncurses form panel menu; do ln -sf ${pc}w.pc ${pc}.pc; done && ln -sf ncursesw.pc tinfo.pc",
         # --enable-widec + --enable-symlinks flattens headers into include/;
-        # packages expecting <ncursesw/ncurses.h> need this symlink
-        "ln -sf . usr/include/ncursesw",
+        # packages expecting <ncursesw/ncurses.h> need this directory.
+        # A self-referencing symlink (. -> .) breaks Buck2 artifact
+        # materialisation, so use a real directory with header symlinks.
+        "mkdir -p usr/include/ncursesw && for h in usr/include/*.h; do ln -sf \"../$(basename $h)\" \"usr/include/ncursesw/$(basename $h)\"; done",
     ],
 
     deps = [],
