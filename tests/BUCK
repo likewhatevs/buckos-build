@@ -52,6 +52,48 @@ sh_test(
     labels = ["unit", "tools-unit"],
 )
 
+sh_test(
+    name = "test-kernel-helpers",
+    test = "test_kernel_helpers.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-iso-config",
+    test = "test_iso_config.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-build-install",
+    test = "test_build_install.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-stage3-strip",
+    test = "test_stage3_strip.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-bootstrap-helpers",
+    test = "test_bootstrap_helpers.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-lang-helpers",
+    test = "test_lang_helpers.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-patch-acct",
+    test = "test_patch_acct.py",
+    labels = ["unit", "tools-unit"],
+)
+
 # ── Provenance integration: hello executable ─────────────────────────
 
 sh_test(
