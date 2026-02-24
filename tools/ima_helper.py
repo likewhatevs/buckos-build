@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """IMA signing via evmctl.
 
-Copies input directory to output and signs ELF files using
+Copies input directory to output and signs all regular files using
 evmctl ima_sign --sigfile, which creates detached .sig sidecar files.
 
-Only ELF binaries are signed; non-ELF regular files are skipped.
-evmctl --sigfile returns non-zero because the xattr attempt fails
-without CAP_SYS_ADMIN, but the .sig sidecar is still created.
+Symlinks and .sig sidecars are skipped.  evmctl --sigfile returns
+non-zero because the xattr attempt fails without CAP_SYS_ADMIN,
+but the .sig sidecar is still created.
 """
 
 import argparse
@@ -16,23 +16,13 @@ import subprocess
 import sys
 
 
-_ELF_MAGIC = b"\x7fELF"
-
-
-def is_elf(path):
-    """Check if a file is an ELF binary by reading its magic bytes."""
-    try:
-        with open(path, "rb") as f:
-            return f.read(4) == _ELF_MAGIC
-    except (OSError, IOError):
-        return False
-
-
 def main():
-    parser = argparse.ArgumentParser(description="IMA sign ELF files with evmctl")
+    parser = argparse.ArgumentParser(description="IMA sign files with evmctl")
     parser.add_argument("--input", required=True, help="Input directory")
     parser.add_argument("--output", required=True, help="Output directory")
     parser.add_argument("--key", required=True, help="Path to signing key (PEM)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
 
     if not os.path.isdir(args.input):
@@ -42,6 +32,39 @@ def main():
     if not os.path.isfile(args.key):
         print(f"error: signing key not found: {args.key}", file=sys.stderr)
         sys.exit(1)
+
+    # Clear host build env vars that could poison the build.
+    # Deps inject these explicitly via --env args.
+    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                "ACLOCAL_PATH"]:
+        os.environ.pop(var, None)
+
+    if args.hermetic_path:
+        os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = os.environ.get("LD_LIBRARY_PATH", "")
+            os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+        _py_paths = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(_sp):
+                        _py_paths.append(_sp)
+        if _py_paths:
+            _existing = os.environ.get("PYTHONPATH", "")
+            os.environ["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
 
     evmctl = shutil.which("evmctl")
     if evmctl is None:
@@ -53,7 +76,7 @@ def main():
         shutil.rmtree(args.output)
     shutil.copytree(args.input, args.output, symlinks=True)
 
-    # Sign ELF files only
+    # Sign all regular files (skip symlinks and .sig sidecars)
     signed = 0
     errors = 0
     for dirpath, _dirnames, filenames in os.walk(args.output):
@@ -63,7 +86,7 @@ def main():
                 continue
             if not os.path.isfile(filepath):
                 continue
-            if not is_elf(filepath):
+            if filepath.endswith(".sig"):
                 continue
 
             # evmctl --sigfile creates .sig sidecar; the xattr attempt fails
@@ -85,7 +108,7 @@ def main():
         print(f"error: {errors} files failed to sign", file=sys.stderr)
         sys.exit(1)
 
-    print(f"signed {signed} ELF files")
+    print(f"signed {signed} files")
 
 
 if __name__ == "__main__":

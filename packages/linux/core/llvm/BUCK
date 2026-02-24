@@ -36,3 +36,48 @@ package(
     ],
     visibility = ["PUBLIC"],
 )
+
+# =============================================================================
+# LLVM Native - host tools build of LLVM, Clang, and LLD
+# =============================================================================
+# Full LLVM+clang+lld for the seed toolchain.  Must be capable of
+# building any package in the tree (Rust uses clang as linker, mesa
+# needs AMDGPU backend, BPF tools need BPF backend, etc.).
+#
+# Built via bootstrap transition (host PATH).
+
+package(
+    build_rule = "cmake",
+    name = "llvm-native",
+    version = "21.1.6",
+    url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.6/llvm-project-21.1.6.src.tar.xz",
+    sha256 = "ae67086eb04bed7ca11ab880349b5f1ab6f50e1b88cda376eaf8a845b935762b",
+    description = "LLVM, Clang, and LLD - native host compilers and linker",
+    homepage = "https://llvm.org/",
+    license = "Apache-2.0 WITH LLVM-exception",
+    source_subdir = "llvm",
+    configure_args = [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DLLVM_ENABLE_PROJECTS=clang;lld",
+        "-DLLVM_ENABLE_RUNTIMES=",
+        "-DLLVM_BUILD_LLVM_DYLIB=ON",
+        "-DLLVM_LINK_LLVM_DYLIB=ON",
+        "-DLLVM_ENABLE_RTTI=ON",
+        "-DLLVM_ENABLE_FFI=ON",
+        "-DLLVM_ENABLE_ZLIB=ON",
+        "-DLLVM_ENABLE_ZSTD=OFF",
+        "-DLLVM_INCLUDE_BENCHMARKS=OFF",
+        "-DLLVM_INCLUDE_EXAMPLES=OFF",
+        "-DLLVM_INCLUDE_TESTS=OFF",
+        "-DLLVM_INCLUDE_DOCS=OFF",
+        "-DLLVM_TARGETS_TO_BUILD=AMDGPU;X86;AArch64;ARM;WebAssembly;BPF",
+        "-DLLVM_INSTALL_UTILS=ON",
+    ],
+    deps = [
+        "//packages/linux/system/terminal/ncurses:ncurses",
+        "//packages/linux/system/libs/data/libxml2:libxml2",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+    ],
+    visibility = ["PUBLIC"],
+)

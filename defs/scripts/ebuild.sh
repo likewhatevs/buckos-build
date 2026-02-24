@@ -998,7 +998,7 @@ use() {
 # Language Toolchain Detection (Go, Rust, LLVM)
 # =============================================================================
 # Detect and set up language toolchains from dependencies.
-# These toolchains are conditionally added when use_host_toolchain=false.
+# These toolchains are conditionally added from dependency declarations.
 
 # Go toolchain detection
 GOROOT=""

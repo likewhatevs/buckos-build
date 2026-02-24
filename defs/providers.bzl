@@ -19,6 +19,9 @@ PackageInfo = provider(fields = [
     "libraries",        # list[str]: library names for -l flags
     "pkg_config_path",  # artifact | None: path to .pc files
 
+    # Runtime library paths for LD_LIBRARY_PATH (self + transitive deps)
+    "runtime_lib_dirs", # list[cmd_args]: lib dirs for LD_LIBRARY_PATH
+
     # Extra flags this package requires consumers to use
     "cflags",           # list[str]
     "ldflags",          # list[str]
@@ -43,6 +46,7 @@ BuildToolchainInfo = provider(fields = [
     "target_triple",    # str
     "sysroot",          # artifact | None: buckos-built sysroot (musl/glibc headers + libs)
     "python",           # RunInfo | None: bootstrap Python interpreter
+    "host_bin_dir",     # artifact | None: hermetic PATH directory (seed host tools)
     "extra_cflags",     # list[str]: toolchain-injected CFLAGS (e.g. hardening flags)
     "extra_ldflags",    # list[str]: toolchain-injected LDFLAGS (e.g. -fuse-ld=mold)
 ])
@@ -87,6 +91,13 @@ KernelBtfInfo = provider(fields = [
 ])
 
 # ── Image providers ────────────────────────────────────────────────
+
+IsoImageInfo = provider(fields = [
+    "iso",              # artifact: the .iso file
+    "boot_mode",        # str: hybrid, efi, bios
+    "volume_label",     # str
+    "arch",             # str: x86_64, aarch64
+])
 
 Stage3Info = provider(fields = [
     "tarball",          # artifact: the stage3 tarball

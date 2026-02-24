@@ -36,6 +36,5 @@ jobs:
               cargo --version &&
               uv --version &&
               rg --version &&
-              fd --version || fdfind --version &&
-              grep use_host_toolchain .buckconfig.local
+              fd --version || fdfind --version
             '

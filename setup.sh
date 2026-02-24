@@ -85,7 +85,6 @@ show_plan() {
     echo "Distro:     $DISTRO"
     echo "Packages:   ${#PACKAGES[@]} packages via ${PKG_CMD}"
     echo "Buck2:      ~/.local/bin/buck2"
-    echo "Config:     .buckconfig.local [buckos] use_host_toolchain = true"
     echo ""
 }
 
@@ -156,30 +155,6 @@ install_buck2() {
         echo "To make it permanent, add to your shell profile:"
         echo "  export PATH=\"$buck2_dir:\$PATH\""
     fi
-    echo ""
-}
-
-configure_buckconfig() {
-    echo "--- Configuring .buckconfig.local ---"
-    local config_file="$SCRIPT_DIR/.buckconfig.local"
-
-    if [ -f "$config_file" ] && grep -q '^\[buckos\]' "$config_file"; then
-        # Update existing [buckos] section
-        sed -i '/^\[buckos\]/,/^\[/{s/^use_host_toolchain.*/use_host_toolchain = true/}' "$config_file"
-        # Add if key wasn't present in section
-        if ! grep -q 'use_host_toolchain' "$config_file"; then
-            sed -i '/^\[buckos\]/a use_host_toolchain = true' "$config_file"
-        fi
-    else
-        # Append new section
-        {
-            [ -s "$config_file" ] && echo ""
-            echo "[buckos]"
-            echo "use_host_toolchain = true"
-        } >> "$config_file"
-    fi
-
-    echo "Wrote: $config_file"
     echo ""
 }
 
@@ -277,7 +252,6 @@ main() {
     install_packages
     install_uv
     install_buck2
-    configure_buckconfig
     verify
 }
 

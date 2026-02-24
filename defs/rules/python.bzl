@@ -9,7 +9,8 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args")
+load("//defs/rules:_common.bzl", "collect_runtime_lib_dirs")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
 
@@ -37,6 +38,10 @@ def _python_install(ctx, source):
     cmd.add("--source-dir", source)
     cmd.add("--output-dir", output.as_output())
 
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     # Inject bootstrap Python if available from toolchain
     tc = ctx.attrs._toolchain[BuildToolchainInfo]
     if tc.python:
@@ -49,6 +54,15 @@ def _python_install(ctx, source):
     # Inject user-specified environment variables
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
+
+    # Propagate dependency prefixes so build deps (setuptools, etc.)
+    # are on PYTHONPATH during pip install --no-build-isolation.
+    for dep in ctx.attrs.deps:
+        if PackageInfo in dep:
+            prefix = dep[PackageInfo].prefix
+        else:
+            prefix = dep[DefaultInfo].default_outputs[0]
+        cmd.add("--dep-prefix", prefix)
 
     for arg in ctx.attrs.pip_args:
         cmd.add("--pip-arg", arg)
@@ -76,6 +90,7 @@ def _python_package_impl(ctx):
         lib_dirs = [],
         bin_dirs = [],
         libraries = [],
+        runtime_lib_dirs = collect_runtime_lib_dirs(ctx.attrs.deps, installed),
         pkg_config_path = None,
         cflags = [],
         ldflags = [],

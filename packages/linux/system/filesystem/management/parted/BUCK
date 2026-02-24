@@ -20,7 +20,7 @@ package(
     },
     use_deps = {
         "device-mapper": [
-            "//packages/linux/system/security/cryptsetup:lvm2",
+            "//packages/linux/system/filesystem/management/lvm2:lvm2",
             "//packages/linux/system/init/systemd:systemd",  # provides libudev for libdevmapper
         ],
         "readline": [

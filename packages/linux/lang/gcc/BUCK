@@ -1,21 +1,12 @@
 load("//defs:package.bzl", "package")
 
-_use_host_toolchain = read_config("buckos", "use_host_toolchain", "false").lower() in ["true", "1", "yes"]
-
 # =============================================================================
 # GCC - GNU Compiler Collection (from bootstrap toolchain)
 # =============================================================================
 # Extracts the GCC compiler from the bootstrap toolchain for installation
 # in the rootfs.  Does not build from source — uses the pre-built toolchain.
-#
-# When use_host_toolchain = true, provides a passthrough (host gcc is used directly).
 
-genrule(
-    name = "gcc",
-    out = "gcc-host-passthrough",
-    cmd = "echo 'Using host system gcc' > $OUT",
-    visibility = ["PUBLIC"],
-) if _use_host_toolchain else package(
+package(
     build_rule = "binary",
     name = "gcc",
     version = "14.3.0",
@@ -86,15 +77,67 @@ echo "GCC installed from bootstrap-toolchain"
 )
 
 # =============================================================================
+# GCC Native - from-source build for hermetic host tools
+# =============================================================================
+# Full GCC with C and C++ for the seed toolchain.  Must be capable of
+# building any package in the tree (C++ for LLVM, Qt, KDE, etc.).
+#
+# Built via bootstrap transition (host PATH), so the host's existing
+# GCC bootstraps this one — proper compiler bootstrapping.
+#
+# libcody (C++ modules server) sub-configure doesn't inherit top-level
+# CXXFLAGS and fails C++11 detection.  Fix by injecting CXXFLAGS into
+# the sub-configure via the top-level Makefile.
+
+package(
+    build_rule = "autotools",
+    name = "gcc-native",
+    version = "14.3.0",
+    url = "https://mirror.buckos.org/g/gcc-14.3.0.tar.gz",
+    sha256 = "ace8b8b0dbfe6abfc22f821cb093e195aa5498b7ccf7cd23e4424b9f14afed22",
+    description = "GNU Compiler Collection - C/C++ compilers for bootstrap",
+    homepage = "https://gcc.gnu.org/",
+    license = "GPL-3.0",
+    pre_configure_cmds = [
+        # Fix obstack.h conflict with glibc >= 2.41
+        "cp include/obstack.h libiberty/obstack.h",
+        # libcody's sub-configure doesn't inherit CXXFLAGS from the
+        # top-level build, so it fails C++11 feature detection.  Patch
+        # the generated configure script to skip the fatal error — the
+        # top-level GCC build already verified C++11 works.
+        "sed -i 's/as_fn_error.*C++11 is required.*/: # patched — C++11 verified by top-level configure/' libcody/configure",
+    ],
+    configure_args = [
+        "--disable-bootstrap",
+        "--disable-multilib",
+        "--enable-languages=c,c++",
+        "--disable-nls",
+        "--disable-cet",
+        "--disable-fixincludes",
+        "--disable-libsanitizer",
+        "--with-system-zlib",
+    ],
+    env = {
+        "CFLAGS": "-O2 -Wno-error=implicit-function-declaration",
+    },
+    deps = [
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
+        "//packages/linux/system/libs/utility/mpc:mpc",
+        "//packages/linux/core/zlib:zlib",
+    ],
+    post_install_cmds = [
+        # Create standard symlinks
+        "cd usr/bin && ln -sf gcc cc && ln -sf g++ c++",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
 # GCC Runtime Libraries - C/C++ runtime for target systems
 # =============================================================================
 
-genrule(
-    name = "gcc-runtime",
-    out = "gcc-runtime-host-passthrough",
-    cmd = "echo 'Using host system gcc-runtime' > $OUT",
-    visibility = ["PUBLIC"],
-) if _use_host_toolchain else package(
+package(
     build_rule = "binary",
     name = "gcc-runtime",
     version = "14.3.0",

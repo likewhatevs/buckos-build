@@ -9,6 +9,7 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
+load("//defs/rules:_common.bzl", "collect_runtime_lib_dirs")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args",
      "toolchain_extra_cflags", "toolchain_extra_ldflags")
 
@@ -135,6 +136,7 @@ _resolve_flag_paths() {
             -L[^/]*)             token="-L${_PROJECT_ROOT}/${token#-L}" ;;
             -Wl,-rpath-link,[^/]*) token="-Wl,-rpath-link,${_PROJECT_ROOT}/${token#-Wl,-rpath-link,}" ;;
             -Wl,-rpath,[^/]*)    token="-Wl,-rpath,${_PROJECT_ROOT}/${token#-Wl,-rpath,}" ;;
+            --*=buck-out/*)      token="${token%%=*}=${_PROJECT_ROOT}/${token#*=}" ;;
             [^-]*/*)             [[ ! "$token" = /* ]] && token="${_PROJECT_ROOT}/$token" ;;
         esac
         result="${result:+$result }$token"
@@ -183,9 +185,47 @@ _INSTALL_SCRIPT="$(_resolve "$1")"
 [[ -n "${_DEP_BIN_PATHS:-}" ]]  && export _DEP_BIN_PATHS="$(_resolve_colon_paths "$_DEP_BIN_PATHS")"
 [[ -n "${DEP_BASE_DIRS:-}" ]]   && export DEP_BASE_DIRS="$(_resolve_colon_paths "$DEP_BASE_DIRS")"
 [[ -n "${LD_LIBRARY_PATH:-}" ]] && export LD_LIBRARY_PATH="$(_resolve_colon_paths "$LD_LIBRARY_PATH")"
+[[ -n "${_HERMETIC_PATH:-}" ]]  && export _HERMETIC_PATH="$(_resolve_colon_paths "$_HERMETIC_PATH")"
 
+# Clear host build env vars not explicitly set by the build system
+unset PYTHONPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH ACLOCAL_PATH 2>/dev/null || true
+# Set hermetic base PATH if provided (replaces host PATH)
+if [[ -n "${_HERMETIC_PATH:-}" ]]; then
+    export PATH="$_HERMETIC_PATH"
+    # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+    # linked tools (e.g. cross-ar needing libzstd) find their libs.
+    _ld_lib_path=""
+    IFS=':' read -ra _herm_dirs <<< "$_HERMETIC_PATH"
+    for _bd in "${_herm_dirs[@]}"; do
+        _parent="$(dirname "$_bd")"
+        for _ld in lib lib64; do
+            [[ -d "$_parent/$_ld" ]] && _ld_lib_path="${_ld_lib_path:+$_ld_lib_path:}$_parent/$_ld"
+        done
+    done
+    [[ -n "$_ld_lib_path" ]] && export LD_LIBRARY_PATH="${_ld_lib_path}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    # Auto-detect Python site/dist-packages so tools (meson, etc.) work.
+    _py_path=""
+    for _bd in "${_herm_dirs[@]}"; do
+        _parent="$(dirname "$_bd")"
+        for _sp in "$_parent"/lib/python*/site-packages "$_parent"/lib/python*/dist-packages \
+                   "$_parent"/lib64/python*/site-packages "$_parent"/lib64/python*/dist-packages; do
+            [[ -d "$_sp" ]] && _py_path="${_py_path:+$_py_path:}$_sp"
+        done
+    done
+    [[ -n "$_py_path" ]] && export PYTHONPATH="${_py_path}${PYTHONPATH:+:$PYTHONPATH}"
+fi
 # Prepend dep bin paths to PATH
 [[ -n "${_DEP_BIN_PATHS:-}" ]] && export PATH="$_DEP_BIN_PATHS:$PATH"
+
+# Stub makeinfo if not already on PATH — texinfo requires perl and is not
+# needed for bootstrap builds.  Without this, GCC/binutils sub-configures
+# fall back to the autotools 'missing' script and fail.
+if ! command -v makeinfo >/dev/null 2>&1; then
+    mkdir -p "$WORKDIR/.stub-bin"
+    printf '#!/bin/sh\\nexit 0\\n' > "$WORKDIR/.stub-bin/makeinfo"
+    chmod +x "$WORKDIR/.stub-bin/makeinfo"
+    export PATH="$WORKDIR/.stub-bin:$PATH"
+fi
 
 # Copy source to writable directory — Buck2 source artifacts are read-only,
 # but install scripts need to write (mkdir build, in-source builds, etc.).
@@ -224,6 +264,10 @@ source "$_INSTALL_SCRIPT"
     env["CC"] = cmd_args(tc.cc.args, delimiter = " ")
     env["CXX"] = cmd_args(tc.cxx.args, delimiter = " ")
     env["AR"] = cmd_args(tc.ar.args, delimiter = " ")
+
+    # Hermetic PATH from toolchain (replaces host PATH in wrapper)
+    if tc.host_bin_dir:
+        env["_HERMETIC_PATH"] = cmd_args(tc.host_bin_dir)
 
     # Inject dep environment (CFLAGS, LDFLAGS, PKG_CONFIG_PATH, PATH)
     dep_env, dep_paths = _dep_env_args(ctx)
@@ -264,6 +308,7 @@ def _binary_package_impl(ctx):
         lib_dirs = [],
         bin_dirs = [],
         libraries = [],
+        runtime_lib_dirs = collect_runtime_lib_dirs(ctx.attrs.deps, installed),
         pkg_config_path = None,
         cflags = [],
         ldflags = [],

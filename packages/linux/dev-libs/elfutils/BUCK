@@ -70,6 +70,7 @@ cp -P libdw/libdw.so* "$OUT/usr/lib64/"
 cp libdw/libdw.a "$OUT/usr/lib64/"
 cp libdw/dwarf.h "$OUT/usr/include/"
 cp libdw/libdw.h libdw/known-dwarf.h "$OUT/usr/include/elfutils/"
+cp libdwfl/libdwfl.h "$OUT/usr/include/elfutils/"
 
 cp -P libasm/libasm.so* "$OUT/usr/lib64/"
 cp libasm/libasm.a "$OUT/usr/lib64/"

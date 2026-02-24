@@ -1566,7 +1566,7 @@ qemu_boot_script(
 # ISO images for distribution
 # =============================================================================
 
-# Minimal bootable ISO image
+# Minimal bootable ISO image (hybrid BIOS+EFI)
 iso_image(
     name = "buckos-iso",
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
@@ -1574,64 +1574,6 @@ iso_image(
     boot_mode = "hybrid",
     volume_label = "BUCKOS",
     kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# ISO with BIOS-only boot (for older systems)
-iso_image(
-    name = "buckos-iso-bios",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    boot_mode = "bios",
-    volume_label = "BUCKOS",
-    kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# ISO with EFI-only boot (for modern systems)
-iso_image(
-    name = "buckos-iso-efi",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    boot_mode = "efi",
-    volume_label = "BUCKOS",
-    kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# Live ISO with full rootfs (squashfs compressed)
-iso_image(
-    name = "buckos-live-iso",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    modules = "//packages/linux/kernel/buckos-kernel:linux-modules",
-    rootfs = ":buckos-rootfs",
-    boot_mode = "hybrid",
-    volume_label = "BUCKOS_LIVE",
-    kernel_args = "quiet rdinit=/init",
-    visibility = ["PUBLIC"],
-)
-
-# Full bootable ISO with dracut initramfs - commented out until buckos-bootable is defined
-# iso_image(
-#     name = "buckos-full-iso",
-#     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-#     initramfs = ":buckos-bootable-initramfs",
-#     rootfs = ":buckos-bootable",
-#     boot_mode = "hybrid",
-#     volume_label = "BUCKOS_FULL",
-#     kernel_args = "quiet rdinit=/init",
-#     visibility = ["PUBLIC"],
-# )
-
-# Development ISO with verbose boot
-iso_image(
-    name = "buckos-iso-dev",
-    kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-    initramfs = ":buckos-initramfs",
-    boot_mode = "hybrid",
-    volume_label = "BUCKOS_DEV",
-    kernel_args = "rdinit=/init loglevel=7 debug",
     visibility = ["PUBLIC"],
 )
 
@@ -1834,7 +1776,7 @@ filegroup(
 http_file(
     name = "buckos-build-tarball",
     urls = ["https://github.com/buck-os/buckos-build/archive/refs/heads/main.tar.gz"],
-    sha256 = "baaabb6363897ff63a1a6fa65edd01d18eb00b5731a604d20dc304ab6eb39fc8",
+    sha256 = "f41ded2c83fd6486e490733eaa98609c347233a5b37c385211d49357420a2d30",
     out = "buckos-build-main.tar.gz",
 )
 
@@ -1995,7 +1937,7 @@ rootfs(
         # Graphics stack
         "//packages/linux/desktop/mesa:mesa",
         # Mesa's radeonsi driver depends on LLVM at runtime
-        # "//packages/linux/core/llvm:llvm",  # disabled: long build, not needed yet
+        "//packages/linux/core/llvm:llvm",
         "//packages/linux/dev-libs/elfutils:elfutils",
         "//packages/linux/system/libs/data/libxml2:libxml2",
         "//packages/linux/graphics/rendering/wayland:wayland",
@@ -2052,7 +1994,7 @@ rootfs(
         "//packages/linux/apps/buckos-tools/cli:buckos-cli",
 
         # Web browser
-        # "//packages/linux/www/firefox:firefox",  # disabled: mozbuild not implemented
+        "//packages/linux/www/firefox:firefox",
 
         # Installer dependencies - filesystem tools
         "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",  # mkfs.ext4
@@ -2061,7 +2003,7 @@ rootfs(
         # xfsprogs requires libinih - TODO: add libinih package
         "//packages/linux/system/filesystem/native/dosfstools:dosfstools",  # mkfs.vfat (EFI)
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",  # LUKS encryption
-        "//packages/linux/system/security/cryptsetup:lvm2",  # LVM2 utilities
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",  # LVM2 utilities
 
         # Installer dependencies - file operations
         "//packages/linux/system/apps/rsync:rsync",  # rsync (file sync during install)
@@ -2627,7 +2569,7 @@ rootfs(
         "//packages/linux/editors/grep:grep",
         "//packages/linux/system/libs/cpio:cpio",
         # Device-mapper for dmsquash-live (dmsetup)
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         # Network utilities (ip command)
         "//packages/linux/network/iproute2:iproute2",
         # ncurses for bash/readline (libtinfow)
@@ -2663,7 +2605,6 @@ iso_image(
     rootfs = ":buckos-live-kde-rootfs",
     boot_mode = "hybrid",
     volume_label = "BUCKOS_LIVE",
-    version = "0.0.3",
     # Systemd initrd boot parameters (no serial console)
     kernel_args = "console=tty0 loglevel=7 rd.systemd.show_status=true",
     visibility = ["PUBLIC"],
@@ -2687,7 +2628,7 @@ iso_image(
     kernel = "//packages/linux/kernel/buckos-kernel:buckos-kernel-live",
     initramfs = ":buckos-live-initramfs",
     rootfs = ":buckos-live-kde-rootfs",
-    boot_mode = "uefi",  # ARM boards typically use UEFI
+    boot_mode = "efi",  # ARM boards typically use UEFI
     volume_label = "BUCKOS_LIVE_ARM64",
     kernel_args = "console=tty0 console=ttyAMA0,115200 init=/init quiet systemd.unified_cgroup_hierarchy=1",
     default_target_platform = "//platforms:linux-aarch64-target",

@@ -21,7 +21,7 @@ sed -i 's/-Werror //' Make.defaults || true
         "prefix=/usr",
     ],
     deps = [
-        "//packages/linux/system/security/cryptsetup:popt",
+        "//packages/linux/dev-libs/popt:popt",
         "//packages/linux/system/libs/efivar:efivar",
     ],
     visibility = ["PUBLIC"],

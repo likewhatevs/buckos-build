@@ -4,7 +4,7 @@ package(
     name = "attr",
     build_rule = "binary",
     version = "2.5.2",
-    url = "https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.xz",
+    url = "https://mirror.csclub.uwaterloo.ca/nongnu/attr/attr-2.5.2.tar.xz",
     sha256 = "f2e97b0ab7ce293681ab701915766190d607a1dba7fae8a718138150b700a70b",
     description = "Extended attribute support library",
     homepage = "https://savannah.nongnu.org/projects/attr/",

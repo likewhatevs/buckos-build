@@ -1,8 +1,8 @@
 """
 toolchain_export rule: pack a bootstrap stage into a distributable archive.
 
-The archive contains compiler binaries, sysroot, GCC internal tools, and
-a metadata.json file for provenance tracking.
+The archive contains compiler binaries, sysroot, GCC internal tools,
+optionally host tools, and a metadata.json file for provenance tracking.
 """
 
 load("//defs:providers.bzl", "BootstrapStageInfo")
@@ -23,6 +23,11 @@ def _toolchain_export_impl(ctx):
     cmd.add("--glibc-version", ctx.attrs.glibc_version)
     cmd.add("--compression", ctx.attrs.compression)
 
+    # Include host tools in the seed archive when provided
+    if ctx.attrs.host_tools != None:
+        host_tools_dir = ctx.attrs.host_tools[DefaultInfo].default_outputs[0]
+        cmd.add("--host-tools-dir", host_tools_dir)
+
     ctx.actions.run(cmd, category = "toolchain_export", identifier = ctx.attrs.name)
 
     return [DefaultInfo(default_output = archive)]
@@ -31,6 +36,10 @@ toolchain_export = rule(
     impl = _toolchain_export_impl,
     attrs = {
         "stage": attrs.dep(providers = [BootstrapStageInfo]),
+        "host_tools": attrs.option(
+            attrs.transition_dep(cfg = "//tc/exec:bootstrap-transition"),
+            default = None,
+        ),
         "gcc_version": attrs.string(default = "14.3.0"),
         "glibc_version": attrs.string(default = "2.42"),
         "compression": attrs.string(default = "zst"),

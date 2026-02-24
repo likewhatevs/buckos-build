@@ -495,6 +495,7 @@ fi
 
 mkdir -p build && cd build
 ../configure \
+    MAKEINFO=true \
     --prefix=/tools \
     --target=$BUCKOS_TARGET \
     --with-sysroot=/tools \
@@ -1149,6 +1150,7 @@ CFLAGS_FOR_BUILD="-std=gnu11 -O2 -Wno-error=implicit-function-declaration -fcf-p
 CXXFLAGS_FOR_BUILD="-std=gnu++11 -O2 -fcf-protection=none -D_GNU_SOURCE" \
 LDFLAGS_FOR_BUILD="" \
 stage1_ldflags="" poststage1_ldflags="" BOOT_LDFLAGS="" CET_FLAGS="-fcf-protection=none" ../configure \
+    MAKEINFO=true \
     --prefix=/tools \
     --target=$BUCKOS_TARGET \
     --build=$(../config.guess) \
@@ -2275,6 +2277,7 @@ mkdir -p build && cd build
 
 # Native build (build == host == target), built with cross-compiler
 ../configure \
+    MAKEINFO=true \
     --prefix=/tools \
     --libdir=/tools/lib64 \
     --libexecdir=/tools/lib \
@@ -2737,6 +2740,7 @@ echo "CPPFLAGS=$CPPFLAGS"
 # Configure for native build (build == host == target)
 # --with-build-sysroot tells GCC where to find libraries during build
 ../configure \
+    MAKEINFO=true \
     --prefix=/usr \
     --libdir=/usr/lib64 \
     --libexecdir=/usr/lib \
@@ -5272,7 +5276,8 @@ mkdir -p build && cd build
     --enable-linker-build-id \
     --enable-lto \
     --enable-plugin \
-    --with-linker-hash-style=gnu
+    --with-linker-hash-style=gnu \
+    MAKEINFO=true
 
 # Remove c++tools from Makefiles
 sed -i 's/all-c++tools//g' Makefile || true
@@ -5281,7 +5286,7 @@ sed -i 's/configure-c++tools//g' Makefile || true
 echo "Native GCC Stage 2 for aarch64 configured"
 
 # build
-make -j$MAKE_JOBS
+make -j$MAKE_JOBS MAKEINFO=true
 echo "Native GCC Stage 2 for aarch64 compilation complete"
 
 # install

@@ -16,7 +16,7 @@ package(
     homepage = "https://samba.org/ftp/tridge/dbench/",
     license = "GPL-3.0",
     deps = [
-        "//packages/linux/system/security/cryptsetup:popt",
+        "//packages/linux/dev-libs/popt:popt",
         "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
         "//packages/linux/dev-tools/build-systems/automake:automake",
         "//packages/linux/dev-tools/build-systems/libtool:libtool",

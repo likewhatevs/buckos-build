@@ -10,6 +10,7 @@ it is a zero-cost passthrough when the controlling USE flag is off.
 """
 
 load("//defs:providers.bzl", "PackageInfo")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_path_args")
 
 # ── Helpers ───────────────────────────────────────────────────────────
 
@@ -34,6 +35,7 @@ def _rebase_pkg(pkg, new_prefix):
         lib_dirs = pkg.lib_dirs,
         bin_dirs = pkg.bin_dirs,
         libraries = pkg.libraries,
+        runtime_lib_dirs = pkg.runtime_lib_dirs,
         pkg_config_path = pkg.pkg_config_path,
         cflags = pkg.cflags,
         ldflags = pkg.ldflags,
@@ -59,6 +61,10 @@ def _strip_package_impl(ctx):
     cmd.add("--output", output.as_output())
     cmd.add("--strip", "strip")
 
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     ctx.actions.run(cmd, category = "strip", identifier = pkg.name)
     return [DefaultInfo(default_output = output), _rebase_pkg(pkg, output)]
 
@@ -70,7 +76,7 @@ strip_package = rule(
         "_strip_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:strip_helper"),
         ),
-    },
+    } | TOOLCHAIN_ATTRS,
 )
 
 # ── stamp_package ─────────────────────────────────────────────────────
@@ -88,6 +94,10 @@ def _stamp_package_impl(ctx):
     cmd.add("--version", pkg.version)
     cmd.add("--build-id", ctx.attrs.build_id)
 
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     ctx.actions.run(cmd, category = "stamp", identifier = pkg.name)
     return [DefaultInfo(default_output = output), _rebase_pkg(pkg, output)]
 
@@ -100,7 +110,7 @@ stamp_package = rule(
         "_stamp_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:stamp_helper"),
         ),
-    },
+    } | TOOLCHAIN_ATTRS,
 )
 
 # ── ima_sign_package ──────────────────────────────────────────────────
@@ -116,6 +126,10 @@ def _ima_sign_package_impl(ctx):
     cmd.add("--output", output.as_output())
     cmd.add("--key", ctx.attrs.signing_key)
 
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+
     ctx.actions.run(cmd, category = "ima_sign", identifier = pkg.name)
     return [DefaultInfo(default_output = output), _rebase_pkg(pkg, output)]
 
@@ -128,5 +142,5 @@ ima_sign_package = rule(
         "_ima_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:ima_helper"),
         ),
-    },
+    } | TOOLCHAIN_ATTRS,
 )

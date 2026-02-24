@@ -2,8 +2,9 @@
 Bootstrap toolchain instantiation and export.
 
 Provides:
-  :bootstrap-toolchain  — BuildToolchainInfo wrapping Stage 2 output
-  :export               — distributable tar.zst archive of the complete toolchain
+  :bootstrap-toolchain  — BuildToolchainInfo wrapping Stage 1 output
+  :export               — distributable tar.zst archive (cross-compiler only)
+  :seed-export          — distributable tar.zst archive (cross-compiler + host tools)
 """
 
 load("//tc:toolchain_rules.bzl", "buckos_bootstrap_toolchain")
@@ -21,6 +22,19 @@ buckos_bootstrap_toolchain(
 toolchain_export(
     name = "export",
     stage = "//tc/bootstrap/stage1:stage1",
+    gcc_version = "14.3.0",
+    glibc_version = "2.42",
+    visibility = ["PUBLIC"],
+)
+
+# Seed export: Stage 1 cross-compiler + host tools.
+# Used as the fallback when no prebuilt seed is configured.
+# The bootstrap transition on host_tools flips the toolchain to host PATH
+# tools, breaking the circular dependency automatically.
+toolchain_export(
+    name = "seed-export",
+    stage = "//tc/bootstrap/stage1:stage1",
+    host_tools = "//tc/bootstrap/host-tools:host-tools",
     gcc_version = "14.3.0",
     glibc_version = "2.42",
     visibility = ["PUBLIC"],

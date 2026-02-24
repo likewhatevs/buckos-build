@@ -10,7 +10,8 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "PackageInfo")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args")
+load("//defs/rules:_common.bzl", "collect_runtime_lib_dirs")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
 
@@ -37,6 +38,10 @@ def _go_build(ctx, source):
     cmd = cmd_args(ctx.attrs._go_tool[RunInfo])
     cmd.add("--source-dir", source)
     cmd.add("--output-dir", output.as_output())
+
+    # Hermetic PATH from toolchain
+    for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
 
     # Inject toolchain CC/CXX/AR
     for env_arg in toolchain_env_args(ctx):
@@ -86,6 +91,7 @@ def _go_package_impl(ctx):
         lib_dirs = [],
         bin_dirs = [],
         libraries = [],
+        runtime_lib_dirs = collect_runtime_lib_dirs(ctx.attrs.deps, installed),
         pkg_config_path = None,
         cflags = [],
         ldflags = [],

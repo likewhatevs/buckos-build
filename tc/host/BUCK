@@ -1,12 +1,11 @@
 """
-Host toolchain: wraps whatever cc/c++/ar/strip/make is on PATH.
+Host PATH toolchain: wraps whatever cc/c++/ar/strip/make is on PATH.
 
-Uses the host system sysroot (sysroot = None).  Binaries compiled with
-this toolchain link against the host libc, not the buckos-built one.
-Suitable for quick dev/testing where exact libc matching doesn't matter.
+Used as the bootstrap fallback when the bootstrap configuration
+transition is active — host tool targets build with host PATH tools
+to break the circular dependency with the seed toolchain.
 
-Usage:
-    buck2 build //packages/linux/core:zlib --config tc.mode=host
+Also usable directly during initial bootstrap when no seed exists yet.
 """
 
 load("//tc:toolchain_rules.bzl", "buckos_toolchain")
@@ -21,6 +20,5 @@ buckos_toolchain(
     pkg_config = "pkg-config",
     target_triple = "x86_64-linux-gnu",
     extra_ldflags = ["-fuse-ld=mold"],
-    # No sysroot -- use the host system's default
     visibility = ["PUBLIC"],
 )

@@ -10,7 +10,7 @@ filegroup(
     srcs = [
         "//packages/linux/system/filesystem/management/parted:parted",
         "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         "//packages/linux/system/filesystem/management/dmraid:dmraid",
@@ -41,7 +41,7 @@ filegroup(
 filegroup(
     name = "volume-management",
     srcs = [
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/dmraid:dmraid",
         "//packages/linux/system/filesystem/management/multipath-tools:multipath-tools",
@@ -81,7 +81,7 @@ filegroup(
     srcs = [
         "//packages/linux/system/filesystem/management/parted:parted",
         "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
-        "//packages/linux/system/security/cryptsetup:lvm2",
+        "//packages/linux/system/filesystem/management/lvm2:lvm2",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         "//packages/linux/system/filesystem/management/smartmontools:smartmontools",
     ],

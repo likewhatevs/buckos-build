@@ -9,7 +9,7 @@ package(
     name = "man-db",
     build_rule = "autotools",
     skip_configure = True,
-    url = "https://download.savannah.nongnu.org/releases/man-db/man-db-2.12.0.tar.xz",
+    url = "https://mirror.csclub.uwaterloo.ca/nongnu/man-db/man-db-2.12.0.tar.xz",
 
     sha256 = "415a6284a22764ad22ff0f66710d853be7790dd451cd71436e3d25c74d996a95",
     use_configure = {
@@ -76,7 +76,7 @@ package(
     name = "libpipeline",
     build_rule = "autotools",
     skip_configure = True,
-    url = "https://download.savannah.nongnu.org/releases/libpipeline/libpipeline-1.5.7.tar.gz",
+    url = "https://mirror.csclub.uwaterloo.ca/nongnu/libpipeline/libpipeline-1.5.7.tar.gz",
 
     sha256 = "b8b45194989022a79ec1317f64a2a75b1551b2a55bea06f67704cb2a2e4690b0",
     version = "1.5.7",

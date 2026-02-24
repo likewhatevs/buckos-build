@@ -104,6 +104,8 @@ def main():
                         help="Subdirectory to create and run configure from (for out-of-tree builds)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--pre-cmd", action="append", dest="pre_cmds", default=[],
                         help="Shell command to run in source dir before configure (repeatable)")
     args = parser.parse_args()
@@ -120,23 +122,29 @@ def main():
         shutil.rmtree(output_dir)
     shutil.copytree(source_dir, output_dir, symlinks=True)
 
-    # For Kconfig-based packages, just copying is enough -- the actual
-    # configuration happens via make targets in the build phase.
-    if args.skip_configure:
-        return
-
-    configure = os.path.join(output_dir, args.configure_script)
-
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
     wrapper_dir = os.path.join(output_dir, ".pkgconf-wrapper")
     os.makedirs(wrapper_dir, exist_ok=True)
     wrapper = os.path.join(wrapper_dir, "pkg-config")
     with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
+        f.write('#!/bin/sh\n'
+                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
+                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
     env = os.environ.copy()
+
+    # Expose the project root so pre-cmds can resolve Buck2 artifact
+    # paths (which are relative to the project root, not to output_dir).
+    env["PROJECT_ROOT"] = os.getcwd()
+
+    # Clear host build env vars that could poison the build.
+    # Deps inject these explicitly via --env args.
+    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                "ACLOCAL_PATH"]:
+        env.pop(var, None)
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -165,17 +173,44 @@ def main():
         key, _, value = entry.partition("=")
         if key:
             env[key] = _resolve_env_paths(value)
+    if args.hermetic_path:
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+        _py_paths = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(_sp):
+                        _py_paths.append(_sp)
+        if _py_paths:
+            _existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
     if args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", os.environ.get("PATH", ""))
 
-        # Auto-detect automake Perl modules and aclocal dirs from dep
-        # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
-        # paths which don't resolve to the artifact directory.
+    # Auto-detect automake Perl modules and aclocal dirs from dep
+    # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
+    # paths which don't resolve to the artifact directory.
+    _path_sources = list(args.hermetic_path) + list(args.path_prepend)
+    if _path_sources:
         perl5lib = []
         aclocal_dirs = []
-        for bin_dir in args.path_prepend:
+        for bin_dir in _path_sources:
             share_dir = os.path.join(os.path.dirname(os.path.abspath(bin_dir)), "share")
             for d in _glob.glob(os.path.join(share_dir, "automake-*")):
                 if os.path.isdir(d):
@@ -213,7 +248,10 @@ def main():
     # Prepend pkg-config wrapper to PATH
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", os.environ.get("PATH", ""))
 
-    # Run pre-configure commands (e.g. autoreconf, libtoolize)
+    # Run pre-configure commands (e.g. autoreconf, libtoolize, or
+    # bootstrap src_prepare steps like symlinking in-tree libraries).
+    # These run before the skip-configure check so they're available
+    # for prepare-only actions (--skip-configure --pre-cmd "...").
     for cmd_str in args.pre_cmds:
         result = subprocess.run(cmd_str, shell=True, cwd=output_dir, env=env)
         if result.returncode != 0:
@@ -221,6 +259,10 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
 
+    if args.skip_configure:
+        return
+
+    configure = os.path.join(output_dir, args.configure_script)
     if not os.path.isfile(configure):
         print(f"error: configure script not found in {output_dir}", file=sys.stderr)
         sys.exit(1)

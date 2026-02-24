@@ -84,6 +84,8 @@ def main():
                         help="Extra environment variable KEY=VALUE (repeatable)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--pre-cmd", action="append", dest="pre_cmds", default=[],
                         help="Shell command to run in source dir before meson setup (repeatable)")
     args = parser.parse_args()
@@ -100,10 +102,19 @@ def main():
     wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
     wrapper = os.path.join(wrapper_dir, "pkg-config")
     with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix "$@"\n')
+        f.write('#!/bin/sh\n'
+                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
+                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
     env = os.environ.copy()
+
+    # Clear host build env vars that could poison the build.
+    # Deps inject these explicitly via --env args.
+    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                "ACLOCAL_PATH"]:
+        env.pop(var, None)
 
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
@@ -114,25 +125,46 @@ def main():
     # Pin timestamps for reproducible builds.
     env.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
-    env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
+    if args.hermetic_path:
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
     if args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
-            env["PATH"] = prepend + ":" + env["PATH"]
+            env["PATH"] = prepend + ":" + env.get("PATH", "")
 
-        # Auto-detect Python site-packages from dep prefixes so build-time
-        # Python modules (e.g. mako for mesa) are found without manual
-        # PYTHONPATH wiring.  --path-prepend dirs are {prefix}/usr/bin;
-        # derive {prefix}/usr/lib/python*/site-packages from them.
+    # Auto-detect Python site-packages from dep prefixes so build-time
+    # Python modules (e.g. mako for mesa) are found without manual
+    # PYTHONPATH wiring.  --path-prepend dirs are {prefix}/usr/bin;
+    # derive {prefix}/usr/lib/python*/site-packages from them.
+    _path_sources = list(args.hermetic_path) + list(args.path_prepend)
+    if _path_sources:
         python_paths = []
-        for bin_dir in args.path_prepend:
+        for bin_dir in _path_sources:
             usr_dir = os.path.dirname(os.path.abspath(bin_dir))
-            for sp in _glob.glob(os.path.join(usr_dir, "lib", "python*", "site-packages")):
-                if os.path.isdir(sp):
-                    python_paths.append(sp)
+            for pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                            "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for sp in _glob.glob(os.path.join(usr_dir, pattern)):
+                    if os.path.isdir(sp):
+                        python_paths.append(sp)
         if python_paths:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")
+
+    # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
+    # so the wrapper is always available regardless of PATH mode)
+    env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
 
     for entry in args.extra_env:
         key, _, value = entry.partition("=")

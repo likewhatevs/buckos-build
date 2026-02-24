@@ -59,6 +59,8 @@ def main():
                         help="Extra argument to pass to cargo (repeatable)")
     parser.add_argument("--env", action="append", dest="extra_env", default=[],
                         help="Extra environment variable KEY=VALUE (repeatable)")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--bin", action="append", dest="bins", default=[],
                         help="Specific binary name to install (repeatable; default: all executables)")
     parser.add_argument("--vendor-dir", default=None,
@@ -78,6 +80,13 @@ def main():
 
     env = os.environ.copy()
 
+    # Clear host build env vars that could poison the build.
+    # Deps inject these explicitly via --env args.
+    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                "ACLOCAL_PATH"]:
+        env.pop(var, None)
+
     # Disable host compiler/build caches — Buck2 caches actions itself,
     # and external caches can poison results across build contexts.
     env["CCACHE_DISABLE"] = "1"
@@ -91,6 +100,31 @@ def main():
         key, _, value = entry.partition("=")
         if key:
             env[key] = _resolve_env_paths(value)
+    if args.hermetic_path:
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+        _py_paths = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(_sp):
+                        _py_paths.append(_sp)
+        if _py_paths:
+            _existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
 
     # Set up vendored dependencies if provided
     if args.vendor_dir:

@@ -4,7 +4,7 @@ package(
     name = "acl",
     build_rule = "binary",
     version = "2.3.2",
-    url = "https://download.savannah.nongnu.org/releases/acl/acl-2.3.2.tar.xz",
+    url = "https://mirror.csclub.uwaterloo.ca/nongnu/acl/acl-2.3.2.tar.xz",
     sha256 = "97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd",
     description = "Access Control List library",
     homepage = "https://github.com/sailfishos-mirror/acl",

@@ -50,12 +50,14 @@ def _setup_pkg_config_wrapper(bin_dir):
     os.makedirs(bin_dir, exist_ok=True)
     wrapper = os.path.join(bin_dir, "pkg-config")
     with open(wrapper, "w") as f:
-        f.write("#!/bin/sh\nexec /usr/bin/pkg-config --define-prefix \"$@\"\n")
+        f.write('#!/bin/sh\n'
+                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
+                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
     return bin_dir
 
 
-def _build_dep_env(dep_base_dirs, pkg_config_path):
+def _build_dep_env(dep_base_dirs, pkg_config_path, base_path=None):
     """Build environment from dep base dirs for mach builds.
 
     Unlike binary.bzl, we DON'T set CFLAGS/LDFLAGS — mach manages those
@@ -96,7 +98,9 @@ def _build_dep_env(dep_base_dirs, pkg_config_path):
         env["PKG_CONFIG_PATH"] = ":".join(all_pc)
 
     if bin_paths:
-        env["PATH"] = ":".join(bin_paths) + ":" + os.environ.get("PATH", "")
+        if base_path is None:
+            base_path = os.environ.get("PATH", "")
+        env["PATH"] = ":".join(bin_paths) + ":" + base_path
 
     # LIBRARY_PATH for the linker (NOT LD_LIBRARY_PATH — that poisons
     # system Python's shared libs like pyexpat against our older expat)
@@ -160,14 +164,47 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
     for var in ["CFLAGS", "CXXFLAGS", "LDFLAGS", "CPPFLAGS", "RUSTFLAGS"]:
         env[var] = ""
 
+    # Hermetic PATH: replace host PATH with only specified dirs
+    if hasattr(args, 'hermetic_path') and args.hermetic_path:
+        base_path = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
+        # linked tools (e.g. cross-ar needing libzstd) find their libs.
+        _lib_dirs = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _lib_dirs.append(_d)
+        if _lib_dirs:
+            _existing = os.environ.get("LD_LIBRARY_PATH", "")
+            os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+        _py_paths = []
+        for _bp in args.hermetic_path:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
+                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(_sp):
+                        _py_paths.append(_sp)
+        if _py_paths:
+            _existing = os.environ.get("PYTHONPATH", "")
+            os.environ["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
+    else:
+        base_path = None
+
     # Dep environment (before PATH so we can prepend pkg-config wrapper)
     # Don't inherit PKG_CONFIG_PATH from os.environ — the Starlark layer sets
     # it with relative buck-out paths that break after cd.  We build everything
     # from resolved dep_base_dirs.
     if args.dep_base_dirs:
         dep_dirs = [_resolve(d) for d in args.dep_base_dirs.split(":") if d]
-        dep_env = _build_dep_env(dep_dirs, None)
+        dep_env = _build_dep_env(dep_dirs, None, base_path=base_path)
         env.update(dep_env)
+
+    # Set hermetic base PATH even when no deps provided bin paths
+    if "PATH" not in env and base_path:
+        env["PATH"] = base_path
 
     # pkg-config wrapper with --define-prefix (MUST be first in PATH)
     env["PATH"] = pkg_config_bin_dir + ":" + env.get("PATH", os.environ.get("PATH", ""))
@@ -365,8 +402,17 @@ def main():
                         help="Mozconfig ac_add_options value (repeatable)")
     parser.add_argument("--dep-base-dirs", default=None,
                         help="Colon-separated dep base directories")
+    parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
+                        help="Set PATH to only these dirs (replaces host PATH, repeatable)")
 
     args = parser.parse_args()
+
+    # Clear host build env vars that could poison the build.
+    # Deps inject these explicitly via the helper.
+    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
+                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
+                "ACLOCAL_PATH"]:
+        os.environ.pop(var, None)
 
     args.source_dir = _resolve(args.source_dir)
     args.output_dir = _resolve(args.output_dir)
