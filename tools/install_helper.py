@@ -42,13 +42,25 @@ _BUCK_OUT_RE = re.compile(r'(/[^\s"\']+?)/buck-out/')
 
 
 def _detect_stale_project_root(build_dir):
-    """Scan config.status for absolute paths containing /buck-out/.
+    """Scan build metadata files for absolute paths containing /buck-out/.
 
-    If the prefix before /buck-out/ differs from os.getcwd(), return the
-    stale root.  Otherwise return None.
+    Checks config.status (autotools), CMakeCache.txt (cmake),
+    build.ninja (meson/cmake), and Makefile (OpenSSL-style).  If the
+    prefix before /buck-out/ differs from os.getcwd(), return the stale
+    root.  Otherwise return None.
     """
     current_root = os.getcwd()
-    for cs in _glob.glob(os.path.join(build_dir, "**/config.status"), recursive=True):
+    candidates = list(_glob.glob(os.path.join(build_dir, "**/config.status"), recursive=True))
+    for name in ("CMakeCache.txt", "build.ninja"):
+        path = os.path.join(build_dir, name)
+        if os.path.isfile(path):
+            candidates.append(path)
+    # Also check top-level Makefile — build systems that don't generate
+    # config.status (e.g. OpenSSL's Configure) still embed absolute paths.
+    top_makefile = os.path.join(build_dir, "Makefile")
+    if os.path.isfile(top_makefile) and not candidates:
+        candidates.append(top_makefile)
+    for cs in candidates:
         try:
             with open(cs, "r") as f:
                 content = f.read()
@@ -146,6 +158,47 @@ def _resolve_env_paths(value):
         else:
             parts.append(token)
     return " ".join(parts)
+
+
+def _patch_runshared(build_dir):
+    """Patch RUNSHARED assignments to preserve LD_LIBRARY_PATH from environment.
+
+    Some packages (notably Python) generate Makefiles with:
+        RUNSHARED=	LD_LIBRARY_PATH=/abs/path/to/build
+    This replaces LD_LIBRARY_PATH for subprocesses, losing dep lib dirs
+    set by the helper.  Appending :$$LD_LIBRARY_PATH (Make syntax for
+    literal $) makes the shell expand the current environment value.
+    """
+    _runshared_re = re.compile(
+        r'^(RUNSHARED\s*=\s*LD_LIBRARY_PATH=\S+)$',
+        re.MULTILINE,
+    )
+
+    def _append_env(m):
+        val = m.group(1)
+        if '$$LD_LIBRARY_PATH' in val:
+            return val
+        return val + ':$$LD_LIBRARY_PATH'
+
+    for dirpath, _dirnames, filenames in os.walk(build_dir):
+        for fname in filenames:
+            fpath = os.path.join(dirpath, fname)
+            try:
+                with open(fpath, 'r') as f:
+                    content = f.read()
+            except (UnicodeDecodeError, PermissionError, OSError):
+                continue
+            if 'RUNSHARED' not in content:
+                continue
+            new_content = _runshared_re.sub(_append_env, content)
+            if new_content != content:
+                try:
+                    st = os.stat(fpath)
+                    with open(fpath, 'w') as f:
+                        f.write(new_content)
+                    os.utime(fpath, (st.st_atime, st.st_mtime))
+                except (PermissionError, OSError):
+                    pass
 
 
 def _suppress_phony_rebuilds(build_dir):
@@ -402,6 +455,10 @@ def main():
                 os.utime(os.path.join(dirpath, fname), _stamp)
             except (PermissionError, OSError):
                 pass
+
+    # Patch RUNSHARED assignments so LD_LIBRARY_PATH from the environment
+    # survives into subprocesses (e.g. Python's compileall test-imports).
+    _patch_runshared(build_dir)
 
     targets = args.make_targets or ["install"]
 
