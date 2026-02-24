@@ -19,6 +19,8 @@ import subprocess
 import sys
 import json
 
+from _env import sanitize_global_env
+
 
 def _resolve(path):
     """Resolve a path to absolute."""
@@ -177,8 +179,8 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
                 if os.path.isdir(_d):
                     _lib_dirs.append(_d)
         if _lib_dirs:
-            _existing = os.environ.get("LD_LIBRARY_PATH", "")
-            os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
         _py_paths = []
         for _bp in args.hermetic_path:
             _parent = os.path.dirname(os.path.abspath(_bp))
@@ -188,8 +190,8 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
                     if os.path.isdir(_sp):
                         _py_paths.append(_sp)
         if _py_paths:
-            _existing = os.environ.get("PYTHONPATH", "")
-            os.environ["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
+            _existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
     else:
         base_path = None
 
@@ -407,12 +409,7 @@ def main():
 
     args = parser.parse_args()
 
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via the helper.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        os.environ.pop(var, None)
+    sanitize_global_env()
 
     args.source_dir = _resolve(args.source_dir)
     args.output_dir = _resolve(args.output_dir)

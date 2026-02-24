@@ -14,6 +14,8 @@ import shutil
 import subprocess
 import sys
 
+from _env import sanitize_global_env
+
 
 def _can_unshare_net():
     """Check if unshare --net is available for network isolation."""
@@ -126,6 +128,8 @@ def main():
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
 
+    sanitize_global_env()
+
     # Expose the project root so pre-cmds can resolve Buck2 artifact
     # paths (which are relative to the project root, not to the build dir).
     os.environ["PROJECT_ROOT"] = os.getcwd()
@@ -141,6 +145,29 @@ def main():
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     shutil.copytree(build_dir, output_dir, symlinks=True)
+
+    # Fix symlinks that break after copytree:
+    #
+    # 1. Self-referencing symlinks (target ".") — Buck2 records these with
+    #    an empty target and fails to materialise them.  Replace with real
+    #    directories.  (xfsprogs: include/disk -> .)
+    #
+    # 2. Absolute symlinks pointing into build_dir — copytree preserves
+    #    the old absolute target, making them dangling.  Rewrite to point
+    #    into output_dir instead.  (QEMU: build/Makefile -> abs/configured/Makefile)
+    for dirpath, dirnames, filenames in os.walk(output_dir):
+        for entries in (dirnames, filenames):
+            for name in entries:
+                p = os.path.join(dirpath, name)
+                if not os.path.islink(p):
+                    continue
+                target = os.readlink(p)
+                if target == ".":
+                    os.unlink(p)
+                    os.makedirs(p, exist_ok=True)
+                elif build_dir in target:
+                    os.unlink(p)
+                    os.symlink(target.replace(build_dir, output_dir), p)
 
     # Rewrite absolute paths in build system files.
     # Both CMake and Meson embed the build dir in generated files.  After
@@ -159,7 +186,7 @@ def main():
             for fpath in _glob.glob(os.path.join(output_dir, pattern), recursive=True):
                 try:
                     _rewrite_file(fpath, build_dir, output_dir)
-                except (UnicodeDecodeError, PermissionError):
+                except (UnicodeDecodeError, PermissionError, FileNotFoundError):
                     pass
         # Rewrite build.ninja and suppress cmake regeneration.
         if os.path.isfile(ninja_file):
@@ -198,7 +225,7 @@ def main():
         for fpath in _glob.glob(os.path.join(output_dir, pattern), recursive=True):
             try:
                 _rewrite_file(fpath, build_dir, output_dir)
-            except (UnicodeDecodeError, PermissionError):
+            except (UnicodeDecodeError, PermissionError, FileNotFoundError):
                 pass
 
     # Comprehensive rewrite of stale build-dir paths.  Autotools configure
@@ -236,9 +263,41 @@ def main():
     _install_dat = os.path.join(output_dir, "meson-private", "install.dat")
     if os.path.isfile(_install_dat):
         import pickle as _pickle
+
+        class _StubUnpickler(_pickle.Unpickler):
+            """Unpickler that stubs missing modules (e.g. mesonbuild).
+
+            install.dat contains serialised mesonbuild.* objects but the
+            build_helper pex doesn't ship mesonbuild.  We only need to
+            walk __dict__ and rewrite strings, so a generic stub class
+            that preserves attributes is sufficient.
+            """
+            def find_class(self, module, name):
+                try:
+                    return super().find_class(module, name)
+                except (ModuleNotFoundError, AttributeError):
+                    # Return a stub that accepts arbitrary pickle state
+                    type_key = f"{module}.{name}"
+                    if type_key not in _stub_cache:
+                        class _Stub:
+                            def __reduce__(self):
+                                return (_make_stub, (type_key,), self.__dict__)
+                            def __setstate__(self, state):
+                                if isinstance(state, dict):
+                                    self.__dict__.update(state)
+                        _Stub.__qualname__ = _Stub.__name__ = name
+                        _Stub.__module__ = module
+                        _stub_cache[type_key] = _Stub
+                    return _stub_cache[type_key]
+
+        _stub_cache = {}
+
+        def _make_stub(type_key):
+            return _stub_cache[type_key]()
+
         stat = os.stat(_install_dat)
         with open(_install_dat, "rb") as f:
-            _idata = _pickle.load(f)
+            _idata = _StubUnpickler(f).load()
         def _patch_paths(obj, old, new):
             """Recursively replace old prefix with new in string attributes."""
             if isinstance(obj, str):
@@ -282,24 +341,6 @@ def main():
                 'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
-
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    os.environ["CCACHE_DISABLE"] = "1"
-    os.environ["RUSTC_WRAPPER"] = ""
-    os.environ["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.  Many build systems embed
-    # __DATE__/__TIME__ or query the system clock.  SOURCE_DATE_EPOCH is
-    # the standard mechanism to override this.
-    os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        os.environ.pop(var, None)
 
     # Apply extra environment variables
     for entry in args.extra_env:
@@ -387,6 +428,15 @@ def main():
     if result.returncode != 0:
         print(f"error: {args.build_system} failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(1)
+
+    # Re-run symlink fix after build — some packages (xfsprogs) recreate
+    # self-referencing symlinks during make.
+    for dirpath, dirnames, _filenames in os.walk(output_dir):
+        for d in dirnames:
+            p = os.path.join(dirpath, d)
+            if os.path.islink(p) and os.readlink(p) == ".":
+                os.unlink(p)
+                os.makedirs(p, exist_ok=True)
 
 
 if __name__ == "__main__":

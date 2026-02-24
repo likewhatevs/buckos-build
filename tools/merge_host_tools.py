@@ -28,6 +28,14 @@ def _merge_tree(src_dir, dst_dir):
             _merge_tree(entry.path, dst)
         elif entry.is_symlink():
             linkto = os.readlink(entry.path)
+            # Relativize absolute symlink targets that point within the
+            # same source tree (e.g. bzip2 installs bzless -> $PREFIX/bin/bzmore).
+            # These become broken once copied out of the original prefix.
+            if os.path.isabs(linkto):
+                real_target = os.path.normpath(linkto)
+                real_src = os.path.normpath(src_dir)
+                if real_target.startswith(real_src + os.sep):
+                    linkto = os.path.relpath(real_target, os.path.dirname(entry.path))
             if os.path.lexists(dst):
                 os.remove(dst)
             os.symlink(linkto, dst)

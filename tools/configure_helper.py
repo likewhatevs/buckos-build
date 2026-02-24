@@ -16,6 +16,8 @@ import shutil
 import subprocess
 import sys
 
+from _env import clean_env
+
 
 def _resolve_env_paths(value):
     """Resolve relative Buck2 artifact paths in env values to absolute.
@@ -67,7 +69,7 @@ def _resolve_env_paths(value):
             idx = token.index("=")
             flag = token[: idx + 1]
             path = token[idx + 1 :]
-            if path and not os.path.isabs(path) and os.path.exists(path):
+            if path and not os.path.isabs(path) and (path.startswith("buck-out") or os.path.exists(path)):
                 parts.append(flag + os.path.abspath(path))
             else:
                 parts.append(token)
@@ -88,6 +90,8 @@ def main():
                         help="Argument to pass to ./configure (repeatable)")
     parser.add_argument("--cflags", action="append", dest="cflags", default=[],
                         help="CFLAGS value (repeatable, joined with spaces)")
+    parser.add_argument("--cxxflags", action="append", dest="cxxflags", default=[],
+                        help="CXXFLAGS value (repeatable, joined with spaces)")
     parser.add_argument("--cppflags", action="append", dest="cppflags", default=[],
                         help="CPPFLAGS value (repeatable, joined with spaces)")
     parser.add_argument("--ldflags", action="append", dest="ldflags", default=[],
@@ -133,29 +137,11 @@ def main():
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
-    env = os.environ.copy()
+    env = clean_env()
 
     # Expose the project root so pre-cmds can resolve Buck2 artifact
     # paths (which are relative to the project root, not to output_dir).
     env["PROJECT_ROOT"] = os.getcwd()
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        env.pop(var, None)
-
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    env["CCACHE_DISABLE"] = "1"
-    env["RUSTC_WRAPPER"] = ""
-    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.  Many build systems (autotools,
-    # cmake, meson, kernel) embed __DATE__/__TIME__ or query the system clock.
-    # SOURCE_DATE_EPOCH is the standard mechanism to override this.
-    env.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
     if args.cc:
         env["CC"] = args.cc
@@ -163,6 +149,8 @@ def main():
         env["CXX"] = args.cxx
     if args.cflags:
         env["CFLAGS"] = _resolve_env_paths(" ".join(args.cflags))
+    if args.cxxflags:
+        env["CXXFLAGS"] = _resolve_env_paths(" ".join(args.cxxflags))
     if args.cppflags:
         env["CPPFLAGS"] = _resolve_env_paths(" ".join(args.cppflags))
     if args.ldflags:
@@ -237,11 +225,6 @@ def main():
                 if "aclocal-" in os.path.basename(d):
                     env["ACLOCAL_AUTOMAKE_DIR"] = d
                     break
-            # Include host system aclocal dir for m4 macros from
-            # host-installed packages (e.g. pkg.m4 from pkg-config)
-            host_aclocal = "/usr/share/aclocal"
-            if os.path.isdir(host_aclocal) and host_aclocal not in aclocal_dirs:
-                aclocal_dirs.append(host_aclocal)
             # ACLOCAL_PATH adds extra search directories
             env["ACLOCAL_PATH"] = ":".join(aclocal_dirs)
 
@@ -278,7 +261,11 @@ def main():
         # For out-of-tree builds, configure path is relative to the subdir
         configure = os.path.join(os.path.relpath(output_dir, configure_cwd), args.configure_script)
 
-    cmd = [configure] + args.configure_args
+    # Resolve buck-out relative paths in configure args to absolute.
+    # Buck2 renders artifact paths relative to the project root, but
+    # configure runs in output_dir — the relative paths would break.
+    resolved_args = [_resolve_env_paths(a) for a in args.configure_args]
+    cmd = [configure] + resolved_args
     result = subprocess.run(cmd, cwd=configure_cwd, env=env)
     if result.returncode != 0:
         print(f"error: configure failed with exit code {result.returncode}", file=sys.stderr)

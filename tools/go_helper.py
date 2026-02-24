@@ -10,6 +10,8 @@ import os
 import subprocess
 import sys
 
+from _env import clean_env
+
 
 def _can_unshare_net():
     """Check if unshare --net is available for network isolation."""
@@ -90,23 +92,7 @@ def main():
     else:
         cmd.append("./...")
 
-    env = os.environ.copy()
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        env.pop(var, None)
-
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    env["CCACHE_DISABLE"] = "1"
-    env["RUSTC_WRAPPER"] = ""
-    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.
-    env.setdefault("SOURCE_DATE_EPOCH", "315576000")
+    env = clean_env()
 
     for entry in args.extra_env:
         key, _, value = entry.partition("=")

@@ -13,5 +13,15 @@ package(
     description = "Text based document generation",
     homepage = "https://asciidoc.org/",
     license = "GPL-2+",
+    # asciidoc/resources/ subdirs lack __init__.py; setuptools 75+ treats
+    # the find_packages/find_namespace_packages mismatch as an error.
+    # Switch to find_namespace_packages so all resource dirs are included.
+    pre_configure_cmds = [
+        "sed -i 's/from setuptools import find_packages/from setuptools import find_namespace_packages as find_packages/' setup.py",
+        "rm -rf build asciidoc.egg-info",
+    ],
+    deps = [
+        "//packages/linux/dev-libs/python/setuptools:setuptools",
+    ],
     visibility = ["PUBLIC"],
 )

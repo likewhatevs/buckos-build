@@ -11,6 +11,8 @@ import os
 import subprocess
 import sys
 
+from _env import sanitize_global_env
+
 
 def main():
     parser = argparse.ArgumentParser(description="Build cpio.gz initramfs")
@@ -18,8 +20,7 @@ def main():
     parser.add_argument("--output", required=True, help="Output file path (cpio.gz)")
     args = parser.parse_args()
 
-    # Pin timestamps for reproducible builds.
-    os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
+    sanitize_global_env()
 
     if not os.path.isdir(args.root_dir):
         print(f"error: root directory not found: {args.root_dir}", file=sys.stderr)

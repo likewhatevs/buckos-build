@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import sys
 
+from _env import sanitize_global_env
+
 
 def main():
     parser = argparse.ArgumentParser(description="Install kernel headers")
@@ -26,14 +28,7 @@ def main():
                         help="CROSS_COMPILE= prefix")
     args = parser.parse_args()
 
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    os.environ["CCACHE_DISABLE"] = "1"
-    os.environ["RUSTC_WRAPPER"] = ""
-    os.environ["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.
-    os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
+    sanitize_global_env()
 
     source_dir = os.path.abspath(args.source_dir)
     config_file = os.path.abspath(args.config) if args.config else None

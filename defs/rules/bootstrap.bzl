@@ -1,11 +1,8 @@
 """
 Bootstrap toolchain rules for building a self-hosted GCC/glibc toolchain.
 
-Six rules following autotools_package's 5-phase pattern.  Compile and
-install phases use the standard Python helpers (build_helper.py,
-install_helper.py) for timestamp management, env sanitisation, and path
-resolution.  Configure phases for GCC and glibc remain as bash due to
-their non-standard sysroot assembly and cross-tool discovery.
+Six rules following autotools_package's 5-phase pattern.  All phases
+delegate to Python helpers for env sanitisation and determinism.
 
   bootstrap_binutils      — cross-binutils for target triple
   bootstrap_linux_headers — kernel headers via make headers_install
@@ -22,33 +19,10 @@ TARGET_TRIPLE = "x86_64-buckos-linux-gnu"
 
 # ── Shared helpers ───────────────────────────────────────────────────
 
-# Deterministic build prologue for the configure-phase bash scripts
-# (GCC and glibc only).  Sets CCACHE_DISABLE + SOURCE_DATE_EPOCH.
-# Compile/install phases use Python helpers which handle this internally.
-_DETERMINISM_PROLOGUE = (
-    "export CCACHE_DISABLE=1 RUSTC_WRAPPER='' && " +
-    "export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-315576000} && "
-)
-
 def _env_args(cmd, env_dict):
     """Append --env KEY=VALUE flags to a cmd_args."""
     for k, v in env_dict.items():
         cmd.add("--env", cmd_args(k, "=", v, delimiter = ""))
-
-def _host_tools_path(cmd, ctx):
-    """Prepend host_tools bin/lib dirs to PATH/LD_LIBRARY_PATH if available."""
-    if getattr(ctx.attrs, "host_tools", None):
-        ht_dir = ctx.attrs.host_tools[DefaultInfo].default_outputs[0]
-        cmd.add("--path-prepend", cmd_args(ht_dir, "/bin", delimiter = ""))
-        # Shared libs (e.g. libpython) live in the merged lib/lib64 dirs
-        cmd.add("--env", cmd_args("LD_LIBRARY_PATH=", ht_dir, "/lib:", ht_dir, "/lib64", delimiter = ""))
-
-_HOST_TOOLS_ATTR = {
-    "host_tools": attrs.option(
-        attrs.transition_dep(cfg = "//tc/exec:bootstrap-transition"),
-        default = None,
-    ),
-}
 
 def _toolchain_env(ctx):
     """Build environment dict from BootstrapStageInfo or host_cc attrs."""
@@ -116,7 +90,6 @@ def _bootstrap_binutils_impl(ctx):
     build_cmd.add("--output-dir", built.as_output())
     build_cmd.add("--build-subdir", "build")
     build_cmd.add("--make-arg", "MAKEINFO=true")
-    _host_tools_path(build_cmd, ctx)
     _env_args(build_cmd, env)
     ctx.actions.run(build_cmd, category = "compile", identifier = ctx.attrs.name)
 
@@ -127,7 +100,6 @@ def _bootstrap_binutils_impl(ctx):
     inst_cmd.add("--build-subdir", "build")
     inst_cmd.add("--prefix", installed.as_output())
     inst_cmd.add("--make-arg", "MAKEINFO=true")
-    _host_tools_path(inst_cmd, ctx)
     _env_args(inst_cmd, env)
     ctx.actions.run(inst_cmd, category = "install", identifier = ctx.attrs.name)
 
@@ -151,7 +123,7 @@ bootstrap_binutils = rule(
         "_install_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:install_helper"),
         ),
-    } | _HOST_TOOLS_ATTR,
+    },
 )
 
 # ── bootstrap_linux_headers ──────────────────────────────────────────
@@ -234,16 +206,29 @@ def _bootstrap_gcc_impl(ctx):
 
     # Build the pre-cmd chain for src_prepare.  $PROJECT_ROOT is set by
     # configure_helper so artifact paths (relative to project root) resolve.
+    #
+    # Collect math lib source artifacts — downstream actions (configure,
+    # compile, install) need these as hidden inputs because the prepare
+    # phase creates symlinks into these artifacts.  Without declaring
+    # them, Buck2 won't materialize the targets for downstream actions.
+    math_lib_srcs = []
     pre_parts = []
+    # Copy math libs into the source tree (GCC configure expects in-tree
+    # gmp/, mpfr/, mpc/ directories).  We use cp -a instead of symlinks
+    # because symlinks embed absolute paths that break when the action
+    # output is restored from remote cache on a different machine.
     if ctx.attrs.gmp_source:
         gmp_src = ctx.attrs.gmp_source[DefaultInfo].default_outputs[0]
-        pre_parts.append(cmd_args("ln -sfn $PROJECT_ROOT/", gmp_src, " gmp", delimiter = ""))
+        math_lib_srcs.append(gmp_src)
+        pre_parts.append(cmd_args("cp -a $PROJECT_ROOT/", gmp_src, " gmp", delimiter = ""))
     if ctx.attrs.mpfr_source:
         mpfr_src = ctx.attrs.mpfr_source[DefaultInfo].default_outputs[0]
-        pre_parts.append(cmd_args("ln -sfn $PROJECT_ROOT/", mpfr_src, " mpfr", delimiter = ""))
+        math_lib_srcs.append(mpfr_src)
+        pre_parts.append(cmd_args("cp -a $PROJECT_ROOT/", mpfr_src, " mpfr", delimiter = ""))
     if ctx.attrs.mpc_source:
         mpc_src = ctx.attrs.mpc_source[DefaultInfo].default_outputs[0]
-        pre_parts.append(cmd_args("ln -sfn $PROJECT_ROOT/", mpc_src, " mpc", delimiter = ""))
+        math_lib_srcs.append(mpc_src)
+        pre_parts.append(cmd_args("cp -a $PROJECT_ROOT/", mpc_src, " mpc", delimiter = ""))
 
     # For pass1 (C only, no libc): remove libcody and c++tools
     if not ctx.attrs.with_headers:
@@ -279,55 +264,26 @@ def _bootstrap_gcc_impl(ctx):
         prep_cmd.add("--pre-cmd", part)
     ctx.actions.run(prep_cmd, category = "prepare", identifier = ctx.attrs.name)
 
-    # Phase 3: configure — build sysroot and run configure.
-    # GCC's configure is non-standard (runtime sysroot assembly, cross-tool
-    # paths, out-of-tree build), so it stays as bash.  The compile and install
-    # phases below use the Python helpers for timestamp/env management.
+    # Phase 3: configure — Python helper handles sysroot assembly and
+    # runs ../configure from an out-of-tree build dir.
     configured = ctx.actions.declare_output("configured", dir = True)
-    conf_script = cmd_args("/bin/bash", "-ce")
-    conf_body = cmd_args(_DETERMINISM_PROLOGUE, "PROJECT_ROOT=$PWD && ", delimiter = "")
+    conf_cmd = cmd_args(ctx.attrs._gcc_configure_tool[RunInfo])
+    conf_cmd.add("--source-dir", prepared)
+    conf_cmd.add("--output-dir", configured.as_output())
+    if math_lib_srcs:
+        conf_cmd.add(cmd_args(hidden = math_lib_srcs))
+    conf_cmd.add("--target-triple", target_triple)
     if ctx.attrs.libc_headers:
-        headers_dir = ctx.attrs.libc_headers[DefaultInfo].default_outputs[0]
-        conf_body.add(cmd_args("HEADERS_ABS=$PROJECT_ROOT/", headers_dir, " && ", delimiter = ""))
+        conf_cmd.add("--headers-dir", ctx.attrs.libc_headers[DefaultInfo].default_outputs[0])
     if ctx.attrs.libc_dep:
-        libc_dir = ctx.attrs.libc_dep[DefaultInfo].default_outputs[0]
-        conf_body.add(cmd_args("LIBC_ABS=$PROJECT_ROOT/", libc_dir, " && ", delimiter = ""))
+        conf_cmd.add("--libc-dir", ctx.attrs.libc_dep[DefaultInfo].default_outputs[0])
     if ctx.attrs.binutils:
-        binutils_dir = ctx.attrs.binutils[DefaultInfo].default_outputs[0]
-        conf_body.add(cmd_args("BINUTILS_ABS=$PROJECT_ROOT/", binutils_dir, " && ", delimiter = ""))
+        conf_cmd.add("--binutils-dir", ctx.attrs.binutils[DefaultInfo].default_outputs[0])
+    if ctx.attrs.with_headers:
+        conf_cmd.add("--with-headers")
+    conf_cmd.add("--languages", ctx.attrs.languages)
 
-    conf_body.add(cmd_args(
-        "cp -a ", prepared, "/. ", configured.as_output(), "/ && ",
-        "cd ", configured.as_output(), " && ",
-        delimiter = "",
-    ))
-
-    # Create build sysroot from dependencies
-    if ctx.attrs.libc_headers:
-        conf_body.add(
-            "BUILD_SYSROOT=$PWD/build-sysroot && " +
-            "mkdir -p $BUILD_SYSROOT/usr/include && " +
-            "cp -r $HEADERS_ABS/usr/include/* $BUILD_SYSROOT/usr/include/ && ",
-        )
-    if ctx.attrs.libc_dep:
-        conf_body.add(
-            "BUILD_SYSROOT=$PWD/build-sysroot && " +
-            "cp -a $LIBC_ABS/* $BUILD_SYSROOT/ && ",
-        )
-        if ctx.attrs.libc_headers:
-            conf_body.add("cp -a $HEADERS_ABS/* $BUILD_SYSROOT/ && ")
-        conf_body.add(
-            "mkdir -p $BUILD_SYSROOT/usr/include/sys && " +
-            "printf '#ifndef _SYS_SDT_H\\n#define _SYS_SDT_H\\n" +
-            "#define STAP_PROBE(p,n)\\n#endif\\n' > $BUILD_SYSROOT/usr/include/sys/sdt.h && ",
-        )
-
-    if ctx.attrs.binutils:
-        conf_body.add("BINUTILS_BIN=$BINUTILS_ABS/tools/bin && ")
-
-    conf_body.add("mkdir -p build && cd build && ")
-
-    # Build configure command
+    # Build configure args
     configure_args = ["--prefix=/tools"]
     if is_cross:
         configure_args.append("--target=" + target_triple)
@@ -365,40 +321,12 @@ def _bootstrap_gcc_impl(ctx):
         configure_args.append(arg)
 
     configure_args.append("MAKEINFO=true")
-
-    # Build the ../configure command with env vars
-    env = _toolchain_env(ctx)
-    for k, v in env.items():
-        if type(v) == type(""):
-            conf_body.add(k + "=\"" + v + "\" ")
-        else:
-            conf_body.add(cmd_args(k + "=\"$PROJECT_ROOT/", v, "\" ", delimiter = ""))
-
-    # Add sysroot args
-    if ctx.attrs.libc_headers and not ctx.attrs.libc_dep:
-        conf_body.add("../configure --with-build-sysroot=$BUILD_SYSROOT ")
-        if ctx.attrs.binutils:
-            conf_body.add(cmd_args(
-                "--with-as=$BINUTILS_BIN/", target_triple, "-as ",
-                "--with-ld=$BINUTILS_BIN/", target_triple, "-ld ",
-                delimiter = "",
-            ))
-    elif ctx.attrs.libc_dep:
-        conf_body.add("../configure --with-build-sysroot=$BUILD_SYSROOT ")
-    else:
-        conf_body.add("../configure ")
-        if ctx.attrs.binutils:
-            conf_body.add(cmd_args(
-                "--with-as=$BINUTILS_BIN/", target_triple, "-as ",
-                "--with-ld=$BINUTILS_BIN/", target_triple, "-ld ",
-                delimiter = "",
-            ))
-
     for arg in configure_args:
-        conf_body.add(arg + " ")
+        conf_cmd.add(cmd_args("--configure-arg=", arg, delimiter = ""))
 
-    conf_script.add(conf_body)
-    ctx.actions.run(conf_script, category = "configure", identifier = ctx.attrs.name)
+    env = _toolchain_env(ctx)
+    _env_args(conf_cmd, env)
+    ctx.actions.run(conf_cmd, category = "configure", identifier = ctx.attrs.name)
 
     # Phase 4: compile — use build_helper for timestamp management, env
     # sanitisation, and path resolution.  Custom make targets via --pre-cmd
@@ -408,6 +336,8 @@ def _bootstrap_gcc_impl(ctx):
     build_cmd.add("--build-dir", configured)
     build_cmd.add("--output-dir", built.as_output())
     build_cmd.add("--skip-make")
+    if math_lib_srcs:
+        build_cmd.add(cmd_args(hidden = math_lib_srcs))
 
     # Cross-binutils must be on PATH for libgcc's ar/ranlib steps
     if ctx.attrs.binutils:
@@ -418,18 +348,20 @@ def _bootstrap_gcc_impl(ctx):
         _stage_out = ctx.attrs.prev_stage[DefaultInfo].default_outputs[0]
         build_cmd.add("--path-prepend", cmd_args(_stage_out, "/tools/bin", delimiter = ""))
 
-    _host_tools_path(build_cmd, ctx)
     _env_args(build_cmd, _toolchain_env(ctx))
 
     # Ensure makeinfo stub is on PATH for GMP/MPFR sub-configures
     _mi = 'command -v makeinfo >/dev/null 2>&1 || { mkdir -p .stub-bin && printf "#!/bin/sh\\nexit 0\\n" > .stub-bin/makeinfo && chmod +x .stub-bin/makeinfo && export PATH="$PWD/.stub-bin:$PATH"; } && '
+    # Suppress autotools regeneration — build_helper resets timestamps
+    # which makes make think aclocal.m4 etc. are stale in GMP/MPFR.
+    _at = "ACLOCAL=true AUTOMAKE=true AUTOCONF=true AUTOHEADER=true MAKEINFO=true "
 
     if not ctx.attrs.with_headers:
         # Pass1: build just gcc and minimal libgcc
         build_cmd.add("--pre-cmd",
             _mi +
-            "cd build && make -j$(nproc) all-gcc && " +
-            "make configure-target-libgcc && " +
+            "cd build && make " + _at + "-j$(nproc) all-gcc && " +
+            "make " + _at + "configure-target-libgcc && " +
             "cd " + target_triple + "/libgcc && " +
             "make -j$(nproc) libgcc.a INHIBIT_LIBC_CFLAGS='-Dinhibit_libc' && " +
             "{ make -j$(nproc) crtbegin.o crtend.o crtbeginS.o crtendS.o crtbeginT.o 2>/dev/null || true; }",
@@ -439,9 +371,9 @@ def _bootstrap_gcc_impl(ctx):
         build_cmd.add("--pre-cmd",
             _mi +
             "cd build && " +
-            "make -j$(nproc) all-gcc && " +
-            "make -j$(nproc) all-target-libgcc && " +
-            "make -j$(nproc) all-target-libstdc++-v3",
+            "make " + _at + "-j$(nproc) all-gcc && " +
+            "make " + _at + "-j$(nproc) all-target-libgcc && " +
+            "make " + _at + "-j$(nproc) all-target-libstdc++-v3",
         )
 
     ctx.actions.run(build_cmd, category = "compile", identifier = ctx.attrs.name)
@@ -454,6 +386,8 @@ def _bootstrap_gcc_impl(ctx):
     inst_cmd.add("--build-dir", built)
     inst_cmd.add("--build-subdir", "build")
     inst_cmd.add("--prefix", installed.as_output())
+    if math_lib_srcs:
+        inst_cmd.add(cmd_args(hidden = math_lib_srcs))
 
     if ctx.attrs.binutils:
         _bdir2 = ctx.attrs.binutils[DefaultInfo].default_outputs[0]
@@ -462,7 +396,6 @@ def _bootstrap_gcc_impl(ctx):
         _stage_out2 = ctx.attrs.prev_stage[DefaultInfo].default_outputs[0]
         inst_cmd.add("--path-prepend", cmd_args(_stage_out2, "/tools/bin", delimiter = ""))
 
-    _host_tools_path(inst_cmd, ctx)
     _env_args(inst_cmd, _toolchain_env(ctx))
 
     if not ctx.attrs.with_headers:
@@ -562,13 +495,16 @@ bootstrap_gcc = rule(
         "_configure_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:configure_helper"),
         ),
+        "_gcc_configure_tool": attrs.default_only(
+            attrs.exec_dep(default = "//tools:bootstrap_gcc_configure"),
+        ),
         "_build_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:build_helper"),
         ),
         "_install_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:install_helper"),
         ),
-    } | _HOST_TOOLS_ATTR,
+    },
 )
 
 # ── bootstrap_glibc ──────────────────────────────────────────────────
@@ -595,60 +531,18 @@ def _bootstrap_glibc_impl(ctx):
     )
     ctx.actions.run(prep_cmd, category = "prepare", identifier = ctx.attrs.name)
 
-    # Phase 3: configure — glibc requires out-of-tree build with custom
-    # cross-tool discovery.  Stays as bash (configure_helper can't do
-    # runtime `which` for cross-tool paths).
+    # Phase 3: configure — Python helper handles cross-tool discovery
+    # and runs ../configure from an out-of-tree build dir.
     configured = ctx.actions.declare_output("configured", dir = True)
-    conf_script = cmd_args("/bin/bash", "-ce")
-    conf_body = cmd_args(_DETERMINISM_PROLOGUE, "PROJECT_ROOT=$PWD && ", delimiter = "")
-    conf_body.add(cmd_args("COMPILER_ABS=$PROJECT_ROOT/", compiler_dir, " && ", delimiter = ""))
-    conf_body.add(cmd_args("HEADERS_ABS=$PROJECT_ROOT/", headers_dir, " && ", delimiter = ""))
+    conf_cmd = cmd_args(ctx.attrs._glibc_configure_tool[RunInfo])
+    conf_cmd.add("--source-dir", prepared)
+    conf_cmd.add("--output-dir", configured.as_output())
+    conf_cmd.add("--target-triple", target_triple)
+    conf_cmd.add("--compiler-dir", compiler_dir)
+    conf_cmd.add("--headers-dir", headers_dir)
     if binutils_dir:
-        conf_body.add(cmd_args("BINUTILS_ABS=$PROJECT_ROOT/", binutils_dir, " && ", delimiter = ""))
-
-    conf_body.add(cmd_args(
-        "cp -a ", prepared, "/. ", configured.as_output(), "/ && ",
-        "cd ", configured.as_output(), " && ",
-        "mkdir -p build && cd build && ",
-        "echo 'rootsbindir=/usr/sbin' > configparms && ",
-        delimiter = "",
-    ))
-
-    tool_prefix = target_triple + "-"
-    conf_body.add("CROSS_CC=$(PATH=$COMPILER_ABS/tools/bin:")
-    if binutils_dir:
-        conf_body.add("$BINUTILS_ABS/tools/bin:")
-    conf_body.add("$PATH which " + tool_prefix + "gcc) && ")
-    conf_body.add("CROSS_CPP=\"$CROSS_CC -E\" && ")
-    conf_body.add("HEADERS_PATH=$HEADERS_ABS/usr/include && ")
-    conf_body.add("CC=\"$CROSS_CC\" CPP=\"$CROSS_CPP\" CXX='' ")
-    if binutils_dir:
-        for tool in ["LD", "AR", "AS", "NM", "RANLIB", "OBJCOPY", "OBJDUMP", "STRIP"]:
-            conf_body.add(
-                tool + "=$(PATH=$BINUTILS_ABS/tools/bin:$PATH which " + tool_prefix + tool.lower() + " 2>/dev/null || true) ",
-            )
-
-    conf_body.add(
-        "../configure " +
-        "--prefix=/usr " +
-        "--host=" + target_triple + " " +
-        "--build=$(../scripts/config.guess) " +
-        "--enable-kernel=4.19 " +
-        "--with-headers=$HEADERS_PATH " +
-        "--disable-nscd " +
-        "--disable-werror " +
-        "--enable-cet=no " +
-        "libc_cv_slibdir=/usr/lib64 " +
-        "libc_cv_forced_unwind=yes " +
-        "libc_cv_c_cleanup=yes " +
-        "libc_cv_pde=yes " +
-        "libc_cv_pde_load_address=0x0000000000400000 " +
-        "libc_cv_cxx_link_ok=no " +
-        "CFLAGS='-O2 -g -fcf-protection=none' " +
-        "CXXFLAGS='-O2 -g -fcf-protection=none'",
-    )
-    conf_script.add(conf_body)
-    ctx.actions.run(conf_script, category = "configure", identifier = ctx.attrs.name)
+        conf_cmd.add("--binutils-dir", binutils_dir)
+    ctx.actions.run(conf_cmd, category = "configure", identifier = ctx.attrs.name)
 
     # Phase 4: compile — use build_helper for timestamp management.
     # Standard make -j$(nproc) in build subdir, just needs cross-tool PATH.
@@ -660,7 +554,6 @@ def _bootstrap_glibc_impl(ctx):
     build_cmd.add("--path-prepend", cmd_args(compiler_dir, "/tools/bin", delimiter = ""))
     if binutils_dir:
         build_cmd.add("--path-prepend", cmd_args(binutils_dir, "/tools/bin", delimiter = ""))
-    _host_tools_path(build_cmd, ctx)
     ctx.actions.run(build_cmd, category = "compile", identifier = ctx.attrs.name)
 
     # Phase 5: install — use install_helper with post-cmds for linker
@@ -673,7 +566,6 @@ def _bootstrap_glibc_impl(ctx):
     inst_cmd.add("--path-prepend", cmd_args(compiler_dir, "/tools/bin", delimiter = ""))
     if binutils_dir:
         inst_cmd.add("--path-prepend", cmd_args(binutils_dir, "/tools/bin", delimiter = ""))
-    _host_tools_path(inst_cmd, ctx)
 
     # Fix glibc linker scripts to use relative paths
     inst_cmd.add("--post-cmd",
@@ -702,13 +594,16 @@ bootstrap_glibc = rule(
         "_configure_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:configure_helper"),
         ),
+        "_glibc_configure_tool": attrs.default_only(
+            attrs.exec_dep(default = "//tools:bootstrap_glibc_configure"),
+        ),
         "_build_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:build_helper"),
         ),
         "_install_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:install_helper"),
         ),
-    } | _HOST_TOOLS_ATTR,
+    },
 )
 
 # ── bootstrap_package ────────────────────────────────────────────────
@@ -872,78 +767,30 @@ def _bootstrap_python_impl(ctx):
     for dep in ctx.attrs.deps:
         dep_dirs.append(dep[DefaultInfo].default_outputs[0])
 
-    # Phase 1: prepare — copy source
+    # Phase 1: prepare — copy source (uses configure_helper --skip-configure)
     prepared = ctx.actions.declare_output("prepared", dir = True)
-    prep_script = cmd_args("/bin/bash", "-ce")
-    prep_body = cmd_args(
-        "cp -a ", source, "/. ", prepared.as_output(), "/",
-        delimiter = "",
-    )
-    prep_script.add(prep_body)
-    ctx.actions.run(prep_script, category = "prepare", identifier = ctx.attrs.name)
+    prep_cmd = cmd_args(ctx.attrs._configure_tool[RunInfo])
+    prep_cmd.add("--source-dir", source)
+    prep_cmd.add("--output-dir", prepared.as_output())
+    prep_cmd.add("--skip-configure")
+    ctx.actions.run(prep_cmd, category = "prepare", identifier = ctx.attrs.name)
 
-    # Phase 2: configure — merge deps into build sysroot, run configure
+    # Phase 2: configure — Python helper merges deps into build sysroot
+    # and runs ../configure with cross-compilation cache variables.
     configured = ctx.actions.declare_output("configured", dir = True)
-    conf_script = cmd_args("/bin/bash", "-ce")
-    conf_body = cmd_args("PROJECT_ROOT=$PWD && ", delimiter = "")
-
-    # Resolve all paths
-    conf_body.add(cmd_args("STAGE_DIR=$PROJECT_ROOT/", stage_output, " && ", delimiter = ""))
-    conf_body.add(cmd_args("SYSROOT=$PROJECT_ROOT/", stage.sysroot, " && ", delimiter = ""))
-    for i, dep_dir in enumerate(dep_dirs):
-        conf_body.add(cmd_args("DEP", str(i), "_DIR=$PROJECT_ROOT/", dep_dir, " && ", delimiter = ""))
-
-    conf_body.add(cmd_args(
-        "cp -a ", prepared, "/. ", configured.as_output(), "/ && ",
-        "cd ", configured.as_output(), " && ",
-        delimiter = "",
-    ))
-
-    # Create merged build sysroot with deps
-    conf_body.add(
-        "BUILD_SYSROOT=$PWD/build-sysroot && " +
-        "mkdir -p $BUILD_SYSROOT && " +
-        "cp -a $SYSROOT/. $BUILD_SYSROOT/ && ",
-    )
-    for i, _ in enumerate(dep_dirs):
-        conf_body.add(
-            "cp -an $DEP" + str(i) + "_DIR/usr/. $BUILD_SYSROOT/usr/ 2>/dev/null || true && ",
-        )
-
-    # Export PATH with stage tools
-    conf_body.add(
-        "export PATH=$STAGE_DIR/tools/bin:$PATH && ",
-    )
-
-    # Set cross-compilation env vars
-    target_triple = stage.target_triple
-    conf_body.add(cmd_args(
-        "export CC=\"$PROJECT_ROOT/", stage.cc, " --sysroot=$BUILD_SYSROOT\" && ",
-        "export CXX=\"$PROJECT_ROOT/", stage.cxx, " --sysroot=$BUILD_SYSROOT\" && ",
-        "export AR=$PROJECT_ROOT/", stage.ar, " && ",
-        delimiter = "",
-    ))
-
-    # Configure with cross-compilation cache variables
-    # These bypass runtime tests that fail during cross-compilation
-    conf_body.add(
-        "mkdir -p build && cd build && " +
-        "ac_cv_file__dev_ptmx=yes " +
-        "ac_cv_file__dev_ptc=no " +
-        "../configure ",
-    )
-
+    conf_cmd = cmd_args(ctx.attrs._python_configure_tool[RunInfo])
+    conf_cmd.add("--source-dir", prepared)
+    conf_cmd.add("--output-dir", configured.as_output())
+    conf_cmd.add("--stage-dir", stage_output)
+    conf_cmd.add("--sysroot", stage.sysroot)
+    conf_cmd.add("--cc", stage.cc)
+    conf_cmd.add("--cxx", stage.cxx)
+    conf_cmd.add("--ar", stage.ar)
+    for dep_dir in dep_dirs:
+        conf_cmd.add("--dep-dir", dep_dir)
     for arg in ctx.attrs.configure_args:
-        conf_body.add(arg + " ")
-
-    # Add sysroot paths for includes/libs
-    conf_body.add(
-        "CFLAGS=\"-I$BUILD_SYSROOT/usr/include\" " +
-        "LDFLAGS=\"-L$BUILD_SYSROOT/usr/lib64 -L$BUILD_SYSROOT/usr/lib -Wl,-rpath-link,$BUILD_SYSROOT/usr/lib64\"",
-    )
-
-    conf_script.add(conf_body)
-    ctx.actions.run(conf_script, category = "configure", identifier = ctx.attrs.name)
+        conf_cmd.add(cmd_args("--configure-arg=", arg, delimiter = ""))
+    ctx.actions.run(conf_cmd, category = "configure", identifier = ctx.attrs.name)
 
     # Phase 3: compile — use build_helper for timestamp management.
     built = ctx.actions.declare_output("built", dir = True)
@@ -982,6 +829,12 @@ bootstrap_python = rule(
         "configure_args": attrs.list(attrs.string(), default = []),
         "license": attrs.string(default = "UNKNOWN"),
         "description": attrs.string(default = ""),
+        "_configure_tool": attrs.default_only(
+            attrs.exec_dep(default = "//tools:configure_helper"),
+        ),
+        "_python_configure_tool": attrs.default_only(
+            attrs.exec_dep(default = "//tools:bootstrap_python_configure"),
+        ),
         "_build_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:build_helper"),
         ),
