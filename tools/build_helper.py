@@ -10,6 +10,7 @@ import argparse
 import glob as _glob
 import multiprocessing
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -190,7 +191,6 @@ def main():
                     pass
         # Rewrite build.ninja and suppress cmake regeneration.
         if os.path.isfile(ninja_file):
-            import re
             stat = os.stat(ninja_file)
             with open(ninja_file, "r") as f:
                 content = f.read()
@@ -204,7 +204,6 @@ def main():
                 f.write(content)
             os.utime(ninja_file, (stat.st_atime, stat.st_mtime))
     elif os.path.isfile(ninja_file):
-        import re
         stat = os.stat(ninja_file)
         with open(ninja_file, "r") as f:
             content = f.read()
@@ -316,6 +315,50 @@ def main():
         with open(_install_dat, "wb") as f:
             _pickle.dump(_idata, f)
         os.utime(_install_dat, (stat.st_atime, stat.st_mtime))
+
+    # Detect and rewrite stale cross-machine paths.  When Buck2 restores
+    # cached configure outputs from a different machine, files contain the
+    # original machine's project root (e.g. /home/patso/repos/foo) which
+    # doesn't exist here.  Scan config.status for /buck-out/ prefixes that
+    # differ from the current project root and rewrite them everywhere.
+    _BUCK_OUT_RE = re.compile(r'(/[^\s"\']+?)/buck-out/')
+    _stale_root = None
+    _current_root = os.getcwd()
+    for _cs in _glob.glob(os.path.join(output_dir, "**/config.status"), recursive=True):
+        try:
+            with open(_cs, "r") as f:
+                _cs_content = f.read()
+        except (UnicodeDecodeError, PermissionError, OSError):
+            continue
+        _m = _BUCK_OUT_RE.search(_cs_content)
+        if _m and _m.group(1) != _current_root:
+            _stale_root = _m.group(1)
+            break
+    if _stale_root:
+        # Rewrite symlink targets
+        for dirpath, dirnames, filenames in os.walk(output_dir):
+            for entries in (dirnames, filenames):
+                for name in entries:
+                    p = os.path.join(dirpath, name)
+                    if not os.path.islink(p):
+                        continue
+                    target = os.readlink(p)
+                    if _stale_root in target:
+                        os.unlink(p)
+                        os.symlink(target.replace(_stale_root, _current_root), p)
+        # Rewrite text files
+        for dirpath, _dirnames, filenames in os.walk(output_dir):
+            for fname in filenames:
+                if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                    continue
+                fpath = os.path.join(dirpath, fname)
+                if os.path.islink(fpath):
+                    continue
+                try:
+                    _rewrite_file(fpath, _stale_root, _current_root)
+                except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                        FileNotFoundError):
+                    pass
 
     # Reset all file timestamps to a single fixed instant so make doesn't
     # try to regenerate autotools/cmake/meson outputs.  The copytree
