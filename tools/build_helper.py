@@ -408,6 +408,19 @@ def main():
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
         if prepend:
             os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
+        # Derive LD_LIBRARY_PATH from dep bin dirs so dynamically linked
+        # libraries (e.g. libbz2.so for Python's _bz2 module) are found
+        # at build time when the build process test-imports extensions.
+        _dep_lib_dirs = []
+        for _bp in args.path_prepend:
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _ld in ("lib", "lib64"):
+                _d = os.path.join(_parent, _ld)
+                if os.path.isdir(_d):
+                    _dep_lib_dirs.append(_d)
+        if _dep_lib_dirs:
+            _existing = os.environ.get("LD_LIBRARY_PATH", "")
+            os.environ["LD_LIBRARY_PATH"] = ":".join(_dep_lib_dirs) + (":" + _existing if _existing else "")
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found by custom generators.
