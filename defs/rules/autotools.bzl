@@ -92,6 +92,20 @@ def _src_configure(ctx, source):
         for flag in ctx.attrs.extra_ldflags:
             cmd.add(cmd_args("--ldflags=", flag, delimiter = ""))
 
+        # --with-NAME=<prefix>/usr and --with-NAME-lib=<prefix>/usr/lib64
+        # flags from configure_prefix_deps.
+        # GCC needs both: --with-gmp for headers, --with-gmp-lib for the
+        # library directory (defaults to <prefix>/lib which misses lib64).
+        for flag_name, dep in ctx.attrs.configure_prefix_deps.items():
+            if PackageInfo in dep:
+                prefix = dep[PackageInfo].prefix
+            else:
+                prefix = dep[DefaultInfo].default_outputs[0]
+            fmt = "--with-" + flag_name + "={}/usr"
+            cmd.add(cmd_args("--configure-arg=", cmd_args(prefix, format = fmt), delimiter = ""))
+            fmt_lib = "--with-" + flag_name + "-lib={}/usr/lib64"
+            cmd.add(cmd_args("--configure-arg=", cmd_args(prefix, format = fmt_lib), delimiter = ""))
+
         # Propagate include/lib/pkgconfig paths from dependencies.
         for dep in ctx.attrs.deps:
             if PackageInfo in dep:
@@ -103,6 +117,7 @@ def _src_configure(ctx, source):
             lib = cmd_args(prefix, format = "-L{}/usr/lib")
             cmd.add(cmd_args("--cppflags=", inc, delimiter = ""))
             cmd.add(cmd_args("--cflags=", inc, delimiter = ""))
+            cmd.add(cmd_args("--cxxflags=", inc, delimiter = ""))
             cmd.add(cmd_args("--ldflags=", lib64, delimiter = ""))
             cmd.add(cmd_args("--ldflags=", lib, delimiter = ""))
             cmd.add(cmd_args("--ldflags=", cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"), delimiter = ""))
@@ -132,6 +147,7 @@ def _dep_env_args(ctx):
     path_dirs = []
     cppflags = []
     cflags = list(toolchain_extra_cflags(ctx)) + list(ctx.attrs.extra_cflags)
+    cxxflags = []
     ldflags = list(toolchain_extra_ldflags(ctx)) + list(ctx.attrs.extra_ldflags)
     libs = []
     for dep in ctx.attrs.deps:
@@ -148,6 +164,7 @@ def _dep_env_args(ctx):
         inc = cmd_args(prefix, format = "-I{}/usr/include")
         cppflags.append(inc)
         cflags.append(inc)
+        cxxflags.append(inc)
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib64"))
         ldflags.append(cmd_args(prefix, format = "-L{}/usr/lib"))
         ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/usr/lib64"))
@@ -165,6 +182,8 @@ def _dep_env_args(ctx):
         env_args.append(cmd_args("CPPFLAGS=", cmd_args(cppflags, delimiter = " "), delimiter = ""))
     if cflags:
         env_args.append(cmd_args("CFLAGS=", cmd_args(cflags, delimiter = " "), delimiter = ""))
+    if cxxflags:
+        env_args.append(cmd_args("CXXFLAGS=", cmd_args(cxxflags, delimiter = " "), delimiter = ""))
     if ldflags:
         env_args.append(cmd_args("LDFLAGS=", cmd_args(ldflags, delimiter = " "), delimiter = ""))
     if libs:
@@ -315,6 +334,7 @@ autotools_package = rule(
 
         # Build configuration
         "configure_args": attrs.list(attrs.string(), default = []),
+        "configure_prefix_deps": attrs.dict(attrs.string(), attrs.dep(), default = {}),
         "configure_script": attrs.option(attrs.string(), default = None),
         "skip_configure": attrs.bool(default = False),
         "pre_configure_cmds": attrs.list(attrs.string(), default = []),

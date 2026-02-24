@@ -27,7 +27,14 @@ def main():
                         help="Shell command to run in source dir after patches (repeatable)")
     args = parser.parse_args()
 
+    # Save action-declared env vars before sanitize wipes them
+    dep_base_dirs = os.environ.get("DEP_BASE_DIRS")
+
     sanitize_global_env()
+
+    # Restore action-declared vars after sanitization
+    if dep_base_dirs is not None:
+        os.environ["DEP_BASE_DIRS"] = dep_base_dirs
 
     if not os.path.isdir(args.source_dir):
         print(f"error: source directory not found: {args.source_dir}", file=sys.stderr)
@@ -41,6 +48,16 @@ def main():
     if os.path.exists(args.output_dir):
         shutil.rmtree(args.output_dir)
     shutil.copytree(args.source_dir, args.output_dir, symlinks=True)
+
+    # Reset timestamps to SOURCE_DATE_EPOCH to prevent autotools regeneration.
+    # The copy changes mtime ordering, causing make to think configure.ac is
+    # newer than generated files and attempt to re-run aclocal/autoconf.
+    epoch = os.environ.get("SOURCE_DATE_EPOCH", "315576000")
+    subprocess.run(
+        ["find", ".", "-exec", "touch", "-h", "-d", f"@{epoch}", "{}", "+"],
+        cwd=args.output_dir,
+        capture_output=True,
+    )
 
     # Apply each patch in order
     for patch_file in args.patches:

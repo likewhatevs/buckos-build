@@ -69,7 +69,7 @@ def _resolve_env_paths(value):
             idx = token.index("=")
             flag = token[: idx + 1]
             path = token[idx + 1 :]
-            if path and not os.path.isabs(path) and os.path.exists(path):
+            if path and not os.path.isabs(path) and (path.startswith("buck-out") or os.path.exists(path)):
                 parts.append(flag + os.path.abspath(path))
             else:
                 parts.append(token)
@@ -90,6 +90,8 @@ def main():
                         help="Argument to pass to ./configure (repeatable)")
     parser.add_argument("--cflags", action="append", dest="cflags", default=[],
                         help="CFLAGS value (repeatable, joined with spaces)")
+    parser.add_argument("--cxxflags", action="append", dest="cxxflags", default=[],
+                        help="CXXFLAGS value (repeatable, joined with spaces)")
     parser.add_argument("--cppflags", action="append", dest="cppflags", default=[],
                         help="CPPFLAGS value (repeatable, joined with spaces)")
     parser.add_argument("--ldflags", action="append", dest="ldflags", default=[],
@@ -147,6 +149,8 @@ def main():
         env["CXX"] = args.cxx
     if args.cflags:
         env["CFLAGS"] = _resolve_env_paths(" ".join(args.cflags))
+    if args.cxxflags:
+        env["CXXFLAGS"] = _resolve_env_paths(" ".join(args.cxxflags))
     if args.cppflags:
         env["CPPFLAGS"] = _resolve_env_paths(" ".join(args.cppflags))
     if args.ldflags:
@@ -257,7 +261,11 @@ def main():
         # For out-of-tree builds, configure path is relative to the subdir
         configure = os.path.join(os.path.relpath(output_dir, configure_cwd), args.configure_script)
 
-    cmd = [configure] + args.configure_args
+    # Resolve buck-out relative paths in configure args to absolute.
+    # Buck2 renders artifact paths relative to the project root, but
+    # configure runs in output_dir — the relative paths would break.
+    resolved_args = [_resolve_env_paths(a) for a in args.configure_args]
+    cmd = [configure] + resolved_args
     result = subprocess.run(cmd, cwd=configure_cwd, env=env)
     if result.returncode != 0:
         print(f"error: configure failed with exit code {result.returncode}", file=sys.stderr)

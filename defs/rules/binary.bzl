@@ -105,7 +105,11 @@ def _dep_env_args(ctx):
     if dep_base_dirs:
         env["DEP_BASE_DIRS"] = cmd_args(dep_base_dirs, delimiter = ":")
     if lib_dirs:
-        env["LD_LIBRARY_PATH"] = cmd_args(lib_dirs, delimiter = ":")
+        # Use an underscore-prefixed name so the dynamic linker of the
+        # host Python process doesn't load target libraries (e.g. buckos
+        # glibc).  binary_install_helper translates this to LD_LIBRARY_PATH
+        # only for the install subprocess.
+        env["_DEP_LD_LIBRARY_PATH"] = cmd_args(lib_dirs, delimiter = ":")
 
     return env, path_dirs
 

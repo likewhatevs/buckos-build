@@ -9,10 +9,24 @@ packages that use a non-standard name (e.g. CONFIG_PREFIX for busybox).
 import argparse
 import multiprocessing
 import os
+import stat
 import subprocess
 import sys
 
 from _env import sanitize_global_env
+
+
+def _rewrite_file(fpath, old, new):
+    """Replace old with new in fpath, preserving the original mtime."""
+    stat = os.stat(fpath)
+    with open(fpath, "r") as f:
+        fc = f.read()
+    if old not in fc:
+        return
+    fc = fc.replace(old, new)
+    with open(fpath, "w") as f:
+        f.write(fc)
+    os.utime(fpath, (stat.st_atime, stat.st_mtime))
 
 
 def _resolve_env_paths(value):
@@ -71,6 +85,57 @@ def _resolve_env_paths(value):
         else:
             parts.append(token)
     return " ".join(parts)
+
+
+def _suppress_phony_rebuilds(build_dir):
+    """Remove variable-expanded targets from .PHONY declarations.
+
+    Some packages (e.g. xfsprogs) mark compiled binaries/libraries as
+    .PHONY via variable expansion (.PHONY: $(LTCOMMAND) $(LTLIBRARY)),
+    which forces make to always rebuild them — even during 'make install'.
+    In Buck2's split-action model the build tree is a finished input;
+    rebuild attempts fail because compiler paths and relative library
+    references may not resolve.
+
+    We strip $(VAR)/${VAR} tokens from .PHONY lines so make treats the
+    existing files as up-to-date.  Literal .PHONY targets (install,
+    clean, all, etc.) are preserved.
+    """
+    import re
+    _var_re = re.compile(r'\$[({][^)}]*[)}]')
+
+    for dirpath, _dirnames, filenames in os.walk(build_dir):
+        for fname in filenames:
+            fpath = os.path.join(dirpath, fname)
+            try:
+                with open(fpath, "r") as f:
+                    content = f.read()
+            except (UnicodeDecodeError, PermissionError, OSError):
+                continue
+            if ".PHONY" not in content:
+                continue
+
+            new_lines = []
+            changed = False
+            in_phony = False
+            for line in content.splitlines(True):
+                if line.lstrip().startswith(".PHONY"):
+                    in_phony = True
+                if in_phony and _var_re.search(line):
+                    line = _var_re.sub("", line)
+                    changed = True
+                if in_phony and not line.rstrip().endswith("\\"):
+                    in_phony = False
+                new_lines.append(line)
+
+            if changed:
+                try:
+                    stat = os.stat(fpath)
+                    with open(fpath, "w") as f:
+                        f.writelines(new_lines)
+                    os.utime(fpath, (stat.st_atime, stat.st_mtime))
+                except (PermissionError, OSError):
+                    pass
 
 
 def main():
@@ -171,6 +236,72 @@ def main():
 
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
+
+    # The build tree is a read-only Buck2 output from the compile action.
+    # Make it writable so we can patch libtool scripts and reset timestamps.
+    for dirpath, dirnames, filenames in os.walk(build_dir):
+        for d in dirnames:
+            dp = os.path.join(dirpath, d)
+            if not os.path.islink(dp):
+                try:
+                    os.chmod(dp, os.stat(dp).st_mode | stat.S_IWUSR)
+                except OSError:
+                    pass
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if not os.path.islink(fp):
+                try:
+                    os.chmod(fp, os.stat(fp).st_mode | stat.S_IWUSR)
+                except OSError:
+                    pass
+
+    # Suppress libtool re-linking during install.
+    #
+    # Libtool's --mode=install re-links binaries when it sees .la files
+    # with installed=no.  Re-linking invokes the linker with build-tree
+    # paths (relative or absolute) that may not resolve in Buck2's
+    # split-action model where build and install are separate cached
+    # actions.  The binaries are already correctly linked from the build
+    # phase; re-linking during install into DESTDIR is unnecessary.
+    #
+    # This is the same technique distros like Gentoo and Arch use to
+    # avoid libtool re-link failures in staged installs.
+    import glob as _glob
+    for lt_script in _glob.glob(os.path.join(build_dir, "**/libtool"), recursive=True):
+        try:
+            _rewrite_file(lt_script, "need_relink=yes", "need_relink=no")
+        except (UnicodeDecodeError, PermissionError):
+            pass
+    # Also patch top-level libtool if present
+    _top_lt = os.path.join(build_dir, "libtool")
+    if os.path.isfile(_top_lt):
+        try:
+            _rewrite_file(_top_lt, "need_relink=yes", "need_relink=no")
+        except (UnicodeDecodeError, PermissionError):
+            pass
+
+    # Clear relink_command from .la files so libtool --mode=install doesn't
+    # re-link libraries/binaries.  relink_command embeds build-tree paths
+    # (often relative) that may not resolve in Buck2's split-action model.
+    import re as _re
+    for la_file in _glob.glob(os.path.join(build_dir, "**", "*.la"), recursive=True):
+        try:
+            with open(la_file, "r") as f:
+                la_content = f.read()
+            if "relink_command=" not in la_content:
+                continue
+            la_new = _re.sub(r"relink_command=.*", 'relink_command=""', la_content)
+            if la_new != la_content:
+                la_stat = os.stat(la_file)
+                with open(la_file, "w") as f:
+                    f.write(la_new)
+                os.utime(la_file, (la_stat.st_atime, la_stat.st_mtime))
+        except (UnicodeDecodeError, PermissionError, OSError):
+            pass
+
+    # Neutralise .PHONY declarations that reference build artifacts via
+    # variable expansion so make doesn't force-rebuild them during install.
+    _suppress_phony_rebuilds(build_dir)
 
     # Reset all file timestamps in the build tree to a uniform instant.
     # Buck2 normalises artifact timestamps after the build phase, so make

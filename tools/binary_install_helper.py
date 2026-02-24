@@ -72,7 +72,7 @@ def main():
     starlark_vars = {}
     for key in ("CC", "CXX", "AR", "_HERMETIC_PATH", "CFLAGS", "LDFLAGS",
                 "CPPFLAGS", "PKG_CONFIG_PATH", "_DEP_BIN_PATHS", "DEP_BASE_DIRS",
-                "LD_LIBRARY_PATH", "MAKE_JOBS"):
+                "_DEP_LD_LIBRARY_PATH", "MAKE_JOBS"):
         val = os.environ.get(key)
         if val is not None:
             starlark_vars[key] = val
@@ -125,7 +125,7 @@ def main():
         if key in starlark_vars:
             env[key] = _resolve_flag_paths(starlark_vars[key], project_root)
     for key in ("PKG_CONFIG_PATH", "_DEP_BIN_PATHS", "DEP_BASE_DIRS",
-                "LD_LIBRARY_PATH", "_HERMETIC_PATH"):
+                "_DEP_LD_LIBRARY_PATH", "_HERMETIC_PATH"):
         if key in starlark_vars:
             env[key] = _resolve_colon_paths(starlark_vars[key], project_root)
 
@@ -161,6 +161,14 @@ def main():
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(py_paths) + (":" + existing if existing else "")
 
+    # Translate _DEP_LD_LIBRARY_PATH → LD_LIBRARY_PATH for the subprocess.
+    # The underscore-prefixed name prevents the dynamic linker from seeing
+    # target libraries when running the host Python helper process.
+    _dep_ld = env.pop("_DEP_LD_LIBRARY_PATH", None)
+    if _dep_ld:
+        existing = env.get("LD_LIBRARY_PATH", "")
+        env["LD_LIBRARY_PATH"] = _dep_ld + (":" + existing if existing else "")
+
     # Prepend dep bin paths to PATH
     dep_bin = env.get("_DEP_BIN_PATHS")
     if dep_bin:
@@ -189,6 +197,15 @@ def main():
         writable_real = os.path.realpath(writable_src) if os.path.exists(writable_src) else writable_src
         if src_real != writable_real:
             shutil.copytree(source_dir, writable_src, symlinks=True, dirs_exist_ok=True)
+            # Resolve top-level directory symlinks to actual copies so
+            # os.walk/chmod/touch reach their contents (e.g. GCC in-tree
+            # gmp/, mpfr/, mpc/ symlinked from read-only dep artifacts).
+            for item in os.listdir(writable_src):
+                path = os.path.join(writable_src, item)
+                if os.path.islink(path) and os.path.isdir(path):
+                    target = os.path.realpath(path)
+                    os.unlink(path)
+                    shutil.copytree(target, path, symlinks=True)
             # Make writable
             for dirpath, dirnames, filenames in os.walk(writable_src):
                 for d in dirnames:
