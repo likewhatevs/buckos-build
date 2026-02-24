@@ -324,6 +324,63 @@ def main():
         check(sha256_directory(d1) != sha256_directory(d2),
               "renamed file changes hash")
 
+    # 25. Absolute symlinks within source tree are relativized
+    print("=== _merge_tree: absolute symlink relativized ===")
+    with tempfile.TemporaryDirectory() as tmp:
+        src = os.path.join(tmp, "src")
+        dst = os.path.join(tmp, "dst")
+        os.makedirs(os.path.join(src, "bin"))
+        os.makedirs(dst)
+        _write(os.path.join(src, "bin", "bzmore"), b"#!/bin/sh\n")
+        # bzip2-style absolute symlink: bzless -> $PREFIX/bin/bzmore
+        os.symlink(os.path.join(src, "bin", "bzmore"),
+                   os.path.join(src, "bin", "bzless"))
+        _merge_tree(src, dst)
+        dst_link = os.path.join(dst, "bin", "bzless")
+        check(os.path.islink(dst_link), "abs symlink created in dst")
+        target = os.readlink(dst_link)
+        check(not os.path.isabs(target),
+              f"abs symlink relativized: {target}")
+        check(target == "bzmore",
+              f"relative target correct: {target}")
+        check(os.path.exists(dst_link),
+              "relativized symlink resolves")
+
+    # 26. Absolute symlinks outside source tree are preserved as-is
+    print("=== _merge_tree: absolute symlink outside tree preserved ===")
+    with tempfile.TemporaryDirectory() as tmp:
+        src = os.path.join(tmp, "src")
+        dst = os.path.join(tmp, "dst")
+        os.makedirs(src)
+        os.makedirs(dst)
+        os.symlink("/usr/bin/env", os.path.join(src, "env"))
+        _merge_tree(src, dst)
+        dst_link = os.path.join(dst, "env")
+        check(os.path.islink(dst_link), "external abs symlink created")
+        check(os.readlink(dst_link) == "/usr/bin/env",
+              "external abs symlink preserved")
+
+    # 27. Cross-subdir absolute symlinks stay absolute (cleanup handles them)
+    print("=== _merge_tree: cross-subdir abs symlink preserved ===")
+    with tempfile.TemporaryDirectory() as tmp:
+        src = os.path.join(tmp, "src")
+        dst = os.path.join(tmp, "dst")
+        os.makedirs(os.path.join(src, "bin"))
+        os.makedirs(os.path.join(src, "sbin"))
+        os.makedirs(dst)
+        _write(os.path.join(src, "bin", "real"), b"binary")
+        # sbin/link -> $src/bin/real (cross-subdir absolute)
+        os.symlink(os.path.join(src, "bin", "real"),
+                   os.path.join(src, "sbin", "link"))
+        # _merge_tree is called per-subdir in main(), so simulate that
+        os.makedirs(os.path.join(dst, "sbin"), exist_ok=True)
+        _merge_tree(os.path.join(src, "sbin"), os.path.join(dst, "sbin"))
+        dst_link = os.path.join(dst, "sbin", "link")
+        target = os.readlink(dst_link)
+        # Target points outside sbin/ tree, so stays absolute
+        check(os.path.isabs(target),
+              f"cross-subdir abs symlink stays absolute: {target}")
+
     # ── Summary ──────────────────────────────────────────────────────
 
     print(f"\n--- {passed} passed, {failed} failed ---")

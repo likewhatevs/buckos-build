@@ -22,7 +22,7 @@ package(
         "--prefix=/usr",
         "--disable-static",
         "--enable-shared",
-        "--enable-nasm",
+        "--disable-nasm",
         "--enable-mp3rtp",
         "--with-fileio=lame",
     ],

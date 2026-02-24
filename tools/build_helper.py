@@ -240,9 +240,41 @@ def main():
     _install_dat = os.path.join(output_dir, "meson-private", "install.dat")
     if os.path.isfile(_install_dat):
         import pickle as _pickle
+
+        class _StubUnpickler(_pickle.Unpickler):
+            """Unpickler that stubs missing modules (e.g. mesonbuild).
+
+            install.dat contains serialised mesonbuild.* objects but the
+            build_helper pex doesn't ship mesonbuild.  We only need to
+            walk __dict__ and rewrite strings, so a generic stub class
+            that preserves attributes is sufficient.
+            """
+            def find_class(self, module, name):
+                try:
+                    return super().find_class(module, name)
+                except (ModuleNotFoundError, AttributeError):
+                    # Return a stub that accepts arbitrary pickle state
+                    type_key = f"{module}.{name}"
+                    if type_key not in _stub_cache:
+                        class _Stub:
+                            def __reduce__(self):
+                                return (_make_stub, (type_key,), self.__dict__)
+                            def __setstate__(self, state):
+                                if isinstance(state, dict):
+                                    self.__dict__.update(state)
+                        _Stub.__qualname__ = _Stub.__name__ = name
+                        _Stub.__module__ = module
+                        _stub_cache[type_key] = _Stub
+                    return _stub_cache[type_key]
+
+        _stub_cache = {}
+
+        def _make_stub(type_key):
+            return _stub_cache[type_key]()
+
         stat = os.stat(_install_dat)
         with open(_install_dat, "rb") as f:
-            _idata = _pickle.load(f)
+            _idata = _StubUnpickler(f).load()
         def _patch_paths(obj, old, new):
             """Recursively replace old prefix with new in string attributes."""
             if isinstance(obj, str):

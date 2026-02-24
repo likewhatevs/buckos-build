@@ -20,16 +20,9 @@ package(
     configure_args = [
         "--prefix=/usr",
     ],
-    post_install_cmds = ["""
-#!/bin/bash
-set -e
-
-# Update icon cache
-gtk-update-icon-cache -f "$DESTDIR/usr/share/icons/hicolor" 2>/dev/null || true
-
-# Update desktop database
-update-desktop-database "$DESTDIR/usr/share/applications" 2>/dev/null || true
-    """],
+    # Icon cache and desktop database are rebuilt at runtime by the
+    # desktop environment; build-time updates require gtk-update-icon-cache
+    # and desktop-file-utils which aren't packaged yet.
     deps = [
         "//packages/linux/lang/python:python",
         "//packages/linux/desktop/gtk:gtk3",

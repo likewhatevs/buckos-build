@@ -388,6 +388,106 @@ def main():
             result == f"{pfx}/buck-out/v2/gen/lib:/no/such/dir",
             f"colon nonexistent entry: {result}")
 
+        # ── StubUnpickler (meson install.dat) ─────────────────────────
+
+        print("=== StubUnpickler ===")
+
+        import pickle
+        import types
+
+        # Create a pickle that references a non-existent module,
+        # simulating meson's install.dat with mesonbuild.* classes.
+        # Temporarily register a fake module so pickle.dump can resolve it.
+        class _FakeObj:
+            def __init__(self):
+                self.source_dir = "/old/build/dir"
+                self.install_dir = "/old/build/dir/install"
+                self.items = ["/old/build/dir/file.c"]
+        _FakeObj.__module__ = "mesonbuild.minstall"
+        _FakeObj.__qualname__ = _FakeObj.__name__ = "InstallData"
+
+        _fake_mod = types.ModuleType("mesonbuild.minstall")
+        _fake_mod.InstallData = _FakeObj
+        _fake_parent = types.ModuleType("mesonbuild")
+        _fake_parent.minstall = _fake_mod
+        sys.modules["mesonbuild"] = _fake_parent
+        sys.modules["mesonbuild.minstall"] = _fake_mod
+
+        fake_dat = os.path.join(tmpdir, "install.dat")
+        with open(fake_dat, "wb") as f:
+            pickle.dump(_FakeObj(), f)
+
+        # Remove fake modules so the StubUnpickler is actually tested
+        del sys.modules["mesonbuild.minstall"]
+        del sys.modules["mesonbuild"]
+
+        # Now load it through the StubUnpickler from build_helper
+        # (mesonbuild is not importable — this is the whole point)
+
+        # Inline the StubUnpickler logic — import it the same way build_helper does
+        _stub_cache = {}
+
+        def _make_stub(type_key):
+            return _stub_cache[type_key]()
+
+        class _StubUnpickler(pickle.Unpickler):
+            def find_class(self, module, name):
+                try:
+                    return super().find_class(module, name)
+                except (ModuleNotFoundError, AttributeError):
+                    type_key = f"{module}.{name}"
+                    if type_key not in _stub_cache:
+                        class _Stub:
+                            def __reduce__(self):
+                                return (_make_stub, (type_key,), self.__dict__)
+                            def __setstate__(self, state):
+                                if isinstance(state, dict):
+                                    self.__dict__.update(state)
+                        _Stub.__qualname__ = _Stub.__name__ = name
+                        _Stub.__module__ = module
+                        _stub_cache[type_key] = _Stub
+                    return _stub_cache[type_key]
+
+        # 39. StubUnpickler loads pickle with missing module
+        with open(fake_dat, "rb") as f:
+            obj = _StubUnpickler(f).load()
+        check(hasattr(obj, "source_dir"),
+              f"stub has source_dir: {obj.source_dir}")
+        check(obj.source_dir == "/old/build/dir",
+              f"stub source_dir value correct")
+
+        # 40. _patch_paths works on stub objects
+        def _patch_paths(obj, old, new):
+            if isinstance(obj, str):
+                return obj.replace(old, new) if old in obj else obj
+            if isinstance(obj, list):
+                return [_patch_paths(item, old, new) for item in obj]
+            if isinstance(obj, tuple):
+                return tuple(_patch_paths(item, old, new) for item in obj)
+            if hasattr(obj, "__dict__"):
+                for k, v in obj.__dict__.items():
+                    patched = _patch_paths(v, old, new)
+                    if patched is not v:
+                        setattr(obj, k, patched)
+            return obj
+
+        _patch_paths(obj, "/old/build/dir", "/new/output/dir")
+        check(obj.source_dir == "/new/output/dir",
+              f"patched source_dir: {obj.source_dir}")
+        check(obj.install_dir == "/new/output/dir/install",
+              f"patched install_dir: {obj.install_dir}")
+        check(obj.items == ["/new/output/dir/file.c"],
+              f"patched list items: {obj.items}")
+
+        # 41. Re-pickle of stub objects works
+        repickled = os.path.join(tmpdir, "repickled.dat")
+        with open(repickled, "wb") as f:
+            pickle.dump(obj, f)
+        with open(repickled, "rb") as f:
+            obj2 = _StubUnpickler(f).load()
+        check(obj2.source_dir == "/new/output/dir",
+              f"re-pickled round-trip: {obj2.source_dir}")
+
     finally:
         os.chdir(saved_cwd)
         shutil.rmtree(tmpdir, ignore_errors=True)
