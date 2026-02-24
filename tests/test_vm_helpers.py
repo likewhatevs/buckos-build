@@ -10,6 +10,7 @@ _REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO / "tools"))
 
 from vm_test_runner import parse_inject, build_init_script, kvm_available
+from disk_image_helper import _parse_size, _parse_sgdisk_output, _build_debugfs_ima_commands
 
 passed = 0
 failed = 0
@@ -315,6 +316,226 @@ def main():
         ok(".sig file strips to directory path (correctly rejected by isfile)")
     else:
         fail(f"expected '/some/dir/', got {target!r}")
+
+    # ----------------------------------------------------------------
+    # _parse_size tests
+    # ----------------------------------------------------------------
+
+    print("=== _parse_size: bytes (no suffix) ===")
+    if _parse_size("1024") == 1024:
+        ok("1024 -> 1024")
+    else:
+        fail(f"expected 1024, got {_parse_size('1024')}")
+
+    print("=== _parse_size: kilobytes ===")
+    if _parse_size("4K") == 4096:
+        ok("4K -> 4096")
+    else:
+        fail(f"expected 4096, got {_parse_size('4K')}")
+
+    print("=== _parse_size: megabytes ===")
+    if _parse_size("512M") == 512 * 1024 * 1024:
+        ok("512M -> 536870912")
+    else:
+        fail(f"expected 536870912, got {_parse_size('512M')}")
+
+    print("=== _parse_size: gigabytes ===")
+    if _parse_size("2G") == 2 * 1024 * 1024 * 1024:
+        ok("2G -> 2147483648")
+    else:
+        fail(f"expected 2147483648, got {_parse_size('2G')}")
+
+    print("=== _parse_size: terabytes ===")
+    if _parse_size("1T") == 1024 * 1024 * 1024 * 1024:
+        ok("1T -> 1099511627776")
+    else:
+        fail(f"expected 1099511627776, got {_parse_size('1T')}")
+
+    print("=== _parse_size: lowercase suffix ===")
+    if _parse_size("2g") == 2 * 1024 * 1024 * 1024:
+        ok("2g -> same as 2G")
+    else:
+        fail(f"expected 2147483648, got {_parse_size('2g')}")
+
+    # ----------------------------------------------------------------
+    # _parse_sgdisk_output tests
+    # ----------------------------------------------------------------
+
+    print("=== _parse_sgdisk_output: typical two-partition GPT ===")
+    sgdisk_text = """\
+Disk /tmp/disk.img: 4194304 sectors, 2.0 GiB
+Sector size (logical/physical): 512/512 bytes
+Disk identifier (GUID): 12345678-ABCD-EFGH-IJKL-123456789012
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 4194270
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 2014 sectors (1007.0 KiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048          206847   100.0 MiB   EF00  EFI
+   2          206848         4194270   1.9 GiB     8300  buckos
+"""
+    parts = _parse_sgdisk_output(sgdisk_text)
+    if len(parts) == 2:
+        ok("parsed 2 partitions")
+    else:
+        fail(f"expected 2 partitions, got {len(parts)}")
+
+    if parts[0]['number'] == 1 and parts[0]['start'] == 2048 and parts[0]['end'] == 206847:
+        ok("partition 1 start/end correct")
+    else:
+        fail(f"partition 1 wrong: {parts[0]!r}")
+
+    if parts[0]['code'] == 'EF00' and parts[0]['name'] == 'EFI':
+        ok("partition 1 code/name correct")
+    else:
+        fail(f"partition 1 code/name wrong: {parts[0]!r}")
+
+    if parts[1]['number'] == 2 and parts[1]['start'] == 206848 and parts[1]['end'] == 4194270:
+        ok("partition 2 start/end correct")
+    else:
+        fail(f"partition 2 wrong: {parts[1]!r}")
+
+    if parts[1]['code'] == '8300' and parts[1]['name'] == 'buckos':
+        ok("partition 2 code/name correct")
+    else:
+        fail(f"partition 2 code/name wrong: {parts[1]!r}")
+
+    print("=== _parse_sgdisk_output: empty input ===")
+    parts = _parse_sgdisk_output("")
+    if parts == []:
+        ok("empty input returns empty list")
+    else:
+        fail(f"expected [], got {parts!r}")
+
+    print("=== _parse_sgdisk_output: no partitions ===")
+    no_parts_text = """\
+Disk /tmp/disk.img: 4194304 sectors, 2.0 GiB
+Sector size (logical/physical): 512/512 bytes
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+"""
+    parts = _parse_sgdisk_output(no_parts_text)
+    if parts == []:
+        ok("header-only returns empty list")
+    else:
+        fail(f"expected [], got {parts!r}")
+
+    # ----------------------------------------------------------------
+    # _build_debugfs_ima_commands tests
+    # ----------------------------------------------------------------
+
+    print("=== _build_debugfs_ima_commands: paired sidecars ===")
+    tmpdir = tempfile.mkdtemp(prefix="test_debugfs_")
+    try:
+        os.makedirs(os.path.join(tmpdir, "usr", "bin"))
+        for f in ("usr/bin/app", "usr/bin/app.sig"):
+            with open(os.path.join(tmpdir, f), "w") as fh:
+                fh.write("data")
+
+        cmds, count = _build_debugfs_ima_commands(tmpdir)
+        if count == 1:
+            ok("count=1 for one paired sidecar")
+        else:
+            fail(f"expected count=1, got {count}")
+
+        if len(cmds) == 2:
+            ok("two commands (ea_set + rm)")
+        else:
+            fail(f"expected 2 commands, got {len(cmds)}")
+
+        if cmds[0] == f"ea_set /usr/bin/app security.ima -f {os.path.join(tmpdir, 'usr/bin/app.sig')}":
+            ok("ea_set command correct")
+        else:
+            fail(f"unexpected ea_set: {cmds[0]!r}")
+
+        if cmds[1] == "rm /usr/bin/app.sig":
+            ok("rm command correct")
+        else:
+            fail(f"unexpected rm: {cmds[1]!r}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    print("=== _build_debugfs_ima_commands: orphan sidecar ignored ===")
+    tmpdir = tempfile.mkdtemp(prefix="test_debugfs_orphan_")
+    try:
+        with open(os.path.join(tmpdir, "orphan.sig"), "w") as fh:
+            fh.write("sig")
+
+        cmds, count = _build_debugfs_ima_commands(tmpdir)
+        if count == 0 and cmds == []:
+            ok("orphan sidecar produces no commands")
+        else:
+            fail(f"expected empty, got count={count} cmds={cmds!r}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    print("=== _build_debugfs_ima_commands: empty directory ===")
+    tmpdir = tempfile.mkdtemp(prefix="test_debugfs_empty_")
+    try:
+        cmds, count = _build_debugfs_ima_commands(tmpdir)
+        if count == 0 and cmds == []:
+            ok("empty directory produces no commands")
+        else:
+            fail(f"expected empty, got count={count} cmds={cmds!r}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    print("=== _build_debugfs_ima_commands: multiple sidecars sorted ===")
+    tmpdir = tempfile.mkdtemp(prefix="test_debugfs_multi_")
+    try:
+        os.makedirs(os.path.join(tmpdir, "usr", "bin"))
+        os.makedirs(os.path.join(tmpdir, "usr", "lib"))
+        for f in ("usr/bin/z-tool", "usr/bin/z-tool.sig",
+                   "usr/bin/a-tool", "usr/bin/a-tool.sig",
+                   "usr/lib/libfoo.so", "usr/lib/libfoo.so.sig"):
+            with open(os.path.join(tmpdir, f), "w") as fh:
+                fh.write("data")
+
+        cmds, count = _build_debugfs_ima_commands(tmpdir)
+        if count == 3:
+            ok("count=3 for three paired sidecars")
+        else:
+            fail(f"expected count=3, got {count}")
+
+        # Verify commands reference sorted filenames within each directory
+        ea_cmds = [c for c in cmds if c.startswith("ea_set")]
+        paths = [c.split()[1] for c in ea_cmds]
+        # Within usr/bin, a-tool should come before z-tool (sorted)
+        bin_paths = [p for p in paths if "/bin/" in p]
+        if bin_paths == ["/usr/bin/a-tool", "/usr/bin/z-tool"]:
+            ok("filenames sorted within directory")
+        else:
+            fail(f"expected sorted bin paths, got {bin_paths!r}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    print("=== _build_debugfs_ima_commands: with image_rel_prefix ===")
+    tmpdir = tempfile.mkdtemp(prefix="test_debugfs_prefix_")
+    try:
+        with open(os.path.join(tmpdir, "file"), "w") as fh:
+            fh.write("data")
+        with open(os.path.join(tmpdir, "file.sig"), "w") as fh:
+            fh.write("sig")
+
+        cmds, count = _build_debugfs_ima_commands(tmpdir, image_rel_prefix="/root")
+        if count == 1:
+            ok("count=1 with prefix")
+        else:
+            fail(f"expected count=1, got {count}")
+
+        if cmds[0].startswith("ea_set /root/file security.ima"):
+            ok("prefix applied to ea_set path")
+        else:
+            fail(f"unexpected ea_set: {cmds[0]!r}")
+
+        if cmds[1] == "rm /root/file.sig":
+            ok("prefix applied to rm path")
+        else:
+            fail(f"unexpected rm: {cmds[1]!r}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
     # -- Summary --
     print(f"\n--- {passed} passed, {failed} failed ---")
