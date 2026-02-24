@@ -348,13 +348,16 @@ def _bootstrap_gcc_impl(ctx):
 
     # Ensure makeinfo stub is on PATH for GMP/MPFR sub-configures
     _mi = 'command -v makeinfo >/dev/null 2>&1 || { mkdir -p .stub-bin && printf "#!/bin/sh\\nexit 0\\n" > .stub-bin/makeinfo && chmod +x .stub-bin/makeinfo && export PATH="$PWD/.stub-bin:$PATH"; } && '
+    # Suppress autotools regeneration — build_helper resets timestamps
+    # which makes make think aclocal.m4 etc. are stale in GMP/MPFR.
+    _at = "ACLOCAL=true AUTOMAKE=true AUTOCONF=true AUTOHEADER=true MAKEINFO=true "
 
     if not ctx.attrs.with_headers:
         # Pass1: build just gcc and minimal libgcc
         build_cmd.add("--pre-cmd",
             _mi +
-            "cd build && make -j$(nproc) all-gcc && " +
-            "make configure-target-libgcc && " +
+            "cd build && make " + _at + "-j$(nproc) all-gcc && " +
+            "make " + _at + "configure-target-libgcc && " +
             "cd " + target_triple + "/libgcc && " +
             "make -j$(nproc) libgcc.a INHIBIT_LIBC_CFLAGS='-Dinhibit_libc' && " +
             "{ make -j$(nproc) crtbegin.o crtend.o crtbeginS.o crtendS.o crtbeginT.o 2>/dev/null || true; }",
@@ -364,9 +367,9 @@ def _bootstrap_gcc_impl(ctx):
         build_cmd.add("--pre-cmd",
             _mi +
             "cd build && " +
-            "make -j$(nproc) all-gcc && " +
-            "make -j$(nproc) all-target-libgcc && " +
-            "make -j$(nproc) all-target-libstdc++-v3",
+            "make " + _at + "-j$(nproc) all-gcc && " +
+            "make " + _at + "-j$(nproc) all-target-libgcc && " +
+            "make " + _at + "-j$(nproc) all-target-libstdc++-v3",
         )
 
     ctx.actions.run(build_cmd, category = "compile", identifier = ctx.attrs.name)
