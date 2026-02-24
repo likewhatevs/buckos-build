@@ -12,6 +12,46 @@ sh_test(
     labels = ["unit"],
 )
 
+# ── Python helper unit tests ─────────────────────────────────────────
+# Pure unit tests of tools/*.py logic — no buck build deps.
+# Run with: buck2 test //tests: --labels tools-unit
+
+sh_test(
+    name = "test-env-unit",
+    test = "test_env_unit.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-path-resolution",
+    test = "test_path_resolution.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-extract-unit",
+    test = "test_extract_unit.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-rootfs-unit",
+    test = "test_rootfs_unit.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-small-helpers",
+    test = "test_small_helpers.py",
+    labels = ["unit", "tools-unit"],
+)
+
+sh_test(
+    name = "test-merge-and-hash",
+    test = "test_merge_and_hash.py",
+    labels = ["unit", "tools-unit"],
+)
+
 # ── Provenance integration: hello executable ─────────────────────────
 
 sh_test(
