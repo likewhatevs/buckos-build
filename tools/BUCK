@@ -220,6 +220,34 @@ python_binary(
     visibility = ["PUBLIC"],
 )
 
+python_binary(
+    name = "stage2_wrapper_helper",
+    main = "stage2_wrapper_helper.py",
+    deps = [":_env"],
+    visibility = ["PUBLIC"],
+)
+
+python_binary(
+    name = "disk_image_helper",
+    main = "disk_image_helper.py",
+    deps = [":_env"],
+    visibility = ["PUBLIC"],
+)
+
+python_binary(
+    name = "stage3_helper",
+    main = "stage3_helper.py",
+    deps = [":_env"],
+    visibility = ["PUBLIC"],
+)
+
+python_binary(
+    name = "boot_script_helper",
+    main = "boot_script_helper.py",
+    deps = [":_env"],
+    visibility = ["PUBLIC"],
+)
+
 export_file(
     name = "sbom.bxl",
     src = "sbom.bxl",
