@@ -12,6 +12,8 @@ import os
 import subprocess
 import sys
 
+from _env import sanitize_global_env
+
 
 def _resolve_env_paths(value):
     """Resolve relative Buck2 artifact paths in env values to absolute.
@@ -95,6 +97,8 @@ def main():
                         help="Shell command to run in prefix dir after install (repeatable)")
     args = parser.parse_args()
 
+    sanitize_global_env()
+
     # Expose the project root so post-cmds can resolve Buck2 artifact
     # paths (which are relative to the project root, not to the prefix).
     os.environ["PROJECT_ROOT"] = os.getcwd()
@@ -120,22 +124,6 @@ def main():
                 'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
-
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    os.environ["CCACHE_DISABLE"] = "1"
-    os.environ["RUSTC_WRAPPER"] = ""
-    os.environ["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.
-    os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        os.environ.pop(var, None)
 
     # Apply extra environment variables
     for entry in args.extra_env:

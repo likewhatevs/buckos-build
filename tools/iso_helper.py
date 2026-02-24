@@ -16,6 +16,8 @@ import subprocess
 import sys
 import tempfile
 
+from _env import sanitize_global_env
+
 
 def _resolve_path(path):
     """Resolve relative Buck2 artifact paths to absolute."""
@@ -421,6 +423,8 @@ def main():
                         help="Set PATH to only these dirs (repeatable)")
     args = parser.parse_args()
 
+    sanitize_global_env()
+
     # Resolve Buck2 artifact paths
     kernel = _resolve_path(args.kernel)
     initramfs = _resolve_path(args.initramfs)
@@ -457,10 +461,7 @@ def main():
             _existing = os.environ.get("PYTHONPATH", "")
             os.environ["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
 
-    # Deterministic build environment
-    os.environ["CCACHE_DISABLE"] = "1"
     epoch = int(os.environ.get("SOURCE_DATE_EPOCH", "315576000"))
-    os.environ["SOURCE_DATE_EPOCH"] = str(epoch)
 
     # aarch64 forces EFI (no BIOS boot on ARM)
     boot_mode = args.boot_mode

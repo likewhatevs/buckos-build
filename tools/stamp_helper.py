@@ -18,6 +18,8 @@ import sys
 import tempfile
 import time
 
+from _env import sanitize_global_env
+
 
 _ELF_MAGIC = b"\x7fELF"
 
@@ -55,16 +57,11 @@ def main():
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     args = parser.parse_args()
 
+    sanitize_global_env()
+
     if not os.path.isdir(args.input):
         print(f"error: input directory not found: {args.input}", file=sys.stderr)
         sys.exit(1)
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        os.environ.pop(var, None)
 
     if args.hermetic_path:
         os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)

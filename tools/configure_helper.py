@@ -16,6 +16,8 @@ import shutil
 import subprocess
 import sys
 
+from _env import clean_env
+
 
 def _resolve_env_paths(value):
     """Resolve relative Buck2 artifact paths in env values to absolute.
@@ -133,29 +135,11 @@ def main():
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
-    env = os.environ.copy()
+    env = clean_env()
 
     # Expose the project root so pre-cmds can resolve Buck2 artifact
     # paths (which are relative to the project root, not to output_dir).
     env["PROJECT_ROOT"] = os.getcwd()
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        env.pop(var, None)
-
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    env["CCACHE_DISABLE"] = "1"
-    env["RUSTC_WRAPPER"] = ""
-    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.  Many build systems (autotools,
-    # cmake, meson, kernel) embed __DATE__/__TIME__ or query the system clock.
-    # SOURCE_DATE_EPOCH is the standard mechanism to override this.
-    env.setdefault("SOURCE_DATE_EPOCH", "315576000")
 
     if args.cc:
         env["CC"] = args.cc
@@ -237,11 +221,6 @@ def main():
                 if "aclocal-" in os.path.basename(d):
                     env["ACLOCAL_AUTOMAKE_DIR"] = d
                     break
-            # Include host system aclocal dir for m4 macros from
-            # host-installed packages (e.g. pkg.m4 from pkg-config)
-            host_aclocal = "/usr/share/aclocal"
-            if os.path.isdir(host_aclocal) and host_aclocal not in aclocal_dirs:
-                aclocal_dirs.append(host_aclocal)
             # ACLOCAL_PATH adds extra search directories
             env["ACLOCAL_PATH"] = ":".join(aclocal_dirs)
 

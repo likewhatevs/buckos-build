@@ -15,6 +15,8 @@ import subprocess
 import sys
 import tempfile
 
+from _env import sanitize_global_env
+
 
 def main():
     parser = argparse.ArgumentParser(description="Build Linux kernel")
@@ -80,13 +82,8 @@ def main():
         print(f"error: source directory not found: {source_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Disable host compiler/build caches — Buck2 caches actions itself.
-    os.environ["CCACHE_DISABLE"] = "1"
-    os.environ["RUSTC_WRAPPER"] = ""
-    os.environ["CARGO_BUILD_RUSTC_WRAPPER"] = ""
+    sanitize_global_env()
 
-    # Pin timestamps for reproducible builds.
-    os.environ.setdefault("SOURCE_DATE_EPOCH", "315576000")
     os.environ.setdefault("KBUILD_BUILD_TIMESTAMP", "Thu Jan  1 00:00:00 UTC 1970")
     os.environ.setdefault("KBUILD_BUILD_USER", "buckos")
     os.environ.setdefault("KBUILD_BUILD_HOST", "buckos")

@@ -12,6 +12,8 @@ import os
 import subprocess
 import sys
 
+from _env import sanitize_global_env
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generate vmlinux.h from BTF")
@@ -22,6 +24,8 @@ def main():
     parser.add_argument("--bpftool", default="bpftool",
                         help="Path to bpftool binary (default: bpftool from PATH)")
     args = parser.parse_args()
+
+    sanitize_global_env()
 
     vmlinux = os.path.abspath(args.vmlinux)
     output = os.path.abspath(args.output)

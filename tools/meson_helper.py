@@ -10,6 +10,8 @@ import os
 import subprocess
 import sys
 
+from _env import clean_env
+
 
 def _resolve_env_paths(value):
     """Resolve relative Buck2 artifact paths in env values to absolute.
@@ -107,23 +109,7 @@ def main():
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
-    env = os.environ.copy()
-
-    # Clear host build env vars that could poison the build.
-    # Deps inject these explicitly via --env args.
-    for var in ["LD_LIBRARY_PATH", "PKG_CONFIG_PATH", "PYTHONPATH",
-                "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                "ACLOCAL_PATH"]:
-        env.pop(var, None)
-
-    # Disable host compiler/build caches — Buck2 caches actions itself,
-    # and external caches can poison results across build contexts.
-    env["CCACHE_DISABLE"] = "1"
-    env["RUSTC_WRAPPER"] = ""
-    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
-
-    # Pin timestamps for reproducible builds.
-    env.setdefault("SOURCE_DATE_EPOCH", "315576000")
+    env = clean_env()
 
     if args.hermetic_path:
         env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)

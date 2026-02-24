@@ -12,6 +12,8 @@ import shutil
 import subprocess
 import sys
 
+from _env import sanitize_global_env
+
 
 def main():
     parser = argparse.ArgumentParser(description="Apply patches in order")
@@ -24,6 +26,8 @@ def main():
     parser.add_argument("--cmd", action="append", dest="cmds", default=[],
                         help="Shell command to run in source dir after patches (repeatable)")
     args = parser.parse_args()
+
+    sanitize_global_env()
 
     if not os.path.isdir(args.source_dir):
         print(f"error: source directory not found: {args.source_dir}", file=sys.stderr)

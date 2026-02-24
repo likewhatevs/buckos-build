@@ -1,3 +1,9 @@
+python_library(
+    name = "_env",
+    srcs = ["_env.py"],
+    visibility = ["PUBLIC"],
+)
+
 python_binary(
     name = "extract",
     main = "extract.py",
@@ -7,78 +13,91 @@ python_binary(
 python_binary(
     name = "patch_helper",
     main = "patch_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "configure_helper",
     main = "configure_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "cmake_helper",
     main = "cmake_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "meson_helper",
     main = "meson_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "build_helper",
     main = "build_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "install_helper",
     main = "install_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "strip_helper",
     main = "strip_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "stamp_helper",
     main = "stamp_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "ima_helper",
     main = "ima_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "cargo_helper",
     main = "cargo_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "go_helper",
     main = "go_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "python_helper",
     main = "python_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "mozbuild_helper",
     main = "mozbuild_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
@@ -109,36 +128,42 @@ python_binary(
 python_binary(
     name = "kernel_config",
     main = "kernel_config.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "kernel_headers",
     main = "kernel_headers.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "kernel_build",
     main = "kernel_build.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "kernel_btf_headers",
     main = "kernel_btf_headers.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "kernel_modules_install",
     main = "kernel_modules_install.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
 python_binary(
     name = "iso_helper",
     main = "iso_helper.py",
+    deps = [":_env"],
     visibility = ["PUBLIC"],
 )
 
