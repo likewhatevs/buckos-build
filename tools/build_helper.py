@@ -146,17 +146,28 @@ def main():
         shutil.rmtree(output_dir)
     shutil.copytree(build_dir, output_dir, symlinks=True)
 
-    # Replace self-referencing symlinks (target ".") with real directories.
-    # Buck2 records these with an empty target and fails to materialise them.
-    # xfsprogs and ncurses create such symlinks (e.g. include/disk -> .).
-    for dirpath, dirnames, _filenames in os.walk(output_dir):
-        for d in dirnames:
-            p = os.path.join(dirpath, d)
-            if os.path.islink(p):
+    # Fix symlinks that break after copytree:
+    #
+    # 1. Self-referencing symlinks (target ".") — Buck2 records these with
+    #    an empty target and fails to materialise them.  Replace with real
+    #    directories.  (xfsprogs: include/disk -> .)
+    #
+    # 2. Absolute symlinks pointing into build_dir — copytree preserves
+    #    the old absolute target, making them dangling.  Rewrite to point
+    #    into output_dir instead.  (QEMU: build/Makefile -> abs/configured/Makefile)
+    for dirpath, dirnames, filenames in os.walk(output_dir):
+        for entries in (dirnames, filenames):
+            for name in entries:
+                p = os.path.join(dirpath, name)
+                if not os.path.islink(p):
+                    continue
                 target = os.readlink(p)
                 if target == ".":
                     os.unlink(p)
                     os.makedirs(p, exist_ok=True)
+                elif build_dir in target:
+                    os.unlink(p)
+                    os.symlink(target.replace(build_dir, output_dir), p)
 
     # Rewrite absolute paths in build system files.
     # Both CMake and Meson embed the build dir in generated files.  After
@@ -175,7 +186,7 @@ def main():
             for fpath in _glob.glob(os.path.join(output_dir, pattern), recursive=True):
                 try:
                     _rewrite_file(fpath, build_dir, output_dir)
-                except (UnicodeDecodeError, PermissionError):
+                except (UnicodeDecodeError, PermissionError, FileNotFoundError):
                     pass
         # Rewrite build.ninja and suppress cmake regeneration.
         if os.path.isfile(ninja_file):
@@ -214,7 +225,7 @@ def main():
         for fpath in _glob.glob(os.path.join(output_dir, pattern), recursive=True):
             try:
                 _rewrite_file(fpath, build_dir, output_dir)
-            except (UnicodeDecodeError, PermissionError):
+            except (UnicodeDecodeError, PermissionError, FileNotFoundError):
                 pass
 
     # Comprehensive rewrite of stale build-dir paths.  Autotools configure
