@@ -50,6 +50,10 @@ package(
     # GCC 14+ false positive in libmpdec io.c (upstream CPython issue)
     extra_cflags = ["-Wno-stringop-overflow"],
 
+    # Prevent parallel make race during install — concurrent targets can't
+    # stat extension modules that are being moved between directories.
+    install_args = ["-j1"],
+
     # Override TMPDIR to avoid AF_UNIX socket path length limit (108 bytes).
     # Python's compileall uses multiprocessing forkserver during make install,
     # which creates Unix sockets under $TMPDIR.  Buck2 sets TMPDIR to the
