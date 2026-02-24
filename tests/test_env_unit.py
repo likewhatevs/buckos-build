@@ -342,6 +342,25 @@ def main():
         os.environ.clear()
         os.environ.update(saved)
 
+    # -- BUCK: _env library has base_module="" (pex namespace regression) --
+    # Without base_module="", Buck2 puts _env.py under the tools/ namespace
+    # in the pex link-tree, so `from _env import ...` fails at runtime.
+    print("=== BUCK: _env base_module ===")
+    buck_file = _REPO / "tools" / "BUCK"
+    buck_text = buck_file.read_text()
+    # Look for the _env python_library block and check it has base_module = ""
+    import re
+    _env_block = re.search(
+        r'python_library\(\s*\n(.*?)\)',
+        buck_text, re.DOTALL)
+    if _env_block and 'name = "_env"' in _env_block.group(0):
+        if 'base_module = ""' in _env_block.group(0):
+            ok('_env library has base_module = ""')
+        else:
+            fail('_env library missing base_module = "" — pex imports will break')
+    else:
+        fail("could not find _env python_library block in tools/BUCK")
+
     # -- Summary --
     print(f"\n--- {passed} passed, {failed} failed ---")
     sys.exit(1 if failed else 0)

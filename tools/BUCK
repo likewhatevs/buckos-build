@@ -1,6 +1,7 @@
 python_library(
     name = "_env",
     srcs = ["_env.py"],
+    base_module = "",
     visibility = ["PUBLIC"],
 )
 
