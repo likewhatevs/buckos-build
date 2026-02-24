@@ -13,12 +13,11 @@ concurrency:
 jobs:
   test:
     name: build & test
-    runs-on: [self-hosted, bigly]
+    runs-on: large
     steps:
       - uses: actions/checkout@v4
         with:
           clean: false
-      - uses: ./.github/actions/ci-setup
       - name: Run all checks
         run: |
           buck2 targets //... &&

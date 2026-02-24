@@ -24,7 +24,7 @@ autoreconf -fi
 """, """
 autoreconf -fi
 """],
-    url = "https://download.savannah.nongnu.org/releases/oath-toolkit/oath-toolkit-2.6.9.tar.gz",
+    url = "https://mirror.csclub.uwaterloo.ca/nongnu/oath-toolkit/oath-toolkit-2.6.9.tar.gz",
 
     sha256 = "333ac831c8f1a6dbd7feb897339bba453ff34d3b0f4cfaa6b5a20dba55c8e985",
     use_configure = {

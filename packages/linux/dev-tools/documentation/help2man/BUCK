@@ -7,7 +7,7 @@ package(
     use_configure = {
         "nls": ("--enable-nls", "--disable-nls"),
     },
-    url = "https://ftpmirror.gnu.org/gnu/help2man/help2man-1.49.2.tar.xz",
+    url = "https://mirrors.kernel.org/gnu/help2man/help2man-1.49.2.tar.xz",
     sha256 = "9e2e0e213a7e0a36244eed6204d902b6504602a578b6ecd15268b1454deadd36",
     configure_args = [
         "--disable-nls",
