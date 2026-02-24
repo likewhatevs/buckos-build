@@ -113,149 +113,10 @@ def _install(ctx, source):
     """Run install_script with SRC pointing to source and OUT to output prefix."""
     output = ctx.actions.declare_output("installed", dir = True)
 
-    # Write a wrapper that sets SRCS/OUT from positional args then sources
-    # the user script.  This ensures output.as_output() appears in cmd_args
-    # so Buck2 can track the declared output.
-    wrapper = ctx.actions.write("wrapper.sh", """\
-#!/bin/bash
-set -e
-# Save project root — Buck2 runs actions from here, all artifact paths
-# (buck-out/v2/...) are relative to this directory.
-_PROJECT_ROOT="$PWD"
-
-# Resolve a single path to absolute (relative to project root).
-_resolve() { [[ "$1" = /* ]] && echo "$1" || echo "$_PROJECT_ROOT/$1"; }
-
-# Resolve relative buck-out paths in compiler/linker flag strings to absolute.
-# Without this, libtool and other tools fail after cd into the source tree.
-_resolve_flag_paths() {
-    local result=""
-    for token in $1; do
-        case "$token" in
-            -I[^/]*)             token="-I${_PROJECT_ROOT}/${token#-I}" ;;
-            -L[^/]*)             token="-L${_PROJECT_ROOT}/${token#-L}" ;;
-            -Wl,-rpath-link,[^/]*) token="-Wl,-rpath-link,${_PROJECT_ROOT}/${token#-Wl,-rpath-link,}" ;;
-            -Wl,-rpath,[^/]*)    token="-Wl,-rpath,${_PROJECT_ROOT}/${token#-Wl,-rpath,}" ;;
-            --*=buck-out/*)      token="${token%%=*}=${_PROJECT_ROOT}/${token#*=}" ;;
-            [^-]*/*)             [[ ! "$token" = /* ]] && token="${_PROJECT_ROOT}/$token" ;;
-        esac
-        result="${result:+$result }$token"
-    done
-    echo "$result"
-}
-
-# Resolve relative paths in colon-separated lists (PKG_CONFIG_PATH etc).
-_resolve_colon_paths() {
-    local IFS=':' result=""
-    for p in $1; do
-        [[ -n "$p" && "$p" != /* ]] && p="${_PROJECT_ROOT}/$p"
-        result="${result:+$result:}$p"
-    done
-    echo "$result"
-}
-
-export SRCS="$(_resolve "$1")"; shift
-export OUT="$(_resolve "$1")"; shift
-export PV="$1"; shift
-
-# Standard build env vars available to install_script
-export DESTDIR="$OUT"
-export S="$SRCS"
-export WORKDIR="$(_resolve "${BUCK_SCRATCH_PATH:-$(mktemp -d)}")"
-export MAKE_JOBS="${MAKE_JOBS:-$(nproc)}"
-export MAKEOPTS="${MAKEOPTS:-$(nproc)}"
-
-# Disable host compiler/build caches — Buck2 caches actions itself.
-unset RUSTC_WRAPPER 2>/dev/null || true
-export CARGO_BUILD_RUSTC_WRAPPER=""
-export CCACHE_DISABLE=1
-
-# Resolve install script to absolute before cd
-_INSTALL_SCRIPT="$(_resolve "$1")"
-
-# Resolve env vars containing relative buck-out paths to absolute
-# so they survive cd into the source tree.
-[[ -n "${CC:-}" ]]              && export CC="$(_resolve_flag_paths "$CC")"
-[[ -n "${CXX:-}" ]]             && export CXX="$(_resolve_flag_paths "$CXX")"
-[[ -n "${AR:-}" ]]              && export AR="$(_resolve_flag_paths "$AR")"
-[[ -n "${CFLAGS:-}" ]]          && export CFLAGS="$(_resolve_flag_paths "$CFLAGS")"
-[[ -n "${LDFLAGS:-}" ]]         && export LDFLAGS="$(_resolve_flag_paths "$LDFLAGS")"
-[[ -n "${CPPFLAGS:-}" ]]        && export CPPFLAGS="$(_resolve_flag_paths "$CPPFLAGS")"
-[[ -n "${PKG_CONFIG_PATH:-}" ]] && export PKG_CONFIG_PATH="$(_resolve_colon_paths "$PKG_CONFIG_PATH")"
-[[ -n "${_DEP_BIN_PATHS:-}" ]]  && export _DEP_BIN_PATHS="$(_resolve_colon_paths "$_DEP_BIN_PATHS")"
-[[ -n "${DEP_BASE_DIRS:-}" ]]   && export DEP_BASE_DIRS="$(_resolve_colon_paths "$DEP_BASE_DIRS")"
-[[ -n "${LD_LIBRARY_PATH:-}" ]] && export LD_LIBRARY_PATH="$(_resolve_colon_paths "$LD_LIBRARY_PATH")"
-[[ -n "${_HERMETIC_PATH:-}" ]]  && export _HERMETIC_PATH="$(_resolve_colon_paths "$_HERMETIC_PATH")"
-
-# Clear host build env vars not explicitly set by the build system
-unset PYTHONPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH ACLOCAL_PATH 2>/dev/null || true
-# Set hermetic base PATH if provided (replaces host PATH)
-if [[ -n "${_HERMETIC_PATH:-}" ]]; then
-    export PATH="$_HERMETIC_PATH"
-    # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
-    # linked tools (e.g. cross-ar needing libzstd) find their libs.
-    _ld_lib_path=""
-    IFS=':' read -ra _herm_dirs <<< "$_HERMETIC_PATH"
-    for _bd in "${_herm_dirs[@]}"; do
-        _parent="$(dirname "$_bd")"
-        for _ld in lib lib64; do
-            [[ -d "$_parent/$_ld" ]] && _ld_lib_path="${_ld_lib_path:+$_ld_lib_path:}$_parent/$_ld"
-        done
-    done
-    [[ -n "$_ld_lib_path" ]] && export LD_LIBRARY_PATH="${_ld_lib_path}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-    # Auto-detect Python site/dist-packages so tools (meson, etc.) work.
-    _py_path=""
-    for _bd in "${_herm_dirs[@]}"; do
-        _parent="$(dirname "$_bd")"
-        for _sp in "$_parent"/lib/python*/site-packages "$_parent"/lib/python*/dist-packages \
-                   "$_parent"/lib64/python*/site-packages "$_parent"/lib64/python*/dist-packages; do
-            [[ -d "$_sp" ]] && _py_path="${_py_path:+$_py_path:}$_sp"
-        done
-    done
-    [[ -n "$_py_path" ]] && export PYTHONPATH="${_py_path}${PYTHONPATH:+:$PYTHONPATH}"
-fi
-# Prepend dep bin paths to PATH
-[[ -n "${_DEP_BIN_PATHS:-}" ]] && export PATH="$_DEP_BIN_PATHS:$PATH"
-
-# Stub makeinfo if not already on PATH — texinfo requires perl and is not
-# needed for bootstrap builds.  Without this, GCC/binutils sub-configures
-# fall back to the autotools 'missing' script and fail.
-if ! command -v makeinfo >/dev/null 2>&1; then
-    mkdir -p "$WORKDIR/.stub-bin"
-    printf '#!/bin/sh\\nexit 0\\n' > "$WORKDIR/.stub-bin/makeinfo"
-    chmod +x "$WORKDIR/.stub-bin/makeinfo"
-    export PATH="$WORKDIR/.stub-bin:$PATH"
-fi
-
-# Copy source to writable directory — Buck2 source artifacts are read-only,
-# but install scripts need to write (mkdir build, in-source builds, etc.).
-# This mirrors what configure_helper.py / build_helper.py do for autotools.
-if [[ -d "$SRCS" ]]; then
-    mkdir -p "$WORKDIR"
-    _WRITABLE="${WORKDIR}/src"
-    _SRCS_REAL="$(realpath "$SRCS")"
-    _WRITABLE_REAL="$(realpath "$_WRITABLE" 2>/dev/null || echo "$_WRITABLE")"
-    if [[ "$_SRCS_REAL" != "$_WRITABLE_REAL" ]]; then
-        cp -a "$SRCS/." "$_WRITABLE"
-        chmod -R u+w "$_WRITABLE"
-        # Restore execute bits on autotools scripts (Buck2 artifacts may strip them)
-        find "$_WRITABLE" -type f \\( -name 'configure' -o -name 'config.guess' -o -name 'config.sub' -o -name 'install-sh' -o -name 'depcomp' -o -name 'missing' -o -name 'compile' -o -name 'ltmain.sh' -o -name 'mkinstalldirs' -o -name 'config.status' \\) -exec chmod +x {} + 2>/dev/null || true
-        # Touch autotools-generated files so make doesn't try to regenerate
-        # them (Buck2 normalises timestamps, making sources look newer).
-        find "$_WRITABLE" -type f \\( -name 'configure' -o -name 'configure.sh' -o -name 'aclocal.m4' -o -name 'config.h.in' -o -name 'Makefile.in' -o -name '*.info' -o -name '*.1' \\) -exec touch {} + 2>/dev/null || true
-    fi
-    export SRCS="$_WRITABLE"
-    export S="$_WRITABLE"
-    cd "$_WRITABLE"
-elif [[ -f "$SRCS" ]]; then
-    cd "$(dirname "$SRCS")"
-fi
-source "$_INSTALL_SCRIPT"
-""", is_executable = True)
-
     script = ctx.actions.write("install.sh", ctx.attrs.install_script, is_executable = True)
 
-    cmd = cmd_args("bash", "-e", wrapper, source, output.as_output(), ctx.attrs.version, script)
+    cmd = cmd_args(ctx.attrs._binary_install_tool[RunInfo])
+    cmd.add(source, output.as_output(), ctx.attrs.version, script)
 
     env = {}
 
@@ -360,6 +221,9 @@ binary_package = rule(
         # Tool deps (hidden — resolved automatically)
         "_patch_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:patch_helper"),
+        ),
+        "_binary_install_tool": attrs.default_only(
+            attrs.exec_dep(default = "//tools:binary_install_helper"),
         ),
     } | TOOLCHAIN_ATTRS,
 )

@@ -248,6 +248,13 @@ python_binary(
     visibility = ["PUBLIC"],
 )
 
+python_binary(
+    name = "binary_install_helper",
+    main = "binary_install_helper.py",
+    deps = [":_env"],
+    visibility = ["PUBLIC"],
+)
+
 export_file(
     name = "sbom.bxl",
     src = "sbom.bxl",
