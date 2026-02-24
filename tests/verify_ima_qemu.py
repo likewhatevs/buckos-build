@@ -57,10 +57,6 @@ def main():
     if not os.access("/dev/kvm", os.R_OK | os.W_OK):
         print("SKIP: /dev/kvm not accessible")
         sys.exit(0)
-    if not shutil.which("evmctl"):
-        print("SKIP: evmctl not found")
-        sys.exit(0)
-
     # Disable QEMU image locking — the disk is readonly and the artifact
     # in buck-out is shared across concurrent test targets.
     cmd = [

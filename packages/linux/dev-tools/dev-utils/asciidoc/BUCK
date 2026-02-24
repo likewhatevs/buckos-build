@@ -13,5 +13,8 @@ package(
     description = "Text based document generation",
     homepage = "https://asciidoc.org/",
     license = "GPL-2+",
+    deps = [
+        "//packages/linux/dev-libs/python/setuptools:setuptools",
+    ],
     visibility = ["PUBLIC"],
 )
