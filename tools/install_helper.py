@@ -365,14 +365,10 @@ def main():
     os.makedirs(prefix, exist_ok=True)
 
     # The build tree is a read-only Buck2 output from the compile action.
-    # Make it writable so we can patch build-system files and reset
-    # timestamps.  Cover the FULL tree (build_dir) — not just make_dir —
-    # because out-of-tree builds reference source files in the parent
-    # (e.g. glibc's ../configure, binutils' ../../include/xxhash.h) and
-    # those need uniform timestamps too.
+    # Make it writable so we can patch libtool scripts and reset timestamps.
     # Also break hard links — Buck2 may share inodes across actions, and
     # mmap-based linkers (mold) SIGBUS when writing to shared mappings.
-    for dirpath, dirnames, filenames in os.walk(build_dir):
+    for dirpath, dirnames, filenames in os.walk(make_dir):
         for d in dirnames:
             dp = os.path.join(dirpath, d)
             if not os.path.islink(dp):
@@ -393,10 +389,6 @@ def main():
                     os.rename(tmp, fp)
             except OSError:
                 pass
-
-    # Build-system fixups operate on make_dir (the build subdir) only.
-    # Running them on the full source tree can modify Makefile templates
-    # and source-tree libtool scripts that change make's behaviour.
 
     # Detect and rewrite stale absolute paths from cross-machine cache.
     # When build ran on CI and install runs locally, autotools files
@@ -478,21 +470,39 @@ def main():
         except (UnicodeDecodeError, PermissionError, FileNotFoundError):
             pass
 
-    # Reset all file timestamps to a uniform instant.  Covers the FULL
-    # tree (build_dir) so out-of-tree builds see consistent timestamps
-    # between the source root (../configure, ../../include/*) and the
-    # build subdir (config.status, *.o).  Without this, Buck2's
-    # normalised timestamps on source files can differ from the build
-    # artifacts, causing make to re-run configure or recompile during
-    # install.
+    # Reset all file timestamps in the build tree to a uniform instant.
+    # Buck2 normalises artifact timestamps after the build phase, so make
+    # install can see stale dependencies and try to regenerate files.
     _epoch = float(os.environ.get("SOURCE_DATE_EPOCH", "315576000"))
     _stamp = (_epoch, _epoch)
-    for dirpath, _dirnames, filenames in os.walk(build_dir):
+    for dirpath, _dirnames, filenames in os.walk(make_dir):
         for fname in filenames:
             try:
                 os.utime(os.path.join(dirpath, fname), _stamp)
             except (PermissionError, OSError):
                 pass
+
+    # Prevent autotools reconfigure during install.  In out-of-tree builds
+    # the build subdir's config.status depends on ../configure (in the
+    # source root).  Buck2 normalises artifact timestamps, so configure
+    # can appear newer than config.status, causing make to re-run configure.
+    # The configure action's inputs (headers, cross-tools) aren't available
+    # here, so reconfigure would fail.  Touch configure scripts to match
+    # their config.status mtime.
+    for _cs in _glob.glob(os.path.join(make_dir, "**/config.status"), recursive=True):
+        _cs_mtime = os.stat(_cs).st_mtime
+        _cs_dir = os.path.dirname(_cs)
+        for _parent in [os.path.dirname(_cs_dir),
+                        os.path.dirname(os.path.dirname(_cs_dir))]:
+            _configure = os.path.join(_parent, "configure")
+            if os.path.isfile(_configure):
+                try:
+                    os.chmod(_configure,
+                             os.stat(_configure).st_mode | stat.S_IWUSR)
+                    os.utime(_configure, (_cs_mtime, _cs_mtime))
+                except OSError:
+                    pass
+                break
 
     # Patch RUNSHARED assignments so LD_LIBRARY_PATH from the environment
     # survives into subprocesses (e.g. Python's compileall test-imports).
