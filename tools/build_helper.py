@@ -238,7 +238,7 @@ def main():
             content = content.replace(build_dir, output_dir)
             content = re.sub(
                 r'^build build\.ninja:.*?(?=\n(?:build |$))',
-                '# cmake regeneration suppressed by build_helper',
+                'build build.ninja: phony',
                 content, count=1, flags=re.MULTILINE | re.DOTALL,
             )
             with open(ninja_file, "w") as f:
@@ -252,7 +252,7 @@ def main():
             content = content.replace(build_dir, output_dir)
         content = re.sub(
             r'^build build\.ninja:.*?(?=\n(?:build |$))',
-            '# meson regeneration suppressed by build_helper',
+            'build build.ninja: phony',
             content, count=1, flags=re.MULTILINE | re.DOTALL,
         )
         with open(ninja_file, "w") as f:
@@ -314,7 +314,7 @@ def main():
             with open(_nf, "r") as f:
                 _nf_content = f.read()
             _nf_new = _regen_re.sub(
-                '# regeneration suppressed by build_helper',
+                'build build.ninja: phony',
                 _nf_content, count=1,
             )
             if _nf_new != _nf_content:

@@ -460,7 +460,7 @@ def main():
             with open(_nf, "r") as f:
                 _nf_content = f.read()
             _nf_new = _regen_re.sub(
-                '# regeneration suppressed by install_helper',
+                'build build.ninja: phony',
                 _nf_content, count=1,
             )
             if _nf_new != _nf_content:
