@@ -444,6 +444,31 @@ def main():
     # variable expansion so make doesn't force-rebuild them during install.
     _suppress_phony_rebuilds(build_dir)
 
+    # Suppress meson/cmake regeneration in all build.ninja files.
+    # In Buck2's split-action model the configure output isn't available
+    # during install; if ninja tries to regenerate, meson/cmake would
+    # fail looking for source files or cross-compilation configs from
+    # the configure action's output directory.
+    _regen_re = re.compile(
+        r'^build build\.ninja:.*?(?=\n(?:build |$))',
+        re.MULTILINE | re.DOTALL,
+    )
+    for _nf in _glob.glob(os.path.join(build_dir, "**/build.ninja"), recursive=True):
+        try:
+            _nf_stat = os.stat(_nf)
+            with open(_nf, "r") as f:
+                _nf_content = f.read()
+            _nf_new = _regen_re.sub(
+                '# regeneration suppressed by install_helper',
+                _nf_content, count=1,
+            )
+            if _nf_new != _nf_content:
+                with open(_nf, "w") as f:
+                    f.write(_nf_new)
+                os.utime(_nf, (_nf_stat.st_atime, _nf_stat.st_mtime))
+        except (UnicodeDecodeError, PermissionError, FileNotFoundError):
+            pass
+
     # Reset all file timestamps in the build tree to a uniform instant.
     # Buck2 normalises artifact timestamps after the build phase, so make
     # install can see stale dependencies and try to regenerate files.
@@ -464,10 +489,21 @@ def main():
 
     jobs = multiprocessing.cpu_count()
 
+    _use_cmake_install = False
     if args.build_system == "ninja":
         # Ninja uses DESTDIR as an env var, not a command-line arg
         os.environ[args.destdir_var] = prefix
-        cmd = ["ninja", "-C", build_dir, f"-j{jobs}"] + targets
+        # Prefer cmake --install for CMake builds.  ninja install checks
+        # the full dependency graph including external libraries that may
+        # not exist in Buck2's split-action model (only the build output
+        # is an input to the install action, not the dep tree).  cmake
+        # --install runs the install scripts directly, bypassing ninja.
+        _cmake_cache = os.path.join(build_dir, "CMakeCache.txt")
+        if os.path.isfile(_cmake_cache) and shutil.which("cmake"):
+            cmd = ["cmake", "--install", build_dir]
+            _use_cmake_install = True
+        else:
+            cmd = ["ninja", "-C", build_dir, f"-j{jobs}"] + targets
     else:
         cmd = [
             "make",
@@ -475,13 +511,15 @@ def main():
             f"-j{jobs}",
             f"{args.destdir_var}={prefix}",
         ] + targets
-    # Resolve paths in make args (e.g. CC=buck-out/.../gcc → absolute)
-    for arg in args.make_args:
-        if "=" in arg:
-            key, _, value = arg.partition("=")
-            cmd.append(f"{key}={_resolve_env_paths(value)}")
-        else:
-            cmd.append(arg)
+    # Resolve paths in make args (e.g. CC=buck-out/.../gcc → absolute).
+    # Skipped for cmake --install which doesn't accept make arguments.
+    if not _use_cmake_install:
+        for arg in args.make_args:
+            if "=" in arg:
+                key, _, value = arg.partition("=")
+                cmd.append(f"{key}={_resolve_env_paths(value)}")
+            else:
+                cmd.append(arg)
 
     result = subprocess.run(cmd)
     if result.returncode != 0:

@@ -298,6 +298,32 @@ def main():
                         FileNotFoundError):
                     pass
 
+    # Suppress meson/cmake regeneration in ALL build.ninja files.
+    # Packages like QEMU wrap meson inside autotools, placing build.ninja
+    # in a subdirectory (build/build.ninja) that the top-level check
+    # above misses.  The configure-phase source tree isn't an input to
+    # this action; regeneration would fail looking for files that only
+    # existed in the configure action's output directory.
+    _regen_re = re.compile(
+        r'^build build\.ninja:.*?(?=\n(?:build |$))',
+        re.MULTILINE | re.DOTALL,
+    )
+    for _nf in _glob.glob(os.path.join(output_dir, "**/build.ninja"), recursive=True):
+        try:
+            _nf_stat = os.stat(_nf)
+            with open(_nf, "r") as f:
+                _nf_content = f.read()
+            _nf_new = _regen_re.sub(
+                '# regeneration suppressed by build_helper',
+                _nf_content, count=1,
+            )
+            if _nf_new != _nf_content:
+                with open(_nf, "w") as f:
+                    f.write(_nf_new)
+                os.utime(_nf, (_nf_stat.st_atime, _nf_stat.st_mtime))
+        except (UnicodeDecodeError, PermissionError, FileNotFoundError):
+            pass
+
     # Rewrite paths in meson's install.dat (binary pickle).  The text
     # rewrite above skips it due to UnicodeDecodeError.  Unpickle, patch
     # path attributes, and re-pickle so `meson install` finds files at
