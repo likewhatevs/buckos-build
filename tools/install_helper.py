@@ -365,7 +365,11 @@ def main():
     os.makedirs(prefix, exist_ok=True)
 
     # The build tree is a read-only Buck2 output from the compile action.
-    # Make it writable so we can patch libtool scripts and reset timestamps.
+    # Make it writable so we can patch build-system files and reset
+    # timestamps.  Cover the FULL tree (build_dir) — not just make_dir —
+    # because out-of-tree builds reference source files in the parent
+    # (e.g. glibc's ../configure, binutils' ../../include/xxhash.h) and
+    # those need uniform timestamps too.
     # Also break hard links — Buck2 may share inodes across actions, and
     # mmap-based linkers (mold) SIGBUS when writing to shared mappings.
     for dirpath, dirnames, filenames in os.walk(build_dir):
@@ -390,14 +394,18 @@ def main():
             except OSError:
                 pass
 
+    # Build-system fixups operate on make_dir (the build subdir) only.
+    # Running them on the full source tree can modify Makefile templates
+    # and source-tree libtool scripts that change make's behaviour.
+
     # Detect and rewrite stale absolute paths from cross-machine cache.
     # When build ran on CI and install runs locally, autotools files
     # (config.status, Makefiles) contain CI's project root.
-    _stale_root = _detect_stale_project_root(build_dir)
+    _stale_root = _detect_stale_project_root(make_dir)
     if _stale_root:
         _new_root = os.getcwd()
-        _fix_stale_symlinks(build_dir, _stale_root, _new_root)
-        _rewrite_stale_paths(build_dir, _stale_root, _new_root)
+        _fix_stale_symlinks(make_dir, _stale_root, _new_root)
+        _rewrite_stale_paths(make_dir, _stale_root, _new_root)
 
     # Suppress libtool re-linking during install.
     #
@@ -410,13 +418,13 @@ def main():
     #
     # This is the same technique distros like Gentoo and Arch use to
     # avoid libtool re-link failures in staged installs.
-    for lt_script in _glob.glob(os.path.join(build_dir, "**/libtool"), recursive=True):
+    for lt_script in _glob.glob(os.path.join(make_dir, "**/libtool"), recursive=True):
         try:
             _rewrite_file(lt_script, "need_relink=yes", "need_relink=no")
         except (UnicodeDecodeError, PermissionError):
             pass
     # Also patch top-level libtool if present
-    _top_lt = os.path.join(build_dir, "libtool")
+    _top_lt = os.path.join(make_dir, "libtool")
     if os.path.isfile(_top_lt):
         try:
             _rewrite_file(_top_lt, "need_relink=yes", "need_relink=no")
@@ -426,7 +434,7 @@ def main():
     # Clear relink_command from .la files so libtool --mode=install doesn't
     # re-link libraries/binaries.  relink_command embeds build-tree paths
     # (often relative) that may not resolve in Buck2's split-action model.
-    for la_file in _glob.glob(os.path.join(build_dir, "**", "*.la"), recursive=True):
+    for la_file in _glob.glob(os.path.join(make_dir, "**", "*.la"), recursive=True):
         try:
             with open(la_file, "r") as f:
                 la_content = f.read()
@@ -443,7 +451,7 @@ def main():
 
     # Neutralise .PHONY declarations that reference build artifacts via
     # variable expansion so make doesn't force-rebuild them during install.
-    _suppress_phony_rebuilds(build_dir)
+    _suppress_phony_rebuilds(make_dir)
 
     # Suppress meson/cmake regeneration in all build.ninja files.
     # In Buck2's split-action model the configure output isn't available
@@ -454,7 +462,7 @@ def main():
         r'^build build\.ninja:.*?(?=\n(?:build |$))',
         re.MULTILINE | re.DOTALL,
     )
-    for _nf in _glob.glob(os.path.join(build_dir, "**/build.ninja"), recursive=True):
+    for _nf in _glob.glob(os.path.join(make_dir, "**/build.ninja"), recursive=True):
         try:
             _nf_stat = os.stat(_nf)
             with open(_nf, "r") as f:
@@ -470,9 +478,13 @@ def main():
         except (UnicodeDecodeError, PermissionError, FileNotFoundError):
             pass
 
-    # Reset all file timestamps in the build tree to a uniform instant.
-    # Buck2 normalises artifact timestamps after the build phase, so make
-    # install can see stale dependencies and try to regenerate files.
+    # Reset all file timestamps to a uniform instant.  Covers the FULL
+    # tree (build_dir) so out-of-tree builds see consistent timestamps
+    # between the source root (../configure, ../../include/*) and the
+    # build subdir (config.status, *.o).  Without this, Buck2's
+    # normalised timestamps on source files can differ from the build
+    # artifacts, causing make to re-run configure or recompile during
+    # install.
     _epoch = float(os.environ.get("SOURCE_DATE_EPOCH", "315576000"))
     _stamp = (_epoch, _epoch)
     for dirpath, _dirnames, filenames in os.walk(build_dir):
@@ -484,7 +496,7 @@ def main():
 
     # Patch RUNSHARED assignments so LD_LIBRARY_PATH from the environment
     # survives into subprocesses (e.g. Python's compileall test-imports).
-    _patch_runshared(build_dir)
+    _patch_runshared(make_dir)
 
     targets = args.make_targets or ["install"]
 
