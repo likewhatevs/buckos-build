@@ -703,7 +703,7 @@ Available QEMU targets:
 
 ```bash
 # Build a hybrid (BIOS+EFI) bootable ISO
-buck2 build //packages/linux/system:buckos-iso --show-output
+buck2 build //packages/linux/system:buckos-minimal-iso --show-output
 ```
 
 ## Security Features
