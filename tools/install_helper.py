@@ -399,6 +399,63 @@ def main():
         _fix_stale_symlinks(make_dir, _stale_root, _new_root)
         _rewrite_stale_paths(make_dir, _stale_root, _new_root)
 
+        # Rewrite meson's install.dat pickle which the text rewrite
+        # skips (binary).  install.dat stores absolute source paths
+        # used by `meson install` to locate headers and other files.
+        _install_dat = os.path.join(make_dir, "meson-private", "install.dat")
+        if os.path.isfile(_install_dat):
+            import pickle as _pickle
+
+            class _StubUnpickler(_pickle.Unpickler):
+                """Unpickler that stubs missing mesonbuild modules."""
+                def find_class(self, module, name):
+                    try:
+                        return super().find_class(module, name)
+                    except (ModuleNotFoundError, AttributeError):
+                        type_key = f"{module}.{name}"
+                        if type_key not in _stub_cache:
+                            class _Stub:
+                                def __reduce__(self):
+                                    return (_make_stub, (type_key,), self.__dict__)
+                                def __setstate__(self, state):
+                                    if isinstance(state, dict):
+                                        self.__dict__.update(state)
+                            _Stub.__qualname__ = _Stub.__name__ = name
+                            _Stub.__module__ = module
+                            _stub_cache[type_key] = _Stub
+                        return _stub_cache[type_key]
+
+            _stub_cache = {}
+
+            def _make_stub(type_key):
+                return _stub_cache[type_key]()
+
+            def _patch_paths(obj, old, new):
+                """Recursively replace old prefix with new in string attributes."""
+                if isinstance(obj, str):
+                    return obj.replace(old, new) if old in obj else obj
+                if isinstance(obj, list):
+                    return [_patch_paths(item, old, new) for item in obj]
+                if isinstance(obj, tuple):
+                    return tuple(_patch_paths(item, old, new) for item in obj)
+                if hasattr(obj, "__dict__"):
+                    for k, v in obj.__dict__.items():
+                        patched = _patch_paths(v, old, new)
+                        if patched is not v:
+                            setattr(obj, k, patched)
+                return obj
+
+            try:
+                _dat_stat = os.stat(_install_dat)
+                with open(_install_dat, "rb") as f:
+                    _idata = _StubUnpickler(f).load()
+                _patch_paths(_idata, _stale_root, _new_root)
+                with open(_install_dat, "wb") as f:
+                    _pickle.dump(_idata, f)
+                os.utime(_install_dat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+            except Exception:
+                pass  # Best-effort — don't block install on pickle errors
+
     # Suppress libtool re-linking during install.
     #
     # Libtool's --mode=install re-links binaries when it sees .la files
