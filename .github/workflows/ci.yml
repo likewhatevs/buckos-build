@@ -55,9 +55,10 @@ jobs:
             | zstd -d -f -o "$HOME/.local/bin/buck2"
           chmod +x "$HOME/.local/bin/buck2"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Run all checks
+      - name: Resolve targets
+        run: buck2 targets //...
+      - name: Graph tests
         run: |
-          buck2 targets //... &&
           failed=0
           for bxl in tests/graph/test_*.bxl; do
             name=$(basename "$bxl" .bxl)
@@ -65,10 +66,14 @@ jobs:
             buck2 bxl "//tests/graph/${name}.bxl:${name}" || failed=1
             echo "::endgroup::"
           done
-          [ "$failed" -eq 0 ] &&
-          buck2 test //tests: &&
-          buck2 build //packages/linux/system:buckos-minimal-iso --out buckos.iso &&
-          buck2 build //tc/bootstrap:seed-export --out seed-toolchain.tar.zst
+          [ "$failed" -eq 0 ]
+      - name: Unit tests
+        run: |
+          buck2 test //tests:
+      - name: Build ISO
+        run: buck2 build //packages/linux/system:buckos-minimal-iso --out buckos.iso
+      - name: Build seed toolchain
+        run: buck2 build //tc/bootstrap:seed-export --out seed-toolchain.tar.zst
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: buckos-minimal-iso
