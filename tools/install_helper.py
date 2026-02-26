@@ -645,7 +645,14 @@ def main():
     # binaries need rebuilding.  Race conditions in parallel make or
     # missing transitive deps can trigger relinking that fails because
     # the full dependency tree isn't available during install.
-    # Override build targets with no-ops so install never rebuilds.
+    #
+    # Single-colon (:) rules: append no-op override at end of file.
+    # GNU Make uses the last single-colon definition, so this reliably
+    # replaces both prerequisites and recipe.
+    #
+    # Double-colon (::) rules: rewrite in-place.  Each :: definition is
+    # independent, so appending a new :: no-op does NOT suppress the
+    # original recipe.
     _BUILD_TARGETS = ("all", "all-am", "all-recursive")
     for _mf in _glob.glob(os.path.join(make_dir, "**/Makefile"), recursive=True):
         try:
@@ -654,18 +661,59 @@ def main():
         except (UnicodeDecodeError, PermissionError, OSError):
             continue
         _mf_stat = os.stat(_mf)
-        _build_overrides = []
+        _single = []
+        _double = []
         for _bt in _BUILD_TARGETS:
-            if not re.search(rf'^{re.escape(_bt)}\s*:', _mf_content, re.MULTILINE):
-                continue
-            _colon = "::" if re.search(rf'^{re.escape(_bt)}\s*::', _mf_content, re.MULTILINE) else ":"
-            _build_overrides.append(f"{_bt}{_colon} ;")
-        if _build_overrides:
+            if re.search(rf'^{re.escape(_bt)}\s*::', _mf_content, re.MULTILINE):
+                _double.append(_bt)
+            elif re.search(rf'^{re.escape(_bt)}\s*:', _mf_content, re.MULTILINE):
+                _single.append(_bt)
+        if not _single and not _double:
+            continue
+        # Single-colon: append override (proven reliable)
+        if _single:
             with open(_mf, "a") as f:
                 f.write("\n# Build suppressed by install_helper — "
                         "compile phase already completed\n")
-                f.write("\n".join(_build_overrides) + "\n")
-            os.utime(_mf, (_mf_stat.st_atime, _mf_stat.st_mtime))
+                f.write("\n".join(f"{_bt}: ;" for _bt in _single) + "\n")
+        # Double-colon: rewrite in-place
+        if _double:
+            _dc_re = re.compile(
+                r'^(' + '|'.join(re.escape(t) for t in _double) + r')\s*::',
+            )
+            with open(_mf, "r") as f:
+                _mf_lines = f.readlines()
+            _changed = False
+            _new_lines = []
+            _in_recipe = False
+            _in_continuation = False
+            for _line in _mf_lines:
+                _stripped = _line.rstrip('\n')
+                # Skip continuation lines from a matched target
+                if _in_continuation:
+                    _changed = True
+                    if not _stripped.endswith('\\'):
+                        _in_continuation = False
+                    continue
+                if not _line.startswith('\t') and _dc_re.match(_stripped):
+                    _m = _dc_re.match(_stripped)
+                    _new_lines.append(f"{_m.group(1)}::\n")
+                    _new_lines.append("\t@:\n")
+                    _in_recipe = True
+                    _changed = True
+                    if _stripped.endswith('\\'):
+                        _in_continuation = True
+                    continue
+                if _in_recipe:
+                    if _line.startswith('\t'):
+                        _changed = True
+                        continue
+                    _in_recipe = False
+                _new_lines.append(_line)
+            if _changed:
+                with open(_mf, "w") as f:
+                    f.writelines(_new_lines)
+        os.utime(_mf, (_mf_stat.st_atime, _mf_stat.st_mtime))
 
     # Prevent autotools reconfigure during install.  In out-of-tree builds
     # the build subdir's config.status depends on ../configure (in the
