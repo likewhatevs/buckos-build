@@ -271,6 +271,23 @@ def main():
         print(f"error: configure failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(1)
 
+    # Sanitize file names — delete files/dirs with control characters or
+    # backslashes that Buck2 cannot relativize (e.g. autoconf's filesystem
+    # character test creates conftest.t<TAB>).
+    for dirpath, dirnames, filenames in os.walk(output_dir, topdown=False):
+        for fname in filenames:
+            if any(ord(c) < 32 or ord(c) == 127 or c == '\\' for c in fname):
+                try:
+                    os.unlink(os.path.join(dirpath, fname))
+                except OSError:
+                    pass
+        for dname in list(dirnames):
+            if any(ord(c) < 32 or ord(c) == 127 or c == '\\' for c in dname):
+                try:
+                    shutil.rmtree(os.path.join(dirpath, dname))
+                except OSError:
+                    pass
+
 
 if __name__ == "__main__":
     main()
