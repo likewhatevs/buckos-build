@@ -531,6 +531,18 @@ def main():
         except (UnicodeDecodeError, PermissionError, FileNotFoundError):
             pass
 
+    # Remove standalone dependency tracking files (*.o.d, *.lo.d).
+    # These record header paths from the build phase and are not needed
+    # during install.  Cross-machine caches may contain paths that cause
+    # make parse errors (e.g. nettle's ecc-gostdsa-sign.o.d).
+    for dirpath, _dirnames, filenames in os.walk(make_dir):
+        for fname in filenames:
+            if fname.endswith((".o.d", ".lo.d")):
+                try:
+                    os.unlink(os.path.join(dirpath, fname))
+                except OSError:
+                    pass
+
     # Reset all file timestamps in the build tree to a uniform instant.
     # Buck2 normalises artifact timestamps after the build phase, so make
     # install can see stale dependencies and try to regenerate files.
@@ -543,6 +555,42 @@ def main():
             except (PermissionError, OSError):
                 pass
 
+    # Bump compiled artifacts to _epoch + 1.  Install targets often have
+    # direct dependencies on build artifacts (e.g. install-gas: as-new,
+    # install-binPROGRAMS: $(bin_PROGRAMS)).  If objects/archives/binaries
+    # share the same timestamp as their sources, make may consider them
+    # stale and trigger relinking.  Making them strictly newer than sources
+    # prevents all rebuild chains during install.
+    _COMPILED_EXTS = frozenset((".o", ".a", ".lo", ".so", ".stamp"))
+    _bump = (_epoch + 1, _epoch + 1)
+    for dirpath, _dirnames, filenames in os.walk(make_dir):
+        for fname in filenames:
+            fpath = os.path.join(dirpath, fname)
+            if os.path.islink(fpath):
+                continue
+            ext = os.path.splitext(fname)[1]
+            if ext in _COMPILED_EXTS or (ext.startswith(".so.") if ext else False):
+                try:
+                    os.utime(fpath, _bump)
+                except (PermissionError, OSError):
+                    pass
+                continue
+            # Versioned shared libraries: libfoo.so.1.2.3
+            if ".so." in fname:
+                try:
+                    os.utime(fpath, _bump)
+                except (PermissionError, OSError):
+                    pass
+                continue
+            # Extensionless ELF executables (e.g. as-new, ld-new)
+            if not ext:
+                try:
+                    with open(fpath, "rb") as f:
+                        if f.read(4) == b"\x7fELF":
+                            os.utime(fpath, _bump)
+                except (PermissionError, OSError):
+                    pass
+
     # Suppress Makefile-level reconfiguration.  Build systems like QEMU
     # wrap meson inside autotools; their Makefile re-runs config.status
     # when included Makefiles (Makefile.mtest, Makefile.ninja) are created
@@ -553,8 +601,8 @@ def main():
     _CLEAN_TARGETS = frozenset(("distclean", "clean", "maintainer-clean",
                                 "mostlyclean", "realclean"))
     _RECONFIG_TRIGGERS = ('config.status', 'check-build-system')
-    _RECONFIG_RECIPE_PATTERNS = ('./config.status', '--reconfigure',
-                                 '--check-build-system')
+    _RECONFIG_RECIPE_PATTERNS = ('./config.status', '$(SHELL) config.status',
+                                 '--reconfigure', '--check-build-system')
     for _mf in _glob.glob(os.path.join(make_dir, "**/Makefile"), recursive=True):
         try:
             with open(_mf, "r") as f:

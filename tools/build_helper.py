@@ -510,8 +510,8 @@ def main():
     _CLEAN_TARGETS = frozenset(("distclean", "clean", "maintainer-clean",
                                 "mostlyclean", "realclean"))
     _RECONFIG_TRIGGERS = ('config.status', 'check-build-system')
-    _RECONFIG_RECIPE_PATTERNS = ('./config.status', '--reconfigure',
-                                 '--check-build-system')
+    _RECONFIG_RECIPE_PATTERNS = ('./config.status', '$(SHELL) config.status',
+                                 '--reconfigure', '--check-build-system')
     for _mf in _glob.glob(os.path.join(output_dir, "**/Makefile"), recursive=True):
         try:
             with open(_mf, "r") as f:
