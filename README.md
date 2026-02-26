@@ -1,5 +1,7 @@
 # BuckOS Linux
 
+[![CI](https://github.com/buck-os/buckos-build/actions/workflows/ci.yml/badge.svg)](https://github.com/buck-os/buckos-build/actions/workflows/ci.yml)
+
 A Buck2-based Linux distribution
 
 ## Overview
