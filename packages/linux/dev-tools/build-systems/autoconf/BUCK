@@ -113,6 +113,15 @@ WRAPPER_EOF
             fi
         done
 
+        # Rewrite shebangs in .real scripts from absolute buck-out perl paths
+        # to portable #!/usr/bin/env perl — the absolute paths become stale
+        # when actions are cached on one machine and restored on another.
+        for real in "$BINDIR"/*.real; do
+            [ -f "$real" ] || continue
+            head -1 "$real" | grep -q '/perl' || continue
+            sed -i '1s|#!.*/perl.*|#!/usr/bin/env perl|' "$real"
+        done
+
         # Also patch the .real scripts to replace hardcoded @include arrays with dynamic paths
         for script in autoscan.real autoupdate.real; do
             if [ -f "$BINDIR/$script" ]; then
