@@ -90,7 +90,27 @@ def main():
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--pre-cmd", action="append", dest="pre_cmds", default=[],
                         help="Shell command to run in source dir before meson setup (repeatable)")
+    parser.add_argument("--cflags-file", default=None,
+                        help="File with CFLAGS (one per line, from tset projection)")
+    parser.add_argument("--ldflags-file", default=None,
+                        help="File with LDFLAGS (one per line, from tset projection)")
+    parser.add_argument("--pkg-config-file", default=None,
+                        help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
+    parser.add_argument("--path-file", default=None,
+                        help="File with PATH dirs to prepend (one per line, from tset projection)")
     args = parser.parse_args()
+
+    # Read flag files early — tset-propagated values are base defaults.
+    def _read_flag_file(path):
+        if not path:
+            return []
+        with open(path) as f:
+            return [line.rstrip("\n") for line in f if line.strip()]
+
+    file_cflags = _read_flag_file(args.cflags_file)
+    file_ldflags = _read_flag_file(args.ldflags_file)
+    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_path_dirs = _read_flag_file(args.path_file)
 
     if not os.path.isdir(args.source_dir):
         print(f"error: source directory not found: {args.source_dir}", file=sys.stderr)
@@ -125,16 +145,31 @@ def main():
         if _lib_dirs:
             _existing = env.get("LD_LIBRARY_PATH", "")
             env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
-    if args.path_prepend:
-        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
+    all_path_prepend = file_path_dirs + args.path_prepend
+    if all_path_prepend:
+        prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
+
+    # Merge flag file values into env
+    if file_cflags:
+        existing = env.get("CFLAGS", "")
+        merged = _resolve_env_paths(" ".join(file_cflags))
+        env["CFLAGS"] = (merged + " " + existing).strip() if existing else merged
+    if file_ldflags:
+        existing = env.get("LDFLAGS", "")
+        merged = _resolve_env_paths(" ".join(file_ldflags))
+        env["LDFLAGS"] = (merged + " " + existing).strip() if existing else merged
+    if file_pkg_config:
+        existing = env.get("PKG_CONFIG_PATH", "")
+        merged = _resolve_env_paths(":".join(file_pkg_config))
+        env["PKG_CONFIG_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found without manual
     # PYTHONPATH wiring.  --path-prepend dirs are {prefix}/usr/bin;
     # derive {prefix}/usr/lib/python*/site-packages from them.
-    _path_sources = list(args.hermetic_path) + list(args.path_prepend)
+    _path_sources = list(args.hermetic_path) + list(all_path_prepend)
     if _path_sources:
         python_paths = []
         for bin_dir in _path_sources:

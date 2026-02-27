@@ -14,14 +14,16 @@ load("//defs:providers.bzl", "BuildToolchainInfo")
 def _buckos_toolchain_select():
     """Config-driven toolchain selection via select().
 
-    Three modes:
+    Four modes:
       DEFAULT        — read from [buckos].default_toolchain in .buckconfig
       stage3         — stage 2 toolchain (hermetic rebuild)
       bootstrap      — host PATH toolchain (escape hatch)
+      host-target    — host toolchain (for exec_dep targets / cross-build)
     """
     return select({
         "//tc/exec:is-stage3-mode": "//tc/bootstrap:stage2-toolchain",
         "//tc/exec:is-bootstrap-mode": "//tc/host:host-toolchain",
+        "//tc/exec:is-host-target": "//tc/host:host-toolchain",
         "DEFAULT": read_config("buckos", "default_toolchain", "toolchains//:buckos"),
     })
 

@@ -112,7 +112,28 @@ def main():
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--pre-cmd", action="append", dest="pre_cmds", default=[],
                         help="Shell command to run in source dir before configure (repeatable)")
+    parser.add_argument("--cflags-file", default=None,
+                        help="File with CFLAGS (one per line, from tset projection)")
+    parser.add_argument("--ldflags-file", default=None,
+                        help="File with LDFLAGS (one per line, from tset projection)")
+    parser.add_argument("--pkg-config-file", default=None,
+                        help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
+    parser.add_argument("--path-file", default=None,
+                        help="File with PATH dirs to prepend (one per line, from tset projection)")
     args = parser.parse_args()
+
+    # Read flag files early — tset-propagated flags are base; per-package
+    # flags from --cflags/--ldflags can override them.
+    def _read_flag_file(path):
+        if not path:
+            return []
+        with open(path) as f:
+            return [line.rstrip("\n") for line in f if line.strip()]
+
+    file_cflags = _read_flag_file(args.cflags_file)
+    file_ldflags = _read_flag_file(args.ldflags_file)
+    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_path_dirs = _read_flag_file(args.path_file)
 
     source_dir = os.path.abspath(args.source_dir)
     output_dir = os.path.abspath(args.output_dir)
@@ -147,16 +168,27 @@ def main():
         env["CC"] = args.cc
     if args.cxx:
         env["CXX"] = args.cxx
-    if args.cflags:
-        env["CFLAGS"] = _resolve_env_paths(" ".join(args.cflags))
-    if args.cxxflags:
-        env["CXXFLAGS"] = _resolve_env_paths(" ".join(args.cxxflags))
-    if args.cppflags:
-        env["CPPFLAGS"] = _resolve_env_paths(" ".join(args.cppflags))
-    if args.ldflags:
-        env["LDFLAGS"] = _resolve_env_paths(" ".join(args.ldflags))
-    if args.pkg_config_paths:
-        env["PKG_CONFIG_PATH"] = _resolve_env_paths(":".join(args.pkg_config_paths))
+    all_cflags = file_cflags + args.cflags
+    all_ldflags = file_ldflags + args.ldflags
+    all_pkg_config = file_pkg_config + args.pkg_config_paths
+
+    # Extract -I flags from tset cflags file for CPPFLAGS/CXXFLAGS propagation.
+    # Autotools passes CPPFLAGS to both C and C++ compilers, CFLAGS to C only,
+    # CXXFLAGS to C++ only — include dirs need to be in all three.
+    file_include_flags = [f for f in file_cflags if f.startswith("-I")]
+
+    if all_cflags:
+        env["CFLAGS"] = _resolve_env_paths(" ".join(all_cflags))
+    all_cxxflags = file_include_flags + args.cxxflags
+    if all_cxxflags:
+        env["CXXFLAGS"] = _resolve_env_paths(" ".join(all_cxxflags))
+    all_cppflags = file_include_flags + args.cppflags
+    if all_cppflags:
+        env["CPPFLAGS"] = _resolve_env_paths(" ".join(all_cppflags))
+    if all_ldflags:
+        env["LDFLAGS"] = _resolve_env_paths(" ".join(all_ldflags))
+    if all_pkg_config:
+        env["PKG_CONFIG_PATH"] = _resolve_env_paths(":".join(all_pkg_config))
     for entry in args.extra_env:
         key, _, value = entry.partition("=")
         if key:
@@ -186,8 +218,9 @@ def main():
         if _py_paths:
             _existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
-    if args.path_prepend:
-        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
+    all_path_prepend = file_path_dirs + args.path_prepend
+    if all_path_prepend:
+        prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", os.environ.get("PATH", ""))
 

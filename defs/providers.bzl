@@ -26,6 +26,12 @@ PackageInfo = provider(fields = [
     "cflags",           # list[str]
     "ldflags",          # list[str]
 
+    # Transitive sets (None for bootstrap packages)
+    "compile_info",     # CompileInfoTSet | None
+    "link_info",        # LinkInfoTSet | None
+    "path_info",        # PathInfoTSet | None
+    "runtime_deps",     # RuntimeDepTSet | None
+
     # SBOM metadata
     "license",          # str: SPDX expression ("MIT", "GPL-2.0-only", "Apache-2.0 OR MIT")
     "src_uri",          # str: upstream source URL

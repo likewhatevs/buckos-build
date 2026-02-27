@@ -273,7 +273,27 @@ def main():
                         help="Make target to install (repeatable, default: install)")
     parser.add_argument("--post-cmd", action="append", dest="post_cmds", default=[],
                         help="Shell command to run in prefix dir after install (repeatable)")
+    parser.add_argument("--cflags-file", default=None,
+                        help="File with CFLAGS (one per line, from tset projection)")
+    parser.add_argument("--ldflags-file", default=None,
+                        help="File with LDFLAGS (one per line, from tset projection)")
+    parser.add_argument("--pkg-config-file", default=None,
+                        help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
+    parser.add_argument("--path-file", default=None,
+                        help="File with PATH dirs to prepend (one per line, from tset projection)")
     args = parser.parse_args()
+
+    # Read flag files early — tset-propagated values are base defaults.
+    def _read_flag_file(path):
+        if not path:
+            return []
+        with open(path) as f:
+            return [line.rstrip("\n") for line in f if line.strip()]
+
+    file_cflags = _read_flag_file(args.cflags_file)
+    file_ldflags = _read_flag_file(args.ldflags_file)
+    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_path_dirs = _read_flag_file(args.path_file)
 
     sanitize_global_env()
 
@@ -304,7 +324,29 @@ def main():
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
-    # Apply extra environment variables
+    # Apply flag file values as base environment.
+    # Extract -I flags for CPPFLAGS/CXXFLAGS propagation — autotools
+    # passes CPPFLAGS to both C and C++, CFLAGS to C only, CXXFLAGS to C++ only.
+    if file_cflags:
+        existing = os.environ.get("CFLAGS", "")
+        merged = _resolve_env_paths(" ".join(file_cflags))
+        os.environ["CFLAGS"] = (merged + " " + existing).strip() if existing else merged
+        file_include_flags = [f for f in file_cflags if f.startswith("-I")]
+        if file_include_flags:
+            inc_str = _resolve_env_paths(" ".join(file_include_flags))
+            for var in ("CPPFLAGS", "CXXFLAGS"):
+                existing = os.environ.get(var, "")
+                os.environ[var] = (inc_str + " " + existing).strip() if existing else inc_str
+    if file_ldflags:
+        existing = os.environ.get("LDFLAGS", "")
+        merged = _resolve_env_paths(" ".join(file_ldflags))
+        os.environ["LDFLAGS"] = (merged + " " + existing).strip() if existing else merged
+    if file_pkg_config:
+        existing = os.environ.get("PKG_CONFIG_PATH", "")
+        merged = _resolve_env_paths(":".join(file_pkg_config))
+        os.environ["PKG_CONFIG_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Apply extra environment variables (override flag file values)
     for entry in args.extra_env:
         key, _, value = entry.partition("=")
         if key:
@@ -323,15 +365,16 @@ def main():
         if _lib_dirs:
             _existing = os.environ.get("LD_LIBRARY_PATH", "")
             os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
-    if args.path_prepend:
-        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
+    all_path_prepend = file_path_dirs + args.path_prepend
+    if all_path_prepend:
+        prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
         # Derive LD_LIBRARY_PATH from dep bin dirs so dynamically linked
         # libraries are found at install time (e.g. Python test-imports
         # extension modules during make install).
         _dep_lib_dirs = []
-        for _bp in args.path_prepend:
+        for _bp in all_path_prepend:
             _parent = os.path.dirname(os.path.abspath(_bp))
             for _ld in ("lib", "lib64"):
                 _d = os.path.join(_parent, _ld)
@@ -343,7 +386,7 @@ def main():
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. packaging for gdbus-codegen) are found.
-    _path_sources = list(args.hermetic_path) + list(args.path_prepend)
+    _path_sources = list(args.hermetic_path) + list(all_path_prepend)
     if _path_sources:
         _py_paths = []
         for _bp in _path_sources:

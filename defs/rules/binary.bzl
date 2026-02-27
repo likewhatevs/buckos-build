@@ -9,7 +9,7 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs/rules:_common.bzl", "collect_runtime_lib_dirs")
+load("//defs/rules:_common.bzl", "build_package_tsets", "collect_runtime_lib_dirs")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args",
      "toolchain_extra_cflags", "toolchain_extra_ldflags")
 
@@ -144,6 +144,15 @@ def _install(ctx, source):
     dep_env, dep_paths = _dep_env_args(ctx)
     for key, value in dep_env.items():
         env[key] = value
+
+    # Add host_deps bin dirs to dep paths
+    for hd in ctx.attrs.host_deps:
+        if PackageInfo in hd:
+            prefix = hd[PackageInfo].prefix
+        else:
+            prefix = hd[DefaultInfo].default_outputs[0]
+        dep_paths.append(cmd_args(prefix, format = "{}/usr/bin"))
+
     if dep_paths:
         env["_DEP_BIN_PATHS"] = cmd_args(dep_paths, delimiter = ":")
 
@@ -171,6 +180,9 @@ def _binary_package_impl(ctx):
     # Phase 3: install
     installed = _install(ctx, prepared)
 
+    # Build transitive sets
+    compile_tset, link_tset, path_tset, runtime_tset = build_package_tsets(ctx, installed)
+
     pkg_info = PackageInfo(
         name = ctx.attrs.name,
         version = ctx.attrs.version,
@@ -183,6 +195,10 @@ def _binary_package_impl(ctx):
         pkg_config_path = None,
         cflags = [],
         ldflags = [],
+        compile_info = compile_tset,
+        link_info = link_tset,
+        path_info = path_tset,
+        runtime_deps = runtime_tset,
         license = ctx.attrs.license,
         src_uri = ctx.attrs.src_uri,
         src_sha256 = ctx.attrs.src_sha256,
@@ -208,6 +224,8 @@ binary_package = rule(
         "pre_configure_cmds": attrs.list(attrs.string(), default = []),
         "env": attrs.dict(attrs.string(), attrs.string(), default = {}),
         "deps": attrs.list(attrs.dep(), default = []),
+        "host_deps": attrs.list(attrs.exec_dep(), default = []),
+        "runtime_deps": attrs.list(attrs.dep(), default = []),
         "patches": attrs.list(attrs.source(), default = []),
 
         # Unused by binary but accepted by the package() macro interface

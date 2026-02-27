@@ -91,7 +91,33 @@ def main():
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
     parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
+    parser.add_argument("--cflags-file", default=None,
+                        help="File with CFLAGS (one per line, from tset projection)")
+    parser.add_argument("--ldflags-file", default=None,
+                        help="File with LDFLAGS (one per line, from tset projection)")
+    parser.add_argument("--pkg-config-file", default=None,
+                        help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
+    parser.add_argument("--path-file", default=None,
+                        help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--prefix-path-file", default=None,
+                        help="File with CMAKE_PREFIX_PATH entries (one per line, from tset projection)")
+    parser.add_argument("--lib-dirs-file", default=None,
+                        help="File with lib dirs for LD_LIBRARY_PATH (one per line, from tset projection)")
     args = parser.parse_args()
+
+    # Read flag files early — tset-propagated values are base defaults.
+    def _read_flag_file(path):
+        if not path:
+            return []
+        with open(path) as f:
+            return [line.rstrip("\n") for line in f if line.strip()]
+
+    file_cflags = _read_flag_file(args.cflags_file)
+    file_ldflags = _read_flag_file(args.ldflags_file)
+    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_path_dirs = _read_flag_file(args.path_file)
+    file_prefix_paths = _read_flag_file(args.prefix_path_file)
+    file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
     if not os.path.isdir(args.source_dir):
         print(f"error: source directory not found: {args.source_dir}", file=sys.stderr)
@@ -141,10 +167,18 @@ def main():
         if _py_paths:
             _existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
-    if args.path_prepend:
-        prepend = ":".join(os.path.abspath(p) for p in args.path_prepend if os.path.isdir(p))
+    all_path_prepend = file_path_dirs + args.path_prepend
+    if all_path_prepend:
+        prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
+
+    # Merge flag file pkg-config paths into env
+    if file_pkg_config:
+        existing = env.get("PKG_CONFIG_PATH", "")
+        merged = _resolve_env_paths(":".join(file_pkg_config))
+        env["PKG_CONFIG_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
@@ -165,18 +199,52 @@ def main():
         "-G", "Ninja",
     ]
 
-    # Build CMAKE_PREFIX_PATH from dep prefixes so find_package() works
-    if args.prefix_paths:
-        resolved = [os.path.abspath(p) for p in args.prefix_paths]
-        cmd.append("-DCMAKE_PREFIX_PATH=" + ";".join(resolved))
+    # Build CMAKE_PREFIX_PATH from dep prefixes so find_package() works.
+    # Merge flag-file prefix paths with CLI --prefix-path args.
+    all_prefix_paths = [os.path.abspath(p) for p in file_prefix_paths] + \
+                       [os.path.abspath(p) for p in args.prefix_paths]
+    if all_prefix_paths:
+        cmd.append("-DCMAKE_PREFIX_PATH=" + ";".join(all_prefix_paths))
 
+    # Merge flag-file lib dirs into LD_LIBRARY_PATH for dep tools
+    if file_lib_dirs:
+        resolved_lib_dirs = [os.path.abspath(d) for d in file_lib_dirs if os.path.isdir(d)]
+        if resolved_lib_dirs:
+            existing = env.get("LD_LIBRARY_PATH", "")
+            merged = ":".join(resolved_lib_dirs)
+            env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Collect cmake defines in a dict so we can merge flag-file values
+    # with toolchain/per-package values for CMAKE_*_FLAGS.
+    # Last --cmake-define for a given key wins; flag-file values are
+    # prepended (dep flags first, per-package flags override).
+    cmake_defines = {}
     for define in args.cmake_defines:
-        # Resolve relative buck-out paths in define values to absolute
         if "=" in define:
             key, _, value = define.partition("=")
-            cmd.append(f"-D{key}={_resolve_env_paths(value)}")
+            cmake_defines[key] = _resolve_env_paths(value)
         else:
-            cmd.append(f"-D{define}")
+            cmake_defines[define] = ""
+
+    # Merge flag-file cflags into CMAKE_C_FLAGS and CMAKE_CXX_FLAGS.
+    # File flags (dep tset) come first; --cmake-define flags (toolchain/
+    # per-package) are appended so they can override.
+    if file_cflags:
+        _cf = _resolve_env_paths(" ".join(file_cflags))
+        for key in ("CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS"):
+            existing = cmake_defines.get(key, "")
+            cmake_defines[key] = (_cf + " " + existing).strip() if existing else _cf
+
+    # Merge flag-file ldflags into CMAKE_*_LINKER_FLAGS.
+    if file_ldflags:
+        _ld = _resolve_env_paths(" ".join(file_ldflags))
+        for key in ("CMAKE_EXE_LINKER_FLAGS", "CMAKE_SHARED_LINKER_FLAGS",
+                     "CMAKE_MODULE_LINKER_FLAGS"):
+            existing = cmake_defines.get(key, "")
+            cmake_defines[key] = (_ld + " " + existing).strip() if existing else _ld
+
+    for key, value in cmake_defines.items():
+        cmd.append(f"-D{key}={value}" if value else f"-D{key}")
 
     cmd.extend(args.cmake_args)
 
