@@ -651,16 +651,24 @@ def main():
         # Derive LD_LIBRARY_PATH from dep bin dirs so dynamically linked
         # libraries (e.g. libbz2.so for Python's _bz2 module) are found
         # at build time when the build process test-imports extensions.
-        _dep_lib_dirs = []
-        for _bp in all_path_prepend:
-            _parent = os.path.dirname(os.path.abspath(_bp))
-            for _ld in ("lib", "lib64"):
-                _d = os.path.join(_parent, _ld)
-                if os.path.isdir(_d):
-                    _dep_lib_dirs.append(_d)
-        if _dep_lib_dirs:
-            _existing = os.environ.get("LD_LIBRARY_PATH", "")
-            os.environ["LD_LIBRARY_PATH"] = ":".join(_dep_lib_dirs) + (":" + _existing if _existing else "")
+        # Skip for ninja/meson builds (including autotools wrapping meson
+        # like QEMU): dep LD_LIBRARY_PATH poisons host python's pyexpat
+        # when buckos expat is in the dep lib dirs.  Meson builds use
+        # targeted python wrappers with embedded LD_LIBRARY_PATH instead.
+        _has_embedded_ninja = bool(_glob.glob(
+            os.path.join(output_dir, "**/build.ninja"), recursive=True,
+        )) or os.path.isfile(os.path.join(output_dir, "build.ninja"))
+        if args.build_system != "ninja" and not _has_embedded_ninja:
+            _dep_lib_dirs = []
+            for _bp in all_path_prepend:
+                _parent = os.path.dirname(os.path.abspath(_bp))
+                for _ld in ("lib", "lib64"):
+                    _d = os.path.join(_parent, _ld)
+                    if os.path.isdir(_d):
+                        _dep_lib_dirs.append(_d)
+            if _dep_lib_dirs:
+                _existing = os.environ.get("LD_LIBRARY_PATH", "")
+                os.environ["LD_LIBRARY_PATH"] = ":".join(_dep_lib_dirs) + (":" + _existing if _existing else "")
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found by custom generators.
@@ -677,6 +685,56 @@ def main():
         if python_paths:
             existing = os.environ.get("PYTHONPATH", "")
             os.environ["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")
+
+    # Create a buckos python wrapper and replace host python references in
+    # all build.ninja files.  Packages like QEMU wrap meson inside autotools;
+    # their build.ninja embeds host python, which hits pyexpat ABI issues
+    # when dep LD_LIBRARY_PATH includes buckos expat.  The wrapper runs
+    # buckos python with its own LD_LIBRARY_PATH, isolating it from host libs.
+    _all_ninja_files = _glob.glob(os.path.join(output_dir, "**/build.ninja"), recursive=True)
+    _top_ninja = os.path.join(output_dir, "build.ninja")
+    if os.path.isfile(_top_ninja) and _top_ninja not in _all_ninja_files:
+        _all_ninja_files.append(_top_ninja)
+    _py_wrapper_dir = os.path.join(output_dir, ".python-wrapper")
+    _py_wrapper = os.path.join(_py_wrapper_dir, "python3")
+    if _all_ninja_files and not os.path.isfile(_py_wrapper):
+        # Find buckos python from dep/hermetic paths
+        _dep_python3 = None
+        for _bp in list(args.hermetic_path) + list(all_path_prepend):
+            _candidate = os.path.join(os.path.abspath(_bp), "python3")
+            if os.path.isfile(_candidate):
+                _dep_python3 = _candidate
+                break
+        if _dep_python3:
+            _py_lib_dirs = []
+            for _bp in list(args.hermetic_path) + list(all_path_prepend):
+                _parent = os.path.dirname(os.path.abspath(_bp))
+                for _ld in ("lib", "lib64"):
+                    _d = os.path.join(_parent, _ld)
+                    if os.path.isdir(_d):
+                        _py_lib_dirs.append(_d)
+            os.makedirs(_py_wrapper_dir, exist_ok=True)
+            _ld_path = ":".join(_py_lib_dirs)
+            with open(_py_wrapper, "w") as f:
+                f.write(f'#!/bin/sh\n'
+                        f'export LD_LIBRARY_PATH="{_ld_path}:${{LD_LIBRARY_PATH}}"\n'
+                        f'exec "{_dep_python3}" "$@"\n')
+            os.chmod(_py_wrapper, 0o755)
+    if os.path.isfile(_py_wrapper) and _all_ninja_files:
+        _host_python = shutil.which("python3") or "/usr/bin/python3"
+        for _nf in _all_ninja_files:
+            try:
+                _nf_stat = os.stat(_nf)
+                with open(_nf, "r") as f:
+                    _nf_content = f.read()
+                if _host_python in _nf_content:
+                    _nf_content = _nf_content.replace(_host_python, _py_wrapper)
+                    with open(_nf, "w") as f:
+                        f.write(_nf_content)
+                    os.utime(_nf, (_nf_stat.st_atime, _nf_stat.st_mtime))
+            except (UnicodeDecodeError, PermissionError, FileNotFoundError):
+                pass
+        os.environ["PATH"] = _py_wrapper_dir + ":" + os.environ.get("PATH", "")
 
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
