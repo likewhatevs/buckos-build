@@ -324,9 +324,15 @@ def main():
                 'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
     os.chmod(wrapper, 0o755)
 
-    # Apply flag file values as base environment.
-    # Extract -I flags for CPPFLAGS/CXXFLAGS propagation — autotools
-    # passes CPPFLAGS to both C and C++, CFLAGS to C only, CXXFLAGS to C++ only.
+    # Apply extra environment variables first (toolchain flags like -march).
+    for entry in args.extra_env:
+        key, _, value = entry.partition("=")
+        if key:
+            os.environ[key] = _resolve_env_paths(value)
+
+    # Prepend flag file values — dep-provided -I/-L flags must appear before
+    # toolchain flags so headers/libs from deps are found.  Extract -I flags
+    # for CPPFLAGS/CXXFLAGS propagation (autotools: CPPFLAGS→C+C++, CFLAGS→C only).
     if file_cflags:
         existing = os.environ.get("CFLAGS", "")
         merged = _resolve_env_paths(" ".join(file_cflags))
@@ -345,12 +351,6 @@ def main():
         existing = os.environ.get("PKG_CONFIG_PATH", "")
         merged = _resolve_env_paths(":".join(file_pkg_config))
         os.environ["PKG_CONFIG_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
-
-    # Apply extra environment variables (override flag file values)
-    for entry in args.extra_env:
-        key, _, value = entry.partition("=")
-        if key:
-            os.environ[key] = _resolve_env_paths(value)
     if args.hermetic_path:
         os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
         # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically

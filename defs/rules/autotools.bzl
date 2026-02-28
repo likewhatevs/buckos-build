@@ -20,7 +20,8 @@ inputs haven't changed.
 
 load("//defs:providers.bzl", "PackageInfo")
 load("//defs/rules:_common.bzl",
-     "build_package_tsets", "collect_dep_tsets", "collect_runtime_lib_dirs",
+     "add_flag_file", "build_package_tsets", "collect_dep_tsets",
+     "collect_runtime_lib_dirs",
      "write_bin_dirs", "write_compile_flags", "write_link_flags",
      "write_pkg_config_paths",
 )
@@ -123,14 +124,10 @@ def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
         # Dep flags via tset projection files (replaces manual dep iteration).
         # The helper reads flags from files and applies to CFLAGS, CPPFLAGS,
         # CXXFLAGS, LDFLAGS, PKG_CONFIG_PATH, and PATH.
-        if cflags_file:
-            cmd.add("--cflags-file", cflags_file)
-        if ldflags_file:
-            cmd.add("--ldflags-file", ldflags_file)
-        if pkg_config_file:
-            cmd.add("--pkg-config-file", pkg_config_file)
-        if path_file:
-            cmd.add("--path-file", path_file)
+        add_flag_file(cmd, "--cflags-file", cflags_file)
+        add_flag_file(cmd, "--ldflags-file", ldflags_file)
+        add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
+        add_flag_file(cmd, "--path-file", path_file)
 
     ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
     return output
@@ -163,14 +160,10 @@ def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,
         cmd.add("--env", cmd_args("LDFLAGS=", cmd_args(_tc_ldflags, delimiter = " "), delimiter = ""))
 
     # Dep flags via tset projection files
-    if cflags_file:
-        cmd.add("--cflags-file", cflags_file)
-    if ldflags_file:
-        cmd.add("--ldflags-file", ldflags_file)
-    if pkg_config_file:
-        cmd.add("--pkg-config-file", pkg_config_file)
-    if path_file:
-        cmd.add("--path-file", path_file)
+    add_flag_file(cmd, "--cflags-file", cflags_file)
+    add_flag_file(cmd, "--ldflags-file", ldflags_file)
+    add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
+    add_flag_file(cmd, "--path-file", path_file)
 
     # Add host_deps bin dirs to PATH
     for hd in ctx.attrs.host_deps:
@@ -225,14 +218,10 @@ def _src_install(ctx, built, cflags_file = None, ldflags_file = None,
         cmd.add("--env", cmd_args("LDFLAGS=", cmd_args(_tc_ldflags, delimiter = " "), delimiter = ""))
 
     # Dep flags via tset projection files
-    if cflags_file:
-        cmd.add("--cflags-file", cflags_file)
-    if ldflags_file:
-        cmd.add("--ldflags-file", ldflags_file)
-    if pkg_config_file:
-        cmd.add("--pkg-config-file", pkg_config_file)
-    if path_file:
-        cmd.add("--path-file", path_file)
+    add_flag_file(cmd, "--cflags-file", cflags_file)
+    add_flag_file(cmd, "--ldflags-file", ldflags_file)
+    add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
+    add_flag_file(cmd, "--path-file", path_file)
 
     # Add host_deps bin dirs to PATH
     for hd in ctx.attrs.host_deps:

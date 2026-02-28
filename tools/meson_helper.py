@@ -151,7 +151,14 @@ def main():
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
 
-    # Merge flag file values into env
+    # Apply extra environment variables first (toolchain flags like -march).
+    for entry in args.extra_env:
+        key, _, value = entry.partition("=")
+        if key:
+            env[key] = _resolve_env_paths(value)
+
+    # Prepend flag file values — dep-provided -I/-L flags must appear before
+    # toolchain flags so headers/libs from deps are found.
     if file_cflags:
         existing = env.get("CFLAGS", "")
         merged = _resolve_env_paths(" ".join(file_cflags))
@@ -186,11 +193,6 @@ def main():
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
-
-    for entry in args.extra_env:
-        key, _, value = entry.partition("=")
-        if key:
-            env[key] = _resolve_env_paths(value)
     if args.cc:
         env["CC"] = _resolve_env_paths(args.cc)
     if args.cxx:

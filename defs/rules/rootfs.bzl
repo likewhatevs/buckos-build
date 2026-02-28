@@ -3,7 +3,7 @@ rootfs rule: assemble a root filesystem from packages.
 """
 
 load("//defs:providers.bzl", "KernelInfo", "PackageInfo")
-load("//defs/rules:_common.bzl", "write_runtime_prefixes")
+load("//defs/rules:_common.bzl", "add_flag_file", "write_runtime_prefixes")
 load("//defs:tsets.bzl", "RuntimeDepTSet")
 
 # ── rootfs rule ──────────────────────────────────────────────────────
@@ -36,8 +36,7 @@ def _rootfs_impl(ctx):
     cmd.add("--output-dir", rootfs_dir.as_output())
     for pkg_dir in pkg_dirs:
         cmd.add("--package-dir", pkg_dir)
-    if prefix_list_file:
-        cmd.add("--prefix-list", prefix_list_file)
+    add_flag_file(cmd, "--prefix-list", prefix_list_file)
     cmd.add("--version", ctx.attrs.version)
 
     # Write version to a file that contributes to action cache key.
