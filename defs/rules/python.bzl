@@ -9,7 +9,7 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets", "collect_runtime_lib_dirs")
+load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets")
 load("//defs:toolchain_helpers.bzl", "toolchain_env_args", "toolchain_path_args")
 load("//defs:host_tools.bzl", "host_tool_path_args")
 
@@ -98,7 +98,6 @@ def _python_package_impl(ctx):
         lib_dirs = [],
         bin_dirs = [],
         libraries = [],
-        runtime_lib_dirs = collect_runtime_lib_dirs(ctx.attrs.deps, installed),
         pkg_config_path = None,
         cflags = [],
         ldflags = [],

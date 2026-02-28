@@ -16,7 +16,6 @@ load("//defs:providers.bzl", "PackageInfo")
 load("//defs/rules:_common.bzl",
      "COMMON_PACKAGE_ATTRS",
      "add_flag_file", "build_package_tsets", "collect_dep_tsets",
-     "collect_runtime_lib_dirs",
      "write_bin_dirs", "write_compile_flags", "write_lib_dirs",
      "write_link_flags", "write_pkg_config_paths",
 )
@@ -243,7 +242,6 @@ def _meson_package_impl(ctx):
         lib_dirs = [],
         bin_dirs = [],
         libraries = ctx.attrs.libraries,
-        runtime_lib_dirs = collect_runtime_lib_dirs(ctx.attrs.deps, installed),
         pkg_config_path = None,
         cflags = ctx.attrs.extra_cflags,
         ldflags = ctx.attrs.extra_ldflags,

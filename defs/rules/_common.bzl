@@ -50,19 +50,6 @@ COMMON_PACKAGE_ATTRS = {
     ),
 } | TOOLCHAIN_ATTRS
 
-def collect_runtime_lib_dirs(deps, installed):
-    """Collect lib dirs from installed prefix and all deps (transitive).
-
-    Deprecated: use tsets instead.  Kept for bootstrap rule compat.
-    """
-    dirs = []
-    for dep in deps:
-        if PackageInfo in dep:
-            dirs.extend(dep[PackageInfo].runtime_lib_dirs)
-    dirs.append(cmd_args(installed, format = "{}/usr/lib64"))
-    dirs.append(cmd_args(installed, format = "{}/usr/lib"))
-    return dirs
-
 # ── Tset construction ────────────────────────────────────────────────
 
 def build_package_tsets(ctx, installed):

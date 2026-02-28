@@ -9,7 +9,7 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets", "collect_runtime_lib_dirs")
+load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets")
 load("//defs:toolchain_helpers.bzl", "toolchain_env_args",
      "toolchain_extra_cflags", "toolchain_extra_ldflags")
 load("//defs:host_tools.bzl", "host_tool_env_paths")
@@ -91,11 +91,6 @@ def _dep_env_args(ctx):
         lib_dirs.append(cmd_args(prefix, format = "{}/tools/lib"))
         ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/tools/lib64"))
         ldflags.append(cmd_args(prefix, format = "-Wl,-rpath-link,{}/tools/lib"))
-
-        # Transitive rpath-link: resolve indirect .so deps (e.g. libedit → ncurses)
-        if PackageInfo in dep:
-            for rt_dir in dep[PackageInfo].runtime_lib_dirs:
-                ldflags.append(cmd_args("-Wl,-rpath-link,", rt_dir, delimiter = ""))
 
         pkg_config_paths.append(cmd_args(prefix, format = "{}/tools/lib64/pkgconfig"))
         pkg_config_paths.append(cmd_args(prefix, format = "{}/tools/lib/pkgconfig"))
@@ -192,7 +187,6 @@ def _binary_package_impl(ctx):
         lib_dirs = [],
         bin_dirs = [],
         libraries = [],
-        runtime_lib_dirs = collect_runtime_lib_dirs(ctx.attrs.deps, installed),
         pkg_config_path = None,
         cflags = [],
         ldflags = [],
