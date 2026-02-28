@@ -192,49 +192,49 @@ def write_compile_flags(ctx, compile_tset):
     """Write cflags (one per line) from compile tset projection."""
     if not compile_tset:
         return None
-    return _write_tset_file(ctx, "tset_cflags.txt", compile_tset.project_as_args("cflags"))
+    return _write_tset_file(ctx, "tset_cflags.txt", compile_tset.project_as_args("cflags", ordering = "preorder"))
 
 def write_link_flags(ctx, link_tset):
     """Write ldflags (one per line) from link tset projection."""
     if not link_tset:
         return None
-    return _write_tset_file(ctx, "tset_ldflags.txt", link_tset.project_as_args("ldflags"))
+    return _write_tset_file(ctx, "tset_ldflags.txt", link_tset.project_as_args("ldflags", ordering = "preorder"))
 
 def write_pkg_config_paths(ctx, compile_tset):
     """Write pkg-config paths (one per line) from compile tset projection."""
     if not compile_tset:
         return None
-    return _write_tset_file(ctx, "tset_pkg_config_paths.txt", compile_tset.project_as_args("pkg_config_paths"))
+    return _write_tset_file(ctx, "tset_pkg_config_paths.txt", compile_tset.project_as_args("pkg_config_paths", ordering = "preorder"))
 
 def write_bin_dirs(ctx, path_tset):
     """Write bin directories (one per line) from path tset projection."""
     if not path_tset:
         return None
-    return _write_tset_file(ctx, "tset_bin_dirs.txt", path_tset.project_as_args("bin_dirs"))
+    return _write_tset_file(ctx, "tset_bin_dirs.txt", path_tset.project_as_args("bin_dirs", ordering = "preorder"))
 
 def write_lib_dirs(ctx, path_tset):
     """Write lib directories (one per line) from path tset projection."""
     if not path_tset:
         return None
-    return _write_tset_file(ctx, "tset_lib_dirs.txt", path_tset.project_as_args("lib_dirs"))
+    return _write_tset_file(ctx, "tset_lib_dirs.txt", path_tset.project_as_args("lib_dirs", ordering = "preorder"))
 
 def write_cmake_prefix_paths(ctx, path_tset):
     """Write cmake prefix paths (one per line) from path tset projection."""
     if not path_tset:
         return None
-    return _write_tset_file(ctx, "tset_cmake_prefix_paths.txt", path_tset.project_as_args("cmake_prefix_paths"))
+    return _write_tset_file(ctx, "tset_cmake_prefix_paths.txt", path_tset.project_as_args("cmake_prefix_paths", ordering = "preorder"))
 
 def write_link_libs(ctx, link_tset):
     """Write -l flags (one per line) from link tset projection."""
     if not link_tset:
         return None
-    return _write_tset_file(ctx, "tset_libs.txt", link_tset.project_as_args("libs"))
+    return _write_tset_file(ctx, "tset_libs.txt", link_tset.project_as_args("libs", ordering = "preorder"))
 
 def write_runtime_prefixes(ctx, runtime_tset):
     """Write prefix paths (one per line) from runtime tset projection."""
     if not runtime_tset:
         return None
-    return _write_tset_file(ctx, "tset_runtime_prefixes.txt", runtime_tset.project_as_args("prefixes"))
+    return _write_tset_file(ctx, "tset_runtime_prefixes.txt", runtime_tset.project_as_args("prefixes", ordering = "preorder"))
 
 def add_flag_file(cmd, flag_name, writer_result):
     """Add a flag-file argument to cmd, handling None and hidden deps.
