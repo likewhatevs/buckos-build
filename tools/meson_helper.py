@@ -7,7 +7,6 @@ Runs meson setup with specified source dir, build dir, and arguments.
 import argparse
 import glob as _glob
 import os
-import shutil
 import subprocess
 import sys
 
@@ -218,46 +217,6 @@ def main():
         if python_paths:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")
-
-    # Create a python3 wrapper with embedded LD_LIBRARY_PATH so buckos
-    # python (from deps) finds libpython and its extension libs without
-    # setting global LD_LIBRARY_PATH which would poison host tools
-    # (e.g. host python's pyexpat loading buckos expat with wrong ABI).
-    # The wrapper lives in the build dir so it persists into the ninja
-    # build phase — build_helper rewrites embedded paths on copy.
-    _py_wrapper_dir = os.path.join(os.path.abspath(args.build_dir), ".python-wrapper")
-    _dep_python3 = None
-    for _bp in all_path_prepend:
-        _candidate = os.path.join(os.path.abspath(_bp), "python3")
-        if os.path.isfile(_candidate):
-            _dep_python3 = _candidate
-            break
-    if _dep_python3:
-        # Collect lib dirs from ALL dep bin dirs — python extensions may
-        # need shared libs from other deps (e.g. libbz2, libexpat).
-        _py_lib_dirs = []
-        for _bp in all_path_prepend:
-            _parent = os.path.dirname(os.path.abspath(_bp))
-            for _ld in ("lib", "lib64"):
-                _d = os.path.join(_parent, _ld)
-                if os.path.isdir(_d):
-                    _py_lib_dirs.append(_d)
-        # Also include hermetic path lib dirs (toolchain libs)
-        for _bp in args.hermetic_path:
-            _parent = os.path.dirname(os.path.abspath(_bp))
-            for _ld in ("lib", "lib64"):
-                _d = os.path.join(_parent, _ld)
-                if os.path.isdir(_d):
-                    _py_lib_dirs.append(_d)
-        os.makedirs(_py_wrapper_dir, exist_ok=True)
-        _py_wrapper = os.path.join(_py_wrapper_dir, "python3")
-        _ld_path = ":".join(_py_lib_dirs)
-        with open(_py_wrapper, "w") as f:
-            f.write(f'#!/bin/sh\n'
-                    f'export LD_LIBRARY_PATH="{_ld_path}:${{LD_LIBRARY_PATH}}"\n'
-                    f'exec "{_dep_python3}" "$@"\n')
-        os.chmod(_py_wrapper, 0o755)
-        env["PATH"] = _py_wrapper_dir + ":" + env.get("PATH", "")
 
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)

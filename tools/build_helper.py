@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import sys
 
-from _env import sanitize_filenames, sanitize_global_env
+from _env import clean_env, sanitize_filenames
 
 
 def _can_unshare_net():
@@ -182,6 +182,8 @@ def main():
                         help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
     parser.add_argument("--path-file", default=None,
                         help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--lib-dirs-file", default=None,
+                        help="File with lib dirs for LD_LIBRARY_PATH (one per line, from tset projection)")
     args = parser.parse_args()
 
     # Read flag files early — tset-propagated values are base defaults.
@@ -195,12 +197,13 @@ def main():
     file_ldflags = _read_flag_file(args.ldflags_file)
     file_pkg_config = _read_flag_file(args.pkg_config_file)
     file_path_dirs = _read_flag_file(args.path_file)
+    file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
-    sanitize_global_env()
+    env = clean_env()
 
     # Expose the project root so pre-cmds can resolve Buck2 artifact
     # paths (which are relative to the project root, not to the build dir).
-    os.environ["PROJECT_ROOT"] = os.getcwd()
+    env["PROJECT_ROOT"] = os.getcwd()
 
     build_dir = os.path.abspath(args.build_dir)
     output_dir = os.path.abspath(args.output_dir)
@@ -516,7 +519,7 @@ def main():
     # preserves original timestamps but path rewriting modifies some
     # files, making others (version.h, aclocal.m4, Makefiles) appear
     # stale.  A uniform timestamp prevents all spurious rebuilds.
-    _epoch = float(os.environ.get("SOURCE_DATE_EPOCH", "315576000"))
+    _epoch = float(env.get("SOURCE_DATE_EPOCH", "315576000"))
     _stamp = (_epoch, _epoch)
     for dirpath, _dirnames, filenames in os.walk(output_dir):
         for fname in filenames:
@@ -598,31 +601,31 @@ def main():
     for entry in args.extra_env:
         key, _, value = entry.partition("=")
         if key:
-            os.environ[key] = _resolve_env_paths(value)
+            env[key] = _resolve_env_paths(value)
 
     # Prepend flag file values — dep-provided -I/-L flags must appear before
     # toolchain flags so headers/libs from deps are found.  Extract -I flags
     # for CPPFLAGS/CXXFLAGS propagation (autotools: CPPFLAGS→C+C++, CFLAGS→C only).
     if file_cflags:
-        existing = os.environ.get("CFLAGS", "")
+        existing = env.get("CFLAGS", "")
         merged = _resolve_env_paths(" ".join(file_cflags))
-        os.environ["CFLAGS"] = (merged + " " + existing).strip() if existing else merged
+        env["CFLAGS"] = (merged + " " + existing).strip() if existing else merged
         file_include_flags = [f for f in file_cflags if f.startswith("-I")]
         if file_include_flags:
             inc_str = _resolve_env_paths(" ".join(file_include_flags))
             for var in ("CPPFLAGS", "CXXFLAGS"):
-                existing = os.environ.get(var, "")
-                os.environ[var] = (inc_str + " " + existing).strip() if existing else inc_str
+                existing = env.get(var, "")
+                env[var] = (inc_str + " " + existing).strip() if existing else inc_str
     if file_ldflags:
-        existing = os.environ.get("LDFLAGS", "")
+        existing = env.get("LDFLAGS", "")
         merged = _resolve_env_paths(" ".join(file_ldflags))
-        os.environ["LDFLAGS"] = (merged + " " + existing).strip() if existing else merged
+        env["LDFLAGS"] = (merged + " " + existing).strip() if existing else merged
     if file_pkg_config:
-        existing = os.environ.get("PKG_CONFIG_PATH", "")
+        existing = env.get("PKG_CONFIG_PATH", "")
         merged = _resolve_env_paths(":".join(file_pkg_config))
-        os.environ["PKG_CONFIG_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+        env["PKG_CONFIG_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
     if args.hermetic_path:
-        os.environ["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
+        env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
         # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
         # linked tools (e.g. cross-ar needing libzstd) find their libs.
         _lib_dirs = []
@@ -633,12 +636,12 @@ def main():
                 if os.path.isdir(_d):
                     _lib_dirs.append(_d)
         if _lib_dirs:
-            _existing = os.environ.get("LD_LIBRARY_PATH", "")
-            os.environ["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = ":".join(_lib_dirs) + (":" + _existing if _existing else "")
     elif args.hermetic_empty:
-        os.environ["PATH"] = ""
+        env["PATH"] = ""
     elif args.allow_host_path:
-        os.environ["PATH"] = _host_path
+        env["PATH"] = _host_path
     else:
         print("error: build requires --hermetic-path, --hermetic-empty, or --allow-host-path",
               file=sys.stderr)
@@ -647,28 +650,18 @@ def main():
     if all_path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
-            os.environ["PATH"] = prepend + ":" + os.environ.get("PATH", "")
-        # Derive LD_LIBRARY_PATH from dep bin dirs so dynamically linked
-        # libraries (e.g. libbz2.so for Python's _bz2 module) are found
-        # at build time when the build process test-imports extensions.
-        # Skip for ninja/meson builds (including autotools wrapping meson
-        # like QEMU): dep LD_LIBRARY_PATH poisons host python's pyexpat
-        # when buckos expat is in the dep lib dirs.  Meson builds use
-        # targeted python wrappers with embedded LD_LIBRARY_PATH instead.
-        _has_embedded_ninja = bool(_glob.glob(
-            os.path.join(output_dir, "**/build.ninja"), recursive=True,
-        )) or os.path.isfile(os.path.join(output_dir, "build.ninja"))
-        if args.build_system != "ninja" and not _has_embedded_ninja:
-            _dep_lib_dirs = []
-            for _bp in all_path_prepend:
-                _parent = os.path.dirname(os.path.abspath(_bp))
-                for _ld in ("lib", "lib64"):
-                    _d = os.path.join(_parent, _ld)
-                    if os.path.isdir(_d):
-                        _dep_lib_dirs.append(_d)
-            if _dep_lib_dirs:
-                _existing = os.environ.get("LD_LIBRARY_PATH", "")
-                os.environ["LD_LIBRARY_PATH"] = ":".join(_dep_lib_dirs) + (":" + _existing if _existing else "")
+            env["PATH"] = prepend + ":" + env.get("PATH", "")
+
+    # Merge tset-provided lib dirs into LD_LIBRARY_PATH so dynamically
+    # linked dep libraries (e.g. libbz2.so, libexpat.so) are found at
+    # build time.  Scoped to the subprocess env dict — never poisons the
+    # host Python process (fixes pyexpat ABI mismatch with buckos expat).
+    if file_lib_dirs:
+        resolved = [os.path.abspath(d) for d in file_lib_dirs if os.path.isdir(d)]
+        if resolved:
+            existing = env.get("LD_LIBRARY_PATH", "")
+            merged = ":".join(resolved)
+            env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found by custom generators.
@@ -683,66 +676,78 @@ def main():
                     if os.path.isdir(sp):
                         python_paths.append(sp)
         if python_paths:
-            existing = os.environ.get("PYTHONPATH", "")
-            os.environ["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")
+            existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")
 
-    # Create a buckos python wrapper and replace host python references in
-    # all build.ninja files.  Packages like QEMU wrap meson inside autotools;
-    # their build.ninja embeds host python, which hits pyexpat ABI issues
-    # when dep LD_LIBRARY_PATH includes buckos expat.  The wrapper runs
-    # buckos python with its own LD_LIBRARY_PATH, isolating it from host libs.
-    _all_ninja_files = _glob.glob(os.path.join(output_dir, "**/build.ninja"), recursive=True)
-    _top_ninja = os.path.join(output_dir, "build.ninja")
-    if os.path.isfile(_top_ninja) and _top_ninja not in _all_ninja_files:
-        _all_ninja_files.append(_top_ninja)
-    _py_wrapper_dir = os.path.join(output_dir, ".python-wrapper")
-    _py_wrapper = os.path.join(_py_wrapper_dir, "python3")
-    if _all_ninja_files and not os.path.isfile(_py_wrapper):
-        # Find buckos python from dep/hermetic paths
-        _dep_python3 = None
-        for _bp in list(args.hermetic_path) + list(all_path_prepend):
-            _candidate = os.path.join(os.path.abspath(_bp), "python3")
+    # Replace host python with buckos python in build.ninja files.
+    # Dep LD_LIBRARY_PATH includes buckos libs; host python loading them
+    # causes ABI mismatches (e.g. pyexpat loading buckos libexpat).
+    # Buckos python is ABI-compatible so we redirect all invocations.
+    #
+    # Two vectors:
+    # 1. Explicit host python paths: meson/cmake embed the absolute path
+    #    of the python that ran during configure.
+    # 2. Embedded pyvenv: packages like QEMU create pyvenv/bin/python
+    #    (symlinked to host python) and pyvenv/bin/meson.  build.ninja
+    #    references these absolute paths for custom commands.  Replace
+    #    them with buckos python and buckos meson from deps.
+    _dep_python3 = None
+    _dep_meson = None
+    for _bp in list(args.hermetic_path) + list(all_path_prepend):
+        _abs_bp = os.path.abspath(_bp)
+        if not _dep_python3:
+            _candidate = os.path.join(_abs_bp, "python3")
             if os.path.isfile(_candidate):
                 _dep_python3 = _candidate
-                break
-        if _dep_python3:
-            _py_lib_dirs = []
-            for _bp in list(args.hermetic_path) + list(all_path_prepend):
-                _parent = os.path.dirname(os.path.abspath(_bp))
-                for _ld in ("lib", "lib64"):
-                    _d = os.path.join(_parent, _ld)
-                    if os.path.isdir(_d):
-                        _py_lib_dirs.append(_d)
-            os.makedirs(_py_wrapper_dir, exist_ok=True)
-            _ld_path = ":".join(_py_lib_dirs)
-            with open(_py_wrapper, "w") as f:
-                f.write(f'#!/bin/sh\n'
-                        f'export LD_LIBRARY_PATH="{_ld_path}:${{LD_LIBRARY_PATH}}"\n'
-                        f'exec "{_dep_python3}" "$@"\n')
-            os.chmod(_py_wrapper, 0o755)
-    if os.path.isfile(_py_wrapper) and _all_ninja_files:
+        if not _dep_meson:
+            _candidate = os.path.join(_abs_bp, "meson")
+            if os.path.isfile(_candidate):
+                _dep_meson = _candidate
+    if _dep_python3:
         _host_python = shutil.which("python3") or "/usr/bin/python3"
+        _dep_python3_abs = os.path.abspath(_dep_python3)
+        _all_ninja_files = _glob.glob(
+            os.path.join(output_dir, "**/build.ninja"), recursive=True,
+        )
+        _top_ninja = os.path.join(output_dir, "build.ninja")
+        if os.path.isfile(_top_ninja) and _top_ninja not in _all_ninja_files:
+            _all_ninja_files.append(_top_ninja)
+        # Collect pyvenv bin dirs that exist in the build tree
+        _pyvenv_replacements = {}
+        for _pvd in _glob.glob(os.path.join(output_dir, "**/pyvenv/bin"), recursive=True):
+            _pv_python = os.path.join(_pvd, "python")
+            if os.path.exists(_pv_python):
+                _pyvenv_replacements[_pv_python] = _dep_python3_abs
+            _pv_meson = os.path.join(_pvd, "meson")
+            if os.path.exists(_pv_meson) and _dep_meson:
+                _pyvenv_replacements[_pv_meson] = os.path.abspath(_dep_meson)
         for _nf in _all_ninja_files:
             try:
                 _nf_stat = os.stat(_nf)
                 with open(_nf, "r") as f:
                     _nf_content = f.read()
+                _nf_orig = _nf_content
+                # Replace host python references
                 if _host_python in _nf_content:
-                    _nf_content = _nf_content.replace(_host_python, _py_wrapper)
+                    _nf_content = _nf_content.replace(_host_python, _dep_python3_abs)
+                # Replace pyvenv python/meson references
+                for _old, _new in _pyvenv_replacements.items():
+                    if _old in _nf_content:
+                        _nf_content = _nf_content.replace(_old, _new)
+                if _nf_content != _nf_orig:
                     with open(_nf, "w") as f:
                         f.write(_nf_content)
                     os.utime(_nf, (_nf_stat.st_atime, _nf_stat.st_mtime))
             except (UnicodeDecodeError, PermissionError, FileNotFoundError):
                 pass
-        os.environ["PATH"] = _py_wrapper_dir + ":" + os.environ.get("PATH", "")
 
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
-    os.environ["PATH"] = wrapper_dir + ":" + os.environ.get("PATH", "")
+    env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
 
     # Run pre-build commands (e.g. Kconfig setup)
     for cmd_str in args.pre_cmds:
-        result = subprocess.run(cmd_str, shell=True, cwd=output_dir)
+        result = subprocess.run(cmd_str, shell=True, cwd=output_dir, env=env)
         if result.returncode != 0:
             print(f"error: pre-cmd failed with exit code {result.returncode}: {cmd_str}",
                   file=sys.stderr)
@@ -779,7 +784,7 @@ def main():
         print("⚠ Warning: unshare --net unavailable, building without network isolation",
               file=sys.stderr)
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, env=env)
     if result.returncode != 0:
         print(f"error: {args.build_system} failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(1)

@@ -146,7 +146,7 @@ def _src_compile(ctx, configured, source, path_file = None, lib_dirs_file = None
     # Build tools (moc, rcc, wayland-scanner, etc.) need shared libs
     # and executables from deps at runtime.
     add_flag_file(cmd, "--path-file", path_file)
-    add_flag_file(cmd, "--ldflags-file", lib_dirs_file)
+    add_flag_file(cmd, "--lib-dirs-file", lib_dirs_file)
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
@@ -183,7 +183,7 @@ def _src_install(ctx, built, source, path_file = None, lib_dirs_file = None):
 
     # Dep bin/lib dirs — install rules may run tools or need shared libs
     add_flag_file(cmd, "--path-file", path_file)
-    add_flag_file(cmd, "--ldflags-file", lib_dirs_file)
+    add_flag_file(cmd, "--lib-dirs-file", lib_dirs_file)
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
