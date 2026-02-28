@@ -1,12 +1,54 @@
 """Shared helpers for package rules."""
 
 load("//defs:providers.bzl", "PackageInfo")
+load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS")
 load("//defs:tsets.bzl",
      "CompileInfoTSet", "CompileInfoValue",
      "LinkInfoTSet", "LinkInfoValue",
      "PathInfoTSet", "PathInfoValue",
      "RuntimeDepTSet", "RuntimeDepValue",
 )
+
+# ── Shared attrs ─────────────────────────────────────────────────────
+#
+# Common attrs accepted by all package rules (autotools, cmake, meson,
+# binary, cargo, go, python, mozbuild).  Rule-specific attrs are merged
+# via COMMON_PACKAGE_ATTRS | { rule_specific } | TOOLCHAIN_ATTRS.
+
+COMMON_PACKAGE_ATTRS = {
+    # Source and identity
+    "source": attrs.dep(),
+    "version": attrs.string(),
+
+    # Build configuration (common package() macro interface)
+    "configure_args": attrs.list(attrs.string(), default = []),
+    "pre_configure_cmds": attrs.list(attrs.string(), default = []),
+    "post_install_cmds": attrs.list(attrs.string(), default = []),
+    "env": attrs.dict(attrs.string(), attrs.string(), default = {}),
+    "deps": attrs.list(attrs.dep(), default = []),
+    "host_deps": attrs.list(attrs.exec_dep(), default = []),
+    "runtime_deps": attrs.list(attrs.dep(), default = []),
+    "patches": attrs.list(attrs.source(), default = []),
+    "extra_cflags": attrs.list(attrs.string(), default = []),
+    "extra_ldflags": attrs.list(attrs.string(), default = []),
+    "libraries": attrs.list(attrs.string(), default = []),
+
+    # Labels (metadata-only, for BXL queries)
+    "labels": attrs.list(attrs.string(), default = []),
+
+    # SBOM metadata
+    "license": attrs.string(default = "UNKNOWN"),
+    "src_uri": attrs.string(default = ""),
+    "src_sha256": attrs.string(default = ""),
+    "homepage": attrs.option(attrs.string(), default = None),
+    "description": attrs.string(default = ""),
+    "cpe": attrs.option(attrs.string(), default = None),
+
+    # Tool deps (shared by all rules)
+    "_patch_tool": attrs.default_only(
+        attrs.exec_dep(default = "//tools:patch_helper"),
+    ),
+} | TOOLCHAIN_ATTRS
 
 def collect_runtime_lib_dirs(deps, installed):
     """Collect lib dirs from installed prefix and all deps (transitive).

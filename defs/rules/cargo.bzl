@@ -10,8 +10,8 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "PackageInfo")
-load("//defs/rules:_common.bzl", "build_package_tsets", "collect_runtime_lib_dirs")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_path_args")
+load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets", "collect_runtime_lib_dirs")
+load("//defs:toolchain_helpers.bzl", "toolchain_env_args", "toolchain_path_args")
 load("//defs:host_tools.bzl", "host_tool_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
@@ -118,48 +118,15 @@ def _cargo_package_impl(ctx):
 
 cargo_package = rule(
     impl = _cargo_package_impl,
-    attrs = {
-        # Source and identity
-        "source": attrs.dep(),
-        "version": attrs.string(),
-
-        # Build configuration
+    attrs = COMMON_PACKAGE_ATTRS | {
+        # Cargo-specific
         "features": attrs.list(attrs.string(), default = []),
         "cargo_args": attrs.list(attrs.string(), default = []),
         "bins": attrs.list(attrs.string(), default = []),
-        "pre_configure_cmds": attrs.list(attrs.string(), default = []),
-        "env": attrs.dict(attrs.string(), attrs.string(), default = {}),
         "vendor_deps": attrs.option(attrs.dep(), default = None),
-        "deps": attrs.list(attrs.dep(), default = []),
-        "host_deps": attrs.list(attrs.exec_dep(), default = []),
-        "runtime_deps": attrs.list(attrs.dep(), default = []),
-        "patches": attrs.list(attrs.source(), default = []),
-
-        # Unused by cargo but accepted by the package() macro interface
-        "configure_args": attrs.list(attrs.string(), default = []),
-        "extra_cflags": attrs.list(attrs.string(), default = []),
-        "extra_ldflags": attrs.list(attrs.string(), default = []),
-        "libraries": attrs.list(attrs.string(), default = []),
-        "post_install_cmds": attrs.list(attrs.string(), default = []),
         "install_script": attrs.option(attrs.string(), default = None),
-
-        # Labels (metadata-only, for BXL queries)
-        "labels": attrs.list(attrs.string(), default = []),
-
-        # SBOM metadata
-        "license": attrs.string(default = "UNKNOWN"),
-        "src_uri": attrs.string(default = ""),
-        "src_sha256": attrs.string(default = ""),
-        "homepage": attrs.option(attrs.string(), default = None),
-        "description": attrs.string(default = ""),
-        "cpe": attrs.option(attrs.string(), default = None),
-
-        # Tool deps (hidden — resolved automatically)
-        "_patch_tool": attrs.default_only(
-            attrs.exec_dep(default = "//tools:patch_helper"),
-        ),
         "_cargo_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:cargo_helper"),
         ),
-    } | TOOLCHAIN_ATTRS,
+    },
 )

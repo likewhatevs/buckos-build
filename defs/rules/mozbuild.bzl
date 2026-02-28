@@ -11,8 +11,8 @@ Five cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs/rules:_common.bzl", "build_package_tsets", "collect_runtime_lib_dirs")
-load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_path_args")
+load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets", "collect_runtime_lib_dirs")
+load("//defs:toolchain_helpers.bzl", "toolchain_path_args")
 load("//defs:host_tools.bzl", "host_tool_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
@@ -264,45 +264,12 @@ def _mozbuild_package_impl(ctx):
 
 mozbuild_package = rule(
     impl = _mozbuild_package_impl,
-    attrs = {
-        # Source and identity
-        "source": attrs.dep(),
-        "version": attrs.string(),
-
-        # Mozbuild configuration
+    attrs = COMMON_PACKAGE_ATTRS | {
+        # Mozbuild-specific
         "mozconfig_options": attrs.list(attrs.string(), default = []),
-        "pre_configure_cmds": attrs.list(attrs.string(), default = []),
-        "deps": attrs.list(attrs.dep(), default = []),
-        "host_deps": attrs.list(attrs.exec_dep(), default = []),
-        "runtime_deps": attrs.list(attrs.dep(), default = []),
-        "patches": attrs.list(attrs.source(), default = []),
-
-        # Unused by mozbuild but accepted by the package() macro interface
         "install_script": attrs.string(default = ""),
-        "configure_args": attrs.list(attrs.string(), default = []),
-        "extra_cflags": attrs.list(attrs.string(), default = []),
-        "extra_ldflags": attrs.list(attrs.string(), default = []),
-        "libraries": attrs.list(attrs.string(), default = []),
-        "post_install_cmds": attrs.list(attrs.string(), default = []),
-        "env": attrs.dict(attrs.string(), attrs.string(), default = {}),
-
-        # Labels (metadata-only, for BXL queries)
-        "labels": attrs.list(attrs.string(), default = []),
-
-        # SBOM metadata
-        "license": attrs.string(default = "UNKNOWN"),
-        "src_uri": attrs.string(default = ""),
-        "src_sha256": attrs.string(default = ""),
-        "homepage": attrs.option(attrs.string(), default = None),
-        "description": attrs.string(default = ""),
-        "cpe": attrs.option(attrs.string(), default = None),
-
-        # Tool deps (hidden — resolved automatically)
         "_mozbuild_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:mozbuild_helper"),
         ),
-        "_patch_tool": attrs.default_only(
-            attrs.exec_dep(default = "//tools:patch_helper"),
-        ),
-    } | TOOLCHAIN_ATTRS,
+    },
 )
