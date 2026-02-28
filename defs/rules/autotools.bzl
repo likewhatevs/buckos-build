@@ -129,6 +129,11 @@ def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
         add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
         add_flag_file(cmd, "--path-file", path_file)
 
+    # Ensure dep artifacts are materialized — tset flag files reference
+    # dep prefixes but don't register them as action inputs.
+    for dep in ctx.attrs.deps:
+        cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
+
     ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
     return output
 
@@ -183,6 +188,11 @@ def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,
         cmd.add("--pre-cmd", pre_cmd)
     for arg in ctx.attrs.make_args:
         cmd.add(cmd_args("--make-arg=", arg, delimiter = ""))
+
+    # Ensure dep artifacts are materialized — tset flag files reference
+    # dep prefixes but don't register them as action inputs.
+    for dep in ctx.attrs.deps:
+        cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
     ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
     return output
@@ -247,6 +257,11 @@ def _src_install(ctx, built, cflags_file = None, ldflags_file = None,
     # Post-install commands (run in the prefix dir after make install)
     for post_cmd in ctx.attrs.post_install_cmds:
         cmd.add("--post-cmd", post_cmd)
+
+    # Ensure dep artifacts are materialized — tset flag files reference
+    # dep prefixes but don't register them as action inputs.
+    for dep in ctx.attrs.deps:
+        cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
     ctx.actions.run(cmd, category = "install", identifier = ctx.attrs.name)
     return output
