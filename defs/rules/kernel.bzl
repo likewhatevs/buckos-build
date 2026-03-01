@@ -46,6 +46,7 @@ def _kernel_config_impl(ctx: AnalysisContext) -> list[Provider]:
         cmd,
         category = "kernel_config",
         identifier = ctx.attrs.name,
+        allow_cache_upload = True,
     )
 
     return [
@@ -283,7 +284,7 @@ def _kernel_headers_impl(ctx: AnalysisContext) -> list[Provider]:
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
-    ctx.actions.run(cmd, category = "kernel_headers", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "kernel_headers", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     return [
         DefaultInfo(default_output = install_dir),
@@ -335,7 +336,7 @@ def _kernel_btf_headers_impl(ctx: AnalysisContext) -> list[Provider]:
     cmd.add("--vmlinux", ki.vmlinux)
     cmd.add("--output", vmlinux_h.as_output())
 
-    ctx.actions.run(cmd, category = "kernel_btf", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "kernel_btf", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     return [
         DefaultInfo(default_output = vmlinux_h),
@@ -391,7 +392,7 @@ def _kernel_modules_install_impl(ctx: AnalysisContext) -> list[Provider]:
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
-    ctx.actions.run(cmd, category = "kernel_modules", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "kernel_modules", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     return [DefaultInfo(default_output = install_dir)]
 

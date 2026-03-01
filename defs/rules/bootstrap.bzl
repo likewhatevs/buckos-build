@@ -54,7 +54,7 @@ def _bootstrap_binutils_impl(ctx):
     prep_cmd.add("--output-dir", prepared.as_output())
     prep_cmd.add("--skip-configure")
     prep_cmd.add("--allow-host-path")
-    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 3: configure
     configured = ctx.actions.declare_output("configured", dir = True)
@@ -83,7 +83,7 @@ def _bootstrap_binutils_impl(ctx):
     env = _toolchain_env(ctx)
     _env_args(conf_cmd, env)
     conf_cmd.add("--allow-host-path")
-    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 4: compile (copy whole configured tree; make runs in build subdir)
     built = ctx.actions.declare_output("built", dir = True)
@@ -143,7 +143,7 @@ def _bootstrap_linux_headers_impl(ctx):
     prep_cmd.add("--output-dir", prepared.as_output())
     prep_cmd.add("--skip-configure")
     prep_cmd.add("--allow-host-path")
-    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Build headers + install in one action (make headers then copy)
     installed = ctx.actions.declare_output("installed", dir = True)
@@ -273,7 +273,7 @@ def _bootstrap_gcc_impl(ctx):
     for part in pre_parts:
         prep_cmd.add("--pre-cmd", part)
     prep_cmd.add("--allow-host-path")
-    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 3: configure — Python helper handles sysroot assembly and
     # runs ../configure from an out-of-tree build dir.
@@ -338,7 +338,7 @@ def _bootstrap_gcc_impl(ctx):
     env = _toolchain_env(ctx)
     _env_args(conf_cmd, env)
     conf_cmd.add("--allow-host-path")
-    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 4: compile — use build_helper for timestamp management, env
     # sanitisation, and path resolution.  Custom make targets via --pre-cmd
@@ -547,7 +547,7 @@ def _bootstrap_glibc_impl(ctx):
         "-exec sed -i 's/eh_frame,\\\\\"a\\\\\"/eh_frame,\\\\\"aw\\\\\"/g' {} +",
     )
     prep_cmd.add("--allow-host-path")
-    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 3: configure — Python helper handles cross-tool discovery
     # and runs ../configure from an out-of-tree build dir.
@@ -565,7 +565,7 @@ def _bootstrap_glibc_impl(ctx):
     for arg in ctx.attrs.extra_configure_args:
         conf_cmd.add(cmd_args("--configure-arg=", arg, delimiter = ""))
     conf_cmd.add("--allow-host-path")
-    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 4: compile — use build_helper for timestamp management.
     # Standard make -j$(nproc) in build subdir, just needs cross-tool PATH.
@@ -650,7 +650,7 @@ def _bootstrap_package_impl(ctx):
     prep_cmd.add("--output-dir", prepared.as_output())
     prep_cmd.add("--skip-configure")
     prep_cmd.add("--allow-host-path")
-    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Build environment from stage info
     sysroot_flag = cmd_args("--sysroot=", stage.sysroot, delimiter = "")
@@ -682,7 +682,7 @@ def _bootstrap_package_impl(ctx):
     for e in ctx.attrs.extra_env:
         conf_cmd.add("--env", e)
     conf_cmd.add("--allow-host-path")
-    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 4: compile (copy whole configured tree, use build-subdir if set)
     built = ctx.actions.declare_output("built", dir = True)
@@ -805,7 +805,7 @@ def _bootstrap_python_impl(ctx):
     prep_cmd.add("--output-dir", prepared.as_output())
     prep_cmd.add("--skip-configure")
     prep_cmd.add("--allow-host-path")
-    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(prep_cmd, category = "bootstrap_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 2: configure — Python helper merges deps into build sysroot
     # and runs ../configure with cross-compilation cache variables.
@@ -822,7 +822,7 @@ def _bootstrap_python_impl(ctx):
         conf_cmd.add("--dep-dir", dep_dir)
     for arg in ctx.attrs.configure_args:
         conf_cmd.add(cmd_args("--configure-arg=", arg, delimiter = ""))
-    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(conf_cmd, category = "bootstrap_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     # Phase 3: compile — use build_helper for timestamp management.
     built = ctx.actions.declare_output("built", dir = True)

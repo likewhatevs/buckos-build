@@ -243,7 +243,7 @@ def src_prepare(ctx, source, category):
     for c in ctx.attrs.pre_configure_cmds:
         cmd.add("--cmd", c)
 
-    ctx.actions.run(cmd, category = category, identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = category, identifier = ctx.attrs.name, allow_cache_upload = True)
     return output
 
 def add_flag_file(cmd, flag_name, writer_result):

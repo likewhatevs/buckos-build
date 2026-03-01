@@ -64,7 +64,7 @@ def _strip_package_impl(ctx):
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
-    ctx.actions.run(cmd, category = "strip", identifier = pkg.name)
+    ctx.actions.run(cmd, category = "strip", identifier = pkg.name, allow_cache_upload = True)
     return [DefaultInfo(default_output = output), _rebase_pkg(pkg, output)]
 
 strip_package = rule(
@@ -97,7 +97,7 @@ def _stamp_package_impl(ctx):
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
-    ctx.actions.run(cmd, category = "stamp", identifier = pkg.name)
+    ctx.actions.run(cmd, category = "stamp", identifier = pkg.name, allow_cache_upload = True)
     return [DefaultInfo(default_output = output), _rebase_pkg(pkg, output)]
 
 stamp_package = rule(
@@ -129,7 +129,7 @@ def _ima_sign_package_impl(ctx):
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
-    ctx.actions.run(cmd, category = "ima_sign", identifier = pkg.name)
+    ctx.actions.run(cmd, category = "ima_sign", identifier = pkg.name, allow_cache_upload = True)
     return [DefaultInfo(default_output = output), _rebase_pkg(pkg, output)]
 
 ima_sign_package = rule(

@@ -42,7 +42,7 @@ def _src_prepare(ctx, source):
     for p in ctx.attrs.patches:
         cmd.add("--patch", p)
 
-    ctx.actions.run(cmd, category = "autotools_prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "autotools_prepare", identifier = ctx.attrs.name, allow_cache_upload = True)
     return output
 
 def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
@@ -129,7 +129,7 @@ def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
         add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
         add_flag_file(cmd, "--path-file", path_file)
 
-    ctx.actions.run(cmd, category = "autotools_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "autotools_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
     return output
 
 def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,

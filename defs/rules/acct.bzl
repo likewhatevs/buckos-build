@@ -44,6 +44,7 @@ def _acct_group_impl(ctx):
         cmd,
         category = "acct_group",
         identifier = ctx.attrs.name,
+        allow_cache_upload = True,
     )
 
     pkg_info = PackageInfo(
@@ -99,6 +100,7 @@ def _acct_user_impl(ctx):
         cmd,
         category = "acct_user",
         identifier = ctx.attrs.name,
+        allow_cache_upload = True,
     )
 
     pkg_info = PackageInfo(

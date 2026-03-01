@@ -101,7 +101,7 @@ def _cmake_configure(ctx, source, cflags_file = None, ldflags_file = None,
     for arg in ctx.attrs.configure_args:
         cmd.add(cmd_args("--cmake-arg=", arg, delimiter = ""))
 
-    ctx.actions.run(cmd, category = "cmake_configure", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "cmake_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
     return output
 
 def _src_compile(ctx, configured, source, path_file = None, lib_dirs_file = None):
