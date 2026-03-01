@@ -90,6 +90,10 @@ def _path_cmake_prefix_projection(value):
     """Project cmake prefix paths."""
     return [cmd_args(value.prefix, format = "{}/usr")]
 
+def _path_prefixes_projection(value):
+    """Project raw prefix artifacts (for dep base dirs)."""
+    return [value.prefix]
+
 def _runtime_prefixes_projection(value):
     """Project prefix artifacts for rootfs assembly."""
     return [value.prefix]
@@ -119,6 +123,7 @@ PathInfoTSet = transitive_set(
         "bin_dirs": _path_bin_dirs_projection,
         "lib_dirs": _path_lib_dirs_projection,
         "cmake_prefix_paths": _path_cmake_prefix_projection,
+        "prefixes": _path_prefixes_projection,
     },
 )
 
