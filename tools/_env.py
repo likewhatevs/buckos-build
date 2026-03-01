@@ -30,6 +30,11 @@ _DETERMINISM_PINS = {
     "CCACHE_DISABLE": "1",
     "RUSTC_WRAPPER": "",
     "CARGO_BUILD_RUSTC_WRAPPER": "",
+    # Prevent pkg-config from falling through to host system .pc files.
+    # The compiled-in default search path (/usr/lib64/pkgconfig, etc.) is
+    # replaced with a nonexistent dir — helpers set PKG_CONFIG_PATH to
+    # buckos deps.  Empty string doesn't work: pkgconf treats "" as unset.
+    "PKG_CONFIG_LIBDIR": "/nonexistent-buckos-pkgconfig",
 }
 
 
