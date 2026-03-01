@@ -16,6 +16,7 @@ load("//defs:providers.bzl", "PackageInfo")
 load("//defs/rules:_common.bzl",
      "COMMON_PACKAGE_ATTRS",
      "add_flag_file", "build_package_tsets", "collect_dep_tsets",
+     "src_prepare",
      "write_bin_dirs", "write_cmake_prefix_paths", "write_compile_flags",
      "write_lib_dirs", "write_link_flags", "write_pkg_config_paths",
 )
@@ -23,23 +24,6 @@ load("//defs:toolchain_helpers.bzl", "toolchain_env_args", "toolchain_extra_cfla
 load("//defs:host_tools.bzl", "host_tool_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
-
-def _src_prepare(ctx, source):
-    """Apply patches and pre-configure commands.  Separate action so unpatched source stays cached."""
-    if not ctx.attrs.patches and not ctx.attrs.pre_configure_cmds:
-        return source  # Nothing to do — zero-cost passthrough
-
-    output = ctx.actions.declare_output("prepared", dir = True)
-    cmd = cmd_args(ctx.attrs._patch_tool[RunInfo])
-    cmd.add("--source-dir", source)
-    cmd.add("--output-dir", output.as_output())
-    for p in ctx.attrs.patches:
-        cmd.add("--patch", p)
-    for c in ctx.attrs.pre_configure_cmds:
-        cmd.add("--cmd", c)
-
-    ctx.actions.run(cmd, category = "cmake_prepare", identifier = ctx.attrs.name)
-    return output
 
 def _cmake_configure(ctx, source, cflags_file = None, ldflags_file = None,
                      pkg_config_file = None, path_file = None,
@@ -210,7 +194,7 @@ def _cmake_package_impl(ctx):
     source = ctx.attrs.source[DefaultInfo].default_outputs[0]
 
     # Phase 2: src_prepare — apply patches
-    prepared = _src_prepare(ctx, source)
+    prepared = src_prepare(ctx, source, "cmake_prepare")
 
     # Collect dep-only tsets and write flag files for build phases
     dep_compile, dep_link, dep_path = collect_dep_tsets(ctx)

@@ -225,6 +225,27 @@ def write_runtime_prefixes(ctx, runtime_tset):
         return None
     return _write_tset_file(ctx, "tset_runtime_prefixes.txt", runtime_tset.project_as_args("prefixes", ordering = "preorder"))
 
+def src_prepare(ctx, source, category):
+    """Apply patches and pre_configure_cmds.  Separate action so unpatched source stays cached.
+
+    Shared by cmake, meson, cargo, go, and python rules.  Autotools has
+    its own variant (patches only, pre_configure_cmds handled in configure).
+    """
+    if not ctx.attrs.patches and not ctx.attrs.pre_configure_cmds:
+        return source  # No patches or cmds — zero-cost passthrough
+
+    output = ctx.actions.declare_output("prepared", dir = True)
+    cmd = cmd_args(ctx.attrs._patch_tool[RunInfo])
+    cmd.add("--source-dir", source)
+    cmd.add("--output-dir", output.as_output())
+    for p in ctx.attrs.patches:
+        cmd.add("--patch", p)
+    for c in ctx.attrs.pre_configure_cmds:
+        cmd.add("--cmd", c)
+
+    ctx.actions.run(cmd, category = category, identifier = ctx.attrs.name)
+    return output
+
 def add_flag_file(cmd, flag_name, writer_result):
     """Add a flag-file argument to cmd, handling None and hidden deps.
 
