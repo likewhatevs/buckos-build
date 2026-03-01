@@ -29,16 +29,6 @@ if [ -z "$REAL_PKGCONFIG" ]; then
 fi
 
 if [ -z "$REAL_PKGCONFIG" ]; then
-    # Fallback: try common locations
-    for p in /usr/bin/pkg-config /bin/pkg-config; do
-        if [ -x "$p" ]; then
-            REAL_PKGCONFIG="$p"
-            break
-        fi
-    done
-fi
-
-if [ -z "$REAL_PKGCONFIG" ]; then
     echo "pkg-config wrapper: cannot find real pkg-config" >&2
     exit 1
 fi

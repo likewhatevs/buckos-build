@@ -19,7 +19,7 @@ import subprocess
 import sys
 import json
 
-from _env import sanitize_filenames, sanitize_global_env
+from _env import clean_env, sanitize_filenames, sanitize_global_env
 
 
 def _resolve(path):
@@ -101,7 +101,7 @@ def _build_dep_env(dep_base_dirs, pkg_config_path, base_path=None):
 
     if bin_paths:
         if base_path is None:
-            base_path = os.environ.get("PATH", "")
+            base_path = ""
         env["PATH"] = ":".join(bin_paths) + ":" + base_path
 
     # LIBRARY_PATH for the linker (NOT LD_LIBRARY_PATH — that poisons
@@ -129,7 +129,7 @@ def _write_mozconfig(path, options):
 
 def _run(cmd, cwd=None, env=None):
     """Run command, exit on failure."""
-    merged_env = dict(os.environ)
+    merged_env = clean_env()
     if env:
         merged_env.update(env)
 

@@ -361,12 +361,13 @@ def main():
         check(env4["DEP_BASE_DIRS"] == empty_dep,
               "DEP_BASE_DIRS always set")
 
-        print("=== _build_dep_env: no base_path uses os.environ PATH ===")
+        print("=== _build_dep_env: no base_path -> no host PATH leakage ===")
         env5 = _build_dep_env([dep_dir], None, base_path=None)
-        host_path = os.environ.get("PATH", "")
         path5 = env5.get("PATH", "")
-        check(path5.endswith(host_path),
-              f"fallback to os.environ PATH")
+        # base_path=None falls back to "" — no host PATH leakage
+        # PATH should contain dep bin dirs and end with empty base_path
+        check(path5.endswith(":"),
+              f"no base_path -> PATH ends with empty base")
 
     finally:
         os.chdir(saved_cwd)

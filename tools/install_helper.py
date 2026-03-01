@@ -878,7 +878,11 @@ def main():
         # is an input to the install action, not the dep tree).  cmake
         # --install runs the install scripts directly, bypassing ninja.
         _cmake_cache = os.path.join(make_dir, "CMakeCache.txt")
-        if os.path.isfile(_cmake_cache) and shutil.which("cmake"):
+        _cmake_in_path = any(
+            os.path.isfile(os.path.join(d, "cmake")) and os.access(os.path.join(d, "cmake"), os.X_OK)
+            for d in env.get("PATH", "").split(":") if d
+        )
+        if os.path.isfile(_cmake_cache) and _cmake_in_path:
             cmd = ["cmake", "--install", make_dir]
             _use_cmake_install = True
         else:
