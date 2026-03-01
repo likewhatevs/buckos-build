@@ -383,5 +383,4 @@ def package(
     native.alias(
         name = name,
         actual = prev_target,
-        visibility = ["PUBLIC"],
     )
