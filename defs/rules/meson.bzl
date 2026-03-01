@@ -38,7 +38,7 @@ def _src_prepare(ctx, source):
     for c in ctx.attrs.pre_configure_cmds:
         cmd.add("--cmd", c)
 
-    ctx.actions.run(cmd, category = "prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "meson_prepare", identifier = ctx.attrs.name)
     return output
 
 def _meson_setup(ctx, source, cflags_file = None, ldflags_file = None,
@@ -113,7 +113,7 @@ def _meson_setup(ctx, source, cflags_file = None, ldflags_file = None,
     for dep in ctx.attrs.deps:
         cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
-    ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "meson_configure", identifier = ctx.attrs.name)
     return output
 
 def _src_compile(ctx, configured, source, path_file = None, lib_dirs_file = None):
@@ -155,7 +155,7 @@ def _src_compile(ctx, configured, source, path_file = None, lib_dirs_file = None
     for arg in ctx.attrs.make_args:
         cmd.add("--make-arg", arg)
 
-    ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "meson_compile", identifier = ctx.attrs.name)
     return output
 
 def _src_install(ctx, built, source, path_file = None, lib_dirs_file = None):
@@ -201,7 +201,7 @@ def _src_install(ctx, built, source, path_file = None, lib_dirs_file = None):
     for dep in ctx.attrs.deps:
         cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
-    ctx.actions.run(cmd, category = "install", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "meson_install", identifier = ctx.attrs.name)
     return output
 
 # ── Rule implementation ───────────────────────────────────────────────

@@ -42,7 +42,7 @@ def _src_prepare(ctx, source):
     for p in ctx.attrs.patches:
         cmd.add("--patch", p)
 
-    ctx.actions.run(cmd, category = "prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "autotools_prepare", identifier = ctx.attrs.name)
     return output
 
 def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
@@ -134,7 +134,7 @@ def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
     for dep in ctx.attrs.deps:
         cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
-    ctx.actions.run(cmd, category = "configure", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "autotools_configure", identifier = ctx.attrs.name)
     return output
 
 def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,
@@ -195,7 +195,7 @@ def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,
     for dep in ctx.attrs.deps:
         cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
-    ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "autotools_compile", identifier = ctx.attrs.name)
     return output
 
 def _src_install(ctx, built, cflags_file = None, ldflags_file = None,
@@ -265,7 +265,7 @@ def _src_install(ctx, built, cflags_file = None, ldflags_file = None,
     for dep in ctx.attrs.deps:
         cmd.add(cmd_args(hidden = dep[DefaultInfo].default_outputs))
 
-    ctx.actions.run(cmd, category = "install", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "autotools_install", identifier = ctx.attrs.name)
     return output
 
 # ── Rule implementation ───────────────────────────────────────────────

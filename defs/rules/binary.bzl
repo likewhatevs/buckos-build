@@ -45,7 +45,7 @@ def _src_prepare(ctx, source):
     if dep_base_dirs:
         env["DEP_BASE_DIRS"] = cmd_args(dep_base_dirs, delimiter = ":")
 
-    ctx.actions.run(cmd, env = env, category = "prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, env = env, category = "binary_prepare", identifier = ctx.attrs.name)
     return output
 
 def _dep_env_args(ctx):
@@ -159,7 +159,7 @@ def _install(ctx, source):
     ctx.actions.run(
         cmd,
         env = env,
-        category = "install",
+        category = "binary_install",
         identifier = ctx.attrs.name,
     )
     return output

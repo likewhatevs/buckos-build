@@ -30,7 +30,7 @@ def _src_prepare(ctx, source):
     for c in ctx.attrs.pre_configure_cmds:
         cmd.add("--cmd", c)
 
-    ctx.actions.run(cmd, category = "prepare", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "go_prepare", identifier = ctx.attrs.name)
     return output
 
 def _go_build(ctx, source):

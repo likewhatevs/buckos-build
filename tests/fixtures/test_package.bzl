@@ -28,7 +28,7 @@ cc "$@" -o "$OUT/usr/bin/{binary}" "$SRC"
     cmd = cmd_args(script, output.as_output(), src)
     cmd.add(ctx.attrs.cflags)
 
-    ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "test_compile", identifier = ctx.attrs.name)
 
     return [
         DefaultInfo(default_output = output),
@@ -85,7 +85,7 @@ cc -shared -fPIC "$@" -o "$OUT/usr/lib64/{lib}" "$SRC"
     cmd = cmd_args(script, output.as_output(), src)
     cmd.add(ctx.attrs.cflags)
 
-    ctx.actions.run(cmd, category = "compile", identifier = ctx.attrs.name)
+    ctx.actions.run(cmd, category = "test_compile", identifier = ctx.attrs.name)
 
     return [
         DefaultInfo(default_output = output),
