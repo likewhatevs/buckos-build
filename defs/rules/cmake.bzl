@@ -247,7 +247,7 @@ cmake_package = rule(
     impl = _cmake_package_impl,
     attrs = COMMON_PACKAGE_ATTRS | {
         # CMake-specific
-        "source_subdir": attrs.option(attrs.string(), default = None),
+        "source_subdir": attrs.string(default = ""),
         "cmake_args": attrs.list(attrs.string(), default = []),
         "cmake_defines": attrs.list(attrs.string(), default = []),
         "cmake_dep_defines": attrs.dict(attrs.string(), attrs.dep(), default = {}),
