@@ -428,6 +428,8 @@ def main():
                         help="Mozconfig ac_add_options value (repeatable)")
     parser.add_argument("--dep-base-dirs", default=None,
                         help="Colon-separated dep base directories")
+    parser.add_argument("--dep-base-dirs-file", default=None,
+                        help="File with dep base directories (one per line)")
     parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--allow-host-path", action="store_true",
@@ -441,6 +443,12 @@ def main():
     args._host_path = _host_path
 
     sanitize_global_env()
+
+    # Merge --dep-base-dirs-file into --dep-base-dirs (flag file takes precedence)
+    if args.dep_base_dirs_file:
+        with open(os.path.abspath(args.dep_base_dirs_file)) as f:
+            dirs = [line.strip() for line in f if line.strip()]
+        args.dep_base_dirs = ":".join(dirs)
 
     args.source_dir = _resolve(args.source_dir)
     args.output_dir = _resolve(args.output_dir)
