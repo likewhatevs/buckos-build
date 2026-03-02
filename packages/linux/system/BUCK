@@ -2515,7 +2515,11 @@ rootfs(
         "//packages/linux/core/bash:bash",
         # systemd for init
         "//packages/linux/system/init/systemd:systemd",
-        # udev for device detection (systemd includes this)
+        # systemd runtime deps
+        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
+        "//packages/linux/system/libs/ipc/libcap:libcap",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
         # Basic utilities
         "//packages/linux/system/apps/coreutils:coreutils",
         "//packages/linux/core/util-linux:util-linux",

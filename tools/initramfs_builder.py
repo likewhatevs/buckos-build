@@ -15,6 +15,20 @@ import tempfile
 from _env import add_path_args, clean_env, setup_path
 
 
+def _merge_tree(src, dst):
+    """Recursively merge src into dst, preserving existing files."""
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s) and not os.path.islink(s):
+            if os.path.isdir(d) and not os.path.islink(d):
+                _merge_tree(s, d)
+            elif not os.path.exists(d):
+                shutil.move(s, d)
+        elif not os.path.exists(d):
+            shutil.move(s, d)
+
+
 def _fix_lib64(staging):
     """Fix aarch64 library paths — merge lib64 into lib."""
     for prefix in ("", "usr/"):
@@ -22,11 +36,7 @@ def _fix_lib64(staging):
         lib = os.path.join(staging, prefix + "lib")
         if os.path.isdir(lib64) and not os.path.islink(lib64):
             os.makedirs(lib, exist_ok=True)
-            for item in os.listdir(lib64):
-                src = os.path.join(lib64, item)
-                dst = os.path.join(lib, item)
-                if not os.path.exists(dst):
-                    shutil.move(src, dst)
+            _merge_tree(lib64, lib)
             shutil.rmtree(lib64)
             os.symlink("lib", lib64)
 
