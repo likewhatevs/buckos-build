@@ -20,7 +20,6 @@ package(
         "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
         "//packages/linux/dev-libs/misc/fmt:fmt",
         "//packages/linux/dev-libs/logging/spdlog:spdlog",
-        "//packages/linux/dev-libs/rpc/grpc:grpc",
     ],
 
     configure_args = [

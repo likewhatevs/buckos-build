@@ -26,7 +26,6 @@ package(
     license = "LGPL-2.0+",
     deps = [
         "//packages/linux/desktop/gtk:gtk3",
-                "//packages/linux/dev-tools/dev-utils/intltool:intltool"
     ],
 )
 
@@ -82,7 +81,6 @@ filegroup(
         ":xfce4-panel",
         ":xfwm4",
         ":xfdesktop",
-        "//packages/linux/desktop/lightdm:lightdm",
         "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "//platforms:linux-target",

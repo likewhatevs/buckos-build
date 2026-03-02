@@ -2056,7 +2056,6 @@ rootfs(
         # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
-        "//packages/linux/network/net-tools:net-tools",
         # Init system
         "//packages/linux/system/init/systemd:systemd",
         # Device management and session (systemd provides libudev and udevd)
@@ -2786,7 +2785,6 @@ rootfs(
         # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
-        "//packages/linux/network/net-tools:net-tools",
     ],
     default_target_platform = "//platforms:linux-aarch64-target",
     visibility = ["PUBLIC"],
@@ -2971,7 +2969,6 @@ rootfs(
         # "//packages/linux/network/openssh:openssh",
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/dhcpcd:dhcpcd",
-        "//packages/linux/network/net-tools:net-tools",
         # Init system
         "//packages/linux/system/init/systemd:systemd",
         # Device management and session (systemd provides libudev and udevd)

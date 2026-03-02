@@ -12,7 +12,6 @@ package(
         "//packages/linux/dev-libs/python/diffusers:diffusers",
         "//packages/linux/dev-libs/python/transformers:transformers",
         "//packages/linux/dev-libs/python/sentencepiece:sentencepiece",
-        "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/dev-libs/python/timm:timm",
         "//packages/linux/dev-libs/python/accelerate:accelerate",
         "//packages/linux/dev-libs/python/peft:peft",

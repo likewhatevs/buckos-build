@@ -45,7 +45,6 @@ package(
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
         "//packages/linux/system/libs/image/libtiff:libtiff",
-        "//packages/linux/system/libs/image/giflib:giflib",
         "//packages/linux/system/terminal/readline:readline",
         "//packages/linux/lang/python:python",
         "//packages/linux/system/libs/font/freetype:freetype",

@@ -10,7 +10,6 @@ package(
     homepage = "https://mne.tools/",
     license = "BSD-3-Clause",
     deps = [
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/lang/python:python",
     ],
     visibility = ["PUBLIC"],

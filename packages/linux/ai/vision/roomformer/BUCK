@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/omegaconf:omegaconf",
         "//packages/linux/dev-libs/python/fvcore:fvcore",
         "//packages/linux/dev-libs/python/pillow:pillow",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/imageio:imageio",
         "//packages/linux/dev-libs/python/shapely:shapely",

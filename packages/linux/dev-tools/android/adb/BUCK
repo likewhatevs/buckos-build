@@ -8,6 +8,5 @@ package(
     sha256 = "8e68e2ed8fa4d73f07df1581670aad0dbe549b764dd7848c6e61ea0c3f009bba",
     deps = [
         "//packages/linux/dev-libs/python/libusb1:libusb1",
-        "//packages/linux/dev-libs/python/cryptography:cryptography",
     ],
 )

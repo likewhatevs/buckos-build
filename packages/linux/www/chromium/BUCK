@@ -74,6 +74,5 @@ WRAPPER
     },
     deps = [
         "//packages/linux/lang/nodejs:nodejs",
-        "//packages/linux/dev-tools/build-systems/gn:gn",
     ],
 )

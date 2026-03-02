@@ -21,10 +21,6 @@ filegroup(
 filegroup(
     name = "container-networking",
     srcs = [
-        "//packages/linux/system/containers/network:cni-plugins",
-        "//packages/linux/system/containers/network:netavark",
-        "//packages/linux/system/containers/network:aardvark-dns",
-        "//packages/linux/system/containers/network:slirp4netns",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -34,7 +30,6 @@ filegroup(
 filegroup(
     name = "container-storage",
     srcs = [
-        "//packages/linux/system/containers/storage:fuse-overlayfs",
         "//packages/linux/system/containers/podman:containers-common",
     ],
     default_target_platform = "//platforms:linux-target",

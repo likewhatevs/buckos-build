@@ -14,7 +14,6 @@ filegroup(
     name = "text-browsers",
     srcs = [
         "//packages/linux/www/lynx:lynx",
-        "//packages/linux/www/w3m:w3m",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

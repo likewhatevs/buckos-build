@@ -11,7 +11,6 @@ package(
         "//packages/linux/dev-libs/python/asgiref:asgiref",
         "//packages/linux/dev-libs/python/brotli:brotli",
         "//packages/linux/dev-libs/python/certifi:certifi",
-        "//packages/linux/dev-libs/python/cryptography:cryptography",
         "//packages/linux/dev-libs/python/flask:flask",
         "//packages/linux/dev-libs/python/h11:h11",
         "//packages/linux/dev-libs/python/h2:h2",

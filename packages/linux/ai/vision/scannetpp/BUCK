@@ -14,7 +14,6 @@ package(
         "//packages/linux/dev-libs/python/lz4:lz4",
         "//packages/linux/dev-libs/python/opencv-python:opencv-python",
         "//packages/linux/dev-libs/python/pillow:pillow",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/open3d:open3d",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/ml-frameworks/torchvision:torchvision",

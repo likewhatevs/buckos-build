@@ -14,7 +14,6 @@ package(
     deps = [],
     use_deps = {
         "ssl": "//packages/linux/system/libs/crypto/openssl:openssl",
-        "websockets": "//packages/linux/network/libs/libwebsockets:libwebsockets",
         "cjson": "//packages/linux/dev-libs/misc/cjson:cjson",
     },
     configure_args = [

@@ -38,7 +38,6 @@ DESTDIR=$OUT meson install
 """],
     deps = [
         "//packages/linux/desktop/gtk:gtk3",
-        "//packages/linux/dev-libs/exiv2:exiv2",
         "//packages/linux/system/libs/graphics/lcms2:lcms2",
         "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
         # "//packages/linux/core/libraw:libraw",  # TODO: not packaged yet

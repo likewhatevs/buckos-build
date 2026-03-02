@@ -25,7 +25,6 @@ filegroup(
     default_target_platform = "//platforms:linux-target",
 )
 
-
 # Cloud Hypervisor boot scripts
 filegroup(
     name = "cloud-hypervisor-boot",

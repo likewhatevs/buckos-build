@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],
 )

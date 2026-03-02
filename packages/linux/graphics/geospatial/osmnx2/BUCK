@@ -18,11 +18,9 @@ package(
             "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         ],
         "entropy": [
-            "//packages/linux/dev-libs/python/scipy:scipy",
         ],
         "neighbors": [
             "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
-            "//packages/linux/dev-libs/python/scipy:scipy",
         ],
         "raster": [
             "//packages/linux/dev-libs/python/rasterio:rasterio",

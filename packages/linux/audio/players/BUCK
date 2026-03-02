@@ -12,7 +12,6 @@ filegroup(
 filegroup(
     name = "daemon-players",
     srcs = [
-        "//packages/linux/audio/players/mpd:mpd",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

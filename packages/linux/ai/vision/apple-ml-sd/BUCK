@@ -9,7 +9,6 @@ package(
     deps = [
         "//packages/linux/ai/ml-frameworks/diffusers:diffusers",
         "//packages/linux/dev-libs/python/safetensors:safetensors",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/transformers:transformers",
     ],
 )

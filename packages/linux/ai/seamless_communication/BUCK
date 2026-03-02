@@ -10,7 +10,6 @@ package(
     deps = [
         "//packages/linux/ai/ml-frameworks/fairseq2:fairseq2",
         "//packages/linux/audio/analysis/librosa:librosa",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/soundfile:soundfile",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],

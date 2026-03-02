@@ -7,11 +7,6 @@
 
 # Re-export all DSP packages for easy access
 alias(
-    name = "kissfft",
-    actual = "//packages/linux/dev-libs/dsp/kissfft:kissfft",
-)
-
-alias(
     name = "liquid-dsp",
     actual = "//packages/linux/dev-libs/dsp/liquid-dsp:liquid-dsp",
 )

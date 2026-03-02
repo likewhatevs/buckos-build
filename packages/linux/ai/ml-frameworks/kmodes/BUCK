@@ -11,7 +11,6 @@ package(
     license = "MIT",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/ai/ml-frameworks/scikit-learn:scikit-learn",
         "//packages/linux/dev-libs/python/joblib:joblib",
     ],

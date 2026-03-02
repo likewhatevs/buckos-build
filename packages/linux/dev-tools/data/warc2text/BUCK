@@ -14,11 +14,8 @@ package(
     ],
     deps = [
         "//packages/linux/dev-libs/boost:boost",
-        "//packages/linux/dev-libs/text/cld2:cld2",
-        "//packages/linux/ai/nlp/fasttext:fasttext",
         "//packages/linux/dev-tools/parsers/flex:flex",
         "//packages/linux/dev-libs/xml/libxslt:libxslt",
         "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
-        "//packages/linux/dev-libs/text/re2:re2",
     ],
 )

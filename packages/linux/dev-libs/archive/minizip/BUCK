@@ -13,7 +13,6 @@ package(
     license = "Zlib",
     deps = [
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/dev-libs/compression/bzip2:bzip2",
         "//packages/linux/system/libs/compression/zstd:zstd",
     ],
     configure_args = [

@@ -18,7 +18,6 @@ package(
         "//packages/linux/dev-libs/python/regex:regex",
         "//packages/linux/dev-libs/python/requests:requests",
         "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tokenizers:tokenizers",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/dev-libs/python/tqdm:tqdm",

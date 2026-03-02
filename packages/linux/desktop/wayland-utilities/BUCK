@@ -33,7 +33,6 @@ filegroup(
         "//packages/linux/desktop/wayland-utilities/bemenu:bemenu",
         "//packages/linux/desktop/wayland-utilities/wtype:wtype",
         "//packages/linux/desktop/wayland-utilities/ydotool:ydotool",
-        "//packages/linux/desktop/wayland-utilities/wev:wev",
         "//packages/linux/desktop/wayland-utilities/waybar:waybar",
         "//packages/linux/desktop/wayland-utilities/eww:eww",
         "//packages/linux/desktop/wayland-utilities/wlsunset:wlsunset",
@@ -125,7 +124,6 @@ filegroup(
     srcs = [
         "//packages/linux/desktop/wayland-utilities/wtype:wtype",
         "//packages/linux/desktop/wayland-utilities/ydotool:ydotool",
-        "//packages/linux/desktop/wayland-utilities/wev:wev",
     ],
     default_target_platform = "//platforms:linux-target",
 )

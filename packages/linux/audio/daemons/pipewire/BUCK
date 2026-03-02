@@ -27,8 +27,6 @@ package(
     },
     use_deps = {
         "alsa": "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
-        "gstreamer": "//packages/linux/graphics/video/gstreamer:gstreamer",
-        "ffmpeg": "//packages/linux/media/video/ffmpeg:ffmpeg",
         "systemd": [
             "//packages/linux/system/init/systemd:systemd",
             "//packages/linux/system/libs/ipc/libcap:libcap",  # libsystemd.so needs libcap

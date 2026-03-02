@@ -13,7 +13,6 @@ filegroup(
         "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
         "//packages/linux/system/libs/image/libwebp:libwebp",
         "//packages/linux/system/libs/image/libtiff:libtiff",
-        "//packages/linux/system/libs/image/giflib:giflib",
         "//packages/linux/system/libs/image/openjpeg:openjpeg",
     ],
     default_target_platform = "//platforms:linux-target",

@@ -15,7 +15,6 @@ package(
     deps = [],
     # nasm is needed when asm is enabled (x86/x86_64 optimizations)
     use_deps = {
-        "lavf": "//packages/linux/media/video/ffmpeg:ffmpeg",
     },
     configure_args = [
         "--prefix=${PREFIX}",

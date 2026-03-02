@@ -12,11 +12,8 @@ package(
     deps = [
         "//packages/linux/dev-libs/math/glm:glm",
         "//packages/linux/dev-libs/misc/happly:happly",
-        "//packages/linux/graphics/rendering/imgui:imgui",
-        "//packages/linux/graphics/rendering/implot:implot",
         "//packages/linux/dev-libs/json/nlohmann-json:nlohmann-json",
         "//packages/linux/dev-libs/misc/stb:stb",
-        "//packages/linux/dev-libs/glew:glew",
         "//packages/linux/graphics/rendering/glfw:glfw",
     ],
     configure_args = [

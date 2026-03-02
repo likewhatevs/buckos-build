@@ -18,7 +18,6 @@ package(
 INSTALL_ROOT=$OUT make install
 """],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
                 "//packages/linux/desktop/qt:qt5",
                 "//packages/linux/media/image/imagemagick:imagemagick",
                 "//packages/linux/dev-libs/boost:boost",

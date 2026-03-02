@@ -12,5 +12,8 @@ package(
     homepage = "https://github.com/nothings/stb",
     license = "MIT",
     deps = [],
-    install_script = """mkdir -p ${PREFIX}/include/stb\ncp *.h ${PREFIX}/include/stb/""",
+    install_script = """
+        mkdir -p $OUT/usr/include/stb
+        cp *.h $OUT/usr/include/stb/
+    """,
 )

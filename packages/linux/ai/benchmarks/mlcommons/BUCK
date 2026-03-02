@@ -6,6 +6,7 @@ package(
     version = "5.1.1",
     url = "https://github.com/mlcommons/inference/archive/refs/tags/v5.1.1.tar.gz",
     sha256 = "0c39c955203c83f1e98424e8feae868d6298890fa387ed1d3a1de864e3781d4d",
+    source_subdir = "loadgen",
     configure_args = [
         "-DCMAKE_BUILD_TYPE=Release",
         "-DCMAKE_CXX_STANDARD=14",

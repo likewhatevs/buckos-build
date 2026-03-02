@@ -11,7 +11,6 @@ package(
     license = "BSD-3-Clause",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/pandas:pandas",

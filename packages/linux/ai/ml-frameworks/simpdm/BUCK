@@ -10,7 +10,6 @@ package(
         "//packages/linux/dev-libs/python/optuna:optuna",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/pyarrow:pyarrow",
         "//packages/linux/dev-libs/python/tomli:tomli",

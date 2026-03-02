@@ -12,7 +12,6 @@ filegroup(
 filegroup(
     name = "external-monitors",
     srcs = [
-        "//packages/linux/laptop/brightness/ddcutil:ddcutil",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -31,7 +30,6 @@ filegroup(
     name = "all-brightness",
     srcs = [
         "//packages/linux/laptop/brightness/brightnessctl:brightnessctl",
-        "//packages/linux/laptop/brightness/ddcutil:ddcutil",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

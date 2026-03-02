@@ -8,6 +8,5 @@ package(
     sha256 = "8dd5e5b9f0d46b09e43c531d9fd4d7b6ca3e1dfe83a09f8bc59dda39f2efd270",
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/dev-libs/python/einops:einops",
     ],
 )

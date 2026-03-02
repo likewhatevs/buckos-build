@@ -25,7 +25,6 @@ filegroup(
     name = "cpu-frequency",
     srcs = [
         "//packages/linux/system/power/cpufrequtils:cpufrequtils",
-        "//packages/linux/laptop/power/cpupower:cpupower",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -36,7 +35,6 @@ filegroup(
     name = "tuning",
     srcs = [
         "//packages/linux/system/power/irqbalance:irqbalance",
-        "//packages/linux/system/power/power-profiles-daemon:power-profiles-daemon",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -93,7 +91,6 @@ filegroup(
         ":essential",
         ":tuning",
         ":storage-power",
-        "//packages/linux/laptop/monitoring/powertop:powertop",
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
     ],
     default_target_platform = "//platforms:linux-target",

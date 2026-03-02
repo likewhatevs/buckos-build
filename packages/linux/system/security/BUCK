@@ -75,7 +75,6 @@ filegroup(
 filegroup(
     name = "firewall-packages",
     srcs = [
-        "//packages/linux/network/firewall/nftables:nftables",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -103,18 +102,6 @@ filegroup(
 filegroup(
     name = "encryption-tools",
     srcs = [
-        "//packages/linux/system/security/encryption:minisign",
-        "//packages/linux/system/security/encryption:signify",
-        "//packages/linux/system/security/encryption:ccrypt",
-        "//packages/linux/system/security/encryption:pass",
-        "//packages/linux/system/security/encryption:tomb",
-        "//packages/linux/system/security/encryption:ecryptfs-utils",
-        "//packages/linux/system/security/encryption:veracrypt",
-        "//packages/linux/system/security/encryption:opensc",
-        "//packages/linux/system/security/encryption:hashcat",
-        "//packages/linux/system/security/encryption:john",
-        "//packages/linux/system/security/encryption:bcrypt",
-        "//packages/linux/system/security/encryption:clevis",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -125,20 +112,6 @@ filegroup(
     name = "encryption-libs",
     srcs = [
         "//packages/linux/system/libs/crypto/libsodium:libsodium",
-        "//packages/linux/system/security/encryption:libbsd",
-        "//packages/linux/system/security/encryption:libmd",
-        "//packages/linux/system/security/encryption:linux-pam",
-        "//packages/linux/system/security/encryption:keyutils",
-        "//packages/linux/system/security/encryption:fuse3",
-        "//packages/linux/system/security/encryption:pcsc-lite",
-        "//packages/linux/system/security/encryption:libusb",
-        "//packages/linux/system/security/encryption:nettle",
-        "//packages/linux/system/security/encryption:argon2",
-        "//packages/linux/system/security/encryption:libressl",
-        "//packages/linux/system/security/encryption:botan",
-        "//packages/linux/system/security/encryption:libp11",
-        "//packages/linux/system/security/encryption:jose",
-        "//packages/linux/system/security/encryption:jansson",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -179,12 +152,6 @@ alias(
 )
 
 alias(
-    name = "nftables",
-    actual = "//packages/linux/network/firewall/nftables:nftables",
-    visibility = ["PUBLIC"],
-)
-
-alias(
     name = "cryptsetup",
     actual = "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
     visibility = ["PUBLIC"],
@@ -209,65 +176,6 @@ alias(
 )
 
 # Encryption tools aliases
-alias(
-    name = "minisign",
-    actual = "//packages/linux/system/security/encryption:minisign",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "signify",
-    actual = "//packages/linux/system/security/encryption:signify",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "pass",
-    actual = "//packages/linux/system/security/encryption:pass",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "tomb",
-    actual = "//packages/linux/system/security/encryption:tomb",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "veracrypt",
-    actual = "//packages/linux/system/security/encryption:veracrypt",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "ccrypt",
-    actual = "//packages/linux/system/security/encryption:ccrypt",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "hashcat",
-    actual = "//packages/linux/system/security/encryption:hashcat",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "john",
-    actual = "//packages/linux/system/security/encryption:john",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "opensc",
-    actual = "//packages/linux/system/security/encryption:opensc",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "clevis",
-    actual = "//packages/linux/system/security/encryption:clevis",
-    visibility = ["PUBLIC"],
-)
 
 alias(
     name = "libsodium",
@@ -275,36 +183,7 @@ alias(
     visibility = ["PUBLIC"],
 )
 
-alias(
-    name = "argon2",
-    actual = "//packages/linux/system/security/encryption:argon2",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "libressl",
-    actual = "//packages/linux/system/security/encryption:libressl",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "botan",
-    actual = "//packages/linux/system/security/encryption:botan",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "nettle",
-    actual = "//packages/linux/system/security/encryption:nettle",
-    visibility = ["PUBLIC"],
-)
-
 # Authentication package aliases
-alias(
-    name = "linux-pam",
-    actual = "//packages/linux/system/security/encryption:linux-pam",
-    visibility = ["PUBLIC"],
-)
 
 alias(
     name = "shadow",
@@ -321,78 +200,6 @@ alias(
 alias(
     name = "polkit",
     actual = "//packages/linux/system/security/auth/privilege:polkit",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "krb5",
-    actual = "//packages/linux/system/security/auth/directory:krb5",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "kerberos",
-    actual = "//packages/linux/system/security/auth/directory:krb5",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "openldap",
-    actual = "//packages/linux/system/security/auth/directory:openldap",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "sssd",
-    actual = "//packages/linux/system/security/auth/directory:sssd",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "cyrus-sasl",
-    actual = "//packages/linux/system/security/auth/directory:cyrus-sasl",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "oath-toolkit",
-    actual = "//packages/linux/system/security/auth/mfa:oath-toolkit",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "google-authenticator",
-    actual = "//packages/linux/system/security/auth/mfa:google-authenticator",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "libfido2",
-    actual = "//packages/linux/system/security/auth/mfa:libfido2",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "pam-u2f",
-    actual = "//packages/linux/system/security/auth/mfa:pam-u2f",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "yubico-pam",
-    actual = "//packages/linux/system/security/auth/mfa:yubico-pam",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "yubikey-manager",
-    actual = "//packages/linux/system/security/auth/mfa:yubikey-manager",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "libpwquality",
-    actual = "//packages/linux/system/security/auth/password:libpwquality",
     visibility = ["PUBLIC"],
 )
 
@@ -414,20 +221,3 @@ alias(
     visibility = ["PUBLIC"],
 )
 
-alias(
-    name = "pam-radius",
-    actual = "//packages/linux/system/security/auth/network:pam-radius",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "pam-tacplus",
-    actual = "//packages/linux/system/security/auth/network:pam-tacplus",
-    visibility = ["PUBLIC"],
-)
-
-alias(
-    name = "nss-pam-ldapd",
-    actual = "//packages/linux/system/security/auth/directory:nss-pam-ldapd",
-    visibility = ["PUBLIC"],
-)

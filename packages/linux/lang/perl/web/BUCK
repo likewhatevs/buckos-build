@@ -36,25 +36,6 @@ package(
     ],
 )
 
-# Catalyst::Runtime - The Elegant MVC Web Application Framework
-package(
-    build_rule = "perl",
-    name = "catalyst-runtime",
-    url = "https://cpan.metacpan.org/authors/id/J/JJ/JJNAPIORK/Catalyst-Runtime-5.90131.tar.gz",
-
-    sha256 = "9d641efacf0f9935e6ecb98f5a3b476c961b1f819bd2f8f23a647d1d867e1849",
-    version = "5.90131",
-    description = "The Elegant MVC Web Application Framework",
-    homepage = "http://www.catalystframework.org/",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        "//packages/linux/lang/perl/oop:moose",
-        ":plack",
-        "//packages/linux/lang/perl/network:lwp",
-    ],
-)
-
 # Plack - Perl Superglue for Web frameworks and Web Servers (PSGI toolkit)
 package(
     build_rule = "perl",

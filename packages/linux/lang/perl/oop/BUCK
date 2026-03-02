@@ -1,28 +1,5 @@
 load("//defs:package.bzl", "package")
 
-# Moose - A postmodern object system for Perl 5
-package(
-    build_rule = "perl",
-    name = "moose",
-    url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Moose-2.2207.tar.gz",
-
-    sha256 = "7c2daddc49754ded93f65b8ce9e3ac9b6d11ab27d111ec77f95a8528cf4ac409",
-    version = "2.2207",
-    description = "A postmodern object system for Perl 5",
-    homepage = "https://metacpan.org/pod/Moose",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        "//packages/linux/lang/perl/core:try-tiny",
-        "//packages/linux/lang/perl/core:package-stash",
-        "//packages/linux/lang/perl/core:module-runtime",
-        "//packages/linux/lang/perl/core:class-accessor",
-        ":class-load",
-        ":data-visitor",
-        ":eval-closure",
-    ],
-)
-
 # Moo - Minimalist Object Orientation (with Moose compatibility)
 package(
     build_rule = "perl",
@@ -41,22 +18,6 @@ package(
         ":role-tiny",
         ":class-method-modifiers",
         ":sub-quote",
-    ],
-)
-
-# Mouse - Moose minus the antlers
-package(
-    build_rule = "perl",
-    name = "mouse",
-    url = "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Mouse-v2.5.10.tar.gz",
-
-    sha256 = "ce8dc23946153a467ff09765167ee2590f5c502120f48a2d9441733f39aa32ee",
-    version = "2.5.10",
-    description = "Moose minus the antlers",
-    homepage = "https://metacpan.org/pod/Mouse",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    deps = [
-        "//packages/linux/lang/perl:perl",
     ],
 )
 
@@ -160,40 +121,6 @@ package(
     ],
 )
 
-# MooseX::Types - Organise your Moose types in libraries
-package(
-    build_rule = "perl",
-    name = "moosex-types",
-    url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/MooseX-Types-0.50.tar.gz",
-
-    sha256 = "9cd87b3492cbf0be9d2df9317b2adf9fc30663770e69906654bea3f41b17cb08",
-    version = "0.50",
-    description = "Organise your Moose types in libraries",
-    homepage = "https://metacpan.org/pod/MooseX::Types",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        ":moose",
-    ],
-)
-
-# MooseX::Role::Parameterized - Moose roles with parameters
-package(
-    build_rule = "perl",
-    name = "moosex-role-parameterized",
-    url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/MooseX-Role-Parameterized-1.11.tar.gz",
-
-    sha256 = "1cfe766c5d7f0ecab57f733dcca430a2a2acd6b995757141b940ade3692bec9e",
-    version = "1.11",
-    description = "Moose roles with parameters",
-    homepage = "https://metacpan.org/pod/MooseX::Role::Parameterized",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        ":moose",
-    ],
-)
-
 # Type::Tiny - Tiny, yet Moo(se)-compatible type constraint
 package(
     build_rule = "perl",
@@ -208,22 +135,6 @@ package(
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:exporter-tiny",
-    ],
-)
-
-# Object::Pad - A simple object system with type constraints
-package(
-    build_rule = "perl",
-    name = "object-pad",
-    url = "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/Object-Pad-0.809.tar.gz",
-
-    sha256 = "12950a664c0607ea3fca7480f365df54d1746291f45ebb0ed80917b74fb15ef5",
-    version = "0.809",
-    description = "A simple object system with type constraints",
-    homepage = "https://metacpan.org/pod/Object::Pad",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    deps = [
-        "//packages/linux/lang/perl:perl",
     ],
 )
 

@@ -20,7 +20,6 @@ package(
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",
         "//packages/linux/ai/robotics/robosuite:robosuite",
         "//packages/linux/ai/robotics/robosuite-models:robosuite-models",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/termcolor:termcolor",
         "//packages/linux/ai/ml-frameworks/tianshou:tianshou",
         "//packages/linux/dev-libs/python/tqdm:tqdm",

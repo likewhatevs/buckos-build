@@ -21,14 +21,11 @@ package(
     ],
     use_deps = {
         "entropy": [
-            "//packages/linux/dev-libs/python/scipy:scipy",
         ],
         "neighbors": [
             "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
-            "//packages/linux/dev-libs/python/scipy:scipy",
         ],
         "raster": [
-            "//packages/linux/graphics/geospatial/gdal:gdal",
             "//packages/linux/dev-libs/python/rasterio:rasterio",
         ],
         "web_map": [

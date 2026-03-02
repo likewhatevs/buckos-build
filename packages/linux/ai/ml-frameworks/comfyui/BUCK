@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/safetensors:safetensors",
         "//packages/linux/dev-libs/python/aiohttp:aiohttp",
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/psutil:psutil",
         "//packages/linux/dev-libs/python/pydantic:pydantic",

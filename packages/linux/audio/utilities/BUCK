@@ -19,7 +19,6 @@ filegroup(
 filegroup(
     name = "control-tools",
     srcs = [
-        "//packages/linux/audio/utilities/pavucontrol:pavucontrol",
     ],
     default_target_platform = "//platforms:linux-target",
 )

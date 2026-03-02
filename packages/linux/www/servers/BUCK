@@ -3,7 +3,6 @@
 filegroup(
     name = "http-servers",
     srcs = [
-        "//packages/linux/www/servers/caddy:caddy",
         "//packages/linux/www/servers/lighttpd:lighttpd",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -14,8 +13,6 @@ filegroup(
     name = "reverse-proxies",
     srcs = [
         "//packages/linux/www/servers/haproxy:haproxy",
-        "//packages/linux/www/servers/traefik:traefik",
-        "//packages/linux/www/servers/caddy:caddy",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -24,7 +21,6 @@ filegroup(
 filegroup(
     name = "lightweight",
     srcs = [
-        "//packages/linux/www/servers/caddy:caddy",
         "//packages/linux/www/servers/lighttpd:lighttpd",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -43,10 +39,8 @@ filegroup(
 filegroup(
     name = "all-web-servers",
     srcs = [
-        "//packages/linux/www/servers/caddy:caddy",
         "//packages/linux/www/servers/lighttpd:lighttpd",
         "//packages/linux/www/servers/haproxy:haproxy",
-        "//packages/linux/www/servers/traefik:traefik",
         "//packages/linux/www/servers/squid:squid",
     ],
     default_target_platform = "//platforms:linux-target",

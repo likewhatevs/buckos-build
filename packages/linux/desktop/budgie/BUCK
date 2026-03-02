@@ -24,7 +24,6 @@ filegroup(
     name = "budgie",
     srcs = [
         ":budgie-desktop",
-        "//packages/linux/desktop/lightdm:lightdm",
         "//packages/linux/desktop/mesa:mesa",
     ],
     default_target_platform = "//platforms:linux-target",

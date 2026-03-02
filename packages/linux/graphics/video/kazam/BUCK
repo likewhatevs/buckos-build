@@ -12,8 +12,6 @@ package(
     homepage = "https://github.com/henrywoo/kazam",
     license = "GPL-3.0-or-later",
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
-        "//packages/linux/graphics/video/gstreamer:gstreamer",
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/lang/python:python",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",

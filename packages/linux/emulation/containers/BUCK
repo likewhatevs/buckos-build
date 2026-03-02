@@ -12,11 +12,6 @@ filegroup(
 filegroup(
     name = "docker-full",
     srcs = [
-        "//packages/linux/emulation/containers/containerd:containerd",
-        "//packages/linux/emulation/containers/docker:docker-cli",
-        "//packages/linux/emulation/containers/docker:docker-engine",
-        "//packages/linux/emulation/containers/docker:docker-compose",
-        "//packages/linux/emulation/containers/docker:docker-buildx",
         "//packages/linux/system/containers/runc:runc",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -25,9 +20,6 @@ filegroup(
 filegroup(
     name = "docker-minimal",
     srcs = [
-        "//packages/linux/emulation/containers/containerd:containerd",
-        "//packages/linux/emulation/containers/docker:docker-cli",
-        "//packages/linux/emulation/containers/docker:docker-engine",
         "//packages/linux/system/containers/runc:runc",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -58,7 +50,6 @@ filegroup(
 filegroup(
     name = "containerd-full",
     srcs = [
-        "//packages/linux/emulation/containers/containerd:containerd",
         "//packages/linux/system/containers/runc:runc",
     ],
     default_target_platform = "//platforms:linux-target",

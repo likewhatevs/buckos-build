@@ -82,7 +82,6 @@ filegroup(
 filegroup(
     name = "debuggers",
     srcs = [
-        "//packages/linux/dev-tools/debuggers/gdb:gdb",
         "//packages/linux/dev-tools/debuggers/strace:strace",
         "//packages/linux/dev-tools/debuggers/ltrace:ltrace",
     ],
@@ -117,7 +116,6 @@ filegroup(
     srcs = [
         "//packages/linux/editors/patch:patch",
         "//packages/linux/dev-tools/dev-utils/ctags:ctags",
-        "//packages/linux/dev-tools/dev-utils/cscope:cscope",
         "//packages/linux/dev-tools/dev-utils/doxygen:doxygen",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -129,7 +127,6 @@ filegroup(
     name = "code-navigation",
     srcs = [
         "//packages/linux/dev-tools/dev-utils/ctags:ctags",
-        "//packages/linux/dev-tools/dev-utils/cscope:cscope",
         "//packages/linux/dev-tools/dev-utils/global:global",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -140,10 +137,6 @@ filegroup(
 filegroup(
     name = "static-analysis",
     srcs = [
-        "//packages/linux/dev-tools/linting/cppcheck:cppcheck",
-        "//packages/linux/dev-tools/dev-utils/shellcheck:shellcheck",
-        "//packages/linux/dev-tools/dev-utils/flawfinder:flawfinder",
-        "//packages/linux/dev-tools/dev-utils/include-what-you-use:include-what-you-use",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -201,8 +194,6 @@ filegroup(
     name = "build-acceleration",
     srcs = [
         "//packages/linux/dev-tools/dev-utils/ccache:ccache",
-        "//packages/linux/dev-tools/dev-utils/distcc:distcc",
-        "//packages/linux/dev-tools/dev-utils/sccache:sccache",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -236,7 +227,6 @@ filegroup(
 filegroup(
     name = "hex-editors",
     srcs = [
-        "//packages/linux/dev-tools/dev-utils/hexedit:hexedit",
         "//packages/linux/dev-tools/dev-utils/xxd:xxd",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -286,7 +276,6 @@ filegroup(
         "//packages/linux/dev-tools/build-systems/make:make",
         "//packages/linux/dev-tools/build-systems/cmake:cmake",
         "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
-        "//packages/linux/dev-tools/debuggers/gdb:gdb",
         "//packages/linux/lang/binutils:binutils",
         "//packages/linux/editors/patch:patch",
         "//packages/linux/editors/diffutils:diffutils",
@@ -308,13 +297,10 @@ filegroup(
         "//packages/linux/dev-tools/build-systems/automake:automake",
         "//packages/linux/dev-tools/build-systems/libtool:libtool",
         "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
-        "//packages/linux/dev-tools/debuggers/gdb:gdb",
         "//packages/linux/dev-tools/debuggers/strace:strace",
         "//packages/linux/lang/binutils:binutils",
         "//packages/linux/dev-tools/dev-utils/ctags:ctags",
-        "//packages/linux/dev-tools/dev-utils/cscope:cscope",
         "//packages/linux/dev-tools/dev-utils/doxygen:doxygen",
-        "//packages/linux/dev-tools/linting/cppcheck:cppcheck",
         "//packages/linux/dev-tools/dev-utils/ccache:ccache",
         "//packages/linux/dev-tools/dev-utils/flex:flex",
         "//packages/linux/dev-tools/dev-utils/bison:bison",
@@ -329,7 +315,6 @@ filegroup(
     name = "shell-dev",
     srcs = [
         "//packages/linux/dev-tools/vcs/git:git",
-        "//packages/linux/dev-tools/dev-utils/shellcheck:shellcheck",
         "//packages/linux/editors/diffutils:diffutils",
         "//packages/linux/editors/patch:patch",
         "//packages/linux/dev-tools/dev-utils/ripgrep:ripgrep",
@@ -343,9 +328,6 @@ filegroup(
 filegroup(
     name = "security-analysis",
     srcs = [
-        "//packages/linux/dev-tools/dev-utils/flawfinder:flawfinder",
-        "//packages/linux/dev-tools/linting/cppcheck:cppcheck",
-        "//packages/linux/dev-tools/dev-utils/shellcheck:shellcheck",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

@@ -12,7 +12,6 @@ package(
     ],
     deps = [
         "//packages/linux/dev-libs/boost:boost",
-        "//packages/linux/dev-libs/compression/bzip2:bzip2",
         "//packages/linux/system/libs/data/expat:expat",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/compression:lz4",

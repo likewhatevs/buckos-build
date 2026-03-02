@@ -69,7 +69,6 @@ filegroup(
         "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "//packages/linux/audio/daemons/alsa-utils:alsa-utils",
         "//packages/linux/audio/players/cmus:cmus",
-        "//packages/linux/audio/players/mpd:mpd",
         "//packages/linux/audio/utilities/sox:sox",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -81,7 +80,6 @@ filegroup(
     name = "desktop",
     srcs = [
         ":essential",
-        "//packages/linux/audio/utilities/pavucontrol:pavucontrol",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

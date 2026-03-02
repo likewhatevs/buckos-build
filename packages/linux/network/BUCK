@@ -56,7 +56,6 @@ filegroup(
     srcs = [
         "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/network/wget:wget",
-        "//packages/linux/network/aria2:aria2",
         "//packages/linux/system/apps/rsync:rsync",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -71,7 +70,6 @@ filegroup(
     name = "browsers",
     srcs = [
         "//packages/linux/www/lynx:lynx",
-        "//packages/linux/www/w3m:w3m",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -86,7 +84,6 @@ filegroup(
     srcs = [
         "//packages/linux/network/iproute2:iproute2",
         "//packages/linux/network/iputils:iputils",
-        "//packages/linux/network/net-tools:net-tools",
         "//packages/linux/network/dhcpcd:dhcpcd",
         "//packages/linux/network/ethtool:ethtool",
     ],
@@ -154,9 +151,6 @@ filegroup(
     name = "packet-capture",
     srcs = [
         "//packages/linux/network/libs/libpcap:libpcap",
-        "//packages/linux/network/tcpdump:tcpdump",
-        "//packages/linux/network/ngrep:ngrep",
-        "//packages/linux/network/tshark:tshark",
         "//packages/linux/network/wireshark:wireshark",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -166,10 +160,8 @@ filegroup(
 filegroup(
     name = "bandwidth-monitors",
     srcs = [
-        "//packages/linux/network/iftop:iftop",
         "//packages/linux/network/bmon:bmon",
         "//packages/linux/network/vnstat:vnstat",
-        "//packages/linux/network/darkstat:darkstat",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],
@@ -178,7 +170,6 @@ filegroup(
 filegroup(
     name = "network-diagnostics",
     srcs = [
-        "//packages/linux/network/mtr:mtr",
         "//packages/linux/network/fping:fping",
         "//packages/linux/network/arping:arping",
         "//packages/linux/benchmarks/iperf3:iperf3",
@@ -190,10 +181,7 @@ filegroup(
 filegroup(
     name = "security-scanners",
     srcs = [
-        "//packages/linux/network/nmap:nmap",
         "//packages/linux/network/masscan:masscan",
-        "//packages/linux/network/hping3:hping3",
-        "//packages/linux/network/ettercap:ettercap",
     ],
     default_target_platform = "//platforms:linux-target",
     visibility = ["PUBLIC"],

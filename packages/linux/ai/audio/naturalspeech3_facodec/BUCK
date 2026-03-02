@@ -11,7 +11,6 @@ package(
         "//packages/linux/ai/audio/pyworld:pyworld",
         "//packages/linux/media/audio/soundfile:soundfile",
         "//packages/linux/ai/audio/librosa:librosa",
-        "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/audio/torchaudio:torchaudio",
     ],

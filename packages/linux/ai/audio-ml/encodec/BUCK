@@ -9,6 +9,5 @@ package(
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/audio-ml/torchaudio:torchaudio",
-        "//packages/linux/dev-libs/python/einops:einops",
     ],
 )

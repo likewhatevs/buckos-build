@@ -11,6 +11,5 @@ package(
         "-DBUILD_TESTING=OFF",
     ],
     deps = [
-        "//packages/linux/emulation/wasmtime:wasmtime",
     ],
 )

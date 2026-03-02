@@ -15,7 +15,6 @@ package(
     use_deps = {
         "netlink": [
             "//packages/linux/core/libnl:libnl",
-            "//packages/linux/system/libs/network/libmnl:libmnl",
         ],
     },
 

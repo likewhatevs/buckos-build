@@ -62,8 +62,6 @@ filegroup(
     name = "text-libs",
     srcs = [
         "//packages/linux/dev-libs/text/oniguruma:oniguruma",
-        "//packages/linux/dev-libs/text/re2:re2",
-        "//packages/linux/system/security/auth/directory:libunistring",
         "//packages/linux/dev-libs/text/utf8proc:utf8proc",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -182,7 +180,6 @@ filegroup(
 filegroup(
     name = "misc-libs",
     srcs = [
-        "//packages/linux/dev-libs/misc/xxhash:xxhash",
         "//packages/linux/dev-libs/misc/libmicrohttpd:libmicrohttpd",
         "//packages/linux/dev-libs/misc/tree-sitter:tree-sitter",
         "//packages/linux/dev-libs/misc/libedit:libedit",
@@ -215,7 +212,6 @@ filegroup(
         ":boost-libs",
         ":google-libs",
         ":cpp-utility-libs",
-        "//packages/linux/dev-libs/text/re2:re2",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -227,7 +223,6 @@ filegroup(
         ":allocator-libs",
         ":event-libs",
         ":gc-libs",
-        "//packages/linux/dev-libs/misc/xxhash:xxhash",
         "//packages/linux/dev-libs/misc/libatomic_ops:libatomic_ops",
     ],
     default_target_platform = "//platforms:linux-target",

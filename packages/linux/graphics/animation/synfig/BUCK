@@ -22,7 +22,6 @@ DESTDIR=$OUT make install
         # "//packages/linux/dev-libs/libsigcpp:libsigcpp",  # TODO: not packaged yet
         "//packages/linux/system/libs/data/libxml2:libxml2",
         # "//packages/linux/dev-libs/mlt:mlt",  # TODO: not packaged yet
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/media/image/imagemagick:imagemagick",
         "//packages/linux/dev-libs/boost:boost",
         "//packages/linux/dev-libs/math/fftw:fftw",

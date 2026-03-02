@@ -12,7 +12,6 @@ filegroup(
 filegroup(
     name = "power-analysis",
     srcs = [
-        "//packages/linux/laptop/monitoring/powertop:powertop",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -20,7 +19,6 @@ filegroup(
 filegroup(
     name = "cpu-monitoring",
     srcs = [
-        "//packages/linux/laptop/monitoring/i7z:i7z",
         "//packages/linux/laptop/monitoring/s-tui:s-tui",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -31,7 +29,6 @@ filegroup(
     srcs = [
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
         "//packages/linux/laptop/monitoring/acpi:acpi",
-        "//packages/linux/laptop/monitoring/powertop:powertop",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -40,10 +37,8 @@ filegroup(
     name = "all-monitoring",
     srcs = [
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
-        "//packages/linux/laptop/monitoring/powertop:powertop",
         "//packages/linux/laptop/monitoring/acpi:acpi",
         "//packages/linux/laptop/monitoring/s-tui:s-tui",
-        "//packages/linux/laptop/monitoring/i7z:i7z",
     ],
     default_target_platform = "//platforms:linux-target",
 )

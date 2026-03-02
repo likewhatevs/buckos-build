@@ -9,7 +9,6 @@ package(
     deps = [
         "//packages/linux/dev-libs/python/bitarray:bitarray",
         "//packages/linux/dev-libs/python/flask:flask",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/transformers:transformers",
         "//packages/linux/dev-libs/python/ujson:ujson",

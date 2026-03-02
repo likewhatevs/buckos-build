@@ -19,7 +19,6 @@ package(
         "-Dwith-gettext=true",
     ],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/dev-libs/glib:glib",
     ],

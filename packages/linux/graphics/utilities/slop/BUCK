@@ -21,6 +21,5 @@ DESTDIR=$OUT make install
         "//packages/linux/system/libs/utility/icu:icu",
         # "//packages/linux/core/libxext:libxext",  # TODO: X11 libs not packaged yet
         "//packages/linux/desktop/mesa:mesa",
-        # "//packages/linux/dev-libs/glew:glew",  # TODO: glew package doesn't exist yet
     ],
 )

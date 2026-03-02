@@ -13,8 +13,6 @@ package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "//packages/linux/dev-libs/serialization/protozero:protozero",
-        "//packages/linux/graphics/geospatial/gdal:gdal",
         "//packages/linux/graphics/geospatial/libosmium:libosmium",
         "//packages/linux/graphics/geospatial/geos:geos",
     ],

@@ -19,7 +19,6 @@ DESTDIR=$OUT make install
 python3 setup.py install --prefix=/usr --root=$OUT
 """],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         # "//packages/linux/core/jsoncpp:jsoncpp",  # TODO: not packaged yet
         # "//packages/linux/core/zeromq:zeromq",  # TODO: not packaged yet,
         "//packages/linux/desktop/qt:qt5",

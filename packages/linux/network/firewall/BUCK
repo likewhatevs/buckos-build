@@ -6,8 +6,6 @@
 filegroup(
     name = "modern-firewalls",
     srcs = [
-        "//packages/linux/network/firewall/nftables:nftables",
-        "//packages/linux/network/firewall/firewalld:firewalld",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -17,7 +15,6 @@ filegroup(
     name = "legacy-firewalls",
     srcs = [
         "//packages/linux/network/firewall/iptables:iptables",
-        "//packages/linux/network/firewall/ipset:ipset",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -26,9 +23,6 @@ filegroup(
 filegroup(
     name = "firewall-frontends",
     srcs = [
-        "//packages/linux/network/firewall/ufw:ufw",
-        "//packages/linux/network/firewall/firewalld:firewalld",
-        "//packages/linux/network/firewall/ferm:ferm",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -37,8 +31,6 @@ filegroup(
 filegroup(
     name = "firewall-tools",
     srcs = [
-        "//packages/linux/network/firewall/ferm:ferm",
-        "//packages/linux/network/firewall/ipset:ipset",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -47,9 +39,7 @@ filegroup(
 filegroup(
     name = "netfilter-core",
     srcs = [
-        "//packages/linux/network/firewall/nftables:nftables",
         "//packages/linux/network/firewall/iptables:iptables",
-        "//packages/linux/network/firewall/ipset:ipset",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -58,7 +48,6 @@ filegroup(
 filegroup(
     name = "minimal-firewall",
     srcs = [
-        "//packages/linux/network/firewall/nftables:nftables",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -67,12 +56,7 @@ filegroup(
 filegroup(
     name = "all-firewalls",
     srcs = [
-        "//packages/linux/network/firewall/nftables:nftables",
         "//packages/linux/network/firewall/iptables:iptables",
-        "//packages/linux/network/firewall/firewalld:firewalld",
-        "//packages/linux/network/firewall/ufw:ufw",
-        "//packages/linux/network/firewall/ipset:ipset",
-        "//packages/linux/network/firewall/ferm:ferm",
     ],
     default_target_platform = "//platforms:linux-target",
 )

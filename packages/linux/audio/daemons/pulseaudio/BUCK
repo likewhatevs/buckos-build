@@ -21,7 +21,6 @@ package(
     use_deps = {
         "alsa": "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "dbus": "//packages/linux/system/libs/ipc/dbus:dbus",
-        "gstreamer": "//packages/linux/graphics/video/gstreamer:gstreamer",
         "gtk": "//packages/linux/desktop/gtk:gtk3",
         "ssl": "//packages/linux/system/libs/crypto/openssl:openssl",
         "systemd": "//packages/linux/system/init/systemd:systemd",

@@ -25,7 +25,6 @@ package(
     deps = [
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/system/init/eudev:eudev",
-        "//packages/linux/system/security/encryption:libusb",
         ":nss",
         ":pixman",
     ],

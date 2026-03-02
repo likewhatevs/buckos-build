@@ -13,7 +13,6 @@ filegroup(
     srcs = [
         "//packages/linux/fonts/tools/fonttools:fonttools",
         "//packages/linux/fonts/tools/woff2:woff2",
-        "//packages/linux/fonts/tools/ttfautohint:ttfautohint",
     ],
     default_target_platform = "//platforms:linux-target",
 )
