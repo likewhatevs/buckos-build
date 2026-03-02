@@ -39,6 +39,10 @@ def _configure(ctx, source, dep_prefixes_file = None):
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
+    # Inject user-specified environment variables
+    for key, value in ctx.attrs.env.items():
+        cmd.add("--env", "{}={}".format(key, value))
+
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
         cmd.add(arg)
@@ -70,6 +74,10 @@ def _build(ctx, source, configured, dep_prefixes_file = None):
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
 
+    # Inject user-specified environment variables
+    for key, value in ctx.attrs.env.items():
+        cmd.add("--env", "{}={}".format(key, value))
+
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
         cmd.add(arg)
@@ -95,6 +103,10 @@ def _install(ctx, source, built, dep_prefixes_file = None):
     # Hermetic PATH from toolchain
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
+
+    # Inject user-specified environment variables
+    for key, value in ctx.attrs.env.items():
+        cmd.add("--env", "{}={}".format(key, value))
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):

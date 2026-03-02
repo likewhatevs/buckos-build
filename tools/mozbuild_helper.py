@@ -226,6 +226,13 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
     # pkg-config wrapper with --define-prefix (MUST be first in PATH)
     env["PATH"] = pkg_config_bin_dir + ":" + env.get("PATH", "")
 
+    # User-specified environment variables
+    if hasattr(args, 'extra_env') and args.extra_env:
+        for entry in args.extra_env:
+            key, _, value = entry.partition("=")
+            if key:
+                env[key] = value
+
     # Mozconfig
     mozconfig = os.path.join(src_dir, "mozconfig")
     env["MOZCONFIG"] = mozconfig
@@ -431,6 +438,8 @@ def main():
                         help="Start with empty PATH (populated by --path-prepend)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--env", action="append", dest="extra_env", default=[],
+                        help="Extra environment variable KEY=VALUE (repeatable)")
 
     args = parser.parse_args()
     args._host_path = _host_path

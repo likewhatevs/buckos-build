@@ -27,6 +27,11 @@ new = '''        try:
 p.write_text(src.replace(old, new, 1))
 PYEOF""",
     ],
+    # Override TMPDIR to avoid AF_UNIX socket path length limit (108 bytes).
+    # Firefox's IPDL code generator uses multiprocessing.Manager() which
+    # creates Unix sockets under $TMPDIR.  Buck2's scratch dir is too long.
+    env = {"TMPDIR": "/tmp"},
+
     mozconfig_options = [
         "--enable-application=browser",
         "--enable-official-branding",
