@@ -56,9 +56,12 @@ package(
         "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/dev-libs/elfutils:elfutils",
         "//packages/linux/dev-libs/spirv:spirv-tools",
-        # Python mako needed for mesa code generation
+        # Python needed for mesa code generation (mako templates + glsl compiler)
+        "//packages/linux/lang/python:python-host",
         "//packages/linux/dev-libs/python/mako:mako",
         "//packages/linux/dev-libs/python/markupsafe:markupsafe",
+        "//packages/linux/dev-libs/python/packaging:packaging",
+        "//packages/linux/dev-libs/python/pyyaml:pyyaml",
     ],
 )
 
