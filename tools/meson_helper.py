@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 
-from _env import clean_env, derive_lib_paths, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -115,9 +115,9 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 

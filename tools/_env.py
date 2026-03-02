@@ -178,6 +178,30 @@ def derive_lib_paths(bin_dirs, env):
         env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
 
+def filter_path_flags(flags):
+    """Filter out -I/-L/-Wl,-rpath-link flags for non-existent directories.
+
+    Tset projections emit flags for every possible lib layout
+    ({prefix}/usr/lib64, usr/lib, lib64, lib) but most only exist
+    for one or two.  Filtering avoids blowing the execve arg limit
+    on packages with 100+ transitive deps.
+    """
+    result = []
+    for flag in flags:
+        if flag.startswith("-I"):
+            if os.path.isdir(os.path.abspath(flag[2:])):
+                result.append(flag)
+        elif flag.startswith("-L"):
+            if os.path.isdir(os.path.abspath(flag[2:])):
+                result.append(flag)
+        elif flag.startswith("-Wl,-rpath-link,"):
+            if os.path.isdir(os.path.abspath(flag[16:])):
+                result.append(flag)
+        else:
+            result.append(flag)
+    return result
+
+
 def write_pkg_config_wrapper(wrapper_dir):
     """Write a pkg-config wrapper that passes --define-prefix.
 

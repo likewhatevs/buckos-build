@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 
-from _env import clean_env, derive_lib_paths, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -119,9 +119,9 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
     file_prefix_paths = _read_flag_file(args.prefix_path_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
@@ -240,8 +240,12 @@ def main():
     # FindPerlModules.  all_prefix_paths are {dep}/usr directories.
     _perl5_paths = []
     for _pp in all_prefix_paths:
-        for _pattern in ("lib/perl5", "share/perl5",
-                         "lib/perl5/5.*", "lib64/perl5/5.*"):
+        for _pattern in ("lib/perl5", "lib/perl5/vendor_perl",
+                         "lib/perl5/site_perl", "share/perl5",
+                         "share/perl5/vendor_perl",
+                         "lib/perl5/5.*", "lib64/perl5",
+                         "lib64/perl5/vendor_perl",
+                         "lib64/perl5/5.*"):
             for _sp in _glob.glob(os.path.join(_pp, _pattern)):
                 if os.path.isdir(_sp):
                     _perl5_paths.append(_sp)
@@ -278,8 +282,15 @@ def main():
             existing = cmake_defines.get(key, "")
             cmake_defines[key] = (_ld + " " + existing).strip() if existing else _ld
 
-    for key, value in cmake_defines.items():
-        cmd.append(f"-D{key}={value}" if value else f"-D{key}")
+    # Write long defines (CMAKE_*_FLAGS with hundreds of dep flags) to an
+    # initial-cache file instead of the command line.  Packages with 100+
+    # transitive deps can exceed the execve argument limit otherwise.
+    _cache_file = os.path.join(os.path.abspath(args.build_dir), "_buck_initial_cache.cmake")
+    with open(_cache_file, "w") as _cf:
+        for key, value in cmake_defines.items():
+            escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+            _cf.write(f'set({key} "{escaped}" CACHE STRING "")\n')
+    cmd.extend(["-C", _cache_file])
 
     cmd.extend(args.cmake_args)
 
