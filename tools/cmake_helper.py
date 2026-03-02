@@ -192,6 +192,22 @@ def main():
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
+
+    # Extract --sysroot= from CC/CXX and pass as CMAKE_SYSROOT instead.
+    # CMake's automoc mishandles sysroot embedded in the compiler command,
+    # generating broken ninja rules with escaped-space before --sysroot.
+    _cmake_sysroot = None
+    for _cc_key in ("CC", "CXX"):
+        _cc_val = env.get(_cc_key, "")
+        if "--sysroot=" in _cc_val:
+            parts = _cc_val.split()
+            clean = []
+            for p in parts:
+                if p.startswith("--sysroot="):
+                    _cmake_sysroot = p[len("--sysroot="):]
+                else:
+                    clean.append(p)
+            env[_cc_key] = " ".join(clean)
     if args.cc:
         env["CC"] = _resolve_env_paths(args.cc)
     if args.cxx:
@@ -215,6 +231,8 @@ def main():
         f"-DPKG_CONFIG_EXECUTABLE={wrapper_pkg_config}",
         "-G", "Ninja",
     ]
+    if _cmake_sysroot:
+        cmd.append(f"-DCMAKE_SYSROOT={_cmake_sysroot}")
 
     # Build CMAKE_PREFIX_PATH from dep prefixes so find_package() works.
     # Merge flag-file prefix paths with CLI --prefix-path args.
