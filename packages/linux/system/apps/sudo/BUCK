@@ -43,5 +43,7 @@ package(
         "MKDIR_P=mkdir -p",
     ],
     install_targets = ["install-binaries", "install-includes", "install-plugin"],
+    # Serialize install — parallel sub-makes race on mkdir in shared DESTDIR
+    install_args = ["-j1"],
     deps = [],
 )
