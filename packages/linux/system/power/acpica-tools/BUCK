@@ -17,9 +17,11 @@ package(
     make_args = [
         "PREFIX=/usr",
     ],
+    install_targets = ["all"],
     post_install_cmds = ["""
-        make DESTDIR=$OUT PREFIX=/usr install
+        make -C "$BUILD_DIR" DESTDIR=$OUT PREFIX=/usr install
     """],
     deps = [
     ],
+    visibility = ["PUBLIC"],
 )

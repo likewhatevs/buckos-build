@@ -11,7 +11,6 @@ package(
         "//packages/linux/ai/ml-frameworks/torchaudio:torchaudio",
         "//packages/linux/ai/nlp/transformers:transformers",
         "//packages/linux/ai/audio/soundfile:soundfile",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/setuptools:setuptools",
         "//packages/linux/dev-libs/python/packaging:packaging",
         "//packages/linux/dev-libs/python/inflect:inflect",

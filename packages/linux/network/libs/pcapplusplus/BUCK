@@ -12,7 +12,6 @@ package(
     homepage = "https://pcapplusplus.github.io/",
     license = "Unlicense",
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
     configure_args = [
         "-DCMAKE_BUILD_TYPE=Release",

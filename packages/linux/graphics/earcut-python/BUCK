@@ -9,6 +9,6 @@ package(
     deps = [
         "//packages/linux/graphics/earcut:earcut",
         "//packages/linux/dev-libs/python/pybind11:pybind11",
-        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
+    visibility = ["PUBLIC"],
 )

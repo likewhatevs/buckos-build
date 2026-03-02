@@ -18,7 +18,6 @@ package(
     use_deps = {
         "perl": "//packages/linux/lang/perl:perl",
         "python": "//packages/linux/lang/python:python",
-        "ruby": "//packages/linux/lang/ruby:ruby",
     },
 
     # Conditional configure arguments
@@ -34,7 +33,6 @@ package(
         "perl": ("--with-swig=/usr/bin/swig", "--without-swig"),
         "plaintext-password-storage": ("--enable-plaintext-password-storage", "--disable-plaintext-password-storage"),
         "python": ("--enable-python-bindings", "--disable-python-bindings"),
-        "ruby": ("--enable-ruby-bindings", "--disable-ruby-bindings"),
         "sasl": ("--enable-sasl", "--disable-sasl"),
         "static-libs": ("--enable-static", "--disable-static"),
     },
@@ -48,4 +46,5 @@ package(
         "//packages/linux/dev-libs/misc/apr:apr",
         "//packages/linux/dev-libs/misc/apr-util:apr-util",
     ],
+    visibility = ["PUBLIC"],
 )

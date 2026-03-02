@@ -11,7 +11,6 @@ package(
         "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
         "//packages/linux/dev-libs/python/kornia:kornia",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/ai/vision/opencv:opencv",
     ],
 )

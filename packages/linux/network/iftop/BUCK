@@ -16,7 +16,6 @@ package(
     ],
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
                 "//packages/linux/system/terminal/ncurses:ncurses",
                 "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
                 "//packages/linux/dev-tools/build-systems/automake:automake",

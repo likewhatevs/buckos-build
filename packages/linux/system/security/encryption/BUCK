@@ -4,42 +4,6 @@ load("//defs:package.bzl", "package")
 # This directory contains various encryption and cryptographic utilities
 
 # =============================================================================
-# AGE - Simple, modern, secure file encryption
-# =============================================================================
-
-package(
-    build_rule = "go",
-    name = "age",
-    version = "1.2.0",
-    url = "https://github.com/FiloSottile/age/archive/refs/tags/v1.2.0.tar.gz",
-    sha256 = "cefe9e956401939ad86a9c9d7dcf843a43b6bcdf4ee7d8e4508864f227a3f6f0",
-    description = "Simple, modern, secure file encryption tool with small explicit keys",
-    homepage = "https://age-encryption.org/",
-    license = "BSD-3-Clause",
-    deps = [
-        "//packages/linux/lang/go:go",
-    ],
-)
-
-# =============================================================================
-# RAGE - Rust implementation of age
-# =============================================================================
-
-package(
-    build_rule = "cargo",
-    name = "rage",
-    version = "0.10.0",
-    url = "https://github.com/str4d/rage/archive/refs/tags/v0.10.0.tar.gz",
-    sha256 = "34c39c28f8032c144a43aea96e58159fe69526f5ff91cb813083530adcaa6ea4",
-    description = "Rust implementation of the age encryption tool",
-    homepage = "https://github.com/str4d/rage",
-    license = "Apache-2.0 OR MIT",
-    deps = [
-        "//packages/linux/lang/rust:rust",
-    ],
-)
-
-# =============================================================================
 # MINISIGN - Dead simple signing tool
 # =============================================================================
 
@@ -59,6 +23,7 @@ package(
     deps = [
         "//packages/linux/system/libs/crypto/libsodium:libsodium",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -83,6 +48,7 @@ package(
     deps = [
         ":libbsd",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -101,7 +67,75 @@ package(
     homepage = "https://libbsd.freedesktop.org/",
     license = "BSD-3-Clause",
     deps = [
+        ":libmd",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# LIBMD - Message digest library (dependency for libbsd)
+# =============================================================================
+
+package(
+    name = "libmd",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://archive.hadrons.org/software/libmd/libmd-1.1.0.tar.xz",
+
+    sha256 = "1bd6aa42275313af3141c7cf2e5b964e8b1fd488025caf2f971f43b00776b332",
+    version = "1.1.0",
+    description = "Message Digest functions from BSD systems",
+    homepage = "https://www.hadrons.org/software/libmd/",
+    license = "BSD-2-Clause",
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# CCRYPT - Secure encryption and decryption of files
+# =============================================================================
+
+package(
+    name = "ccrypt",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://ccrypt.sourceforge.net/download/1.11/ccrypt-1.11.tar.gz",
+
+    sha256 = "b19c47500a96ee5fbd820f704c912f6efcc42b638c0a6aa7a4e3dc0a6b51a44f",
+    version = "1.11",
+    description = "Secure encryption and decryption of files and streams",
+    homepage = "https://ccrypt.sourceforge.net/",
+    license = "GPL-2.0+",
+    post_install_cmds = ["""
+        # Create convenience symlinks
+        ln -sf ccrypt "$OUT/usr/bin/ccencrypt"
+        ln -sf ccrypt "$OUT/usr/bin/ccdecrypt"
+        ln -sf ccrypt "$OUT/usr/bin/ccat"
+    """, """
+        mkdir -p "$OUT/etc/pam.d"
+        chmod 4755 "$OUT/sbin/unix_chkpwd" || true
+    """, """
+        mkdir -p "$OUT/usr/lib/pcsc/drivers"
+        mkdir -p "$OUT/var/run/pcscd"
+    """, """
+        mkdir -p "$OUT/etc/opensc"
+    """, """
+        mkdir -p "$OUT/usr/bin"
+        mkdir -p "$OUT/usr/share/john"
+        cp run/john "$OUT/usr/bin/"
+        cp run/*.chr run/*.lst "$OUT/usr/share/john/" || true
+        ln -sf john "$OUT/usr/bin/unshadow"
+        ln -sf john "$OUT/usr/bin/unafs"
+        ln -sf john "$OUT/usr/bin/unique"
+    """, """
+        mkdir -p "$OUT/usr/bin" "$OUT/usr/share/man/man1"
+        cp bcrypt "$OUT/usr/bin/"
+        cp bcrypt.1 "$OUT/usr/share/man/man1/"
+    """],
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -129,6 +163,7 @@ package(
         "//packages/linux/system/apps/coreutils:coreutils",
         "//packages/linux/core/util-linux:util-linux",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -155,43 +190,50 @@ package(
         "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",
         "//packages/linux/core/util-linux:util-linux",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
-# GOCRYPTFS - Encrypted overlay filesystem
+# LINUX-PAM - Pluggable Authentication Modules
 # =============================================================================
 
 package(
-    build_rule = "go",
-    name = "gocryptfs",
-    version = "2.4.0",
-    url = "https://github.com/rfjakob/gocryptfs/archive/refs/tags/v2.4.0.tar.gz",
-    sha256 = "a36d47f546b7deb87e291066a09d324015dbada123de355f41d035ba7a9d6b2b",
-    description = "Encrypted overlay filesystem written in Go",
-    homepage = "https://nuetzlich.net/gocryptfs/",
-    license = "MIT",
+    name = "linux-pam",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://github.com/linux-pam/linux-pam/releases/download/v1.6.1/Linux-PAM-1.6.1.tar.xz",
+
+    sha256 = "f8923c740159052d719dbfc2a2f81942d68dd34fcaf61c706a02c9b80feeef8e",
+    version = "1.6.1",
+    description = "Pluggable Authentication Modules for Linux",
+    homepage = "http://www.linux-pam.org/",
+    license = "BSD-3-Clause",
     deps = [
-        "//packages/linux/lang/go:go",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# ECRYPTFS-UTILS - eCryptfs userspace utilities
+# =============================================================================
+
+package(
+    name = "ecryptfs-utils",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://github.com/dustinkirkland/ecryptfs-utils/archive/5e877f3747303096f7861863bac937be4328fa72.tar.gz",
+
+    sha256 = "b91cd0a707f0b1d912297efb1019beca1cd973d199c4fd9f0bcdc1898bb66ebe",
+    version = "111",
+    description = "eCryptfs userspace utilities for filesystem encryption",
+    homepage = "https://ecryptfs.org/",
+    license = "GPL-2.0+",
+    deps = [
+        ":keyutils",
+        "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
-)
-
-# =============================================================================
-# FSCRYPT - Linux native filesystem encryption
-# =============================================================================
-
-package(
-    build_rule = "go",
-    name = "fscrypt",
-    version = "0.3.5",
-    url = "https://github.com/google/fscrypt/archive/refs/tags/v0.3.5.tar.gz",
-    sha256 = "368119b5e67c64bdc5f7872ffc7beed425e1401778003f4c7ae7c1062a45ebaf",
-    description = "Tool for managing Linux native filesystem encryption",
-    homepage = "https://github.com/google/fscrypt",
-    license = "Apache-2.0",
-    deps = [
-        "//packages/linux/lang/go:go",
-    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -221,24 +263,7 @@ package(
     ],
     deps = [
     ],
-)
-
-# =============================================================================
-# SOPS - Secrets OPerationS
-# =============================================================================
-
-package(
-    build_rule = "go",
-    name = "sops",
-    version = "3.8.1",
-    url = "https://github.com/getsops/sops/archive/refs/tags/v3.8.1.tar.gz",
-    sha256 = "5ca70fb4f96797d09012c705a5bb935835896de7bcd063b98d498912b0e645a0",
-    description = "Simple and flexible tool for managing secrets",
-    homepage = "https://github.com/getsops/sops",
-    license = "MPL-2.0",
-    deps = [
-        "//packages/linux/lang/go:go",
-    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -266,6 +291,7 @@ package(
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         ":fuse3",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -284,28 +310,11 @@ package(
     license = "GPL-2.0+ AND LGPL-2.1+",
     configure_args = [
         "-Dexamples=false",
+        "-Duseroot=false",
     ],
     deps = [
     ],
-)
-
-# =============================================================================
-# AGE-PLUGIN-YUBIKEY - YubiKey plugin for age
-# =============================================================================
-
-package(
-    build_rule = "cargo",
-    name = "age-plugin-yubikey",
-    version = "0.5.0",
-    url = "https://github.com/str4d/age-plugin-yubikey/archive/refs/tags/v0.5.0.tar.gz",
-    sha256 = "65807403f0098569a473ffa76302b205da148a7f46b61fd331b8e323959978ba",
-    description = "YubiKey plugin for age",
-    homepage = "https://github.com/str4d/age-plugin-yubikey",
-    license = "Apache-2.0 OR MIT",
-    deps = [
-        "//packages/linux/lang/rust:rust",
-        ":pcsc-lite",
-    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -326,6 +335,7 @@ package(
     deps = [
         ":libusb",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -346,25 +356,27 @@ package(
     deps = [
         "//packages/linux/system/init/systemd:systemd",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
-# SEQUOIA-SQ - Modern PGP implementation
+# NETTLE - Low-level cryptographic library
 # =============================================================================
 
 package(
-    build_rule = "cargo",
-    name = "sequoia-sq",
-    version = "0.35.0",
-    url = "https://gitlab.com/sequoia-pgp/sequoia-sq/-/archive/v0.35.0/sequoia-sq-v0.35.0.tar.gz",
-    sha256 = "0b16bb4dcd7b85eb1292dfe4b22dfa3c0df44bae1e84859e91aadfee80b08bec",
-    description = "Command-line frontend for Sequoia, a modern OpenPGP implementation",
-    homepage = "https://sequoia-pgp.org/",
-    license = "GPL-2.0+",
+    name = "nettle",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://mirrors.kernel.org/gnu/nettle/nettle-3.9.1.tar.gz",
+
+    sha256 = "ccfeff981b0ca71bbd6fbcb054f407c60ffb644389a5be80d6716d5b550c6ce3",
+    version = "3.9.1",
+    description = "Low-level cryptographic library",
+    homepage = "https://www.lysator.liu.se/~nisse/nettle/",
+    license = "GPL-2.0+ AND LGPL-3.0+",
     deps = [
-        "//packages/linux/lang/rust:rust",
-        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -386,6 +398,7 @@ package(
         ":pcsc-lite",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -410,6 +423,49 @@ package(
     ],
     deps = [
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# LIBRESSL - OpenBSD's fork of OpenSSL
+# =============================================================================
+
+package(
+    name = "libressl",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.9.2.tar.gz",
+
+    sha256 = "7b031dac64a59eb6ee3304f7ffb75dad33ab8c9d279c847f92c89fb846068f97",
+    version = "3.9.2",
+    description = "OpenBSD's fork of the OpenSSL library",
+    homepage = "https://www.libressl.org/",
+    license = "ISC AND OpenSSL AND BSD-3-Clause",
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# BOTAN - C++ cryptography library
+# =============================================================================
+
+package(
+    name = "botan",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://botan.randombit.net/releases/Botan-3.4.0.tar.xz",
+
+    sha256 = "71843afcc0a2c585f8f33fa304f0b58ae4b9c5d8306f894667b3746044277557",
+    version = "3.4.0",
+    description = "C++ cryptography library",
+    homepage = "https://botan.randombit.net/",
+    license = "BSD-2-Clause",
+    deps = [
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/bzip2:bzip2",
+    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -434,6 +490,29 @@ package(
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# JOHN - John the Ripper password cracker
+# =============================================================================
+
+package(
+    name = "john",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://www.openwall.com/john/k/john-1.9.0.tar.xz",
+
+    sha256 = "0b266adcfef8c11eed690187e71494baea539efbd632fe221181063ba09508df",
+    version = "1.9.0",
+    description = "John the Ripper password security auditing tool",
+    homepage = "https://www.openwall.com/john/",
+    license = "GPL-2.0+",
+    make_args = [],
+    deps = [
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -452,9 +531,37 @@ package(
     homepage = "https://bcrypt.sourceforge.net/",
     license = "BSD-2-Clause",
     make_args = [],
+    install_prefix_var = "PREFIX",
+    post_install_cmds = ["""
+mkdir -p "$OUT/usr/bin" "$OUT/usr/share/man/man1"
+cp "$OUT/bin/bcrypt" "$OUT/usr/bin/" 2>/dev/null || true
+cp "$OUT/man/man1/bcrypt.1" "$OUT/usr/share/man/man1/" 2>/dev/null || true
+"""],
     deps = [
         "//packages/linux/core/zlib:zlib",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# OPENSSL-PKCS11 - PKCS#11 engine for OpenSSL
+# =============================================================================
+
+package(
+    name = "libp11",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://github.com/OpenSC/libp11/releases/download/libp11-0.4.12/libp11-0.4.12.tar.gz",
+
+    sha256 = "1e1a2533b3fcc45fde4da64c9c00261b1047f14c3f911377ebd1b147b3321cfd",
+    version = "0.4.12",
+    description = "PKCS#11 wrapper library and OpenSSL engine",
+    homepage = "https://github.com/OpenSC/libp11",
+    license = "LGPL-2.1+",
+    deps = [
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -476,6 +583,7 @@ package(
         ":jose",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -496,5 +604,27 @@ package(
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/crypto/openssl:openssl",
+        ":jansson",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# =============================================================================
+# JANSSON - C library for encoding/decoding JSON
+# =============================================================================
+
+package(
+    name = "jansson",
+    build_rule = "autotools",
+    skip_configure = True,
+    url = "https://github.com/akheron/jansson/releases/download/v2.14/jansson-2.14.tar.gz",
+
+    sha256 = "5798d010e41cf8d76b66236cfb2f2543c8d082181d16bc3085ab49538d4b9929",
+    version = "2.14",
+    description = "C library for encoding and decoding JSON data",
+    homepage = "https://github.com/akheron/jansson",
+    license = "MIT",
+    deps = [
+    ],
+    visibility = ["PUBLIC"],
 )

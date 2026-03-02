@@ -18,7 +18,6 @@ package(
     },
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "Command-line packet analyzer",

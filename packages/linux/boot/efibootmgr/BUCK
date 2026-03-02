@@ -22,6 +22,6 @@ sed -i 's/-Werror //' Make.defaults || true
     ],
     deps = [
         "//packages/linux/dev-libs/popt:popt",
-        "//packages/linux/system/libs/efivar:efivar",
     ],
+    visibility = ["PUBLIC"],
 )

@@ -8,7 +8,6 @@ package(
     sha256 = "85dc3f85ce4bdd169541f94f91841581871e846abb4a3740c155b204d5d5dd32",
     deps = [
         "//packages/linux/ai/ml-frameworks/diffusers:diffusers",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/safetensors:safetensors",
         "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/transformers:transformers",

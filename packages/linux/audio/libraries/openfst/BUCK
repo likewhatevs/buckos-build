@@ -10,5 +10,7 @@ package(
     configure_args = [
         "--enable-static",
         "--enable-shared",
+        "CXXFLAGS=-Wno-error=missing-template-keyword",
     ],
+    visibility = ["PUBLIC"],
 )

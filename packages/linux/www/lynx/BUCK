@@ -19,14 +19,16 @@ package(
     description = "Text-based web browser with SSL support",
     homepage = "https://lynx.invisible-island.net/",
     license = "GPL-2.0",
-    deps = [],
+    deps = [
+        "//packages/linux/system/terminal/ncurses:ncurses",
+    ],
     use_deps = {
         "ssl": "//packages/linux/system/libs/crypto/openssl:openssl",
         "zlib": "//packages/linux/core/zlib:zlib",
-        "ncurses": "//packages/linux/system/terminal/ncurses:ncurses",
     },
     configure_args = [
         "--enable-default-colors",
+        "--with-screen=ncursesw",
     ],
     use_configure = {
         "brotli": ("--with-brotli", "--without-brotli"),
@@ -41,4 +43,5 @@ package(
         "unicode": ("--enable-widec", "--disable-widec"),
         "zlib": ("--with-zlib", "--without-zlib"),
     },
+    visibility = ["PUBLIC"],
 )

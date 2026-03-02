@@ -21,7 +21,6 @@ package(
     ],
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "Network exploration tool and security/port scanner",

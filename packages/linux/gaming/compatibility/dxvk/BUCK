@@ -84,7 +84,7 @@ EOF
 chmod +x "$DESTDIR/usr/bin/setup_dxvk"
     """],
     deps = [
-        "//packages/linux/gaming/compatibility/wine:wine",
     ],
     labels = ["buckos:hw:vulkan"],
+    visibility = ["PUBLIC"],
 )

@@ -7,7 +7,6 @@ load("//defs:package.bzl", "package")
 # IBus - Intelligent Input Bus
 package(
     build_rule = "autotools",
-    skip_configure = True,
     name = "ibus",
     url = "https://github.com/ibus/ibus/releases/download/1.5.29/ibus-1.5.29.tar.gz",
 
@@ -53,106 +52,12 @@ package(
         "//packages/linux/graphics/rendering/wayland:wayland",
         "//packages/linux/lang/python:python",
     ],
-)
-
-# Fcitx5 - Input method framework
-package(
-    build_rule = "autotools",
-    skip_configure = True,
-    name = "fcitx5",
-    url = "https://download.fcitx-im.org/fcitx5/fcitx5/fcitx5-5.1.8.tar.xz",
-
-    sha256 = "e7558003e06e41fcd112b7bd66a884f42df732682f0a29327ccef119cae90a9b",
-    version = "5.1.8",
-    description = "Next generation input method framework",
-    homepage = "https://fcitx-im.org/",
-    license = "LGPL-2.1-or-later",
-    configure_args = [],
-    make_args = ["-C", "build"],
-    post_install_cmds = ["""
-        cd build
-        DESTDIR=$OUT make install
-    """, """
-        cd build
-        DESTDIR=$OUT make install
-    """, """
-        cd build
-        DESTDIR=$OUT make install
-    """, """
-        cd build
-        DESTDIR=$OUT make install
-    """],
-    deps = [
-        "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/system/libs/ipc/dbus:dbus",
-        "//packages/linux/graphics/rendering/wayland:wayland",
-        "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
-    ],
-)
-
-# Fcitx5 GTK module
-package(
-    build_rule = "autotools",
-    skip_configure = True,
-    name = "fcitx5-gtk",
-    url = "https://download.fcitx-im.org/fcitx5/fcitx5-gtk/fcitx5-gtk-5.1.1.tar.xz",
-
-    sha256 = "d6cda72de020031daf8da4dbc6c7923c8025edadec1a3acb9aa28e9efb78b013",
-    version = "5.1.1",
-    description = "GTK input method module for Fcitx5",
-    homepage = "https://fcitx-im.org/",
-    license = "LGPL-2.1-or-later",
-    configure_args = [],
-    make_args = ["-C", "build"],
-    deps = [
-        ":fcitx5",
-    ],
-)
-
-# Fcitx5 Qt module
-package(
-    build_rule = "autotools",
-    skip_configure = True,
-    name = "fcitx5-qt",
-    url = "https://download.fcitx-im.org/fcitx5/fcitx5-qt/fcitx5-qt-5.1.5.tar.xz",
-
-    sha256 = "f663f12f0c3806684f43dcc64decc4f81c853e9027e2203188e20d7507b39c31",
-    version = "5.1.5",
-    description = "Qt input method module for Fcitx5",
-    homepage = "https://fcitx-im.org/",
-    license = "LGPL-2.1-or-later",
-    configure_args = [],
-    make_args = ["-C", "build"],
-    deps = [
-        ":fcitx5",
-        "//packages/linux/desktop/qt:qt5",
-    ],
-)
-
-# Fcitx5 Chinese Addons (Pinyin, etc.)
-package(
-    build_rule = "autotools",
-    skip_configure = True,
-    name = "fcitx5-chinese-addons",
-    url = "https://download.fcitx-im.org/fcitx5/fcitx5-chinese-addons/fcitx5-chinese-addons-5.1.4.tar.xz",
-
-    sha256 = "39b582d76543582d59c71fe4a0f1e082d032bd7f145b3320d34d38f961317ed2",
-    version = "5.1.4",
-    description = "Chinese addons for Fcitx5 (Pinyin, Wubi, etc.)",
-    homepage = "https://fcitx-im.org/",
-    license = "LGPL-2.1-or-later",
-    configure_args = [],
-    make_args = ["-C", "build"],
-    deps = [
-        ":fcitx5",
-        "//packages/linux/desktop/qt:qt5",
-    ],
+    visibility = ["PUBLIC"],
 )
 
 # IBus Anthy - Japanese input for IBus
 package(
     build_rule = "autotools",
-    skip_configure = True,
     name = "ibus-anthy",
     url = "https://github.com/ibus/ibus-anthy/releases/download/1.5.15/ibus-anthy-1.5.15.tar.gz",
 
@@ -170,12 +75,12 @@ package(
         ":ibus",
         "//packages/linux/lang/python:python",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # IBus Libpinyin - Chinese Pinyin for IBus
 package(
     build_rule = "autotools",
-    skip_configure = True,
     name = "ibus-libpinyin",
     url = "https://github.com/libpinyin/ibus-libpinyin/releases/download/1.15.3/ibus-libpinyin-1.15.3.tar.gz",
 
@@ -192,12 +97,12 @@ package(
     deps = [
         ":ibus",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # IBus Hangul - Korean input for IBus
 package(
     build_rule = "autotools",
-    skip_configure = True,
     name = "ibus-hangul",
     url = "https://github.com/libhangul/ibus-hangul/releases/download/1.5.5/ibus-hangul-1.5.5.tar.xz",
 
@@ -214,6 +119,7 @@ package(
     deps = [
         ":ibus",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # Filegroup for all input method packages
@@ -221,11 +127,9 @@ filegroup(
     name = "input-methods",
     srcs = [
         ":ibus",
-        ":fcitx5",
-        ":fcitx5-gtk",
-        ":fcitx5-qt",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Filegroup for complete CJK support
@@ -233,10 +137,10 @@ filegroup(
     name = "input-methods-cjk",
     srcs = [
         ":input-methods",
-        ":fcitx5-chinese-addons",
         ":ibus-anthy",
         ":ibus-libpinyin",
         ":ibus-hangul",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

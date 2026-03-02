@@ -7,7 +7,6 @@ package(
     url = "https://github.com/yixinliu233/simpdm/archive/69e279a38caf098ad1fbcec7f1dbcd90b86d5f97.tar.gz",
     sha256 = "27ee18dffc742d848a3829039c27798761a2cc847361be6fcf0b5de2161c83f0",
     deps = [
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/optuna:optuna",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",

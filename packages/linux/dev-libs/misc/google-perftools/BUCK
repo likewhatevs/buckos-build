@@ -23,7 +23,6 @@ package(
         "--enable-static",
     ],
     deps = [
-        "//packages/linux/system/libs/libunwind:libunwind",
         "//packages/linux/core/zlib:zlib",
     ],
 )

@@ -32,6 +32,7 @@ package(
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/utility/pcre2:pcre2",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # GStreamer plugins - base set
@@ -48,7 +49,7 @@ package(
         "-Dexamples=disabled",
         "-Dtests=disabled",
         "-Ddoc=disabled",
-        "-Dintrospection=enabled",
+        "-Dintrospection=disabled",
     ],
     deps = [
         ":gstreamer",
@@ -56,6 +57,7 @@ package(
         "//packages/linux/system/libs/audio/libvorbis:libvorbis",
         "//packages/linux/core/zlib:zlib",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # GStreamer plugins - good set
@@ -78,6 +80,7 @@ package(
         ":gst-plugins-base",
         "//packages/linux/media/video/libvpx:libvpx",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # GStreamer plugins - bad set
@@ -103,6 +106,7 @@ package(
         "//packages/linux/media/video/x265:x265",
         "//packages/linux/graphics/video/aom:aom",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # GStreamer plugins - ugly set (may have licensing issues)
@@ -126,6 +130,7 @@ package(
         ":gst-plugins-base",
         "//packages/linux/media/video/x264:x264",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # GStreamer libav - FFmpeg plugin
@@ -146,4 +151,5 @@ package(
         ":gst-plugins-base",
         "//packages/linux/media/video/ffmpeg:ffmpeg",
     ],
+    visibility = ["PUBLIC"],
 )

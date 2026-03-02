@@ -23,9 +23,9 @@ package(
     },
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
     use_deps = {
         "openblas": "//packages/linux/dev-libs/math/openblas:openblas",
     },
+    visibility = ["PUBLIC"],
 )

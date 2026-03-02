@@ -12,10 +12,10 @@ package(
     deps = [
         "//packages/linux/lang/python:python",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/scikit-image:scikit-image",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],
+    visibility = ["PUBLIC"],
 )

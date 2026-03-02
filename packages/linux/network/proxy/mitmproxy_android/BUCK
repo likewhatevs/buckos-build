@@ -24,7 +24,6 @@ package(
         "//packages/linux/dev-libs/python/pyopenssl:pyopenssl",
         "//packages/linux/dev-libs/python/pyparsing:pyparsing",
         "//packages/linux/dev-libs/python/pyperclip:pyperclip",
-        "//packages/linux/dev-libs/python/ruamel-yaml:ruamel-yaml",
         "//packages/linux/dev-libs/python/sortedcontainers:sortedcontainers",
         "//packages/linux/dev-libs/python/tornado:tornado",
         "//packages/linux/dev-libs/python/urwid:urwid",

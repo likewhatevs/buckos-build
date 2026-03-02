@@ -120,6 +120,7 @@ package(
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # QEMU guest agent
@@ -145,6 +146,7 @@ package(
     deps = [
         "//packages/linux/dev-libs/glib:glib",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # QEMU user-space emulation only
@@ -168,13 +170,13 @@ package(
         "--sysconfdir=/etc",
         "--disable-system",
         "--enable-linux-user",
-        "--enable-binfmt",
         "--target-list=x86_64-linux-user,i386-linux-user,aarch64-linux-user,arm-linux-user,riscv64-linux-user,riscv32-linux-user,ppc64-linux-user,s390x-linux-user,mips64el-linux-user",
     ],
     deps = [
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/core/zlib:zlib",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # QEMU image utilities
@@ -201,4 +203,5 @@ package(
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/compression/zstd:zstd",
     ],
+    visibility = ["PUBLIC"],
 )

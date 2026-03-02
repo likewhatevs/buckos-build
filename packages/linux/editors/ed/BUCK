@@ -16,6 +16,9 @@ package(
         "--prefix=/usr",
     ],
     # GNU ed uses a lzip-style non-standard configure, force CFLAGS in make
+    # Use -std=c11 to avoid conflict with C23's reserved 'false'/'true' as keywords
+    extra_cflags = ["-std=c11"],
     deps = [
     ],
+    visibility = ["PUBLIC"],
 )

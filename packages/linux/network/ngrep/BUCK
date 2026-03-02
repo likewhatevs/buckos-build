@@ -20,7 +20,6 @@ package(
     ],
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "Network packet analyzer with grep-like functionality",

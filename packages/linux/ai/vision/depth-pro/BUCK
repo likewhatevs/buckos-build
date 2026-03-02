@@ -10,7 +10,6 @@ package(
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/vision/torchvision:torchvision",
         "//packages/linux/dev-libs/python/timm:timm",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pillow-heif:pillow-heif",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
     ],

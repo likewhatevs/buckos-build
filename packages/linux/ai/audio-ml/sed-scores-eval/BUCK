@@ -10,9 +10,9 @@ package(
     homepage = "https://github.com/fgnt/sed_scores_eval",
     license = "MIT",
     deps = [
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/cython:cython",
         "//packages/linux/dev-libs/python/einops:einops",
     ],
+    visibility = ["PUBLIC"],
 )

@@ -15,7 +15,6 @@ package(
     homepage = "https://github.com/raboof/nethogs",
     license = "GPL-2.0-or-later",
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/system/terminal/ncurses:ncurses",
     ],
 )

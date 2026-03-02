@@ -19,7 +19,6 @@ package(
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/tyro:tyro",
         "//packages/linux/dev-libs/python/einops:einops",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/sentencepiece:sentencepiece",
@@ -38,4 +37,5 @@ package(
         "//packages/linux/media/libraries/pyav:pyav",
         "//packages/linux/audio/libraries/librosa:librosa",
     ],
+    visibility = ["PUBLIC"],
 )

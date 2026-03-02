@@ -14,5 +14,6 @@ package(
     deps = [
         "//packages/linux/lang/go:go",
     ],
-    install_script = """go build -o unbound_exporter .\ninstall -Dm755 unbound_exporter ${PREFIX}/bin/unbound_exporter""",
+    install_script = """go build -o unbound_exporter .\ninstall -Dm755 unbound_exporter $OUT/usr/bin/unbound_exporter""",
+    visibility = ["PUBLIC"],
 )

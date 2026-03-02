@@ -35,8 +35,9 @@ mkdir -p "$OUT/usr/share/man/man8"
 cp bonnie++ "$OUT/usr/sbin/"
 cp bon_csv2html bon_csv2txt "$OUT/usr/bin/"
 cp zcav "$OUT/usr/bin/"
-cp bonnie++.1 "$OUT/usr/share/man/man1/"
-cp bon_csv2html.1 bon_csv2txt.1 "$OUT/usr/share/man/man1/"
-cp zcav.8 "$OUT/usr/share/man/man8/"
+cp bonnie++.1 "$OUT/usr/share/man/man1/" 2>/dev/null || true
+cp bon_csv2html.1 bon_csv2txt.1 "$OUT/usr/share/man/man1/" 2>/dev/null || true
+cp zcav.8 "$OUT/usr/share/man/man8/" 2>/dev/null || true
 """,
+    visibility = ["PUBLIC"],
 )

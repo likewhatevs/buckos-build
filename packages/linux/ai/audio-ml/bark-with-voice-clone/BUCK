@@ -8,7 +8,6 @@ package(
     sha256 = "1f0a03046434771624a694349ae770efa503c61295bcbba8f117d279b79de6b0",
     deps = [
         "//packages/linux/dev-libs/python/boto3:boto3",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",

@@ -12,10 +12,10 @@ package(
     deps = [
         "//packages/linux/lang/python:python",
         "//packages/linux/lang/go:go",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scipy:scipy",
     ],
     env = {
         "CGO_ENABLED": "1",
     },
+    visibility = ["PUBLIC"],
 )

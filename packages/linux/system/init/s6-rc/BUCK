@@ -18,6 +18,6 @@ package(
     deps = [
         "//packages/linux/system/init/skalibs:skalibs",
         "//packages/linux/system/init/s6:s6",
-        "//packages/linux/system/init/execline:execline",
     ],
+    visibility = ["PUBLIC"],
 )

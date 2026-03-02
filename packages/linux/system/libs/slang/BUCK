@@ -24,7 +24,7 @@ package(
         "--prefix=/usr",
         "--sysconfdir=/etc",
         "--with-readline=gnu",
-        "--with-pcre",
+        "--without-pcre",
         "--with-png",
         "--with-z",
     ],
@@ -33,4 +33,5 @@ package(
         "//packages/linux/system/terminal/readline:readline",
         "//packages/linux/system/terminal/ncurses:ncurses",
     ],
+    visibility = ["PUBLIC"],
 )

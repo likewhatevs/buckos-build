@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/geopandas:geopandas",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/networkx:networkx",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/pyproj:pyproj",
         "//packages/linux/dev-libs/python/python-dateutil:python-dateutil",
@@ -36,4 +35,5 @@ package(
             "//packages/linux/dev-libs/python/folium:folium",
         ],
     },
+    visibility = ["PUBLIC"],
 )

@@ -22,7 +22,7 @@ package(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     deps = [
-        "//packages/linux/system/libs/libunwind:libunwind",
         "//packages/linux/dev-libs/boost:boost",
     ],
+    visibility = ["PUBLIC"],
 )

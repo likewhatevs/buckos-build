@@ -19,7 +19,6 @@ package(
     use_deps = {
         "python": "//packages/linux/lang/python:python",
         "perl": "//packages/linux/lang/perl:perl",
-        "ruby": "//packages/linux/lang/ruby:ruby",
         "lua": "//packages/linux/lang/lua:lua",
     },
 
@@ -38,7 +37,6 @@ package(
         "perl": ("--enable-perlinterp", "--disable-perlinterp"),
         "python": ("--enable-python3interp", "--disable-python3"),
         "racket": ("--enable-racket", "--disable-racket"),
-        "ruby": ("--enable-rubyinterp", "--disable-rubyinterp"),
         "selinux": ("--enable-selinux", "--disable-selinux"),
         "sound": ("--enable-sound", "--disable-sound"),
         "tcl": ("--enable-tcl", "--disable-tcl"),
@@ -79,4 +77,5 @@ package(
     deps = [
         "//packages/linux/system/terminal/ncurses:ncurses",
     ],
+    visibility = ["PUBLIC"],
 )

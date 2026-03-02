@@ -122,6 +122,7 @@ make DESTDIR="$DESTDIR" install
     description = "XML C parser and toolkit",
     homepage = "https://gitlab.gnome.org/GNOME/libxml2",
     license = "MIT",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -149,6 +150,7 @@ package(
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/security/linux-pam:linux-pam",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
     env = {
         "CFLAGS": "-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2",
@@ -170,4 +172,5 @@ filegroup(
         ":openssh-hardened-example",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

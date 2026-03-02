@@ -16,7 +16,6 @@ package(
         cp create_pcap psp_encrypt psp_decrypt $OUT/usr/bin/
     """,
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 )

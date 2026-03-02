@@ -11,9 +11,9 @@ package(
     license = "Apache-2.0",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/pandas:pandas",
     ],
+    visibility = ["PUBLIC"],
 )

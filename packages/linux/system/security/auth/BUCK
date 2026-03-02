@@ -22,7 +22,6 @@ filegroup(
     srcs = [
         "//packages/linux/system/apps/shadow:shadow",
         "//packages/linux/system/apps/sudo:sudo",
-        "//packages/linux/system/apps/doas:doas",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -32,7 +31,6 @@ filegroup(
     name = "privilege-escalation",
     srcs = [
         "//packages/linux/system/apps/sudo:sudo",
-        "//packages/linux/system/apps/doas:doas",
         "//packages/linux/system/security/auth/privilege:polkit",
     ],
     default_target_platform = "//platforms:linux-target",

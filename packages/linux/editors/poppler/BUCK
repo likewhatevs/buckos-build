@@ -34,9 +34,11 @@ package(
         "-DCMAKE_BUILD_TYPE=Release",
         "-DENABLE_QT5=ON",
         "-DENABLE_GTK_DOC=OFF",
+        "-DENABLE_NSS3=OFF",
     ],
     deps = [
         "//packages/linux/system/libs/font/freetype:freetype",
         "//packages/linux/system/libs/font/fontconfig:fontconfig",
     ],
+    visibility = ["PUBLIC"],
 )

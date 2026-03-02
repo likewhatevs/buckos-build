@@ -17,7 +17,6 @@ package(
         "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/dev-libs/python/librosa:librosa",
         "//packages/linux/dev-libs/python/scipy:scipy",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",
         "//packages/linux/dev-libs/python/pydub:pydub",
         "//packages/linux/dev-libs/python/soundfile:soundfile",

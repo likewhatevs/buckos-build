@@ -7,7 +7,6 @@ filegroup(
     name = "modern-vpns",
     srcs = [
         "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
-        "//packages/linux/network/vpn/openvpn:openvpn",
         "//packages/linux/network/vpn/strongswan:strongswan",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -18,7 +17,6 @@ filegroup(
     name = "ipsec-vpns",
     srcs = [
         "//packages/linux/network/vpn/strongswan:strongswan",
-        "//packages/linux/network/vpn/libreswan:libreswan",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -27,7 +25,6 @@ filegroup(
 filegroup(
     name = "enterprise-vpns",
     srcs = [
-        "//packages/linux/network/vpn/openconnect:openconnect",
         "//packages/linux/network/vpn/vpnc:vpnc",
         "//packages/linux/network/vpn/ocproxy:ocproxy",
     ],
@@ -51,7 +48,6 @@ filegroup(
 filegroup(
     name = "vpn-servers",
     srcs = [
-        "//packages/linux/network/vpn/openvpn:openvpn",
         "//packages/linux/network/vpn/strongswan:strongswan",
         "//packages/linux/network/vpn/softether:softether",
     ],
@@ -73,7 +69,6 @@ filegroup(
 filegroup(
     name = "legacy-vpns",
     srcs = [
-        "//packages/linux/network/vpn/pptp-linux:pptp-linux",
         "//packages/linux/network/vpn/vpnc:vpnc",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -84,17 +79,13 @@ filegroup(
     name = "all-vpns",
     srcs = [
         "//packages/linux/network/vpn/wireguard-tools:wireguard-tools",
-        "//packages/linux/network/vpn/openvpn:openvpn",
         "//packages/linux/network/vpn/strongswan:strongswan",
-        "//packages/linux/network/vpn/libreswan:libreswan",
-        "//packages/linux/network/vpn/openconnect:openconnect",
         "//packages/linux/network/vpn/vpnc:vpnc",
         "//packages/linux/network/vpn/tinc:tinc",
         "//packages/linux/network/vpn/softether:softether",
         "//packages/linux/network/vpn/zerotier:zerotier",
         "//packages/linux/network/vpn/nebula:nebula",
         "//packages/linux/network/vpn/n2n:n2n",
-        "//packages/linux/network/vpn/pptp-linux:pptp-linux",
         "//packages/linux/network/vpn/tailscale:tailscale",
         "//packages/linux/network/vpn/ocproxy:ocproxy",
     ],

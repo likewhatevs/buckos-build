@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/text/lxml:lxml",
         "//packages/linux/dev-libs/physics/mujoco:mujoco",
         "//packages/linux/dev-libs/python/numba:numba",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/graphics/opencv:opencv",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/pygame:pygame",

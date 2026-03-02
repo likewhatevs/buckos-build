@@ -13,6 +13,5 @@ package(
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",
         "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
-        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
 )

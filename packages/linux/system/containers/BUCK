@@ -12,10 +12,9 @@ filegroup(
     name = "container-runtime",
     srcs = [
         "//packages/linux/system/containers/runtime:crun",
-        "//packages/linux/system/containers/runtime:runc",
-        "//packages/linux/system/containers/runtime:conmon",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container networking packages
@@ -28,6 +27,7 @@ filegroup(
         "//packages/linux/system/containers/network:slirp4netns",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container storage packages
@@ -38,6 +38,7 @@ filegroup(
         "//packages/linux/system/containers/podman:containers-common",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Main container tools (Podman ecosystem)
@@ -50,6 +51,30 @@ filegroup(
         "//packages/linux/system/containers/podman:podman-compose",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container utilities and monitoring
+filegroup(
+    name = "container-utilities",
+    srcs = [
+        "//packages/linux/system/containers/utils:umoci",
+        "//packages/linux/system/containers/utils:dive",
+        "//packages/linux/system/containers/utils:ctop",
+        "//packages/linux/system/containers/utils:lazydocker",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
+)
+
+# Container security tools
+filegroup(
+    name = "container-security",
+    srcs = [
+        "//packages/linux/system/containers/utils:trivy",
+    ],
+    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Complete container stack
@@ -60,6 +85,10 @@ filegroup(
         ":container-networking",
         ":container-storage",
         ":podman-tools",
+        ":container-utilities",
+        ":container-security",
+        "//packages/linux/system/containers/utils:docker-credential-helpers",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

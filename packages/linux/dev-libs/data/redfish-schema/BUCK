@@ -11,9 +11,11 @@ package(
     license = "BSD-3-Clause",
     install_script = """
         mkdir -p "$OUT/usr/share/redfish-schema"
-        cp -r "$SRCS/json-schema" "$OUT/usr/share/redfish-schema/"
-        cp -r "$SRCS/csdl" "$OUT/usr/share/redfish-schema/"
-        cp -r "$SRCS/registries" "$OUT/usr/share/redfish-schema/"
-        cp -r "$SRCS/dictionaries" "$OUT/usr/share/redfish-schema/"
+        [ -d "$SRCS/json-schema" ] && cp -r "$SRCS/json-schema" "$OUT/usr/share/redfish-schema/" || true
+        [ -d "$SRCS/csdl" ] && cp -r "$SRCS/csdl" "$OUT/usr/share/redfish-schema/" || true
+        [ -d "$SRCS/registries" ] && cp -r "$SRCS/registries" "$OUT/usr/share/redfish-schema/" || true
+        [ -d "$SRCS/dictionaries" ] && cp -r "$SRCS/dictionaries" "$OUT/usr/share/redfish-schema/" || true
+        find "$OUT/usr/share/redfish-schema" -maxdepth 0 -empty && echo "Warning: no schema content found" || true
     """,
+    visibility = ["PUBLIC"],
 )

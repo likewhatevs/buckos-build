@@ -9,6 +9,7 @@ filegroup(
         "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # ACPI tools for laptops
@@ -18,6 +19,7 @@ filegroup(
         "//packages/linux/system/apps/acpid:acpid",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Thermal management
@@ -27,6 +29,7 @@ filegroup(
         "//packages/linux/laptop/power/thermald:thermald",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # CPU frequency scaling
@@ -37,24 +40,26 @@ filegroup(
         "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Intel laptop tools (includes undervolting, speed select)
 filegroup(
     name = "intel-laptop",
     srcs = [
-        "//packages/linux/system/power/x86_energy_perf_policy:x86_energy_perf_policy",
-        "//packages/linux/system/power/intel-undervolt:intel-undervolt",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # AMD laptop tools
 filegroup(
     name = "amd-laptop",
     srcs = [
+        "//packages/linux/system/power/rapl-read-ryzen:rapl-read-ryzen",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Storage power management for laptops
@@ -62,19 +67,20 @@ filegroup(
     name = "storage-power",
     srcs = [
         "//packages/linux/system/power/hdparm:hdparm",
-        "//packages/linux/system/power/nvme-cli:nvme-cli",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # System tuning daemons
 filegroup(
     name = "tuning-daemons",
     srcs = [
-        "//packages/linux/system/power/tuned:tuned",
         "//packages/linux/system/power/power-profiles-daemon:power-profiles-daemon",
+        "//packages/linux/system/power/irqbalance:irqbalance",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Essential laptop power tools
@@ -86,6 +92,7 @@ filegroup(
         "//packages/linux/laptop/power/cpupower:cpupower",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Console-only laptop power tools (no GUI dependencies)
@@ -97,6 +104,7 @@ filegroup(
         "//packages/linux/laptop/monitoring/powertop:powertop",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Maximum battery life configuration
@@ -110,6 +118,7 @@ filegroup(
         "//packages/linux/laptop/monitoring/powertop:powertop",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Intel laptop complete setup
@@ -123,6 +132,7 @@ filegroup(
         ":tuning-daemons",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # AMD laptop complete setup
@@ -136,6 +146,7 @@ filegroup(
         ":tuning-daemons",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # All laptop power management packages
@@ -153,4 +164,5 @@ filegroup(
         ":tuning-daemons",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

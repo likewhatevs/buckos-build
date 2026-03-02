@@ -10,7 +10,6 @@ package(
         "//packages/linux/dev-libs/python/boto3:boto3",
         "//packages/linux/dev-libs/python/click:click",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/opencv-python:opencv-python",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/protobuf:protobuf",

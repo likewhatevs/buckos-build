@@ -39,4 +39,5 @@ make LD_RUN_PATH= DESTDIR="$OUT" install
     deps = [
         "//packages/linux/core/zlib:zlib",
     ],
+    visibility = ["PUBLIC"],
 )

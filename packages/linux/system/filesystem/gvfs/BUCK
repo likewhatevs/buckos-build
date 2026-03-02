@@ -55,7 +55,7 @@ package(
         "-Donedrive=false",
         "-Dsftp=true",
         "-Dsmb=true",
-        "-Dudisks2=true",
+        "-Dudisks2=false",
         "-Dbluray=false",
         "-Dfuse=true",
         "-Dgcr=false",
@@ -70,8 +70,8 @@ package(
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/system/libs/ipc/dbus:dbus",
         "//packages/linux/system/security/encryption:fuse3",
-        "//packages/linux/system/filesystem/management/udisks2:udisks2",
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/dev-libs/libsecret:libsecret",
     ],
+    visibility = ["PUBLIC"],
 )

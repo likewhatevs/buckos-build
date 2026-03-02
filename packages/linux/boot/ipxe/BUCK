@@ -11,7 +11,7 @@ package(
     homepage = "https://ipxe.org/",
     license = "GPL-2.0",
     pre_build_cmds = [
-        "make -C src -j$(nproc)",
+        "make -C src -j$(nproc) EXTRA_CFLAGS=-Wno-error=array-bounds",
         "printf 'all:\\ninstall:\\n' > Makefile",
     ],
     post_install_cmds = ["""\
@@ -25,4 +25,5 @@ cp -v "$BUILD_DIR/README" "$BUILD_DIR/COPYING"* "$DESTDIR/usr/share/doc/ipxe/" 2
 """],
     labels = ["buckos:firmware"],
     deps = [],
+    visibility = ["PUBLIC"],
 )

@@ -16,7 +16,6 @@ package(
     ],
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/core/zlib:zlib",
     ],
 

@@ -16,10 +16,10 @@ autoreconf -fi
 """],
     deps = [
         "//packages/linux/system/security/encryption:fuse3",
-                "//packages/linux/system/libs/compression/libarchive:libarchive",
                 "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
                 "//packages/linux/dev-tools/build-systems/automake:automake",
                 "//packages/linux/dev-tools/build-systems/libtool:libtool",
                 "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config"
     ],
+    visibility = ["PUBLIC"],
 )

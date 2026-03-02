@@ -29,8 +29,8 @@ package(
     # Custom phases for waf build system
     # Samba's waf configure wrapper script generates a Makefile
     deps = [
-        "//packages/linux/system/libs/talloc:talloc",
         "//packages/linux/system/security/auth/directory:tdb",
         "//packages/linux/system/security/auth/directory:tevent",
     ],
+    visibility = ["PUBLIC"],
 )

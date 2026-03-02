@@ -26,5 +26,8 @@ package(
         "--bindir=/usr/sbin",
     ],
     deps = [
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
     ],
+    visibility = ["PUBLIC"],
 )

@@ -28,7 +28,6 @@ package(
     license = "BSD-3-Clause",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/serialization/protobuf:protobuf",
         "//packages/linux/core/zlib:zlib",
     ],
@@ -53,4 +52,5 @@ package(
         "cudnn": ("-DUSE_CUDNN=ON", "-DUSE_CUDNN=OFF"),
         "distributed": ("-DUSE_DISTRIBUTED=ON", "-DUSE_DISTRIBUTED=OFF"),
     },
+    visibility = ["PUBLIC"],
 )

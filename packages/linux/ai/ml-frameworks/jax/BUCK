@@ -13,7 +13,7 @@ package(
     license = "Apache-2.0",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scipy:scipy",
     ],
+    visibility = ["PUBLIC"],
 )

@@ -5,9 +5,9 @@
 filegroup(
     name = "eda-packages",
     srcs = [
-        "//packages/linux/cad/eda/ngspice:ngspice",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # 2D CAD packages
@@ -16,6 +16,7 @@ filegroup(
     srcs = [
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # 3D CAD packages
@@ -24,15 +25,16 @@ filegroup(
     srcs = [
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Circuit simulation packages
 filegroup(
     name = "simulation-packages",
     srcs = [
-        "//packages/linux/cad/eda/ngspice:ngspice",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # PCB design packages
@@ -41,6 +43,7 @@ filegroup(
     srcs = [
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Parametric modeling packages
@@ -49,6 +52,7 @@ filegroup(
     srcs = [
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # All CAD packages
@@ -60,4 +64,5 @@ filegroup(
         ":3d-cad-packages",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

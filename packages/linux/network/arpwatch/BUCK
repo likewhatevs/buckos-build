@@ -28,7 +28,6 @@ package(
     },
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "Ethernet/IP address pairing monitor",

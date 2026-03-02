@@ -9,7 +9,6 @@ package(
     deps = [
         "//packages/linux/dev-libs/python/filelock:filelock",
         "//packages/linux/dev-libs/python/huggingface-hub:huggingface-hub",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/regex:regex",
         "//packages/linux/dev-libs/python/requests:requests",

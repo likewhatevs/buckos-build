@@ -5,17 +5,19 @@
 filegroup(
     name = "intel-x86-tools",
     srcs = [
-        "//packages/linux/system/power/x86_energy_perf_policy:x86_energy_perf_policy",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # AMD Power Tools
 filegroup(
     name = "amd-tools",
     srcs = [
+        "//packages/linux/system/power/rapl-read-ryzen:rapl-read-ryzen",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # CPU Frequency and Scaling
@@ -26,16 +28,18 @@ filegroup(
         "//packages/linux/laptop/power/cpupower:cpupower",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # System Tuning and Optimization
 filegroup(
     name = "tuning",
     srcs = [
-        "//packages/linux/system/power/tuned:tuned",
+        "//packages/linux/system/power/irqbalance:irqbalance",
         "//packages/linux/system/power/power-profiles-daemon:power-profiles-daemon",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Storage Power Management
@@ -44,9 +48,9 @@ filegroup(
     srcs = [
         "//packages/linux/system/power/hdparm:hdparm",
         "//packages/linux/system/power/sdparm:sdparm",
-        "//packages/linux/system/power/nvme-cli:nvme-cli",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Power Capping and Limits
@@ -54,9 +58,9 @@ filegroup(
     name = "power-limits",
     srcs = [
         "//packages/linux/system/power/powercap:powercap",
-        "//packages/linux/system/power/intel-undervolt:intel-undervolt",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # ACPI Tools
@@ -67,6 +71,7 @@ filegroup(
         "//packages/linux/system/apps/acpid:acpid",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Essential Power Management Tools
@@ -75,8 +80,10 @@ filegroup(
     srcs = [
         "//packages/linux/system/power/cpufrequtils:cpufrequtils",
         "//packages/linux/system/power/hdparm:hdparm",
+        "//packages/linux/system/power/irqbalance:irqbalance",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Desktop/Server Power Management
@@ -90,6 +97,7 @@ filegroup(
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Intel Platform Complete
@@ -101,9 +109,9 @@ filegroup(
         ":power-limits",
         ":storage-power",
         ":tuning",
-        "//packages/linux/system/power/intel-undervolt:intel-undervolt",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # AMD Platform Complete
@@ -117,6 +125,7 @@ filegroup(
         ":tuning",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Server Power Management
@@ -126,10 +135,12 @@ filegroup(
         ":cpu-frequency",
         ":tuning",
         ":storage-power",
+        "//packages/linux/system/power/irqbalance:irqbalance",
         "//packages/linux/system/power/powercap:powercap",
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # All Power Management Packages
@@ -145,4 +156,5 @@ filegroup(
         ":acpi-tools",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

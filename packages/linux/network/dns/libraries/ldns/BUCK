@@ -29,6 +29,7 @@ package(
     ],
 
     deps = [
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 
     description = "DNS programming library with support for DNSSEC",

@@ -14,13 +14,17 @@ BUILD=$(mktemp -d)
 cp -a "$SRCS"/. "$BUILD/"
 cd "$BUILD"
 
-# Source extracts to SoftFloat-3e/ subdirectory
-if [ ! -d SoftFloat-3e/build/Linux-x86_64-GCC ]; then
-    echo "Error: SoftFloat-3e/build/Linux-x86_64-GCC directory not found"
-    find . -type d -name "*x86*" -o -name "*GCC*" -o -name "*Linux*" | head -20
+# Source may extract with or without a SoftFloat-3e/ subdirectory
+if [ -d SoftFloat-3e/build/Linux-x86_64-GCC ]; then
+    SFDIR=SoftFloat-3e
+elif [ -d build/Linux-x86_64-GCC ]; then
+    SFDIR=.
+else
+    echo "Error: build/Linux-x86_64-GCC directory not found"
+    find . -type d | head -20
     exit 1
 fi
-cd SoftFloat-3e/build/Linux-x86_64-GCC
+cd "$SFDIR/build/Linux-x86_64-GCC"
 # Override COMPILE_C since Makefile defaults to just 'c' not '$(CC)'
 make SOURCE_DIR=../../source CC="${CC:-gcc}" COMPILE_C='$(CC) -c -fPIC -Werror-implicit-function-declaration -DSOFTFLOAT_FAST_INT64 -DSOFTFLOAT_ROUND_ODD -DINLINE_LEVEL=5 -DSOFTFLOAT_FAST_DIV32TO16 -DSOFTFLOAT_FAST_DIV64TO32 -I. -I../../source/8086-SSE -I../../source/include'
 
@@ -28,4 +32,5 @@ mkdir -p "$OUT/usr/lib" "$OUT/usr/include/softfloat"
 cp softfloat.a "$OUT/usr/lib/libsoftfloat.a"
 cp ../../source/include/*.h "$OUT/usr/include/softfloat/"
 """,
+    visibility = ["PUBLIC"],
 )

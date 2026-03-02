@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/dev-libs/python/ftfy:ftfy",
         "//packages/linux/dev-libs/python/imageio:imageio",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/scikit-image:scikit-image",
         "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",

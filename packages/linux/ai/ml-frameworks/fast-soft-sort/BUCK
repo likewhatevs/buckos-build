@@ -8,7 +8,6 @@ package(
     sha256 = "6609ce8a167c95be86d11871a1591dd6cb097e0c41a7ca522ffb76199443daa7",
     deps = [
         "//packages/linux/dev-libs/python/numba:numba",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scipy:scipy",
     ],
 )

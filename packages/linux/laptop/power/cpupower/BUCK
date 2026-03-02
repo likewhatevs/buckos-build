@@ -30,7 +30,9 @@ package(
         "DEBUG=false",
         "NLS=false",
         "CPUFREQ_BENCH=false",
+        "HAVE_PCIUTILS=false",
     ],
     deps = [
     ],
+    visibility = ["PUBLIC"],
 )

@@ -9,10 +9,8 @@ package(
     sha256 = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
     deps = [],
     make_args = [
-        "CC=${CC:-gcc}",
         "PREFIX=/usr",
-        "PREFIX=/usr",
-        "DESTDIR=$DESTDIR",
     ],
     # bzip2 also needs to build the shared library
+    visibility = ["PUBLIC"],
 )

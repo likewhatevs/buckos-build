@@ -17,6 +17,7 @@ filegroup(
         "//packages/linux/system/libs/image/openjpeg:openjpeg",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Font Libraries - For text rendering and font handling
@@ -30,6 +31,7 @@ filegroup(
         "//packages/linux/system/libs/font/graphite2:graphite2",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # 2D Graphics Libraries - For drawing and rendering
@@ -40,6 +42,7 @@ filegroup(
         "//packages/linux/system/libs/graphics/cairo:cairo",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Audio Codec Libraries - For audio encoding/decoding
@@ -57,6 +60,7 @@ filegroup(
         "//packages/linux/system/libs/audio/wavpack:wavpack",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Audio I/O Libraries - For audio input/output
@@ -67,6 +71,7 @@ filegroup(
         "//packages/linux/system/libs/audio/libsamplerate:libsamplerate",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Video Libraries - For video codecs and disc playback
@@ -74,13 +79,13 @@ filegroup(
     name = "video-libs",
     srcs = [
         "//packages/linux/system/libs/video/theora:theora",
-        "//packages/linux/system/libs/video/libass:libass",
         "//packages/linux/system/libs/video/libdvdcss:libdvdcss",
         "//packages/linux/system/libs/video/libdvdread:libdvdread",
         "//packages/linux/system/libs/video/libdvdnav:libdvdnav",
         "//packages/linux/system/libs/video/libbluray:libbluray",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Multimedia Framework Libraries - SDL2 and audio frameworks
@@ -92,6 +97,7 @@ filegroup(
         "//packages/linux/system/libs/multimedia/portaudio:portaudio",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Input Libraries - For input device handling
@@ -104,6 +110,7 @@ filegroup(
         "//packages/linux/system/libs/input/libxkbcommon:libxkbcommon",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # CD/DVD Support Libraries
@@ -118,6 +125,7 @@ filegroup(
         "//packages/linux/system/libs/video/libbluray:libbluray",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -137,6 +145,7 @@ filegroup(
         "//packages/linux/system/libs/audio/opus:opus",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Desktop Media Libraries - Complete set for desktop applications
@@ -152,6 +161,7 @@ filegroup(
         ":input-libs",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Full Media Libraries - Everything for comprehensive media support
@@ -163,6 +173,7 @@ filegroup(
         ":disc-libs",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # SDL2 Development - All SDL2 libraries for game/multimedia development
@@ -172,6 +183,7 @@ filegroup(
         "//packages/linux/system/libs/multimedia/sdl2:sdl2",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Audio Development - Complete audio codec and I/O stack
@@ -184,6 +196,7 @@ filegroup(
         "//packages/linux/system/libs/multimedia/portaudio:portaudio",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -201,6 +214,7 @@ filegroup(
         "//packages/linux/system/libs/compression/xz:xz",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Crypto Libraries
@@ -214,6 +228,7 @@ filegroup(
         "//packages/linux/system/libs/crypto/nettle:nettle",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Data Format Libraries
@@ -228,6 +243,7 @@ filegroup(
         "//packages/linux/system/libs/data/yaml:yaml",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Database Libraries
@@ -235,8 +251,10 @@ filegroup(
     name = "database-libs",
     srcs = [
         "//packages/linux/system/libs/database/sqlite:sqlite",
+        "//packages/linux/system/libs/database/lmdb:lmdb",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Network Libraries
@@ -249,6 +267,7 @@ filegroup(
         "//packages/linux/system/libs/network/c-ares:c-ares",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # IPC Libraries
@@ -260,6 +279,7 @@ filegroup(
         "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Utility Libraries
@@ -272,9 +292,9 @@ filegroup(
         "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/system/libs/utility/libevent:libevent",
         "//packages/linux/system/libs/utility/libuv:libuv",
-        "//packages/linux/system/libs/compression/libarchive:libarchive",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -301,4 +321,5 @@ filegroup(
         ":utility-libs",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

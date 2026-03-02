@@ -38,6 +38,6 @@ DESTDIR=$OUT rake install
                 "//packages/linux/system/libs/audio/flac:flac",
                 "//packages/linux/system/libs/audio/libvorbis:libvorbis",
                 "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
-                "//packages/linux/lang/ruby:ruby"
     ],
+    visibility = ["PUBLIC"],
 )

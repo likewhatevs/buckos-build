@@ -46,10 +46,15 @@ package(
     # Base configure arguments (always applied)
     configure_args = [
         "--with-system-zlib",
+        "--with-gmp",
+        "--with-mpfr",
         "--disable-werror",
     ],
 
     deps = [
         "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/utility/gmp:gmp",
+        "//packages/linux/system/libs/utility/mpfr:mpfr",
     ],
+    visibility = ["PUBLIC"],
 )

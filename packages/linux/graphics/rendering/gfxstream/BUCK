@@ -14,7 +14,6 @@ package(
     homepage = "https://android.googlesource.com/platform/hardware/google/gfxstream",
     license = "Apache-2.0 OR MIT",
     deps = [
-        "//packages/linux/emulation/aemu:aemu",
         "//packages/linux/desktop/libdrm:libdrm",
     ],
     configure_args = [
@@ -24,4 +23,5 @@ package(
         "-Dlog-level=error",
     ],
     labels = ["buckos:hw:vulkan"],
+    visibility = ["PUBLIC"],
 )

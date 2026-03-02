@@ -20,6 +20,7 @@ package(
         "-Dterminfo=disabled",
         "-Dtests=false",
     ],
+    extra_cflags = ["-Wno-error=switch", "-Wno-error=deprecated-declarations"],
     use_configure = {
         "grapheme-clustering": ("-Dgrapheme-clustering=enabled", "-Dgrapheme-clustering=disabled"),
     },
@@ -41,4 +42,5 @@ package(
                 "//packages/linux/graphics/rendering/wayland:wayland",
                 "//packages/linux/graphics/rendering/wayland:wayland-scanner"
     ],
+    visibility = ["PUBLIC"],
 )

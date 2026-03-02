@@ -12,7 +12,6 @@ package(
         "//packages/linux/dev-libs/python/emoji:emoji",
         "//packages/linux/dev-libs/python/fuzzywuzzy:fuzzywuzzy",
         "//packages/linux/dev-libs/python/nltk:nltk",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",

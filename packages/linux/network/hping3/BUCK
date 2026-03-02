@@ -20,7 +20,6 @@ package(
     },
 
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 
     description = "TCP/IP packet assembler and analyzer for network testing",

@@ -14,19 +14,15 @@ package(
     homepage = "https://github.com/OpenRC/openrc",
     license = "BSD-2-Clause",
     configure_args = [
-        "-Dbranding=BuckOs Linux",
         "-Dnewnet=false",
         "-Daudit=disabled",
         "-Dselinux=disabled",
         "-Dpam=false",
-        "-Dtermcap=ncurses",
         "-Dbash-completions=false",
         "-Dzsh-completions=false",
     ],
     deps = [
         "//packages/linux/system/terminal/ncurses:ncurses",
-                # For termcap,
-                "//packages/linux/lang/python:python",
-                # Python for meson
     ],
+    visibility = ["PUBLIC"],
 )

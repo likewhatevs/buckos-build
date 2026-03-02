@@ -21,6 +21,7 @@ package(
         "--prefix=${PREFIX}",
         "--enable-pic",
         "--disable-swscale",
+        "--enable-shared",
     ],
     use_configure = {
         "asm": ("--enable-asm", "--disable-asm"),

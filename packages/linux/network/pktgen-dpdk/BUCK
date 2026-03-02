@@ -19,7 +19,6 @@ package(
         "//packages/linux/dev-libs/zlib:zlib",
         "//packages/linux/lang/lua:lua",
         "//packages/linux/system/libs/data/json-c:json-c",
-        "//packages/linux/system/libs/libelf:libelf",
     ],
     labels = ["buckos:hw:dpdk"],
 )

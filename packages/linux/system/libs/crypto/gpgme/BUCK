@@ -10,33 +10,25 @@ package(
     homepage = "https://www.gnupg.org/related_software/gpgme/",
     license = "LGPL-2.1",
 
-    # USE flags: static-libs, cxx, qt5, python, test
-
     use_configure = {
         "common-lisp": ("--enable-common-lisp", "--disable-common-lisp"),
-        "cxx": ("--enable-languages=cpp", "--disable-languages=cpp"),
-        "python": ("--enable-languages=python", "--disable-languages=python"),
-        "qt5": ("--enable-languages=qt", "--disable-languages=qt"),
         "static-libs": ("--enable-static", "--disable-static"),
-    },
-
-    use_deps = {
-        "qt5": "//packages/linux/dev-libs/qt5:qt5",
-        "python": "//packages/linux/lang/python:python",
     },
 
     configure_args = [
         "--prefix=/usr",
         "--enable-shared",
-    ] + ([
+        # gpgme uses --enable-languages=<list>; disable all bindings by default
+        "--enable-languages=",
         "--disable-gpg-test",
         "--disable-gpgsm-test",
         "--disable-gpgconf-test",
         "--disable-g13-test",
-    ]),
+    ],
 
     deps = [
         "//packages/linux/system/security/gnupg:gnupg",
         "//packages/linux/system/libs/crypto/libgpg-error:libgpg-error",
     ],
+    visibility = ["PUBLIC"],
 )

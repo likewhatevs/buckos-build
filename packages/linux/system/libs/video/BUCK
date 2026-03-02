@@ -6,14 +6,15 @@ filegroup(
         "//packages/linux/system/libs/video/theora:theora",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
     name = "subtitles",
     srcs = [
-        "//packages/linux/system/libs/video/libass:libass",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -24,6 +25,7 @@ filegroup(
         "//packages/linux/system/libs/video/libdvdnav:libdvdnav",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -32,6 +34,7 @@ filegroup(
         "//packages/linux/system/libs/video/libbluray:libbluray",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -41,6 +44,7 @@ filegroup(
         ":bluray-support",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -51,4 +55,5 @@ filegroup(
         ":disc-support",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

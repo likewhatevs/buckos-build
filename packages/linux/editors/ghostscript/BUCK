@@ -15,6 +15,7 @@ package(
         "--prefix=/usr",
         "--sysconfdir=/etc",
         "--with-system-libtiff",
+        "--with-system-libjpeg",
         "--disable-compile-inits",
     ],
     deps = [
@@ -22,4 +23,5 @@ package(
         "//packages/linux/system/libs/image/libpng:libpng",
         "//packages/linux/system/libs/image/libtiff:libtiff",
     ],
+    visibility = ["PUBLIC"],
 )

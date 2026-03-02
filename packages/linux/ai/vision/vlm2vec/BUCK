@@ -18,7 +18,6 @@ package(
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/wandb:wandb",
         "//packages/linux/dev-libs/python/pillow:pillow",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
         "//packages/linux/dev-libs/python/scikit-image:scikit-image",
         "//packages/linux/dev-libs/python/timm:timm",

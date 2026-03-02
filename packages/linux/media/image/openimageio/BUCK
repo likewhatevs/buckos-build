@@ -35,7 +35,6 @@ package(
     ],
     use_deps = {
         "python": "//packages/linux/lang/python:python",
-        "opengl": "//packages/linux/graphics/opengl:opengl",
         "qt": "//packages/linux/graphics/qt:qt",
         "ffmpeg": "//packages/linux/media/video/ffmpeg:ffmpeg",
         "opencv": "//packages/linux/ai/vision/opencv:opencv",
@@ -44,4 +43,5 @@ package(
         "-DCMAKE_INSTALL_PREFIX=${PREFIX}",
         "-DUSE_PYTHON=OFF",
     ],
+    visibility = ["PUBLIC"],
 )

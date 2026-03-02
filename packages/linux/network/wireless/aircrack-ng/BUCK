@@ -29,7 +29,6 @@ package(
 
     deps = [
         "//packages/linux/core/zlib:zlib",
-                "//packages/linux/network/libs/libpcap:libpcap",
                 "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
                 "//packages/linux/dev-tools/build-systems/automake:automake",
                 "//packages/linux/dev-tools/build-systems/libtool:libtool",

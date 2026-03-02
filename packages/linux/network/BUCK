@@ -11,21 +11,25 @@
 alias(
     name = "openssh",
     actual = "//packages/linux/network/openssh:openssh",
+    visibility = ["PUBLIC"],
 )
 
 alias(
     name = "openssl",
     actual = "//packages/linux/system/libs/crypto/openssl:openssl",
+    visibility = ["PUBLIC"],
 )
 
 alias(
     name = "curl",
     actual = "//packages/linux/system/libs/network/curl:curl",
+    visibility = ["PUBLIC"],
 )
 
 alias(
     name = "iproute2",
     actual = "//packages/linux/network/iproute2:iproute2",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -40,6 +44,7 @@ filegroup(
         "//packages/linux/system/libs/network/nghttp2:nghttp2",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -55,6 +60,7 @@ filegroup(
         "//packages/linux/system/apps/rsync:rsync",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -65,10 +71,10 @@ filegroup(
     name = "browsers",
     srcs = [
         "//packages/linux/www/lynx:lynx",
-        "//packages/linux/www/links:links",
         "//packages/linux/www/w3m:w3m",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -85,6 +91,7 @@ filegroup(
         "//packages/linux/network/ethtool:ethtool",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -97,6 +104,7 @@ filegroup(
         "//packages/linux/network/openssh:openssh",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -109,6 +117,7 @@ filegroup(
         "//packages/linux/network/vpn:all-vpns",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -121,6 +130,7 @@ filegroup(
         "//packages/linux/network/firewall:all-firewalls",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -133,6 +143,7 @@ filegroup(
         "//packages/linux/network/dns:all-dns",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -146,8 +157,10 @@ filegroup(
         "//packages/linux/network/tcpdump:tcpdump",
         "//packages/linux/network/ngrep:ngrep",
         "//packages/linux/network/tshark:tshark",
+        "//packages/linux/network/wireshark:wireshark",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -159,6 +172,7 @@ filegroup(
         "//packages/linux/network/darkstat:darkstat",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -170,6 +184,7 @@ filegroup(
         "//packages/linux/benchmarks/iperf3:iperf3",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -181,6 +196,7 @@ filegroup(
         "//packages/linux/network/ettercap:ettercap",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -192,6 +208,7 @@ filegroup(
         ":security-scanners",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -205,6 +222,7 @@ filegroup(
         "//packages/linux/network/netcat:netcat",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -217,6 +235,7 @@ filegroup(
         "//packages/linux/network/wireless:all",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -231,6 +250,7 @@ filegroup(
         ":network-utils",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -243,6 +263,7 @@ filegroup(
         "//packages/linux/network/signal-desktop:signal-desktop",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -264,4 +285,5 @@ filegroup(
         ":messaging",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

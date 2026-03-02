@@ -10,7 +10,6 @@ package(
         "//packages/linux/dev-libs/python/munch:munch",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/imageio:imageio",
         "//packages/linux/dev-libs/python/lz4:lz4",
         "//packages/linux/dev-libs/python/opencv-python:opencv-python",

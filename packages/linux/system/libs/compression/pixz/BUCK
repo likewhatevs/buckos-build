@@ -19,6 +19,6 @@ package(
     ],
     deps = [
         "//packages/linux/system/libs/compression/xz:xz",
-        "//packages/linux/system/libs/compression/libarchive:libarchive",
     ],
+    visibility = ["PUBLIC"],
 )

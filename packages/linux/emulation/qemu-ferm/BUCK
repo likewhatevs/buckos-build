@@ -11,7 +11,7 @@ package(
     license = "GPL-2.0",
     configure_args = [
         "-Ddefault_devices=false",
-        "-Dsystem=true",
+        "-Dsoftmmu=true",
         "-Dlinux_user=false",
         "-Dbsd_user=false",
         "-Dtcg=enabled",
@@ -61,4 +61,5 @@ package(
         "//packages/linux/system/security/auth/biometric:pixman",
         "//packages/linux/core/zlib:zlib",
     ],
+    visibility = ["PUBLIC"],
 )
