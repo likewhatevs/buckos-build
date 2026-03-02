@@ -1,58 +1,5 @@
 load("//defs:package.bzl", "package")
 
-# virt-manager - Desktop user interface for managing VMs
-# USE flags: See use_flags.bzl for available flags
-
-package(
-    build_rule = "autotools",
-    name = "virt-manager",
-    url = "https://releases.pagure.org/virt-manager/virt-manager-4.1.0.tar.xz",
-    sha256 = "FIXME",
-    use_configure = {
-        "gui": ("--enable-gui", "--disable-gui"),
-        "policykit": ("--enable-policykit", "--disable-policykit"),
-        "sasl": ("--enable-sasl", "--disable-sasl"),
-    },
-    version = "4.1.0",
-    description = "Desktop user interface for managing virtual machines",
-    homepage = "https://virt-manager.org/",
-    license = "GPL-2.0",
-    configure_args = [
-        "--prefix=/usr",
-    ],
-    # Icon cache and desktop database are rebuilt at runtime by the
-    # desktop environment; build-time updates require gtk-update-icon-cache
-    # and desktop-file-utils which aren't packaged yet.
-    deps = [
-        "//packages/linux/lang/python:python",
-        "//packages/linux/desktop/gtk:gtk3",
-        # gtksourceview4 - optional dependency for syntax highlighting
-        # "//packages/linux/desktop/gtk:libvte",  # TODO: add libvte package
-        "//packages/linux/emulation/virtualization/libvirt:libvirt-python",
-    ],
-)
-
-# virt-install - Command line tool for creating VMs
-# USE flags: See use_flags.bzl for available flags
-
-package(
-    build_rule = "autotools",
-    name = "virt-install",
-    url = "https://releases.pagure.org/virt-manager/virt-manager-4.1.0.tar.xz",
-    sha256 = "FIXME",
-    version = "4.1.0",
-    description = "Command line tool for creating new KVM/Xen/LXC guests",
-    homepage = "https://virt-manager.org/",
-    license = "GPL-2.0",
-    configure_args = [
-        "--prefix=/usr",
-    ],
-    deps = [
-        "//packages/linux/lang/python:python",
-        "//packages/linux/emulation/virtualization/libvirt:libvirt-python",
-    ],
-)
-
 # virt-viewer - Graphical console client
 # USE flags: See use_flags.bzl for available flags
 

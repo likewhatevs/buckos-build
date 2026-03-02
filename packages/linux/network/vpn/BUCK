@@ -30,7 +30,6 @@ filegroup(
         "//packages/linux/network/vpn/openconnect:openconnect",
         "//packages/linux/network/vpn/vpnc:vpnc",
         "//packages/linux/network/vpn/ocproxy:ocproxy",
-        "//packages/linux/network/vpn/vpnc-scripts:vpnc-scripts",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -98,7 +97,6 @@ filegroup(
         "//packages/linux/network/vpn/pptp-linux:pptp-linux",
         "//packages/linux/network/vpn/tailscale:tailscale",
         "//packages/linux/network/vpn/ocproxy:ocproxy",
-        "//packages/linux/network/vpn/vpnc-scripts:vpnc-scripts",
     ],
     default_target_platform = "//platforms:linux-target",
 )

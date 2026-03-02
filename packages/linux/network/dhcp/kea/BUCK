@@ -9,14 +9,12 @@ package(
 
     use_deps = {
         "openssl": "//packages/linux/system/libs/crypto/openssl:openssl",
-        "mysql": "//packages/linux/databases/mysql:mysql",
         "postgresql": "//packages/linux/databases/postgresql:postgresql",
     },
 
     use_configure = {
         "debug": ("--enable-debug", "--disable-debug"),
         "kerberos": ("--enable-kerberos", "--disable-kerberos"),
-        "mysql": ("--with-mysql", "--without-mysql"),
         "openssl": ("--with-openssl", "--without-openssl"),
         "postgres": ("--enable-postgres", "--disable-postgres"),
         "postgresql": ("--with-pgsql", "--without-pgsql"),

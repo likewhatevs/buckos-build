@@ -8,8 +8,6 @@ filegroup(
         "//packages/linux/benchmarks/hackbench:hackbench",
         "//packages/linux/benchmarks/memtester:memtester",
         "//packages/linux/benchmarks/bonnie:bonnie",
-        "//packages/linux/benchmarks/iozone:iozone",
-        "//packages/linux/benchmarks/stream:stream",
         "//packages/linux/benchmarks/netperf:netperf",
         "//packages/linux/benchmarks/dbench:dbench",
         "//packages/linux/benchmarks/perf:perf",
@@ -23,7 +21,6 @@ filegroup(
     srcs = [
         "//packages/linux/benchmarks/stress-ng:stress-ng",
         "//packages/linux/benchmarks/memtester:memtester",
-        "//packages/linux/benchmarks/stream:stream",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -34,7 +31,6 @@ filegroup(
     srcs = [
         "//packages/linux/system/filesystem/management/fio:fio",
         "//packages/linux/benchmarks/bonnie:bonnie",
-        "//packages/linux/benchmarks/iozone:iozone",
         "//packages/linux/benchmarks/dbench:dbench",
     ],
     default_target_platform = "//platforms:linux-target",

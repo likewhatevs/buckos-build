@@ -17,7 +17,6 @@ package(
         "gnutls": "//packages/linux/system/libs/crypto/gnutls:gnutls",
         "ssl": "//packages/linux/system/libs/crypto/openssl:openssl",
         "gcrypt": "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
-        "mysql": "//packages/linux/databases/mysql:mysql",
         "systemd": "//packages/linux/system/init/systemd:systemd",
     },
     use_configure = {
@@ -39,7 +38,6 @@ package(
         "kubernetes": ("--enable-kubernetes", "--disable-kubernetes"),
         "mdblookup": ("--enable-mdblookup", "--disable-mdblookup"),
         "mongodb": ("--enable-mongodb", "--disable-mongodb"),
-        "mysql": ("--enable-mysql", "--disable-mysql"),
         "normalize": ("--enable-normalize", "--disable-normalize"),
         "omhttp": ("--enable-omhttp", "--disable-omhttp"),
         "omhttpfs": ("--enable-omhttpfs", "--disable-omhttpfs"),

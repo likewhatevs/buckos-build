@@ -79,7 +79,6 @@ filegroup(
     srcs = [
         "//packages/linux/lang/binutils:binutils",
         "//packages/linux/lang/linkers:mold",
-        "//packages/linux/lang/linkers:lld",
     ],
     default_target_platform = "//platforms:linux-target",
 )
