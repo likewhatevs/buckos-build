@@ -722,15 +722,24 @@ def main():
         _top_ninja = os.path.join(output_dir, "build.ninja")
         if os.path.isfile(_top_ninja) and _top_ninja not in _all_ninja_files:
             _all_ninja_files.append(_top_ninja)
-        # Collect pyvenv bin dirs that exist in the build tree
-        _pyvenv_replacements = {}
+        # Collect pyvenv bin dirs that exist in the build tree.
+        # Register longest paths first — "python3" before "python" — so
+        # str.replace doesn't match a substring and leave a trailing "3"
+        # (e.g. replacing "pyvenv/bin/python" inside "pyvenv/bin/python3"
+        # would produce ".../python33" instead of ".../python3").
+        _pyvenv_replacements = []
         for _pvd in _glob.glob(os.path.join(output_dir, "**/pyvenv/bin"), recursive=True):
+            _pv_python3 = os.path.join(_pvd, "python3")
             _pv_python = os.path.join(_pvd, "python")
-            if os.path.exists(_pv_python):
-                _pyvenv_replacements[_pv_python] = _dep_python3_abs
+            if os.path.exists(_pv_python3):
+                _pyvenv_replacements.append((_pv_python3, _dep_python3_abs))
+            elif os.path.exists(_pv_python):
+                _pyvenv_replacements.append((_pv_python, _dep_python3_abs))
             _pv_meson = os.path.join(_pvd, "meson")
             if os.path.exists(_pv_meson) and _dep_meson:
-                _pyvenv_replacements[_pv_meson] = os.path.abspath(_dep_meson)
+                _pyvenv_replacements.append((_pv_meson, os.path.abspath(_dep_meson)))
+        # Sort longest-first to avoid substring collisions
+        _pyvenv_replacements.sort(key=lambda x: len(x[0]), reverse=True)
         for _nf in _all_ninja_files:
             try:
                 _nf_stat = os.stat(_nf)
@@ -742,7 +751,7 @@ def main():
                 if not _skip_host_replace and _host_python in _nf_content:
                     _nf_content = _nf_content.replace(_host_python, _dep_python3_abs)
                 # Replace pyvenv python/meson references
-                for _old, _new in _pyvenv_replacements.items():
+                for _old, _new in _pyvenv_replacements:
                     if _old in _nf_content:
                         _nf_content = _nf_content.replace(_old, _new)
                 if _nf_content != _nf_orig:
