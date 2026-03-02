@@ -525,6 +525,15 @@ def main():
                         if not os.path.lexists(parent_short):
                             os.symlink(_anchor, parent_short)
 
+    # Detect meson-wrapped builds early.  When install.dat exists, we'll
+    # use `meson install --no-rebuild` instead of make/ninja.  This flag
+    # gates all Makefile/build.ninja/timestamp modifications below — those
+    # changes are unnecessary for meson install and corrupt the compile
+    # step's cached output (the build directory is a read-only input from
+    # the compile phase).
+    _is_meson_build = os.path.isfile(
+        os.path.join(make_dir, "meson-private", "install.dat"))
+
     # Detect and rewrite stale absolute paths from cross-machine cache.
     # When build ran on CI and install runs locally, autotools files
     # (config.status, Makefiles) contain CI's project root.
@@ -591,11 +600,60 @@ def main():
             except Exception:
                 pass  # Best-effort — don't block install on pickle errors
 
+    # --- Meson install fast-path ---
+    # For meson-wrapped builds (including autotools wrappers like QEMU),
+    # use `meson install --no-rebuild` and skip all Makefile/build.ninja
+    # modifications.  Those modifications are only needed for make/ninja
+    # install and corrupt the compile step's cached output (the build
+    # directory is a read-only input from the compile phase).
+    if _is_meson_build:
+        _install_dat = os.path.join(make_dir, "meson-private", "install.dat")
+        _meson_bin = None
+        _pyvenv_meson = os.path.join(make_dir, "pyvenv", "bin", "meson")
+        if os.path.isfile(_pyvenv_meson) and os.access(_pyvenv_meson, os.X_OK):
+            _meson_bin = _pyvenv_meson
+        else:
+            for _d in env.get("PATH", "").split(":"):
+                _candidate = os.path.join(_d, "meson") if _d else ""
+                if _candidate and os.path.isfile(_candidate) and os.access(_candidate, os.X_OK):
+                    _meson_bin = _candidate
+                    break
+        if not _meson_bin:
+            print("error: meson install.dat found but no meson binary available",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        # Meson install reads DESTDIR from the environment.
+        env[args.destdir_var] = prefix
+        # pyvenv meson may need the bundled python's libraries.
+        _pyvenv_lib = os.path.join(make_dir, "pyvenv", "lib")
+        if os.path.isdir(_pyvenv_lib):
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = _pyvenv_lib + (":" + _existing if _existing else "")
+
+        cmd = [_meson_bin, "install", "--no-rebuild", "-C", make_dir]
+        result = subprocess.run(cmd, env=env)
+        if result.returncode != 0:
+            print(f"error: meson install failed with exit code {result.returncode}",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        # Fall through to post-install (la removal, post-cmds, sanitize)
+        for la in _glob.glob(os.path.join(prefix, "**", "*.la"), recursive=True):
+            os.remove(la)
+        env["DESTDIR"] = prefix
+        env["OUT"] = prefix
+        for cmd_str in args.post_cmds:
+            result = subprocess.run(cmd_str, shell=True, cwd=prefix, env=env,
+                                    executable=_buckos_bash)
+            if result.returncode != 0:
+                print(f"error: post-cmd failed with exit code {result.returncode}: {cmd_str}",
+                      file=sys.stderr)
+                sys.exit(1)
+        sanitize_filenames(prefix, make_dir)
+        return
+
     # Suppress libtool re-linking during install.
-    #
-    # Libtool's --mode=install re-links binaries when it sees .la files
-    # with installed=no.  Re-linking invokes the linker with build-tree
-    # paths (relative or absolute) that may not resolve in Buck2's
     # split-action model where build and install are separate cached
     # actions.  The binaries are already correctly linked from the build
     # phase; re-linking during install into DESTDIR is unnecessary.
