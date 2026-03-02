@@ -181,6 +181,12 @@ def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,
     # of trying to run aclocal/automake/autoconf which may not be available.
     for var in ["ACLOCAL=true", "AUTOMAKE=true", "AUTOCONF=true", "AUTOHEADER=true", "MAKEINFO=true"]:
         cmd.add(cmd_args("--make-arg=", var, delimiter = ""))
+    # When skip_configure is True, there's no ./configure --prefix=/usr.
+    # Pass PREFIX=/usr to make so Makefile-based packages use the standard
+    # buckos install prefix (consistent with the autoconf default on line 92).
+    if ctx.attrs.skip_configure:
+        cmd.add("--make-arg=PREFIX=/usr")
+
     for pre_cmd in ctx.attrs.pre_build_cmds:
         cmd.add("--pre-cmd", pre_cmd)
     for arg in ctx.attrs.make_args:
@@ -239,6 +245,10 @@ def _src_install(ctx, built, cflags_file = None, ldflags_file = None,
     # e2fsprogs: install-shlibs must finish before install-progs).
     for target in ctx.attrs.install_targets:
         cmd.add("--make-target", target)
+    # When skip_configure is True, pass PREFIX=/usr to install (same as compile).
+    if ctx.attrs.skip_configure:
+        cmd.add("--make-arg=PREFIX=/usr")
+
     # Suppress autotools regeneration during install (same as compile phase)
     for var in ["ACLOCAL=true", "AUTOMAKE=true", "AUTOCONF=true", "AUTOHEADER=true", "MAKEINFO=true"]:
         cmd.add(cmd_args("--make-arg=", var, delimiter = ""))
