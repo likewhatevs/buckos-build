@@ -2,8 +2,7 @@ load("//defs:package.bzl", "package")
 
 # Getopt::Long::Descriptive - Getopt::Long, but simpler and more powerful
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "getopt-long-descriptive",
     url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Getopt-Long-Descriptive-0.114.tar.gz",
 
@@ -12,7 +11,6 @@ package(
     description = "Getopt::Long, but simpler and more powerful",
     homepage = "https://metacpan.org/pod/Getopt::Long::Descriptive",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:params-util",
@@ -22,8 +20,7 @@ package(
 
 # Term::ANSIColor - Color screen output using ANSI escape sequences
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "term-ansicolor",
     url = "https://cpan.metacpan.org/authors/id/R/RR/RRA/Term-ANSIColor-5.01.tar.gz",
 
@@ -32,7 +29,6 @@ package(
     description = "Color screen output using ANSI escape sequences",
     homepage = "https://metacpan.org/pod/Term::ANSIColor",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -40,8 +36,7 @@ package(
 
 # Term::ReadLine::Gnu - Perl extension for the GNU Readline/History Library
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "term-readline-gnu",
     url = "https://cpan.metacpan.org/authors/id/H/HA/HAYASHI/Term-ReadLine-Gnu-1.46.tar.gz",
 
@@ -50,7 +45,6 @@ package(
     description = "Perl extension for the GNU Readline/History Library",
     homepage = "https://metacpan.org/pod/Term::ReadLine::Gnu",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -58,8 +52,7 @@ package(
 
 # Term::ProgressBar - Provide a progress meter on a standard terminal
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "term-progressbar",
     url = "https://cpan.metacpan.org/authors/id/M/MA/MANWAR/Term-ProgressBar-2.23.tar.gz",
 
@@ -68,7 +61,6 @@ package(
     description = "Provide a progress meter on a standard terminal",
     homepage = "https://metacpan.org/pod/Term::ProgressBar",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":term-ansicolor",
@@ -77,8 +69,7 @@ package(
 
 # Term::Table - Format a header and rows into a table
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "term-table",
     url = "https://cpan.metacpan.org/authors/id/E/EX/EXODIST/Term-Table-0.018.tar.gz",
 
@@ -87,7 +78,6 @@ package(
     description = "Format a header and rows into a table",
     homepage = "https://metacpan.org/pod/Term::Table",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -95,8 +85,7 @@ package(
 
 # App::Cmd - Write command line apps with less suffering
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "app-cmd",
     url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/App-Cmd-0.336.tar.gz",
 
@@ -105,7 +94,6 @@ package(
     description = "Write command line apps with less suffering",
     homepage = "https://metacpan.org/pod/App::Cmd",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":getopt-long-descriptive",
@@ -115,8 +103,7 @@ package(
 
 # Log::Log4perl - Log4j implementation for Perl
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "log-log4perl",
     url = "https://cpan.metacpan.org/authors/id/E/ET/ETJ/Log-Log4perl-1.57.tar.gz",
 
@@ -125,7 +112,6 @@ package(
     description = "Log4j implementation for Perl",
     homepage = "https://metacpan.org/pod/Log::Log4perl",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -133,8 +119,7 @@ package(
 
 # Log::Any - Bringing loggers and listeners together
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "log-any",
     url = "https://cpan.metacpan.org/authors/id/P/PR/PREACTION/Log-Any-1.717.tar.gz",
 
@@ -143,7 +128,6 @@ package(
     description = "Bringing loggers and listeners together",
     homepage = "https://metacpan.org/pod/Log::Any",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -151,8 +135,7 @@ package(
 
 # Log::Dispatch - Dispatches messages to one or more outputs
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "log-dispatch",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Log-Dispatch-2.71.tar.gz",
 
@@ -161,7 +144,6 @@ package(
     description = "Dispatches messages to one or more outputs",
     homepage = "https://metacpan.org/pod/Log::Dispatch",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:params-util",
@@ -170,8 +152,7 @@ package(
 
 # Config::Tiny - Read/Write .ini style files with as little code as possible
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "config-tiny",
     url = "https://cpan.metacpan.org/authors/id/R/RS/RSAVAGE/Config-Tiny-2.30.tgz",
 
@@ -180,7 +161,6 @@ package(
     description = "Read/Write .ini style files with as little code as possible",
     homepage = "https://metacpan.org/pod/Config::Tiny",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -188,8 +168,7 @@ package(
 
 # Config::General - Generic config file parser
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "config-general",
     url = "https://cpan.metacpan.org/authors/id/T/TL/TLINDEN/Config-General-2.65.tar.gz",
 
@@ -198,7 +177,6 @@ package(
     description = "Generic config file parser",
     homepage = "https://metacpan.org/pod/Config::General",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],

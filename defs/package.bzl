@@ -29,6 +29,7 @@ load("//defs/rules:cargo.bzl", "cargo_package")
 load("//defs/rules:cmake.bzl", "cmake_package")
 load("//defs/rules:go.bzl", "go_package")
 load("//defs/rules:meson.bzl", "meson_package")
+load("//defs/rules:perl.bzl", "perl_module")
 load("//defs/rules:mozbuild.bzl", "mozbuild_package")
 load("//defs/rules:python.bzl", "python_package")
 load("//defs/rules:source.bzl", "extract_source")
@@ -43,6 +44,7 @@ _BUILD_RULES = {
     "cmake": cmake_package,
     "go": go_package,
     "meson": meson_package,
+    "perl": perl_module,
     "mozbuild": mozbuild_package,
     "python": python_package,
 }
@@ -288,6 +290,7 @@ def package(
         "meson": "buckos:build:meson",
         "cargo": "buckos:build:cargo",
         "go": "buckos:build:go",
+        "perl": "buckos:build:perl",
         "python": "buckos:build:python",
         "mozbuild": "buckos:build:mozbuild",
     }

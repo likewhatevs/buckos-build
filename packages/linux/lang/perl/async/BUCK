@@ -2,8 +2,7 @@ load("//defs:package.bzl", "package")
 
 # AnyEvent - The DBI of event loop programming
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "anyevent",
     url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/AnyEvent-7.17.tar.gz",
 
@@ -12,7 +11,6 @@ package(
     description = "The DBI of event loop programming",
     homepage = "https://metacpan.org/pod/AnyEvent",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -20,8 +18,7 @@ package(
 
 # IO::Async - Asynchronous event-driven programming
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "io-async",
     url = "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/IO-Async-0.803.tar.gz",
 
@@ -30,7 +27,6 @@ package(
     description = "Asynchronous event-driven programming",
     homepage = "https://metacpan.org/pod/IO::Async",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":future",
@@ -39,8 +35,7 @@ package(
 
 # POE - Portable multitasking and networking framework
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "poe",
     url = "https://cpan.metacpan.org/authors/id/B/BI/BINGOS/POE-1.370.tar.gz",
 
@@ -49,7 +44,6 @@ package(
     description = "Portable multitasking and networking framework",
     homepage = "https://metacpan.org/pod/POE",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -57,8 +51,7 @@ package(
 
 # Future - Represent an operation awaiting completion
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "future",
     url = "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/Future-0.50.tar.gz",
 
@@ -67,7 +60,6 @@ package(
     description = "Represent an operation awaiting completion",
     homepage = "https://metacpan.org/pod/Future",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -75,8 +67,7 @@ package(
 
 # Future::AsyncAwait - Deferred subroutine syntax for futures
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "future-asyncawait",
     url = "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/Future-AsyncAwait-0.66.tar.gz",
 
@@ -85,7 +76,6 @@ package(
     description = "Deferred subroutine syntax for futures",
     homepage = "https://metacpan.org/pod/Future::AsyncAwait",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":future",
@@ -94,8 +84,7 @@ package(
 
 # Coro - The only real threads in perl
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "coro",
     url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/Coro-6.57.tar.gz",
 
@@ -104,7 +93,6 @@ package(
     description = "The only real threads in perl",
     homepage = "https://metacpan.org/pod/Coro",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:canary-stability",
@@ -114,8 +102,7 @@ package(
 
 # EV - Perl interface to libev, a high performance full-featured event loop
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "ev",
     url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/EV-4.34.tar.gz",
 
@@ -124,7 +111,6 @@ package(
     description = "Perl interface to libev, a high performance event loop",
     homepage = "https://metacpan.org/pod/EV",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:canary-stability",
@@ -134,8 +120,7 @@ package(
 # Mojo::IOLoop - Minimalistic event loop
 # Note: Mojo::IOLoop is part of Mojolicious, using the same source
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "mojo-ioloop",
     url = "https://cpan.metacpan.org/authors/id/S/SR/SRI/Mojolicious-9.37.tar.gz",
 
@@ -144,7 +129,6 @@ package(
     description = "Minimalistic event loop (part of Mojolicious)",
     homepage = "https://metacpan.org/pod/Mojo::IOLoop",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -152,8 +136,7 @@ package(
 
 # Guard - Safe cleanup blocks
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "guard",
     url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/Guard-1.023.tar.gz",
 
@@ -162,7 +145,6 @@ package(
     description = "Safe cleanup blocks",
     homepage = "https://metacpan.org/pod/Guard",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],

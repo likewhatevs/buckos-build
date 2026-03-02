@@ -90,6 +90,13 @@ python_binary(
 )
 
 python_binary(
+    name = "perl_helper",
+    main = "perl_helper.py",
+    deps = [":_env"],
+    visibility = ["PUBLIC"],
+)
+
+python_binary(
     name = "python_helper",
     main = "python_helper.py",
     deps = [":_env"],

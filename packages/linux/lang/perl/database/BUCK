@@ -2,8 +2,7 @@ load("//defs:package.bzl", "package")
 
 # DBI - Database independent interface for Perl
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "dbi",
     url = "https://cpan.metacpan.org/authors/id/H/HM/HMBRAND/DBI-1.646.tar.gz",
 
@@ -12,7 +11,6 @@ package(
     description = "Database independent interface for Perl",
     homepage = "https://dbi.perl.org/",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -20,8 +18,7 @@ package(
 
 # DBD::SQLite - Self-contained RDBMS in a DBI Driver
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "dbd-sqlite",
     url = "https://cpan.metacpan.org/authors/id/I/IS/ISHIGAKI/DBD-SQLite-1.74.tar.gz",
 
@@ -30,7 +27,6 @@ package(
     description = "Self-contained RDBMS in a DBI Driver",
     homepage = "https://metacpan.org/pod/DBD::SQLite",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":dbi",
@@ -39,8 +35,7 @@ package(
 
 # DBD::Pg - PostgreSQL database driver for the DBI module
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "dbd-pg",
     url = "https://cpan.metacpan.org/authors/id/T/TU/TURNSTEP/DBD-Pg-3.18.0.tar.gz",
 
@@ -49,7 +44,6 @@ package(
     description = "PostgreSQL database driver for the DBI module",
     homepage = "https://metacpan.org/pod/DBD::Pg",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":dbi",
@@ -59,8 +53,7 @@ package(
 
 # DBD::mysql - MySQL driver for the Perl5 Database Interface (DBI)
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "dbd-mysql",
     url = "https://cpan.metacpan.org/authors/id/D/DV/DVEEDEN/DBD-mysql-5.004.tar.gz",
 
@@ -69,7 +62,6 @@ package(
     description = "MySQL driver for the Perl5 Database Interface",
     homepage = "https://metacpan.org/pod/DBD::mysql",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":dbi",
@@ -78,8 +70,7 @@ package(
 
 # DBIx::Class - Extensible and flexible object <-> relational mapper
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "dbix-class",
     url = "https://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/DBIx-Class-0.082843.tar.gz",
 
@@ -88,7 +79,6 @@ package(
     description = "Extensible and flexible object <-> relational mapper",
     homepage = "https://metacpan.org/pod/DBIx::Class",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":dbi",
@@ -100,8 +90,7 @@ package(
 
 # SQL::Abstract - Generate SQL from Perl data structures
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "sql-abstract",
     url = "https://cpan.metacpan.org/authors/id/M/MS/MSTROUT/SQL-Abstract-2.000001.tar.gz",
 
@@ -110,7 +99,6 @@ package(
     description = "Generate SQL from Perl data structures",
     homepage = "https://metacpan.org/pod/SQL::Abstract",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/oop:moo",
@@ -119,8 +107,7 @@ package(
 
 # Rose::DB - A DBI wrapper and target class for the Rose database system
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "rose-db",
     url = "https://cpan.metacpan.org/authors/id/J/JS/JSIRACUSA/Rose-DB-0.778.tar.gz",
 
@@ -129,7 +116,6 @@ package(
     description = "A DBI wrapper and target class for Rose database",
     homepage = "https://metacpan.org/pod/Rose::DB",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":dbi",
@@ -138,8 +124,7 @@ package(
 
 # Mojo::Pg - Mojolicious and PostgreSQL
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "mojo-pg",
     url = "https://cpan.metacpan.org/authors/id/S/SR/SRI/Mojo-Pg-4.27.tar.gz",
 
@@ -148,7 +133,6 @@ package(
     description = "Mojolicious and PostgreSQL",
     homepage = "https://metacpan.org/pod/Mojo::Pg",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/web:mojolicious",
@@ -158,8 +142,7 @@ package(
 
 # Mojo::SQLite - A tiny Mojolicious wrapper for SQLite
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "mojo-sqlite",
     url = "https://cpan.metacpan.org/authors/id/D/DB/DBOOK/Mojo-SQLite-3.009.tar.gz",
 
@@ -168,7 +151,6 @@ package(
     description = "A tiny Mojolicious wrapper for SQLite",
     homepage = "https://metacpan.org/pod/Mojo::SQLite",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/web:mojolicious",
@@ -178,8 +160,7 @@ package(
 
 # Redis - Perl binding for Redis database
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "redis",
     url = "https://cpan.metacpan.org/authors/id/D/DA/DAMS/Redis-2.000.tar.gz",
 
@@ -188,7 +169,6 @@ package(
     description = "Perl binding for Redis database",
     homepage = "https://metacpan.org/pod/Redis",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:try-tiny",
@@ -197,8 +177,7 @@ package(
 
 # MongoDB - Official MongoDB Driver for Perl
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "mongodb",
     url = "https://cpan.metacpan.org/authors/id/M/MO/MONGODB/MongoDB-v2.2.2.tar.gz",
 
@@ -207,7 +186,6 @@ package(
     description = "Official MongoDB Driver for Perl",
     homepage = "https://metacpan.org/pod/MongoDB",
     license = "Apache-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/oop:moo",
@@ -217,8 +195,7 @@ package(
 
 # Cache::Memcached::Fast - Perl client for memcached
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "cache-memcached-fast",
     url = "https://cpan.metacpan.org/authors/id/K/KR/KROKI/Cache-Memcached-Fast-0.23.tar.gz",
 
@@ -227,7 +204,6 @@ package(
     description = "Perl client for memcached, in C language",
     homepage = "https://metacpan.org/pod/Cache::Memcached::Fast",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     # Force single-threaded build to avoid race condition where compute_crc32.h
     # is generated but dispatch_key.c compiles before it's ready
     deps = [

@@ -2,8 +2,7 @@ load("//defs:package.bzl", "package")
 
 # JSON - JSON (JavaScript Object Notation) encoder/decoder
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "json",
     url = "https://cpan.metacpan.org/authors/id/I/IS/ISHIGAKI/JSON-4.10.tar.gz",
 
@@ -12,7 +11,6 @@ package(
     description = "JSON encoder/decoder",
     homepage = "https://metacpan.org/pod/JSON",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -20,8 +18,7 @@ package(
 
 # JSON::XS - JSON serialising/deserialising, done correctly and fast
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "json-xs",
     url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/JSON-XS-4.03.tar.gz",
 
@@ -30,7 +27,6 @@ package(
     description = "JSON serialising/deserialising, done correctly and fast",
     homepage = "https://metacpan.org/pod/JSON::XS",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:canary-stability",
@@ -39,8 +35,7 @@ package(
 
 # JSON::MaybeXS - Use Cpanel::JSON::XS with a fallback to JSON::XS and JSON::PP
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "json-maybexs",
     url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/JSON-MaybeXS-1.004005.tar.gz",
 
@@ -49,7 +44,6 @@ package(
     description = "Use Cpanel::JSON::XS with a fallback to JSON::XS and JSON::PP",
     homepage = "https://metacpan.org/pod/JSON::MaybeXS",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:cpanel-json-xs",
@@ -58,8 +52,7 @@ package(
 
 # YAML - YAML Ain't Markup Language
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "yaml",
     url = "https://cpan.metacpan.org/authors/id/I/IN/INGY/YAML-1.31.tar.gz",
 
@@ -68,7 +61,6 @@ package(
     description = "YAML Ain't Markup Language",
     homepage = "https://metacpan.org/pod/YAML",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -76,8 +68,7 @@ package(
 
 # YAML::XS - Perl YAML Serialization using XS and libyaml
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "yaml-xs",
     url = "https://cpan.metacpan.org/authors/id/I/IN/INGY/YAML-LibYAML-0.88.tar.gz",
 
@@ -86,7 +77,6 @@ package(
     description = "Perl YAML Serialization using XS and libyaml",
     homepage = "https://metacpan.org/pod/YAML::XS",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -94,8 +84,7 @@ package(
 
 # YAML::Tiny - Read/Write YAML files with as little code as possible
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "yaml-tiny",
     url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/YAML-Tiny-1.74.tar.gz",
 
@@ -104,7 +93,6 @@ package(
     description = "Read/Write YAML files with as little code as possible",
     homepage = "https://metacpan.org/pod/YAML::Tiny",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -112,8 +100,7 @@ package(
 
 # XML::LibXML - Interface to libxml2
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "xml-libxml",
     url = "https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/XML-LibXML-2.0210.tar.gz",
 
@@ -122,7 +109,6 @@ package(
     description = "Interface to libxml2",
     homepage = "https://metacpan.org/pod/XML::LibXML",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -130,8 +116,7 @@ package(
 
 # XML::Simple - An API for simple XML files
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "xml-simple",
     url = "https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-Simple-2.25.tar.gz",
 
@@ -140,7 +125,6 @@ package(
     description = "An API for simple XML files",
     homepage = "https://metacpan.org/pod/XML::Simple",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":xml-libxml",
@@ -149,8 +133,7 @@ package(
 
 # XML::Parser - A perl module for parsing XML documents
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "xml-parser",
     url = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.47.tar.gz",
 
@@ -159,7 +142,6 @@ package(
     description = "A perl module for parsing XML documents",
     homepage = "https://metacpan.org/pod/XML::Parser",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/system/libs/data/expat:expat",
@@ -168,8 +150,7 @@ package(
 
 # XML::Twig - A perl module for processing huge XML documents in tree mode
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "xml-twig",
     url = "https://cpan.metacpan.org/authors/id/M/MI/MIROD/XML-Twig-3.52.tar.gz",
 
@@ -178,7 +159,6 @@ package(
     description = "A perl module for processing huge XML documents",
     homepage = "https://metacpan.org/pod/XML::Twig",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":xml-parser",
@@ -187,8 +167,7 @@ package(
 
 # Data::Dumper - stringified perl data structures
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "data-dumper",
     url = "https://cpan.metacpan.org/authors/id/N/NW/NWCLARK/Data-Dumper-2.183.tar.gz",
 
@@ -197,7 +176,6 @@ package(
     description = "Stringified perl data structures",
     homepage = "https://metacpan.org/pod/Data::Dumper",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -205,8 +183,7 @@ package(
 
 # Sereal - Fast, compact, powerful binary serialization
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "sereal-encoder",
     url = "https://cpan.metacpan.org/authors/id/Y/YV/YVES/Sereal-Encoder-5.004.tar.gz",
 
@@ -215,15 +192,13 @@ package(
     description = "Fast, compact, powerful binary serialization - Encoder",
     homepage = "https://metacpan.org/pod/Sereal::Encoder",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
 )
 
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "sereal-decoder",
     url = "https://cpan.metacpan.org/authors/id/Y/YV/YVES/Sereal-Decoder-5.004.tar.gz",
 
@@ -232,7 +207,6 @@ package(
     description = "Fast, compact, powerful binary serialization - Decoder",
     homepage = "https://metacpan.org/pod/Sereal::Decoder",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -240,8 +214,7 @@ package(
 
 # Storable - Persistence for Perl data structures
 package(
-    build_rule = "autotools",
-    skip_configure = True,
+    build_rule = "perl",
     name = "storable",
     url = "https://cpan.metacpan.org/authors/id/N/NW/NWCLARK/Storable-3.25.tar.gz",
 
@@ -250,7 +223,6 @@ package(
     description = "Persistence for Perl data structures",
     homepage = "https://metacpan.org/pod/Storable",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
