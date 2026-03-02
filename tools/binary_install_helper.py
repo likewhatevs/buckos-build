@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames, write_stub_script
+from _env import clean_env, register_cleanup, sanitize_filenames, write_stub_script
 
 
 def _resolve_flag_paths(value, project_root):
@@ -98,6 +98,11 @@ def main():
     version = sys.argv[3]
     install_script = resolve(sys.argv[4])
 
+    # Register cleanup early so unsafe filenames are removed on any exit
+    scratch = os.environ.get("BUCK_SCRATCH_PATH")
+    workdir = resolve(scratch) if scratch else None
+    register_cleanup(output_dir, workdir)
+
     # Start with clean env
     env = clean_env()
     env["PROJECT_ROOT"] = project_root
@@ -108,13 +113,14 @@ def main():
     env["DESTDIR"] = output_dir
     env["S"] = source_dir
     env["PV"] = version
-    scratch = os.environ.get("BUCK_SCRATCH_PATH")
-    if scratch:
-        env["WORKDIR"] = resolve(scratch)
-        env["BUCK_SCRATCH_PATH"] = resolve(scratch)
+    if workdir:
+        env["WORKDIR"] = workdir
+        env["BUCK_SCRATCH_PATH"] = workdir
     else:
         import tempfile
-        env["WORKDIR"] = tempfile.mkdtemp()
+        workdir = tempfile.mkdtemp()
+        env["WORKDIR"] = workdir
+        register_cleanup(workdir)
 
     make_jobs = starlark_vars.get("MAKE_JOBS", str(os.cpu_count() or 1))
     env["MAKE_JOBS"] = make_jobs

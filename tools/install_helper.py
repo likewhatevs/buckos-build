@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, derive_lib_paths, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _rewrite_file(fpath, old, new):
@@ -311,6 +311,7 @@ def main():
     env["PROJECT_ROOT"] = os.getcwd()
 
     build_dir = os.path.abspath(args.build_dir)
+    register_cleanup(build_dir)
     make_dir = build_dir
     if args.build_subdir:
         make_dir = os.path.join(build_dir, args.build_subdir)
@@ -392,6 +393,10 @@ def main():
             existing = env.get("LD_LIBRARY_PATH", "")
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. packaging for gdbus-codegen) are found.

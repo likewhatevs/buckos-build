@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, derive_lib_paths, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -126,6 +126,7 @@ def main():
         sys.exit(1)
 
     os.makedirs(args.build_dir, exist_ok=True)
+    register_cleanup(os.path.abspath(args.build_dir))
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
@@ -171,6 +172,10 @@ def main():
             existing = env.get("LD_LIBRARY_PATH", "")
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
 
     # Apply extra environment variables first (toolchain flags like -march).
     for entry in args.extra_env:

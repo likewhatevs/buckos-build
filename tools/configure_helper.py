@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, derive_lib_paths, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -147,6 +147,9 @@ def main():
     source_dir = os.path.abspath(args.source_dir)
     output_dir = os.path.abspath(args.output_dir)
 
+    # Register cleanup early so unsafe filenames are removed on any exit
+    register_cleanup(output_dir)
+
     if not os.path.isdir(source_dir):
         print(f"error: source directory not found: {source_dir}", file=sys.stderr)
         sys.exit(1)
@@ -252,6 +255,10 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
+
     # Auto-detect automake Perl modules and aclocal dirs from dep
     # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
     # paths which don't resolve to the artifact directory.
@@ -342,7 +349,22 @@ def main():
     # Buck2 renders artifact paths relative to the project root, but
     # configure runs in output_dir — the relative paths would break.
     resolved_args = [_resolve_env_paths(a) for a in args.configure_args]
+
+    # Only wrap with CONFIG_SHELL for shell scripts.  Perl-based configure
+    # scripts (e.g. OpenSSL's Configure) must run via their own shebang.
+    _use_config_shell = False
     if _config_shell:
+        _abs_configure = os.path.join(configure_cwd, configure) if not os.path.isabs(configure) else configure
+        try:
+            with open(_abs_configure, "rb") as _f:
+                _shebang = _f.readline(256)
+            # Shell script or no shebang → wrap with CONFIG_SHELL
+            _use_config_shell = not _shebang.startswith(b"#!") or \
+                any(s in _shebang for s in (b"/sh", b"/bash", b"/dash", b"/ash"))
+        except OSError:
+            _use_config_shell = True
+
+    if _use_config_shell:
         cmd = [_config_shell, configure] + resolved_args
     else:
         cmd = [configure] + resolved_args

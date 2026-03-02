@@ -10,7 +10,9 @@ with only functional vars, pin determinism vars, and let each helper add
 what it needs on top.
 """
 
+import atexit
 import os
+import signal
 import shutil
 import sys
 
@@ -83,6 +85,43 @@ def sanitize_filenames(*roots):
                         pass
 
 
+# ── Guaranteed cleanup ────────────────────────────────────────────────
+# Helpers register directories here so sanitize_filenames runs on ANY
+# exit path — normal return, exception, or SIGTERM.  Only SIGKILL
+# bypasses this (unavoidable).
+
+_cleanup_dirs = []
+_cleanup_ran = False
+
+
+def register_cleanup(*dirs):
+    """Register directories for filename sanitization on exit.
+
+    Call early (before builds start) so cleanup runs even if the
+    build is interrupted.
+    """
+    _cleanup_dirs.extend(d for d in dirs if d)
+
+
+def _run_cleanup():
+    global _cleanup_ran
+    if _cleanup_ran:
+        return
+    _cleanup_ran = True
+    sanitize_filenames(*_cleanup_dirs)
+
+
+atexit.register(_run_cleanup)
+
+
+def _sigterm_cleanup(signum, frame):
+    _run_cleanup()
+    sys.exit(128 + signum)
+
+
+signal.signal(signal.SIGTERM, _sigterm_cleanup)
+
+
 def add_path_args(parser):
     """Register the standard three-way PATH arguments on an argparse parser."""
     parser.add_argument("--hermetic-path", action="append",
@@ -116,6 +155,27 @@ def setup_path(args, env, host_path=""):
     if hasattr(args, 'path_prepend') and args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend)
         env["PATH"] = prepend + (":" + env["PATH"] if env.get("PATH") else "")
+        derive_lib_paths(args.path_prepend, env)
+
+
+def derive_lib_paths(bin_dirs, env):
+    """Derive LD_LIBRARY_PATH from bin dirs.
+
+    Given {prefix}/usr/bin, adds {prefix}/usr/lib and {prefix}/usr/lib64
+    so dynamically linked host tools (e.g. python → libpython3.so)
+    can find their shared libraries.
+    """
+    lib_parts = []
+    for bin_dir in bin_dirs:
+        parent = os.path.dirname(os.path.abspath(bin_dir))
+        for ld in ("lib", "lib64"):
+            d = os.path.join(parent, ld)
+            if os.path.isdir(d):
+                lib_parts.append(d)
+    if lib_parts:
+        existing = env.get("LD_LIBRARY_PATH", "")
+        merged = ":".join(lib_parts)
+        env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
 
 def write_pkg_config_wrapper(wrapper_dir):
