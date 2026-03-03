@@ -37,6 +37,7 @@ package(
         "-DFLB_AWS=ON",
         "-DFLB_SIGNV4=ON",
         "-DFLB_BACKTRACE=ON",
+        "-DFLB_HTTP_SERVER=ON",
         "-DFLB_PREFER_SYSTEM_LIBS=ON",
         "-DFLB_PREFER_SYSTEM_LIB_LUAJIT=ON",
         "-DFLB_PREFER_SYSTEM_LIB_JEMALLOC=ON",
@@ -53,4 +54,5 @@ package(
         "tls": ("-DFLB_TLS=ON", "-DFLB_TLS=OFF"),
         "yaml": ("-DFLB_CONFIG_YAML=ON", "-DFLB_CONFIG_YAML=OFF"),
     },
+    visibility = ["PUBLIC"],
 )

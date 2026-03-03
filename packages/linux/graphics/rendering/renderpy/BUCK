@@ -8,7 +8,6 @@ package(
     sha256 = "4c0531e23c6db42563ffb2a4995df33f411ef15f813c8a2d09141a4e8106d23a",
     deps = [
         "//packages/linux/graphics/opencv:opencv",
-        "//packages/linux/dev-libs/glew:glew",
         "//packages/linux/graphics/xorg:mesa",
     ],
 )

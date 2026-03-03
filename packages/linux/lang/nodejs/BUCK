@@ -25,8 +25,7 @@ cd "$SRCS"
 # Only pass Node.js-compatible options
 ./configure \
     --prefix=/usr \
-    --shared-zlib \
-    --with-intl=system-icu \
+    --with-intl=full-icu \
     --without-npm \
     --without-corepack
 
@@ -34,8 +33,5 @@ make -j${MAKEOPTS:-$(nproc)}
 
 make DESTDIR="$OUT" install
 """,
-    deps = [
-        "//packages/linux/core/zlib:zlib",
-        "//packages/linux/system/libs/utility/icu:icu",
-    ],
+    deps = [],
 )

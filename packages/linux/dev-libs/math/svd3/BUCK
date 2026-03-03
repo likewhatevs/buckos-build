@@ -10,5 +10,8 @@ package(
     homepage = "https://github.com/ericjang/svd3",
     license = "MIT",
     deps = [],
-    install_script = """mkdir -p ${PREFIX}/include/svd3\ncp *.h ${PREFIX}/include/svd3/""",
+    install_script = """
+mkdir -p "${OUT}/usr/include/svd3"
+cp *.h "${OUT}/usr/include/svd3/"
+""",
 )

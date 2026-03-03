@@ -29,32 +29,7 @@ mkdir -p "$OUT/usr/lib/firmware/intel"
 cp -r intel/* "$OUT/usr/lib/firmware/intel/" 2>/dev/null || true
 """,
     labels = ["buckos:firmware", "buckos:hw:gpu"],
-)
-
-# Intel GPU tools
-package(
-    build_rule = "meson",
-    name = "intel-gpu-tools",
-    version = "1.28",
-    url = "https://gitlab.freedesktop.org/drm/igt-gpu-tools/-/archive/v1.28/igt-gpu-tools-v1.28.tar.gz",
-    sha256 = "ba15b321c5a90da629baf326912c9c0406a903719040eb4959e0af1197935133",
-    description = "Intel GPU debugging and testing tools",
-    homepage = "https://gitlab.freedesktop.org/drm/igt-gpu-tools",
-    license = "MIT",
-    meson_args = [
-        "-Ddocs=disabled",
-        "-Dtests=disabled",
-        "-Drunner=disabled",
-    ],
-    deps = [
-        "//packages/linux/desktop/libdrm:libdrm",
-        "//packages/linux/graphics/xorg/libpciaccess:libpciaccess",
-    ],
-    env = {
-        "CFLAGS": "-O2 -march=x86-64 -pipe",
-        "LDFLAGS": "-Wl,-O1,--as-needed",
-    },
-    labels = ["buckos:hw:gpu"],
+    visibility = ["PUBLIC"],
 )
 
 # Combined Intel drivers package
@@ -62,7 +37,7 @@ filegroup(
     name = "intel-drivers",
     srcs = [
         ":intel-firmware",
-        ":intel-gpu-tools",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

@@ -12,9 +12,9 @@ package(
     install_script = """
 cd "$SRCS"
 
-COPTS="-DHAVE_DNSSEC -DHAVE_LIBIDN2 -DHAVE_IPV6"
+COPTS="-DHAVE_LIBIDN2 -DHAVE_IPV6 $CFLAGS"
 
-make -j${MAKEOPTS:-$(nproc)} PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var COPTS="$COPTS"
+make -j${MAKEOPTS:-$(nproc)} PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var COPTS="$COPTS" LDFLAGS="$LDFLAGS"
 
 make install PREFIX="$OUT/usr" SYSCONFDIR="$OUT/etc" LOCALSTATEDIR="$OUT/var" DESTDIR=""
 
@@ -27,6 +27,5 @@ fi
 """,
     deps = [
         "//packages/linux/network/dns/libraries/libidn2:libidn2",
-        "//packages/linux/system/libs/crypto/nettle:nettle",
     ],
 )

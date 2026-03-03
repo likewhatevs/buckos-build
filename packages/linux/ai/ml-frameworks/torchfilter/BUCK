@@ -8,7 +8,6 @@ package(
     sha256 = "96753e0e15e2b12da2a71f90b17364fc66bc76a6f14caccda0327ef7a53475f0",
     deps = [
         "//packages/linux/dev-libs/python/fannypack:fannypack",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],

@@ -14,7 +14,6 @@ package(
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
         "//packages/linux/dev-libs/python/pillow:pillow",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/ai/ml-frameworks/timm:timm",
         "//packages/linux/ai/ml-frameworks/transformers:transformers",
         "//packages/linux/ai/ml-frameworks/fairscale:fairscale",

@@ -8,7 +8,6 @@ package(
     sha256 = "1f2fbfad3ffa38110368abac76c6ef9df9c282a66d5c2807bc94abf4d2fb30f8",
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/hydra-core:hydra-core",

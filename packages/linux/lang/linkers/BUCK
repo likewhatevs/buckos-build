@@ -37,78 +37,6 @@ package(
 )
 
 # =============================================================================
-# lld - LLVM Linker
-# =============================================================================
-#
-# lld is LLVM's linker that supports ELF, COFF, Mach-O, and WebAssembly.
-# It provides fast linking with better diagnostics than traditional linkers.
-# =============================================================================
-
-package(
-    build_rule = "binary",
-    name = "lld",
-    url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/lld-18.1.8.src.tar.xz",
-    sha256 = "FIXME",
-    version = "18.1.8",
-    description = "LLVM linker with support for ELF, COFF, Mach-O, and WebAssembly",
-    homepage = "https://lld.llvm.org/",
-    license = "Apache-2.0 WITH LLVM-exception",
-    install_script = """
-        cd $SRCS
-
-        # Find LLVM cmake dir from dependencies
-        LLVM_DIR=""
-        for dep in $DEPS; do
-            if [ -d "$dep/usr/lib/cmake/llvm" ]; then
-                LLVM_DIR="$dep/usr/lib/cmake/llvm"
-                break
-            elif [ -d "$dep/usr/lib64/cmake/llvm" ]; then
-                LLVM_DIR="$dep/usr/lib64/cmake/llvm"
-                break
-            fi
-        done
-
-        # Fallback to system LLVM if not in deps
-        if [ -z "$LLVM_DIR" ]; then
-            if [ -d "/usr/lib64/cmake/llvm" ]; then
-                LLVM_DIR="/usr/lib64/cmake/llvm"
-            elif [ -d "/usr/lib/cmake/llvm" ]; then
-                LLVM_DIR="/usr/lib/cmake/llvm"
-            fi
-        fi
-
-        if [ -z "$LLVM_DIR" ]; then
-            echo "ERROR: Could not find LLVM cmake directory"
-            exit 1
-        fi
-
-        echo "Using LLVM_DIR: $LLVM_DIR"
-
-        # Setup cmake modules from the downloaded cmake source
-        # The cmake-*.src directory contains the LLVM cmake modules
-        CMAKE_MOD_DIR=$(find . -maxdepth 1 -type d -name 'cmake-*' | head -1)
-
-        mkdir -p build
-        cd build
-
-        cmake ../lld-*.src \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr \
-            -DLLVM_DIR="$LLVM_DIR" \
-            -DLLVM_CMAKE_DIR="$SRCS/$CMAKE_MOD_DIR/Modules" \
-            -DLLVM_INCLUDE_TESTS=OFF
-
-        make -j${MAKEOPTS:-$(nproc)}
-        make DESTDIR=$OUT install
-    """,
-    deps = [
-        "//packages/linux/dev-tools/build-systems/cmake:cmake",
-        "//packages/linux/core/llvm:llvm",
-        "//packages/linux/core/zlib:zlib",
-    ],
-)
-
-# =============================================================================
 # gold - GNU Gold Linker
 # =============================================================================
 #
@@ -124,7 +52,6 @@ filegroup(
     name = "all-linkers",
     srcs = [
         ":mold",
-        ":lld",
     ],
     default_target_platform = "//platforms:linux-target",
 )

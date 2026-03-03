@@ -14,5 +14,6 @@ package(
     deps = [
         "//packages/linux/lang/go:go",
     ],
-    install_script = """make build\ninstall -Dm755 node_exporter ${PREFIX}/bin/node_exporter""",
+    install_script = """make build\ninstall -Dm755 node_exporter $OUT/usr/bin/node_exporter""",
+    visibility = ["PUBLIC"],
 )

@@ -78,6 +78,5 @@ make DESTDIR=$OUT install
         "//packages/linux/system/libs/compression/zstd:zstd",
         "//packages/linux/system/libs/compression/xz:xz",
         "//packages/linux/system/libs/compression/bzip2:bzip2",
-        "//packages/linux/editors/ghostscript:ghostscript",
     ],
 )

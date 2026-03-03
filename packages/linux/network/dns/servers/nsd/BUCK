@@ -46,6 +46,7 @@ package(
     ],
 
     deps = [
+        "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 
     description = "NSD - Name Server Daemon (authoritative-only DNS server)",

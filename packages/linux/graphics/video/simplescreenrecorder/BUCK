@@ -36,7 +36,6 @@ package(
         "-DENABLE_FFMPEG_VERSIONS=ON",
     ],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/desktop/qt:qt5",
         "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",

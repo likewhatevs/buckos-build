@@ -38,8 +38,7 @@ cd build
 DESTDIR=$OUT meson install
 """],
     deps = [
-        "//packages/linux/graphics/utilities/babl:babl",
-                "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/glib:glib",
                 "//packages/linux/system/libs/image/libpng:libpng",
                 "//packages/linux/system/libs/image/libjpeg-turbo:libjpeg-turbo",
                 "//packages/linux/system/libs/graphics/cairo:cairo",
@@ -50,9 +49,7 @@ DESTDIR=$OUT meson install
         # "//packages/linux/core/librsvg:librsvg",
                 # TODO: not packaged yet
         "//packages/linux/system/libs/image/libwebp:libwebp",
-                # "//packages/linux/editors/poppler:poppler",
                 # TODO: wrong path
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
                 "//packages/linux/lang/vala:vala"
     ],
 )

@@ -10,6 +10,5 @@ package(
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/vision/torchvision:torchvision",
         "//packages/linux/dev-libs/python/kornia:kornia",
-        "//packages/linux/dev-libs/python/numpy:numpy",
     ],
 )

@@ -41,7 +41,6 @@ DESTDIR=$OUT make install
     deps = [
         "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/desktop/qt:qt5",
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/system/libs/network/curl:curl",
         "//packages/linux/system/libs/data/jansson:jansson",
         "//packages/linux/media/video/x264:x264",

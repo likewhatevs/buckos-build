@@ -3,7 +3,7 @@ load("//defs:package.bzl", "package")
 # CityHash - Fast hash functions for strings
 
 package(
-    build_rule = "cmake",
+    build_rule = "autotools",
     name = "cityhash",
     version = "master",
     url = "https://github.com/google/cityhash/archive/refs/heads/master.tar.gz",
@@ -12,7 +12,6 @@ package(
     homepage = "https://github.com/google/cityhash",
     license = "MIT",
     configure_args = [
-        "-DCMAKE_BUILD_TYPE=Release",
-        "-DBUILD_SHARED_LIBS=ON",
+        "--enable-shared",
     ],
 )

@@ -12,55 +12,30 @@
 filegroup(
     name = "all-initramfs-tools",
     srcs = [
-        "//packages/linux/system/initramfs/dracut:dracut",
-        "//packages/linux/system/initramfs/mkinitcpio:mkinitcpio",
-        "//packages/linux/system/initramfs/genkernel:genkernel",
         "//packages/linux/system/initramfs/initramfs-tools:initramfs-tools",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Modern/recommended initramfs generators
 filegroup(
     name = "modern-initramfs",
     srcs = [
-        "//packages/linux/system/initramfs/dracut:dracut",
-        "//packages/linux/system/initramfs/mkinitcpio:mkinitcpio",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Dracut (Fedora/RHEL/openSUSE default)
 filegroup(
     name = "dracut-stack",
     srcs = [
-        "//packages/linux/system/initramfs/dracut:dracut",
         "//packages/linux/system/libs/kmod:kmod",
         "//packages/linux/system/init/eudev:eudev",
     ],
     default_target_platform = "//platforms:linux-target",
-)
-
-# mkinitcpio (Arch Linux default)
-filegroup(
-    name = "mkinitcpio-stack",
-    srcs = [
-        "//packages/linux/system/initramfs/mkinitcpio:mkinitcpio",
-        "//packages/linux/system/libs/kmod:kmod",
-        "//packages/linux/system/init/eudev:eudev",
-    ],
-    default_target_platform = "//platforms:linux-target",
-)
-
-# genkernel (Gentoo default)
-filegroup(
-    name = "genkernel-stack",
-    srcs = [
-        "//packages/linux/system/initramfs/genkernel:genkernel",
-        "//packages/linux/system/libs/kmod:kmod",
-        "//packages/linux/system/init/eudev:eudev",
-    ],
-    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # initramfs-tools (Debian/Ubuntu default)
@@ -72,6 +47,7 @@ filegroup(
         "//packages/linux/system/init/eudev:eudev",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Base dependencies for all initramfs tools
@@ -85,6 +61,7 @@ filegroup(
         "//packages/linux/system/apps/coreutils:coreutils",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Full boot stack - everything needed to boot from initramfs
@@ -92,29 +69,28 @@ filegroup(
     name = "full-boot-stack",
     srcs = [
         # Initramfs generator (pick one)
-        "//packages/linux/system/initramfs/dracut:dracut",
         # Kernel module management
         "//packages/linux/system/libs/kmod:kmod",
         # Device management
         "//packages/linux/system/init/eudev:eudev",
         # Filesystem tools
         "//packages/linux/system/filesystem/management/lvm2:lvm2",
-        "//packages/linux/system/filesystem/management/mdadm:mdadm",
         "//packages/linux/system/filesystem/management/cryptsetup:cryptsetup",
         # Bootloader
         "//packages/linux/boot/grub:grub",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Minimal boot stack - just the essentials
 filegroup(
     name = "minimal-boot-stack",
     srcs = [
-        "//packages/linux/system/initramfs/dracut:dracut",
         "//packages/linux/system/libs/kmod:kmod",
         "//packages/linux/system/init/eudev:eudev",
         "//packages/linux/boot/grub:grub",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

@@ -22,9 +22,11 @@ package(
         "sbindir=/usr/sbin",
         "mandir=/usr/share/man",
     ],
+    install_targets = ["all"],
     post_install_cmds = ["""
-        make DESTDIR=$OUT prefix=/usr install
+        make -C "$BUILD_DIR" DESTDIR=$OUT prefix=/usr install
     """],
     deps = [
     ],
+    visibility = ["PUBLIC"],
 )

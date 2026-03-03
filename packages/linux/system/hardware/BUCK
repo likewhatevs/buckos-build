@@ -9,6 +9,7 @@ filegroup(
         "//packages/linux/system/hardware/dmidecode:dmidecode",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # All hardware inspection tools
@@ -16,11 +17,10 @@ filegroup(
     name = "all-hardware",
     srcs = [
         "//packages/linux/system/hardware/usbutils:usbutils",
-        "//packages/linux/system/hardware/lshw:lshw",
         "//packages/linux/system/hardware/dmidecode:dmidecode",
-        "//packages/linux/system/hardware/hwinfo:hwinfo",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # PCI inspection tools
@@ -29,6 +29,7 @@ filegroup(
     srcs = [
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # USB inspection tools
@@ -38,6 +39,7 @@ filegroup(
         "//packages/linux/system/hardware/usbutils:usbutils",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # System information tools (BIOS/DMI)
@@ -45,8 +47,7 @@ filegroup(
     name = "sysinfo",
     srcs = [
         "//packages/linux/system/hardware/dmidecode:dmidecode",
-        "//packages/linux/system/hardware/lshw:lshw",
-        "//packages/linux/system/hardware/hwinfo:hwinfo",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

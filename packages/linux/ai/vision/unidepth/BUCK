@@ -9,13 +9,10 @@ package(
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/vision/torchvision:torchvision",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pillow:pillow",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/timm:timm",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
-        "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/dev-libs/python/opencv-python:opencv-python",
         "//packages/linux/dev-libs/python/huggingface-hub:huggingface-hub",
     ],

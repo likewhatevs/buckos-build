@@ -219,6 +219,12 @@ def write_link_libs(ctx, link_tset):
         return None
     return _write_tset_file(ctx, "tset_libs.txt", link_tset.project_as_args("libs", ordering = "topological"))
 
+def write_dep_prefixes(ctx, path_tset):
+    """Write raw prefix paths (one per line) from path tset projection."""
+    if not path_tset:
+        return None
+    return _write_tset_file(ctx, "tset_dep_prefixes.txt", path_tset.project_as_args("prefixes", ordering = "preorder"))
+
 def write_runtime_prefixes(ctx, runtime_tset):
     """Write prefix paths (one per line) from runtime tset projection."""
     if not runtime_tset:

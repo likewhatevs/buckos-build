@@ -17,6 +17,12 @@ package(
     },
     configure_args = [
         "--with-exuberant-ctags=/usr/bin/ctags",
+        "--disable-gtagscscope",
+        "--with-ncurses",
+    ],
+    deps = [
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
 
+    visibility = ["PUBLIC"],
 )

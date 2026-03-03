@@ -31,10 +31,8 @@ package(
         "-DQT4=ON",
     ],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/media/video/x264:x264",
         "//packages/linux/media/video/x265:x265",
-        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/system/libs/audio/opus:opus",
         "//packages/linux/system/libs/audio/lame:lame",
         "//packages/linux/desktop/qt:qt5",

@@ -8,10 +8,10 @@ filegroup(
         "//packages/linux/network/mail/dovecot:dovecot",
         "//packages/linux/communication/email-servers/exim:exim",
         "//packages/linux/communication/email-servers/maddy:maddy",
-        "//packages/linux/communication/email-servers/opensmtpd:opensmtpd",
         "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Modern all-in-one mail servers (SMTP + IMAP + more)
@@ -21,6 +21,7 @@ filegroup(
         "//packages/linux/communication/email-servers/maddy:maddy",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Mail Transfer Agents (MTAs) - SMTP servers
@@ -28,10 +29,10 @@ filegroup(
     name = "mta",
     srcs = [
         "//packages/linux/communication/email-servers/exim:exim",
-        "//packages/linux/communication/email-servers/opensmtpd:opensmtpd",
         "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # IMAP/POP3 servers
@@ -41,6 +42,7 @@ filegroup(
         "//packages/linux/network/mail/dovecot:dovecot",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Traditional mail server stack (postfix + dovecot)
@@ -51,6 +53,7 @@ filegroup(
         "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Lightweight/simple mail servers
@@ -58,9 +61,9 @@ filegroup(
     name = "lightweight",
     srcs = [
         "//packages/linux/communication/email-servers/maddy:maddy",
-        "//packages/linux/communication/email-servers/opensmtpd:opensmtpd",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Modern Rust/Go mail servers
@@ -70,6 +73,7 @@ filegroup(
         "//packages/linux/communication/email-servers/maddy:maddy",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Enterprise-grade mail servers
@@ -81,4 +85,5 @@ filegroup(
         "//packages/linux/communication/email-servers/postfix:postfix",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

@@ -8,8 +8,6 @@ package(
     sha256 = "6375f92a4b8d4f000c04d28784521e0cc7f6e9c72a3893eafe51bfc78b5d1568",
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/numba:numba",
         "//packages/linux/dev-libs/python/rawpy:rawpy",
         "//packages/linux/dev-libs/python/exifread:exifread",

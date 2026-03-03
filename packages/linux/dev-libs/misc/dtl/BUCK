@@ -12,6 +12,8 @@ package(
     homepage = "https://github.com/cubicdaiya/dtl",
     license = "BSD",
     deps = [],
-    install_script = """# dtl is header-only - just install the headers
-        "mkdir -p ${PREFIX}/include/dtl"\ncp -r dtl/*.hpp ${PREFIX}/include/dtl/""",
+    install_script = """
+        mkdir -p $OUT/usr/include/dtl
+        cp -r dtl/*.hpp $OUT/usr/include/dtl/
+    """,
 )

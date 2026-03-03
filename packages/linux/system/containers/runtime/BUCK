@@ -4,29 +4,6 @@ load("//defs:package.bzl", "package")
 # Core Container Runtimes
 # =============================================================================
 
-# runc - OCI container runtime
-package(
-    build_rule = "binary",
-    name = "runc",
-    version = "1.1.12",
-    url = "https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.tar.xz",
-    sha256 = "47d9e34500e478d860512b3b646724ee4b9e638692122ddaa82af417668ca4d7",
-    description = "CLI tool for spawning and running containers according to the OCI specification",
-    homepage = "https://github.com/opencontainers/runc",
-    license = "Apache-2.0",
-    install_script = """
-export CGO_ENABLED=1
-export BUILDTAGS="seccomp"
-make BUILDTAGS="$BUILDTAGS" runc
-mkdir -p "$OUT/usr/bin"
-install -m 755 runc "$OUT/usr/bin/runc"
-""",
-    deps = [
-        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
-        "//packages/linux/lang/go:go",
-    ],
-)
-
 # crun - Fast and lightweight OCI runtime
 package(
     build_rule = "autotools",
@@ -46,24 +23,6 @@ package(
         "//packages/linux/system/libs/ipc/libcap:libcap",
         "//packages/linux/system/libs/data/yajl:yajl",
     ],
+    visibility = ["PUBLIC"],
 )
 
-# conmon - Container monitor
-package(
-    build_rule = "binary",
-    name = "conmon",
-    version = "2.1.10",
-    url = "https://github.com/containers/conmon/archive/refs/tags/v2.1.10.tar.gz",
-    sha256 = "455fabcbd4a5a5dc5e05374a71b62dc0b08ee865c2ba398e9dc9acac1ea1836a",
-    description = "OCI container runtime monitor",
-    homepage = "https://github.com/containers/conmon",
-    license = "Apache-2.0",
-    install_script = """
-make PREFIX=/usr
-make PREFIX=/usr DESTDIR="$OUT" install
-""",
-    deps = [
-        "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/system/libs/ipc/libseccomp:libseccomp",
-    ],
-)

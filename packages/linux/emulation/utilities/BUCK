@@ -9,6 +9,7 @@ filegroup(
         "//packages/linux/emulation/utilities/spice:spice-vdagent",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -18,6 +19,7 @@ filegroup(
         "//packages/linux/emulation/utilities/spice:spice-server",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -26,6 +28,7 @@ filegroup(
         "//packages/linux/emulation/utilities/spice:spice-vdagent",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -36,14 +39,7 @@ filegroup(
         "//packages/linux/emulation/utilities/crosvm:crosvm",
     ],
     default_target_platform = "//platforms:linux-target",
-)
-
-filegroup(
-    name = "virtio-tools",
-    srcs = [
-        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
-    ],
-    default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 filegroup(
@@ -51,7 +47,7 @@ filegroup(
     srcs = [
         ":spice-full",
         ":microvm-hypervisors",
-        ":virtio-tools",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

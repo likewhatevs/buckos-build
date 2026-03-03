@@ -4,14 +4,9 @@ Image rules: iso_image, raw_disk_image, stage3_tarball.
 Assembly rules that take rootfs/kernel/initramfs deps and produce images.
 """
 
-load("//defs:providers.bzl", "IsoImageInfo", "KernelInfo", "Stage3Info")
+load("//defs:providers.bzl", "IsoImageInfo", "KernelInfo", "Stage3Info", "get_kernel_image")
+load("//defs:host_tools.bzl", "host_tool_path_args")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_path_args")
-
-def _get_kernel_image(dep):
-    """Extract boot image from KernelInfo provider."""
-    if KernelInfo not in dep:
-        fail("kernel dep must provide KernelInfo")
-    return dep[KernelInfo].bzimage
 
 # =============================================================================
 # RAW DISK IMAGE
@@ -74,7 +69,7 @@ def _iso_image_impl(ctx: AnalysisContext) -> list[Provider]:
     iso_file = ctx.actions.declare_output(ctx.attrs.name + ".iso")
 
     cmd = cmd_args(ctx.attrs._iso_tool[RunInfo])
-    cmd.add("--kernel", _get_kernel_image(ctx.attrs.kernel))
+    cmd.add("--kernel", get_kernel_image(ctx.attrs.kernel))
     cmd.add("--initramfs", ctx.attrs.initramfs[DefaultInfo].default_outputs[0])
     cmd.add("--output", iso_file.as_output())
 
@@ -97,6 +92,8 @@ def _iso_image_impl(ctx: AnalysisContext) -> list[Provider]:
 
     # Hermetic PATH from toolchain
     for arg in toolchain_path_args(ctx):
+        cmd.add(arg)
+    for arg in host_tool_path_args(ctx):
         cmd.add(arg)
 
     ctx.actions.run(cmd, category = "iso", identifier = ctx.attrs.name, allow_cache_upload = True)
@@ -123,6 +120,7 @@ _iso_image_rule = rule(
         "kernel_args": attrs.string(default = "quiet"),
         "arch": attrs.string(default = "x86_64"),  # x86_64 or aarch64
         "syslinux": attrs.option(attrs.dep(), default = None),
+        "host_deps": attrs.list(attrs.dep(), default = []),
         "labels": attrs.list(attrs.string(), default = []),
         "_iso_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:iso_helper"),

@@ -18,9 +18,6 @@ package(
         "//packages/linux/dev-libs/google/gflags:gflags",
         "//packages/linux/dev-libs/math/ceres-solver:ceres-solver",
         "//packages/linux/system/libs/database/sqlite:sqlite",
-        "//packages/linux/dev-libs/glew:glew",
-        "//packages/linux/media/image/openimageio:openimageio",
-        "//packages/linux/graphics/rendering/opengl:opengl",
     ],
     use_deps = {
         "cgal": "//packages/linux/dev-libs/cgal:cgal",
@@ -50,4 +47,5 @@ package(
         "-DFreeImage_INCLUDE_DIR=${PREFIX}/include",
         "-DFreeImage_LIBRARY=${PREFIX}/lib/libOpenImageIO.so",
     ],
+    visibility = ["PUBLIC"],
 )

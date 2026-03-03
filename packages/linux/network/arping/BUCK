@@ -14,7 +14,6 @@ package(
     homepage = "https://github.com/ThomasHabets/arping",
     license = "GPL-2.0-or-later",
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
         "//packages/linux/network/libnet:libnet",
     ],
 )

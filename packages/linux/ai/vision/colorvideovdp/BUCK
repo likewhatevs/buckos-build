@@ -7,8 +7,6 @@ package(
     url = "https://github.com/gfxdisp/colorvideovdp/archive/refs/tags/v0.5.4.tar.gz",
     sha256 = "760945bc8b0ccd88ca7b87fb815f2013fc9bbdfe36400f07e42ee6504388e075",
     deps = [
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/ml-frameworks/torchvision:torchvision",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",

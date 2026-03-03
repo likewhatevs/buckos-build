@@ -8,11 +8,10 @@ package(
     sha256 = "1b1c3613d170e669bbe6f6ede277ad41aec0ad7a091b154fdaeffb7f1a1ef393",
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/regex:regex",
         "//packages/linux/dev-libs/python/ftfy:ftfy",
-        "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/dev-libs/python/timm:timm",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
     ],
+    visibility = ["PUBLIC"],
 )

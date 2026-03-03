@@ -292,6 +292,7 @@ fi
 
     # Create Qt6QuickTools package for cross-compilation
 
+    visibility = ["PUBLIC"],
 )
 
 package(
@@ -457,59 +458,7 @@ package(
         "//packages/linux/system/libs/ipc/libcap:libcap",
     ],
 
-)
-
-# =============================================================================
-# Qt5 - Cross-platform application framework (legacy)
-# =============================================================================
-
-package(
-    build_rule = "binary",
-    name = "qt5",
-    url = "https://download.qt.io/archive/qt/5.15/5.15.12/single/qt-everywhere-opensource-src-5.15.12.tar.xz",
-    sha256 = "93f2c0889ee2e9cdf30c170d353c3f829de5f29ba21c119167dee5995e48ccce",
-    version = "5.15.12",
-    description = "Cross-platform application framework",
-    homepage = "https://www.qt.io/",
-    license = "LGPL-3.0-or-later OR GPL-3.0-or-later",
-    install_script = """
-        # Find the Qt source directory in $SRCS
-        cd "$SRCS"
-        QT_DIR=$(ls -d qt-everywhere-* 2>/dev/null | head -1)
-        if [ -z "$QT_DIR" ]; then
-            # Source may be extracted directly (top-level stripped)
-            if [ -f "$SRCS/qt.pro" ] || [ -d "$SRCS/qtbase" ]; then
-                QT_DIR="."
-            else
-                echo "ERROR: Cannot find Qt source directory in SRCS=$SRCS"
-                ls -la "$SRCS"
-                exit 1
-            fi
-        fi
-        echo "Using Qt source directory: $QT_DIR"
-        cd "$QT_DIR"
-        ./configure \
-            -prefix $PREFIX \
-            -opensource \
-            -confirm-license \
-            -release \
-            -shared \
-            -nomake examples \
-            -nomake tests \
-            -no-separate-debug-info \
-            -no-pch \
-            -no-use-gold-linker
-        make -j${MAKEOPTS:-$(nproc)}
-        make install
-    """,
-    deps = [
-        "//packages/linux/desktop/libdrm:libdrm",
-        "//packages/linux/system/libs/font/fontconfig:fontconfig",
-        "//packages/linux/system/libs/font/freetype:freetype",
-        "//packages/linux/system/libs/font/harfbuzz:harfbuzz",
-        "//packages/linux/dev-libs/glib:glib",
-        "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
-    ],
+    visibility = ["PUBLIC"],
 )
 
 # =============================================================================
@@ -543,4 +492,5 @@ package(
         "//packages/linux/core/zlib:zlib",
     ],
 
+    visibility = ["PUBLIC"],
 )

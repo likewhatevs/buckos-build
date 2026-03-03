@@ -54,6 +54,8 @@ def _compile_pkg_config_projection(value):
         cmd_args(value.prefix, format = "{}/usr/lib64/pkgconfig"),
         cmd_args(value.prefix, format = "{}/usr/lib/pkgconfig"),
         cmd_args(value.prefix, format = "{}/usr/share/pkgconfig"),
+        cmd_args(value.prefix, format = "{}/lib64/pkgconfig"),
+        cmd_args(value.prefix, format = "{}/lib/pkgconfig"),
     ]
 
 def _link_ldflags_projection(value):
@@ -61,8 +63,12 @@ def _link_ldflags_projection(value):
     args = [
         cmd_args(value.prefix, format = "-L{}/usr/lib64"),
         cmd_args(value.prefix, format = "-L{}/usr/lib"),
+        cmd_args(value.prefix, format = "-L{}/lib64"),
+        cmd_args(value.prefix, format = "-L{}/lib"),
         cmd_args(value.prefix, format = "-Wl,-rpath-link,{}/usr/lib64"),
         cmd_args(value.prefix, format = "-Wl,-rpath-link,{}/usr/lib"),
+        cmd_args(value.prefix, format = "-Wl,-rpath-link,{}/lib64"),
+        cmd_args(value.prefix, format = "-Wl,-rpath-link,{}/lib"),
     ]
     for f in value.ldflags:
         args.append(cmd_args(f))
@@ -84,11 +90,17 @@ def _path_lib_dirs_projection(value):
     return [
         cmd_args(value.prefix, format = "{}/usr/lib64"),
         cmd_args(value.prefix, format = "{}/usr/lib"),
+        cmd_args(value.prefix, format = "{}/lib64"),
+        cmd_args(value.prefix, format = "{}/lib"),
     ]
 
 def _path_cmake_prefix_projection(value):
     """Project cmake prefix paths."""
     return [cmd_args(value.prefix, format = "{}/usr")]
+
+def _path_prefixes_projection(value):
+    """Project raw prefix artifacts (for dep base dirs)."""
+    return [value.prefix]
 
 def _runtime_prefixes_projection(value):
     """Project prefix artifacts for rootfs assembly."""
@@ -119,6 +131,7 @@ PathInfoTSet = transitive_set(
         "bin_dirs": _path_bin_dirs_projection,
         "lib_dirs": _path_lib_dirs_projection,
         "cmake_prefix_paths": _path_cmake_prefix_projection,
+        "prefixes": _path_prefixes_projection,
     },
 )
 

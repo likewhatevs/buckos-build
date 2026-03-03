@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _rewrite_file(fpath, old, new):
@@ -298,9 +298,9 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
@@ -311,6 +311,7 @@ def main():
     env["PROJECT_ROOT"] = os.getcwd()
 
     build_dir = os.path.abspath(args.build_dir)
+    register_cleanup(build_dir)
     make_dir = build_dir
     if args.build_subdir:
         make_dir = os.path.join(build_dir, args.build_subdir)
@@ -325,13 +326,7 @@ def main():
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
     import tempfile
-    wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
-    wrapper = os.path.join(wrapper_dir, "pkg-config")
-    with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\n'
-                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
-                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
-    os.chmod(wrapper, 0o755)
+    wrapper_dir = write_pkg_config_wrapper(tempfile.mkdtemp(prefix="pkgconf-wrapper-"))
 
     # Apply extra environment variables first (toolchain flags like -march).
     for entry in args.extra_env:
@@ -399,6 +394,10 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
+
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. packaging for gdbus-codegen) are found.
     _path_sources = list(args.hermetic_path) + list(all_path_prepend)
@@ -418,6 +417,14 @@ def main():
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
+
+    # Find buckos bash for shell=True subprocesses and SHELL= override.
+    _buckos_bash = None
+    for _d in env.get("PATH", "").split(":"):
+        _bash = os.path.join(_d, "bash") if _d else ""
+        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
+            _buckos_bash = _bash
+            break
 
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
@@ -518,6 +525,15 @@ def main():
                         if not os.path.lexists(parent_short):
                             os.symlink(_anchor, parent_short)
 
+    # Detect meson-wrapped builds early.  When install.dat exists, we'll
+    # use `meson install --no-rebuild` instead of make/ninja.  This flag
+    # gates all Makefile/build.ninja/timestamp modifications below — those
+    # changes are unnecessary for meson install and corrupt the compile
+    # step's cached output (the build directory is a read-only input from
+    # the compile phase).
+    _is_meson_build = os.path.isfile(
+        os.path.join(make_dir, "meson-private", "install.dat"))
+
     # Detect and rewrite stale absolute paths from cross-machine cache.
     # When build ran on CI and install runs locally, autotools files
     # (config.status, Makefiles) contain CI's project root.
@@ -584,11 +600,60 @@ def main():
             except Exception:
                 pass  # Best-effort — don't block install on pickle errors
 
+    # --- Meson install fast-path ---
+    # For meson-wrapped builds (including autotools wrappers like QEMU),
+    # use `meson install --no-rebuild` and skip all Makefile/build.ninja
+    # modifications.  Those modifications are only needed for make/ninja
+    # install and corrupt the compile step's cached output (the build
+    # directory is a read-only input from the compile phase).
+    if _is_meson_build:
+        _install_dat = os.path.join(make_dir, "meson-private", "install.dat")
+        _meson_bin = None
+        _pyvenv_meson = os.path.join(make_dir, "pyvenv", "bin", "meson")
+        if os.path.isfile(_pyvenv_meson) and os.access(_pyvenv_meson, os.X_OK):
+            _meson_bin = _pyvenv_meson
+        else:
+            for _d in env.get("PATH", "").split(":"):
+                _candidate = os.path.join(_d, "meson") if _d else ""
+                if _candidate and os.path.isfile(_candidate) and os.access(_candidate, os.X_OK):
+                    _meson_bin = _candidate
+                    break
+        if not _meson_bin:
+            print("error: meson install.dat found but no meson binary available",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        # Meson install reads DESTDIR from the environment.
+        env[args.destdir_var] = prefix
+        # pyvenv meson may need the bundled python's libraries.
+        _pyvenv_lib = os.path.join(make_dir, "pyvenv", "lib")
+        if os.path.isdir(_pyvenv_lib):
+            _existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = _pyvenv_lib + (":" + _existing if _existing else "")
+
+        cmd = [_meson_bin, "install", "--no-rebuild", "-C", make_dir]
+        result = subprocess.run(cmd, env=env)
+        if result.returncode != 0:
+            print(f"error: meson install failed with exit code {result.returncode}",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        # Fall through to post-install (la removal, post-cmds, sanitize)
+        for la in _glob.glob(os.path.join(prefix, "**", "*.la"), recursive=True):
+            os.remove(la)
+        env["DESTDIR"] = prefix
+        env["OUT"] = prefix
+        for cmd_str in args.post_cmds:
+            result = subprocess.run(cmd_str, shell=True, cwd=prefix, env=env,
+                                    executable=_buckos_bash)
+            if result.returncode != 0:
+                print(f"error: post-cmd failed with exit code {result.returncode}: {cmd_str}",
+                      file=sys.stderr)
+                sys.exit(1)
+        sanitize_filenames(prefix, make_dir)
+        return
+
     # Suppress libtool re-linking during install.
-    #
-    # Libtool's --mode=install re-links binaries when it sees .la files
-    # with installed=no.  Re-linking invokes the linker with build-tree
-    # paths (relative or absolute) that may not resolve in Buck2's
     # split-action model where build and install are separate cached
     # actions.  The binaries are already correctly linked from the build
     # phase; re-linking during install into DESTDIR is unnecessary.
@@ -904,6 +969,13 @@ def main():
             else:
                 cmd.append(arg)
 
+    # Override make's SHELL so recipe lines use buckos bash instead of
+    # /bin/sh (which doesn't exist on remote execution workers).
+    if args.build_system == "make" and _buckos_bash:
+        _has_shell_arg = any(a.startswith("SHELL=") for a in args.make_args)
+        if not _has_shell_arg:
+            cmd.append(f"SHELL={_buckos_bash}")
+
     result = subprocess.run(cmd, env=env)
     if result.returncode != 0:
         print(f"error: make install failed with exit code {result.returncode}", file=sys.stderr)
@@ -920,7 +992,8 @@ def main():
     env["DESTDIR"] = prefix
     env["OUT"] = prefix
     for cmd_str in args.post_cmds:
-        result = subprocess.run(cmd_str, shell=True, cwd=prefix, env=env)
+        result = subprocess.run(cmd_str, shell=True, cwd=prefix, env=env,
+                                executable=_buckos_bash)
         if result.returncode != 0:
             print(f"error: post-cmd failed with exit code {result.returncode}: {cmd_str}",
                   file=sys.stderr)

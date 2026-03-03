@@ -20,10 +20,8 @@
 filegroup(
     name = "core-auth",
     srcs = [
-        "//packages/linux/system/security/encryption:linux-pam",
         "//packages/linux/system/apps/shadow:shadow",
         "//packages/linux/system/apps/sudo:sudo",
-        "//packages/linux/system/apps/doas:doas",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -33,7 +31,6 @@ filegroup(
     name = "privilege-escalation",
     srcs = [
         "//packages/linux/system/apps/sudo:sudo",
-        "//packages/linux/system/apps/doas:doas",
         "//packages/linux/system/security/auth/privilege:polkit",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -43,11 +40,6 @@ filegroup(
 filegroup(
     name = "directory-services",
     srcs = [
-        "//packages/linux/system/security/auth/directory:krb5",
-        "//packages/linux/system/security/auth/directory:openldap",
-        "//packages/linux/system/security/auth/directory:cyrus-sasl",
-        "//packages/linux/system/security/auth/directory:sssd",
-        "//packages/linux/system/security/auth/directory:nss-pam-ldapd",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -56,12 +48,6 @@ filegroup(
 filegroup(
     name = "two-factor-auth",
     srcs = [
-        "//packages/linux/system/security/auth/mfa:oath-toolkit",
-        "//packages/linux/system/security/auth/mfa:google-authenticator",
-        "//packages/linux/system/security/auth/mfa:libfido2",
-        "//packages/linux/system/security/auth/mfa:pam-u2f",
-        "//packages/linux/system/security/auth/mfa:yubico-pam",
-        "//packages/linux/system/security/auth/mfa:yubikey-manager",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -70,8 +56,6 @@ filegroup(
 filegroup(
     name = "network-auth",
     srcs = [
-        "//packages/linux/system/security/auth/network:pam-radius",
-        "//packages/linux/system/security/auth/network:pam-tacplus",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -80,9 +64,7 @@ filegroup(
 filegroup(
     name = "password-quality",
     srcs = [
-        "//packages/linux/system/security/auth/password:libpwquality",
         "//packages/linux/system/security/cracklib:cracklib",
-        "//packages/linux/system/security/auth/password:passwdqc",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -101,18 +83,6 @@ filegroup(
 filegroup(
     name = "pam-modules",
     srcs = [
-        "//packages/linux/system/security/auth/mfa:oath-toolkit",
-        "//packages/linux/system/security/auth/mfa:google-authenticator",
-        "//packages/linux/system/security/auth/mfa:pam-u2f",
-        "//packages/linux/system/security/auth/mfa:yubico-pam",
-        "//packages/linux/system/security/auth/network:pam-radius",
-        "//packages/linux/system/security/auth/network:pam-tacplus",
-        "//packages/linux/system/security/auth/password:libpwquality",
-        "//packages/linux/system/security/auth/pam-modules:pam-mount",
-        "//packages/linux/system/security/auth/pam-modules:pam-script",
-        "//packages/linux/system/security/auth/pam-modules:pam-ssh-agent-auth",
-        "//packages/linux/system/security/auth/pam-modules:pam-pkcs11",
-        "//packages/linux/system/security/auth/pam-modules:pam-abl",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -121,13 +91,6 @@ filegroup(
 filegroup(
     name = "yubikey",
     srcs = [
-        "//packages/linux/system/security/auth/mfa:yubico-pam",
-        "//packages/linux/system/security/auth/mfa:yubikey-manager",
-        "//packages/linux/system/security/auth/mfa:ykpers",
-        "//packages/linux/system/security/auth/mfa:ykclient",
-        "//packages/linux/system/security/auth/mfa:libyubikey",
-        "//packages/linux/system/security/auth/mfa:libfido2",
-        "//packages/linux/system/security/auth/mfa:pam-u2f",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -152,10 +115,8 @@ filegroup(
 filegroup(
     name = "essential",
     srcs = [
-        "//packages/linux/system/security/encryption:linux-pam",
         "//packages/linux/system/apps/shadow:shadow",
         "//packages/linux/system/apps/sudo:sudo",
-        "//packages/linux/system/security/auth/password:libpwquality",
         "//packages/linux/system/security/cracklib:cracklib",
     ],
     default_target_platform = "//platforms:linux-target",

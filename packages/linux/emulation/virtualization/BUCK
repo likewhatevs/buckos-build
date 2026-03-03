@@ -13,8 +13,6 @@ filegroup(
 filegroup(
     name = "virt-manager-full",
     srcs = [
-        "//packages/linux/emulation/virtualization/virt-manager:virt-manager",
-        "//packages/linux/emulation/virtualization/virt-manager:virt-install",
         "//packages/linux/emulation/virtualization/virt-manager:virt-viewer",
     ],
     default_target_platform = "//platforms:linux-target",

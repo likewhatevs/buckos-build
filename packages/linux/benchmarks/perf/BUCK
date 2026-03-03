@@ -20,11 +20,12 @@ package(
         cd $SRCS/tools/perf
         # Build without optional dependencies
         # WERROR=0 needed for GCC 15 which has stricter warnings (calloc-transposed-args, etc.)
-        make WERROR=0 NO_LIBPYTHON=1 NO_LIBBPF=1 NO_LIBCAP=1 NO_JEVENTS=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBTRACEEVENT=1 prefix=/usr
+        make WERROR=0 NO_LIBPYTHON=1 NO_LIBBPF=1 NO_LIBCAP=1 NO_JEVENTS=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBTRACEEVENT=1 NO_LIBELF=1 prefix=/usr
         mkdir -p $OUT/usr/bin
         cp perf $OUT/usr/bin/
     """,
     use_deps = {
         "zlib": "//packages/linux/core/zlib:zlib",
     },
+    visibility = ["PUBLIC"],
 )

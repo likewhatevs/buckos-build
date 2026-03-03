@@ -15,13 +15,13 @@ package(
         "--disable-alsaconf",
         "--disable-bat",
         "--disable-xmlto",
+        "--with-curses=ncurses",
     ],
     use_configure = {
         "bat": ("--enable-bat", "--disable-bat"),
         "doc": ("--enable-xmlto", "--disable-xmlto"),
         "ieee1394": ("--enable-ieee1394", "--disable-ieee1394"),
         "libsamplerate": ("--enable-libsamplerate", "--disable-libsamplerate"),
-        "ncurses": ("--with-curses=ncurses", "--without-curses"),
         "nls": ("--enable-nls", "--disable-nls"),
         "selinux": ("--enable-selinux", "--disable-selinux"),
     },
@@ -31,5 +31,7 @@ package(
     deps = [
         "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
         "//packages/linux/system/init/eudev:eudev",
+        "//packages/linux/system/terminal/ncurses:ncurses",
     ],
+    visibility = ["PUBLIC"],
 )

@@ -5,11 +5,12 @@ Runs cmake with specified source dir, build dir, and arguments.
 """
 
 import argparse
+import glob as _glob
 import os
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -118,9 +119,9 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
     file_prefix_paths = _read_flag_file(args.prefix_path_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
@@ -130,17 +131,12 @@ def main():
         sys.exit(1)
 
     os.makedirs(args.build_dir, exist_ok=True)
+    register_cleanup(os.path.abspath(args.build_dir))
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
     import tempfile
-    wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
-    wrapper = os.path.join(wrapper_dir, "pkg-config")
-    with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\n'
-                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
-                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
-    os.chmod(wrapper, 0o755)
+    wrapper_dir = write_pkg_config_wrapper(tempfile.mkdtemp(prefix="pkgconf-wrapper-"))
 
     env = clean_env()
 
@@ -196,6 +192,22 @@ def main():
     # Prepend pkg-config wrapper to PATH (after hermetic/prepend logic
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
+
+    # Extract --sysroot= from CC/CXX and pass as CMAKE_SYSROOT instead.
+    # CMake's automoc mishandles sysroot embedded in the compiler command,
+    # generating broken ninja rules with escaped-space before --sysroot.
+    _cmake_sysroot = None
+    for _cc_key in ("CC", "CXX"):
+        _cc_val = env.get(_cc_key, "")
+        if "--sysroot=" in _cc_val:
+            parts = _cc_val.split()
+            clean = []
+            for p in parts:
+                if p.startswith("--sysroot="):
+                    _cmake_sysroot = p[len("--sysroot="):]
+                else:
+                    clean.append(p)
+            env[_cc_key] = " ".join(clean)
     if args.cc:
         env["CC"] = _resolve_env_paths(args.cc)
     if args.cxx:
@@ -205,13 +217,22 @@ def main():
     if args.source_subdir:
         source_path = os.path.join(source_path, args.source_subdir)
 
+    # Force cmake to use our --define-prefix wrapper instead of the real
+    # pkg-config binary.  cmake's find_program() searches CMAKE_PREFIX_PATH
+    # before PATH, so it finds the buckos-built pkg-config binary (which
+    # doesn't rewrite prefixes) before our wrapper on PATH.
+    wrapper_pkg_config = os.path.join(wrapper_dir, "pkg-config")
+
     cmd = [
         "cmake",
         "-S", source_path,
         "-B", os.path.abspath(args.build_dir),
         f"-DCMAKE_INSTALL_PREFIX={args.install_prefix}",
+        f"-DPKG_CONFIG_EXECUTABLE={wrapper_pkg_config}",
         "-G", "Ninja",
     ]
+    if _cmake_sysroot:
+        cmd.append(f"-DCMAKE_SYSROOT={_cmake_sysroot}")
 
     # Build CMAKE_PREFIX_PATH from dep prefixes so find_package() works.
     # Merge flag-file prefix paths with CLI --prefix-path args.
@@ -227,6 +248,28 @@ def main():
             existing = env.get("LD_LIBRARY_PATH", "")
             merged = ":".join(resolved_lib_dirs)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
+
+    # Auto-detect Perl5 lib dirs from dep prefixes so build-time perl
+    # modules (e.g. URI::Escape for kdoctools) are found by cmake's
+    # FindPerlModules.  all_prefix_paths are {dep}/usr directories.
+    _perl5_paths = []
+    for _pp in all_prefix_paths:
+        for _pattern in ("lib/perl5", "lib/perl5/vendor_perl",
+                         "lib/perl5/site_perl", "share/perl5",
+                         "share/perl5/vendor_perl",
+                         "lib/perl5/5.*", "lib64/perl5",
+                         "lib64/perl5/vendor_perl",
+                         "lib64/perl5/5.*"):
+            for _sp in _glob.glob(os.path.join(_pp, _pattern)):
+                if os.path.isdir(_sp):
+                    _perl5_paths.append(_sp)
+    if _perl5_paths:
+        _existing = env.get("PERL5LIB", "")
+        env["PERL5LIB"] = ":".join(_perl5_paths) + (":" + _existing if _existing else "")
 
     # Collect cmake defines in a dict so we can merge flag-file values
     # with toolchain/per-package values for CMAKE_*_FLAGS.
@@ -257,8 +300,15 @@ def main():
             existing = cmake_defines.get(key, "")
             cmake_defines[key] = (_ld + " " + existing).strip() if existing else _ld
 
-    for key, value in cmake_defines.items():
-        cmd.append(f"-D{key}={value}" if value else f"-D{key}")
+    # Write long defines (CMAKE_*_FLAGS with hundreds of dep flags) to an
+    # initial-cache file instead of the command line.  Packages with 100+
+    # transitive deps can exceed the execve argument limit otherwise.
+    _cache_file = os.path.join(os.path.abspath(args.build_dir), "_buck_initial_cache.cmake")
+    with open(_cache_file, "w") as _cf:
+        for key, value in cmake_defines.items():
+            escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+            _cf.write(f'set({key} "{escaped}" CACHE STRING "")\n')
+    cmd.extend(["-C", _cache_file])
 
     cmd.extend(args.cmake_args)
 

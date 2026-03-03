@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames
+from _env import clean_env, register_cleanup, sanitize_filenames, write_stub_script
 
 
 def _resolve_flag_paths(value, project_root):
@@ -98,6 +98,11 @@ def main():
     version = sys.argv[3]
     install_script = resolve(sys.argv[4])
 
+    # Register cleanup early so unsafe filenames are removed on any exit
+    scratch = os.environ.get("BUCK_SCRATCH_PATH")
+    workdir = resolve(scratch) if scratch else None
+    register_cleanup(output_dir, workdir)
+
     # Start with clean env
     env = clean_env()
     env["PROJECT_ROOT"] = project_root
@@ -108,13 +113,14 @@ def main():
     env["DESTDIR"] = output_dir
     env["S"] = source_dir
     env["PV"] = version
-    scratch = os.environ.get("BUCK_SCRATCH_PATH")
-    if scratch:
-        env["WORKDIR"] = resolve(scratch)
-        env["BUCK_SCRATCH_PATH"] = resolve(scratch)
+    if workdir:
+        env["WORKDIR"] = workdir
+        env["BUCK_SCRATCH_PATH"] = workdir
     else:
         import tempfile
-        env["WORKDIR"] = tempfile.mkdtemp()
+        workdir = tempfile.mkdtemp()
+        env["WORKDIR"] = workdir
+        register_cleanup(workdir)
 
     make_jobs = starlark_vars.get("MAKE_JOBS", str(os.cpu_count() or 1))
     env["MAKE_JOBS"] = make_jobs
@@ -215,11 +221,7 @@ def main():
     )
     if not has_makeinfo:
         stub_dir = os.path.join(workdir, ".stub-bin")
-        os.makedirs(stub_dir, exist_ok=True)
-        stub = os.path.join(stub_dir, "makeinfo")
-        with open(stub, "w") as f:
-            f.write("#!/bin/sh\nexit 0\n")
-        os.chmod(stub, 0o755)
+        write_stub_script(os.path.join(stub_dir, "makeinfo"))
         env["PATH"] = stub_dir + ":" + env.get("PATH", "")
 
     # Copy source to writable directory
@@ -280,6 +282,17 @@ def main():
         cwd = os.path.dirname(source_dir)
     else:
         cwd = project_root
+
+    # Override make's SHELL via MAKEFLAGS so any make invocation inside
+    # the install script uses buckos bash instead of /bin/sh (which
+    # doesn't exist on remote execution workers).
+    for _d in env.get("PATH", "").split(":"):
+        _bash = os.path.join(_d, "bash") if _d else ""
+        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
+            existing_flags = env.get("MAKEFLAGS", "")
+            if "SHELL=" not in existing_flags:
+                env["MAKEFLAGS"] = (existing_flags + " " if existing_flags else "") + f"SHELL={_bash}"
+            break
 
     # Run install script via bash -e (matching original `source` semantics)
     result = subprocess.run(

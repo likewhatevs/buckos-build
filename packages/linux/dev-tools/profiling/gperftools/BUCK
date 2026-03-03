@@ -14,9 +14,6 @@ package(
     deps = [
         "//packages/linux/system/libs/compression/xz-utils:xz-utils",
     ],
-    use_deps = {
-        "libunwind": "//packages/linux/system/libs/libunwind:libunwind",
-    },
     configure_args = [
         "--prefix=${PREFIX}",
         "--enable-shared",
@@ -25,4 +22,5 @@ package(
     use_configure = {
         "libunwind": ("--enable-libunwind", "--disable-libunwind"),
     },
+    visibility = ["PUBLIC"],
 )

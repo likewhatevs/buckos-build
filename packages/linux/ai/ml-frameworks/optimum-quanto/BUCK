@@ -9,7 +9,6 @@ package(
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/dev-libs/python/ninja:ninja",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/safetensors:safetensors",
         "//packages/linux/dev-libs/python/huggingface-hub:huggingface-hub",
     ],

@@ -13,7 +13,6 @@ filegroup(
     srcs = [
         "//packages/linux/system/libs/network/c-ares:c-ares",
         "//packages/linux/network/dns/libraries/ldns:ldns",
-        "//packages/linux/network/dns/libraries/getdns:getdns",
         "//packages/linux/network/dns/libraries/libidn:libidn",
         "//packages/linux/network/dns/libraries/libidn2:libidn2",
     ],
@@ -27,8 +26,6 @@ filegroup(
 filegroup(
     name = "authoritative-servers",
     srcs = [
-        "//packages/linux/network/dns/servers/bind:bind",
-        "//packages/linux/network/dns/servers/powerdns:powerdns",
         "//packages/linux/network/dns/servers/nsd:nsd",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -41,7 +38,6 @@ filegroup(
 filegroup(
     name = "recursive-resolvers",
     srcs = [
-        "//packages/linux/network/dns/servers/pdns-recursor:pdns-recursor",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -54,7 +50,6 @@ filegroup(
     name = "lightweight-servers",
     srcs = [
         "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
-        "//packages/linux/network/dns/servers/coredns:coredns",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -66,12 +61,8 @@ filegroup(
 filegroup(
     name = "dns-servers",
     srcs = [
-        "//packages/linux/network/dns/servers/bind:bind",
         "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
-        "//packages/linux/network/dns/servers/powerdns:powerdns",
-        "//packages/linux/network/dns/servers/coredns:coredns",
         "//packages/linux/network/dns/servers/nsd:nsd",
-        "//packages/linux/network/dns/servers/pdns-recursor:pdns-recursor",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -83,7 +74,6 @@ filegroup(
 filegroup(
     name = "dns-query-tools",
     srcs = [
-        "//packages/linux/network/dns/tools/bind-tools:bind-tools",
         "//packages/linux/network/dns/tools/ldns-utils:ldns-utils",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -96,9 +86,6 @@ filegroup(
 filegroup(
     name = "modern-dns-clients",
     srcs = [
-        "//packages/linux/network/dns/tools/doggo:doggo",
-        "//packages/linux/network/dns/tools/dog:dog",
-        "//packages/linux/network/dns/tools/q:q",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -110,8 +97,6 @@ filegroup(
 filegroup(
     name = "dns-privacy-tools",
     srcs = [
-        "//packages/linux/network/dns/tools/dnscrypt-proxy:dnscrypt-proxy",
-        "//packages/linux/network/dns/tools/stubby:stubby",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -123,13 +108,7 @@ filegroup(
 filegroup(
     name = "dns-tools",
     srcs = [
-        "//packages/linux/network/dns/tools/bind-tools:bind-tools",
         "//packages/linux/network/dns/tools/ldns-utils:ldns-utils",
-        "//packages/linux/network/dns/tools/doggo:doggo",
-        "//packages/linux/network/dns/tools/dnscrypt-proxy:dnscrypt-proxy",
-        "//packages/linux/network/dns/tools/stubby:stubby",
-        "//packages/linux/network/dns/tools/dog:dog",
-        "//packages/linux/network/dns/tools/q:q",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -142,7 +121,6 @@ filegroup(
     name = "essential-dns",
     srcs = [
         "//packages/linux/network/dns/servers/dnsmasq:dnsmasq",
-        "//packages/linux/network/dns/tools/bind-tools:bind-tools",
         "//packages/linux/system/libs/network/c-ares:c-ares",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -155,8 +133,6 @@ filegroup(
 filegroup(
     name = "enterprise-dns",
     srcs = [
-        "//packages/linux/network/dns/servers/bind:bind",
-        "//packages/linux/network/dns/servers/powerdns:powerdns",
         "//packages/linux/network/dns/servers/nsd:nsd",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -169,7 +145,6 @@ filegroup(
 filegroup(
     name = "cloud-dns",
     srcs = [
-        "//packages/linux/network/dns/servers/coredns:coredns",
     ],
     default_target_platform = "//platforms:linux-target",
 )

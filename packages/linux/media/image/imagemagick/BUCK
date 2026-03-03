@@ -23,7 +23,6 @@ package(
         "webp": "//packages/linux/system/libs/image/libwebp:libwebp",
         "jxl": "//packages/linux/media/image/libjxl:libjxl",
         "heif": "//packages/linux/media/image/libheif:libheif",
-        "raw": "//packages/linux/media/image/libraw:libraw",
         "openexr": "//packages/linux/media/image/openexr:openexr",
         "x11": "//packages/linux/graphics/x11-libs/libx11:libx11",
     },

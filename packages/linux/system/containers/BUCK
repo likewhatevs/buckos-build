@@ -12,32 +12,28 @@ filegroup(
     name = "container-runtime",
     srcs = [
         "//packages/linux/system/containers/runtime:crun",
-        "//packages/linux/system/containers/runtime:runc",
-        "//packages/linux/system/containers/runtime:conmon",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container networking packages
 filegroup(
     name = "container-networking",
     srcs = [
-        "//packages/linux/system/containers/network:cni-plugins",
-        "//packages/linux/system/containers/network:netavark",
-        "//packages/linux/system/containers/network:aardvark-dns",
-        "//packages/linux/system/containers/network:slirp4netns",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container storage packages
 filegroup(
     name = "container-storage",
     srcs = [
-        "//packages/linux/system/containers/storage:fuse-overlayfs",
         "//packages/linux/system/containers/podman:containers-common",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Main container tools (Podman ecosystem)
@@ -50,6 +46,7 @@ filegroup(
         "//packages/linux/system/containers/podman:podman-compose",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container utilities and monitoring
@@ -62,6 +59,7 @@ filegroup(
         "//packages/linux/system/containers/utils:lazydocker",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container security tools
@@ -71,6 +69,7 @@ filegroup(
         "//packages/linux/system/containers/utils:trivy",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Complete container stack
@@ -86,4 +85,5 @@ filegroup(
         "//packages/linux/system/containers/utils:docker-credential-helpers",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

@@ -43,9 +43,10 @@ package(
     description = "Generic and open source machine emulator and virtualizer",
     homepage = "https://www.qemu.org/",
     license = "GPL-2.0",
+    # QEMU's ./configure creates a build/ subdirectory with the actual
+    # meson/ninja build system; make must run from there, not the source root.
+    build_subdir = "build",
     pre_configure_cmds = [
-        # QEMU 9.x mkvenv needs distlib to create its Python venv
-        "pip3 install --user distlib",
         # Fix struct sched_attr redefinition with glibc >= 2.41 (linux-user targets)
         "awk '/^struct sched_attr \\{/{print \"#if !(defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 41)))\"; f=1} {print} f && /^};/{print \"#endif\"; f=0}' linux-user/syscall.c > linux-user/syscall.c.tmp && mv linux-user/syscall.c.tmp linux-user/syscall.c",
     ],
@@ -92,6 +93,7 @@ package(
     deps = [
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/dev-libs/python/packaging:packaging",
+        "//packages/linux/lang/python/distlib:distlib",  # QEMU 9.x mkvenv
         "//packages/linux/system/libs/utility/pcre2:pcre2",
         "//packages/linux/system/libs/utility/libffi:libffi",
         "//packages/linux/system/libs/io/libaio:libaio",
@@ -120,6 +122,7 @@ package(
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/crypto/libgcrypt:libgcrypt",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # QEMU guest agent
@@ -134,6 +137,7 @@ package(
     description = "QEMU Guest Agent for improved host-guest communication",
     homepage = "https://www.qemu.org/",
     license = "GPL-2.0",
+    build_subdir = "build",
     configure_args = [
         "--prefix=/usr",
         "--sysconfdir=/etc",
@@ -145,6 +149,7 @@ package(
     deps = [
         "//packages/linux/dev-libs/glib:glib",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # QEMU user-space emulation only
@@ -159,6 +164,7 @@ package(
     description = "QEMU user-space emulation for running foreign binaries",
     homepage = "https://www.qemu.org/",
     license = "GPL-2.0",
+    build_subdir = "build",
     pre_configure_cmds = [
         # Fix struct sched_attr redefinition with glibc >= 2.41
         "awk '/^struct sched_attr \\{/{print \"#if !(defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 41)))\"; f=1} {print} f && /^};/{print \"#endif\"; f=0}' linux-user/syscall.c > linux-user/syscall.c.tmp && mv linux-user/syscall.c.tmp linux-user/syscall.c",
@@ -168,13 +174,13 @@ package(
         "--sysconfdir=/etc",
         "--disable-system",
         "--enable-linux-user",
-        "--enable-binfmt",
         "--target-list=x86_64-linux-user,i386-linux-user,aarch64-linux-user,arm-linux-user,riscv64-linux-user,riscv32-linux-user,ppc64-linux-user,s390x-linux-user,mips64el-linux-user",
     ],
     deps = [
         "//packages/linux/dev-libs/glib:glib",
         "//packages/linux/core/zlib:zlib",
     ],
+    visibility = ["PUBLIC"],
 )
 
 # QEMU image utilities
@@ -189,6 +195,7 @@ package(
     description = "QEMU disk image utility (qemu-img, qemu-nbd)",
     homepage = "https://www.qemu.org/",
     license = "GPL-2.0",
+    build_subdir = "build",
     configure_args = [
         "--prefix=/usr",
         "--sysconfdir=/etc",
@@ -201,4 +208,5 @@ package(
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/compression/zstd:zstd",
     ],
+    visibility = ["PUBLIC"],
 )

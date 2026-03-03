@@ -6,7 +6,6 @@ filegroup(
     name = "wifi-tools",
     srcs = [
         "//packages/linux/network/wireless/wpa-supplicant:wpa-supplicant",
-        "//packages/linux/network/wireless/hostapd:hostapd",
         "//packages/linux/network/wireless/iw:iw",
         "//packages/linux/network/wireless/wireless-tools:wireless-tools",
         "//packages/linux/network/wireless/wireless-regdb:wireless-regdb",
@@ -27,8 +26,6 @@ filegroup(
 filegroup(
     name = "wireless-security",
     srcs = [
-        "//packages/linux/network/wireless/aircrack-ng:aircrack-ng",
-        "//packages/linux/network/wireless/kismet:kismet",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -37,7 +34,6 @@ filegroup(
 filegroup(
     name = "wireless-monitoring",
     srcs = [
-        "//packages/linux/network/wireless/wavemon:wavemon",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -46,7 +42,6 @@ filegroup(
 filegroup(
     name = "sdr-tools",
     srcs = [
-        "//packages/linux/network/wireless/rtl-sdr:rtl-sdr",
     ],
     default_target_platform = "//platforms:linux-target",
 )

@@ -17,11 +17,6 @@ alias(
     actual = "//packages/linux/system/init/systemd:systemd",
 )
 
-alias(
-    name = "s6",
-    actual = "//packages/linux/system/init/s6:s6",
-)
-
 # =============================================================================
 # Package Groups
 # =============================================================================
@@ -38,9 +33,6 @@ filegroup(
     name = "s6-stack",
     srcs = [
         "//packages/linux/system/init/skalibs:skalibs",
-        "//packages/linux/system/init/s6:s6",
-        "//packages/linux/system/init/s6-linux-init:s6-linux-init",
-        "//packages/linux/system/init/s6-rc:s6-rc",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -57,9 +49,6 @@ filegroup(
     srcs = [
         "//packages/linux/system/init/systemd:systemd",
         "//packages/linux/system/init/skalibs:skalibs",
-        "//packages/linux/system/init/s6:s6",
-        "//packages/linux/system/init/s6-linux-init:s6-linux-init",
-        "//packages/linux/system/init/s6-rc:s6-rc",
     ],
     default_target_platform = "//platforms:linux-target",
 )

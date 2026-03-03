@@ -10,16 +10,6 @@ alias(
 )
 
 alias(
-    name = "vim-minimal",
-    actual = "//packages/linux/editors/vim-minimal:vim-minimal",
-)
-
-alias(
-    name = "neovim",
-    actual = "//packages/linux/editors/neovim:neovim",
-)
-
-alias(
     name = "emacs",
     actual = "//packages/linux/editors/emacs:emacs",
 )
@@ -32,11 +22,6 @@ alias(
 alias(
     name = "vscodium",
     actual = "//packages/linux/editors/vscodium:vscodium",
-)
-
-alias(
-    name = "ed",
-    actual = "//packages/linux/editors/ed:ed",
 )
 
 # =============================================================================
@@ -69,16 +54,6 @@ alias(
 )
 
 alias(
-    name = "jq",
-    actual = "//packages/linux/editors/jq:jq",
-)
-
-alias(
-    name = "yq",
-    actual = "//packages/linux/editors/yq:yq",
-)
-
-alias(
     name = "xmlstarlet",
     actual = "//packages/linux/editors/xmlstarlet:xmlstarlet",
 )
@@ -94,16 +69,6 @@ alias(
 )
 
 alias(
-    name = "fzf",
-    actual = "//packages/linux/editors/fzf:fzf",
-)
-
-alias(
-    name = "pandoc",
-    actual = "//packages/linux/editors/pandoc:pandoc",
-)
-
-alias(
     name = "entr",
     actual = "//packages/linux/editors/entr:entr",
 )
@@ -111,11 +76,6 @@ alias(
 alias(
     name = "delta",
     actual = "//packages/linux/editors/delta:delta",
-)
-
-alias(
-    name = "sd",
-    actual = "//packages/linux/editors/sd:sd",
 )
 
 alias(
@@ -146,7 +106,6 @@ filegroup(
         ":emacs",
         ":emacs-nox",
         ":vscodium",
-        ":ed",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -191,16 +150,11 @@ filegroup(
         ":grep",
         ":diffutils",
         ":patch",
-        ":jq",
-        ":yq",
         ":xmlstarlet",
         ":ripgrep",
         ":bat",
-        ":fzf",
-        ":pandoc",
         ":entr",
         ":delta",
-        ":sd",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -220,8 +174,6 @@ filegroup(
 filegroup(
     name = "data-processors",
     srcs = [
-        ":jq",
-        ":yq",
         ":xmlstarlet",
     ],
     default_target_platform = "//platforms:linux-target",
@@ -233,7 +185,6 @@ filegroup(
         ":ripgrep",
         ":bat",
         ":delta",
-        ":sd",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -243,7 +194,6 @@ filegroup(
     srcs = [
         ":grep",
         ":ripgrep",
-        ":fzf",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -263,7 +213,6 @@ filegroup(
     srcs = [
         ":sed",
         ":gawk",
-        ":sd",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -271,7 +220,6 @@ filegroup(
 filegroup(
     name = "document-converters",
     srcs = [
-        ":pandoc",
     ],
     default_target_platform = "//platforms:linux-target",
 )

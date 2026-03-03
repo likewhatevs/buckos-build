@@ -8,8 +8,6 @@ package(
     sha256 = "6ccca500a0bca1a4c81c1bdc3fc3366f8fd5fe5f6df4329a2641a601a90b6c36",
     deps = [
         "//packages/linux/ai/ml-frameworks/accelerate:accelerate",
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/ai/ml-frameworks/peft:peft",
         "//packages/linux/dev-libs/python/sentencepiece:sentencepiece",
         "//packages/linux/ai/ml-frameworks/timm:timm",

@@ -4,10 +4,6 @@ package(
     build_rule = "meson",
     name = "libslirp",
     version = "4.9.1",
-    use_configure = {
-        "static-libs": ("--enable-static", "--disable-static"),
-        "valgrind": ("--enable-valgrind", "--disable-valgrind"),
-    },
     url = "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v4.9.1/libslirp-v4.9.1.tar.gz",
     sha256 = "3970542143b7c11e6a09a4d2b50f30a133473c41f15ed0bdcc3b7a1c450d9a5c",
     deps = [

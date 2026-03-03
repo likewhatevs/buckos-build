@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -126,6 +126,8 @@ def main():
                         help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
     parser.add_argument("--path-file", default=None,
                         help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--lib-dirs-file", default=None,
+                        help="File with lib dirs for LD_LIBRARY_PATH (one per line, from tset projection)")
     args = parser.parse_args()
 
     # Read flag files early — tset-propagated flags are base; per-package
@@ -136,13 +138,17 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
+    file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
     source_dir = os.path.abspath(args.source_dir)
     output_dir = os.path.abspath(args.output_dir)
+
+    # Register cleanup early so unsafe filenames are removed on any exit
+    register_cleanup(output_dir)
 
     if not os.path.isdir(source_dir):
         print(f"error: source directory not found: {source_dir}", file=sys.stderr)
@@ -155,14 +161,7 @@ def main():
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
-    wrapper_dir = os.path.join(output_dir, ".pkgconf-wrapper")
-    os.makedirs(wrapper_dir, exist_ok=True)
-    wrapper = os.path.join(wrapper_dir, "pkg-config")
-    with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\n'
-                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
-                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
-    os.chmod(wrapper, 0o755)
+    wrapper_dir = write_pkg_config_wrapper(os.path.join(output_dir, ".pkgconf-wrapper"))
 
     env = clean_env()
 
@@ -246,6 +245,20 @@ def main():
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
 
+    # Merge tset-provided lib dirs into LD_LIBRARY_PATH so dynamically
+    # linked dep tools (e.g. buckos python needing libpython3.12.so)
+    # can execute during configure probes.
+    if file_lib_dirs:
+        resolved = [os.path.abspath(d) for d in file_lib_dirs if os.path.isdir(d)]
+        if resolved:
+            existing = env.get("LD_LIBRARY_PATH", "")
+            merged = ":".join(resolved)
+            env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
+
     # Auto-detect automake Perl modules and aclocal dirs from dep
     # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
     # paths which don't resolve to the artifact directory.
@@ -286,12 +299,27 @@ def main():
     # Prepend pkg-config wrapper to PATH
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", os.environ.get("PATH", ""))
 
+    # Find buckos bash on PATH for running configure and pre-cmds.
+    # CONFIG_SHELL tells autotools configure to re-exec sub-configures
+    # under this shell instead of #!/bin/sh (which doesn't exist on
+    # remote execution workers).
+    _config_shell = None
+    for _d in env.get("PATH", "").split(":"):
+        _bash = os.path.join(_d, "bash") if _d else ""
+        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
+            _config_shell = _bash
+            env["CONFIG_SHELL"] = _bash
+            break
+
     # Run pre-configure commands (e.g. autoreconf, libtoolize, or
     # bootstrap src_prepare steps like symlinking in-tree libraries).
     # These run before the skip-configure check so they're available
     # for prepare-only actions (--skip-configure --pre-cmd "...").
     for cmd_str in args.pre_cmds:
-        result = subprocess.run(cmd_str, shell=True, cwd=output_dir, env=env)
+        result = subprocess.run(
+            cmd_str, shell=True, cwd=output_dir, env=env,
+            executable=_config_shell,
+        )
         if result.returncode != 0:
             print(f"error: pre-cmd failed with exit code {result.returncode}: {cmd_str}",
                   file=sys.stderr)
@@ -321,7 +349,25 @@ def main():
     # Buck2 renders artifact paths relative to the project root, but
     # configure runs in output_dir — the relative paths would break.
     resolved_args = [_resolve_env_paths(a) for a in args.configure_args]
-    cmd = [configure] + resolved_args
+
+    # Only wrap with CONFIG_SHELL for shell scripts.  Perl-based configure
+    # scripts (e.g. OpenSSL's Configure) must run via their own shebang.
+    _use_config_shell = False
+    if _config_shell:
+        _abs_configure = os.path.join(configure_cwd, configure) if not os.path.isabs(configure) else configure
+        try:
+            with open(_abs_configure, "rb") as _f:
+                _shebang = _f.readline(256)
+            # Shell script or no shebang → wrap with CONFIG_SHELL
+            _use_config_shell = not _shebang.startswith(b"#!") or \
+                any(s in _shebang for s in (b"/sh", b"/bash", b"/dash", b"/ash"))
+        except OSError:
+            _use_config_shell = True
+
+    if _use_config_shell:
+        cmd = [_config_shell, configure] + resolved_args
+    else:
+        cmd = [configure] + resolved_args
     result = subprocess.run(cmd, cwd=configure_cwd, env=env)
     if result.returncode != 0:
         print(f"error: configure failed with exit code {result.returncode}", file=sys.stderr)

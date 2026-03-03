@@ -35,8 +35,8 @@ package(
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/system/libs/data/json-c:json-c",
-        "//packages/linux/system/libs/libelf:libelf",
     ],
 
     labels = ["buckos:hw:dpdk"],
+    visibility = ["PUBLIC"],
 )

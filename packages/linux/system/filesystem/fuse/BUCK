@@ -8,14 +8,6 @@
 filegroup(
     name = "fuse",
     srcs = [
-        "//packages/linux/system/security/encryption:fuse3",
-        "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
-        "//packages/linux/system/filesystem/fuse/exfat-fuse:exfat-fuse",
-        "//packages/linux/system/filesystem/fuse/bindfs:bindfs",
-        "//packages/linux/system/filesystem/fuse/unionfs-fuse:unionfs-fuse",
-        "//packages/linux/system/filesystem/fuse/archivemount:archivemount",
-        "//packages/linux/system/filesystem/fuse/encfs:encfs",
-        "//packages/linux/system/filesystem/fuse/gocryptfs:gocryptfs",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -24,8 +16,6 @@ filegroup(
 filegroup(
     name = "common",
     srcs = [
-        "//packages/linux/system/security/encryption:fuse3",
-        "//packages/linux/system/filesystem/fuse/ntfs-3g:ntfs-3g",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -34,8 +24,6 @@ filegroup(
 filegroup(
     name = "encrypted",
     srcs = [
-        "//packages/linux/system/filesystem/fuse/encfs:encfs",
-        "//packages/linux/system/filesystem/fuse/gocryptfs:gocryptfs",
     ],
     default_target_platform = "//platforms:linux-target",
 )

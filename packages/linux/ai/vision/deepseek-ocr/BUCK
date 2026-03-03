@@ -8,7 +8,6 @@ package(
     sha256 = "be386861a32be6ce0dcff4f78182c676135ee4f7b911d6a8a3a4400191829ba7",
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pillow:pillow",
     ],
 )

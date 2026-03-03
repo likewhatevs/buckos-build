@@ -78,7 +78,6 @@ filegroup(
 filegroup(
     name = "tools",
     srcs = [
-        "//packages/linux/system/gpu/tools/gpu-monitoring:gpu-monitoring",
     ],
     default_target_platform = "//platforms:linux-target",
 )

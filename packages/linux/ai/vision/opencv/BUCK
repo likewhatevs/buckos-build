@@ -21,8 +21,6 @@ package(
     use_deps = {
         "tbb": "//packages/linux/dev-libs/misc/tbb:tbb",
         "eigen": "//packages/linux/dev-libs/eigen:eigen",
-        "ffmpeg": "//packages/linux/media/video/ffmpeg:ffmpeg",
-        "gstreamer": "//packages/linux/graphics/video/gstreamer:gstreamer",
         "python": "//packages/linux/lang/python:python",
     },
     configure_args = [

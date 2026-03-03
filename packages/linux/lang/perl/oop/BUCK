@@ -1,32 +1,8 @@
 load("//defs:package.bzl", "package")
 
-# Moose - A postmodern object system for Perl 5
-package(
-    build_rule = "autotools",
-    name = "moose",
-    url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Moose-2.2207.tar.gz",
-
-    sha256 = "7c2daddc49754ded93f65b8ce9e3ac9b6d11ab27d111ec77f95a8528cf4ac409",
-    version = "2.2207",
-    description = "A postmodern object system for Perl 5",
-    homepage = "https://metacpan.org/pod/Moose",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        "//packages/linux/lang/perl/core:try-tiny",
-        "//packages/linux/lang/perl/core:package-stash",
-        "//packages/linux/lang/perl/core:module-runtime",
-        "//packages/linux/lang/perl/core:class-accessor",
-        ":class-load",
-        ":data-visitor",
-        ":eval-closure",
-    ],
-)
-
 # Moo - Minimalist Object Orientation (with Moose compatibility)
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "moo",
     url = "https://cpan.metacpan.org/authors/id/H/HA/HAARG/Moo-2.005005.tar.gz",
 
@@ -35,7 +11,6 @@ package(
     description = "Minimalist Object Orientation (with Moose compatibility)",
     homepage = "https://metacpan.org/pod/Moo",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:module-runtime",
@@ -46,26 +21,9 @@ package(
     ],
 )
 
-# Mouse - Moose minus the antlers
-package(
-    build_rule = "autotools",
-    name = "mouse",
-    url = "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Mouse-v2.5.10.tar.gz",
-
-    sha256 = "ce8dc23946153a467ff09765167ee2590f5c502120f48a2d9441733f39aa32ee",
-    version = "2.5.10",
-    description = "Moose minus the antlers",
-    homepage = "https://metacpan.org/pod/Mouse",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
-    deps = [
-        "//packages/linux/lang/perl:perl",
-    ],
-)
-
 # Role::Tiny - Roles: a lightweight alternative to Moose roles
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "role-tiny",
     url = "https://cpan.metacpan.org/authors/id/H/HA/HAARG/Role-Tiny-2.002004.tar.gz",
 
@@ -74,7 +32,6 @@ package(
     description = "Roles: a lightweight alternative to Moose roles",
     homepage = "https://metacpan.org/pod/Role::Tiny",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -82,7 +39,7 @@ package(
 
 # Class::Method::Modifiers - Provides Moose-like method modifiers
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "class-method-modifiers",
     url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Class-Method-Modifiers-2.15.tar.gz",
 
@@ -91,7 +48,6 @@ package(
     description = "Provides Moose-like method modifiers",
     homepage = "https://metacpan.org/pod/Class::Method::Modifiers",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -99,7 +55,7 @@ package(
 
 # Sub::Quote - Efficient generation of subroutines via string eval
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "sub-quote",
     url = "https://cpan.metacpan.org/authors/id/H/HA/HAARG/Sub-Quote-2.006008.tar.gz",
 
@@ -108,7 +64,6 @@ package(
     description = "Efficient generation of subroutines via string eval",
     homepage = "https://metacpan.org/pod/Sub::Quote",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -116,7 +71,7 @@ package(
 
 # Class::Load - A working (require Class::Name) and target
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "class-load",
     url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Class-Load-0.25.tar.gz",
 
@@ -125,7 +80,6 @@ package(
     description = "A working (require Class::Name) and target",
     homepage = "https://metacpan.org/pod/Class::Load",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:module-runtime",
@@ -135,7 +89,7 @@ package(
 
 # Data::Visitor - Visitor style traversal of Perl data structures
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "data-visitor",
     url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Data-Visitor-0.32.tar.gz",
 
@@ -144,7 +98,6 @@ package(
     description = "Visitor style traversal of Perl data structures",
     homepage = "https://metacpan.org/pod/Data::Visitor",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:namespace-clean",
@@ -153,7 +106,7 @@ package(
 
 # Eval::Closure - Safely and cleanly create closures via string eval
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "eval-closure",
     url = "https://cpan.metacpan.org/authors/id/D/DO/DOY/Eval-Closure-0.14.tar.gz",
 
@@ -162,52 +115,15 @@ package(
     description = "Safely and cleanly create closures via string eval",
     homepage = "https://metacpan.org/pod/Eval::Closure",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:try-tiny",
     ],
 )
 
-# MooseX::Types - Organise your Moose types in libraries
-package(
-    build_rule = "autotools",
-    name = "moosex-types",
-    url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/MooseX-Types-0.50.tar.gz",
-
-    sha256 = "9cd87b3492cbf0be9d2df9317b2adf9fc30663770e69906654bea3f41b17cb08",
-    version = "0.50",
-    description = "Organise your Moose types in libraries",
-    homepage = "https://metacpan.org/pod/MooseX::Types",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        ":moose",
-    ],
-)
-
-# MooseX::Role::Parameterized - Moose roles with parameters
-package(
-    build_rule = "autotools",
-    name = "moosex-role-parameterized",
-    url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/MooseX-Role-Parameterized-1.11.tar.gz",
-
-    sha256 = "1cfe766c5d7f0ecab57f733dcca430a2a2acd6b995757141b940ade3692bec9e",
-    version = "1.11",
-    description = "Moose roles with parameters",
-    homepage = "https://metacpan.org/pod/MooseX::Role::Parameterized",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
-    deps = [
-        "//packages/linux/lang/perl:perl",
-        ":moose",
-    ],
-)
-
 # Type::Tiny - Tiny, yet Moo(se)-compatible type constraint
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "type-tiny",
     url = "https://cpan.metacpan.org/authors/id/T/TO/TOBYINK/Type-Tiny-2.004000.tar.gz",
 
@@ -216,33 +132,15 @@ package(
     description = "Tiny, yet Moo(se)-compatible type constraint",
     homepage = "https://metacpan.org/pod/Type::Tiny",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:exporter-tiny",
     ],
 )
 
-# Object::Pad - A simple object system with type constraints
-package(
-    build_rule = "autotools",
-    name = "object-pad",
-    url = "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/Object-Pad-0.809.tar.gz",
-
-    sha256 = "12950a664c0607ea3fca7480f365df54d1746291f45ebb0ed80917b74fb15ef5",
-    version = "0.809",
-    description = "A simple object system with type constraints",
-    homepage = "https://metacpan.org/pod/Object::Pad",
-    license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
-    deps = [
-        "//packages/linux/lang/perl:perl",
-    ],
-)
-
 # Class::Tiny - Minimalist class construction
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "class-tiny",
     url = "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Class-Tiny-1.008.tar.gz",
 
@@ -251,7 +149,6 @@ package(
     description = "Minimalist class construction",
     homepage = "https://metacpan.org/pod/Class::Tiny",
     license = "Apache-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],

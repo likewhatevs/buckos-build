@@ -507,10 +507,10 @@ alias(
     visibility = ["PUBLIC"],
 )
 
-# virt-manager - VM management GUI
+# virt-viewer - Graphical console client for VMs
 alias(
-    name = "virt-manager",
-    actual = "//packages/linux/emulation/virtualization/virt-manager:virt-manager",
+    name = "virt-viewer",
+    actual = "//packages/linux/emulation/virtualization/virt-manager:virt-viewer",
     visibility = ["PUBLIC"],
 )
 
@@ -586,20 +586,6 @@ alias(
 alias(
     name = "kernel-ch",
     actual = "//packages/linux/kernel/buckos-kernel:buckos-kernel-ch",
-    visibility = ["PUBLIC"],
-)
-
-# Cloud Hypervisor firmware
-alias(
-    name = "hypervisor-fw",
-    actual = "//packages/linux/boot/rust-hypervisor-firmware:rust-hypervisor-firmware",
-    visibility = ["PUBLIC"],
-)
-
-# Cloud Hypervisor UEFI firmware
-alias(
-    name = "edk2-cloudhv",
-    actual = "//packages/linux/boot/edk2-cloudhv:edk2-cloudhv",
     visibility = ["PUBLIC"],
 )
 

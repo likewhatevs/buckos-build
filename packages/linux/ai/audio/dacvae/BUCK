@@ -10,9 +10,7 @@ package(
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/audio/descript-audiotools:descript-audiotools",
         "//packages/linux/dev-libs/python/argbind:argbind",
-        "//packages/linux/dev-libs/python/einops:einops",
         "//packages/linux/dev-libs/python/huggingface-hub:huggingface-hub",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],
 )

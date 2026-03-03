@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/requests:requests",
         "//packages/linux/dev-libs/python/safetensors:safetensors",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/transformers:transformers",
     ],
 )

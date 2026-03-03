@@ -7,13 +7,11 @@ package(
     url = "https://github.com/gfxdisp/FovVideoVDP/archive/v1.2.2.tar.gz",
     sha256 = "e864567c0e46c02d37cfe9ca264cd4fd53d5231c0ec15ebb0420cd202209ad44",
     deps = [
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/ffmpeg-python:ffmpeg-python",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/dev-libs/python/imageio:imageio",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/PyEXR:PyEXR",
     ],
+    visibility = ["PUBLIC"],
 )

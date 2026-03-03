@@ -14,6 +14,7 @@ package(
     deps = [
         "//packages/linux/system/libs/crypto/openssl:openssl",
         "//packages/linux/system/libs/utility/libevent:libevent",
+        "//packages/linux/system/libs/data/expat:expat",
     ],
     configure_args = [
         "--prefix=${PREFIX}",

@@ -15,6 +15,5 @@ package(
     homepage = "https://github.com/robertdavidgraham/masscan",
     license = "AGPL-3.0-only",
     deps = [
-        "//packages/linux/network/libs/libpcap:libpcap",
     ],
 )

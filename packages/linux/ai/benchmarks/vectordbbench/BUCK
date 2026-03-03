@@ -11,11 +11,11 @@ package(
     license = "MIT",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/pydantic:pydantic",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/click:click",
         "//packages/linux/dev-libs/python/psutil:psutil",
     ],
+    visibility = ["PUBLIC"],
 )

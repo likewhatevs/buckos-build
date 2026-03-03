@@ -26,9 +26,7 @@ filegroup(
 filegroup(
     name = "display-managers",
     srcs = [
-        "//packages/linux/desktop/gdm:gdm",
         "//packages/linux/desktop/sddm:sddm",
-        "//packages/linux/desktop/lightdm:lightdm",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -125,8 +123,6 @@ filegroup(
     ],
     default_target_platform = "//platforms:linux-target",
 )
-
-
 
 # i3 complete desktop
 filegroup(

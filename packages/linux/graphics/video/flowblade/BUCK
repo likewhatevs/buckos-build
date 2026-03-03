@@ -12,7 +12,6 @@ package(
     homepage = "https://jliljebl.github.io/flowblade/",
     license = "GPL-3.0-or-later",
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/desktop/gtk:gtk3",
         "//packages/linux/lang/python:python",
         # "//packages/linux/core/frei0r:frei0r",  # TODO: not packaged yet,

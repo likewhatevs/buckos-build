@@ -8,5 +8,6 @@ package(
     sha256 = "061947189ad1aa807beefb175a842e795086625d1fad0d0ca779989f34b8cadf",
     configure_args = [
         "-DHIGH_BITDEPTH=ON",
+        "-DCMAKE_CXX_FLAGS=-Wno-error=array-bounds",
     ],
 )

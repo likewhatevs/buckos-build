@@ -11,10 +11,9 @@ package(
     license = "Apache-2.0",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/pillow:pillow",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
     ],
+    visibility = ["PUBLIC"],
 )

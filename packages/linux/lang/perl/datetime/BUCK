@@ -2,7 +2,7 @@ load("//defs:package.bzl", "package")
 
 # DateTime - A date and time object for Perl
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "datetime",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-1.65.tar.gz",
 
@@ -11,7 +11,6 @@ package(
     description = "A date and time object for Perl",
     homepage = "https://metacpan.org/pod/DateTime",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":datetime-locale",
@@ -24,7 +23,7 @@ package(
 
 # DateTime::Locale - Localization support for DateTime
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "datetime-locale",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-Locale-1.40.tar.gz",
 
@@ -33,7 +32,6 @@ package(
     description = "Localization support for DateTime",
     homepage = "https://metacpan.org/pod/DateTime::Locale",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:params-util",
@@ -43,7 +41,7 @@ package(
 
 # DateTime::TimeZone - Time zone object base class and target
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "datetime-timezone",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-TimeZone-2.62.tar.gz",
 
@@ -52,7 +50,6 @@ package(
     description = "Time zone object base class and target",
     homepage = "https://metacpan.org/pod/DateTime::TimeZone",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/core:params-util",
@@ -65,7 +62,7 @@ package(
 
 # DateTime::Format::Strptime - Parse and format strp and strf time patterns
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "datetime-format-strptime",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-Format-Strptime-1.79.tar.gz",
 
@@ -74,7 +71,6 @@ package(
     description = "Parse and format strp and strf time patterns",
     homepage = "https://metacpan.org/pod/DateTime::Format::Strptime",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":datetime",
@@ -85,7 +81,7 @@ package(
 
 # DateTime::Format::ISO8601 - Parses ISO8601 formats
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "datetime-format-iso8601",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-Format-ISO8601-0.16.tar.gz",
 
@@ -94,7 +90,6 @@ package(
     description = "Parses ISO8601 formats",
     homepage = "https://metacpan.org/pod/DateTime::Format::ISO8601",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":datetime",
@@ -104,7 +99,7 @@ package(
 
 # DateTime::Format::Builder - Create DateTime parser classes and objects
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "datetime-format-builder",
     url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-Format-Builder-0.83.tar.gz",
 
@@ -113,7 +108,6 @@ package(
     description = "Create DateTime parser classes and objects",
     homepage = "https://metacpan.org/pod/DateTime::Format::Builder",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":datetime",
@@ -123,7 +117,7 @@ package(
 
 # Time::Duration - Rounded or exact English expression of durations
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "time-duration",
     url = "https://cpan.metacpan.org/authors/id/N/NE/NEILB/Time-Duration-1.21.tar.gz",
 
@@ -132,7 +126,6 @@ package(
     description = "Rounded or exact English expression of durations",
     homepage = "https://metacpan.org/pod/Time::Duration",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -140,7 +133,7 @@ package(
 
 # Time::Moment - Represents a date and time of day with an offset from UTC
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "time-moment",
     url = "https://cpan.metacpan.org/authors/id/C/CH/CHANSEN/Time-Moment-0.44.tar.gz",
 
@@ -149,7 +142,6 @@ package(
     description = "Represents a date and time of day with an offset from UTC",
     homepage = "https://metacpan.org/pod/Time::Moment",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -157,7 +149,7 @@ package(
 
 # Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "time-hires",
     url = "https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/Time-HiRes-1.9764.tar.gz",
 
@@ -166,7 +158,6 @@ package(
     description = "High resolution alarm, sleep, gettimeofday, interval timers",
     homepage = "https://metacpan.org/pod/Time::HiRes",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -174,7 +165,7 @@ package(
 
 # Date::Calc - Gregorian calendar date calculations
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "date-calc",
     url = "https://cpan.metacpan.org/authors/id/S/ST/STBEY/Date-Calc-6.4.tar.gz",
 
@@ -183,7 +174,6 @@ package(
     description = "Gregorian calendar date calculations",
     homepage = "https://metacpan.org/pod/Date::Calc",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],

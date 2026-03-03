@@ -35,6 +35,5 @@ package(
     configure_args = [],
     deps = [
         ":vdpau",
-        "//packages/linux/graphics/video/libva:libva",
     ],
 )

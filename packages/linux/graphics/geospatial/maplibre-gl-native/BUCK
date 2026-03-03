@@ -12,7 +12,6 @@ package(
     deps = [
         "//packages/linux/dev-libs/compression/zlib:zlib",
         "//packages/linux/system/libs/utility/icu:icu",
-        "//packages/linux/graphics/rendering/opengl:opengl",
         "//packages/linux/system/libs/database/sqlite:sqlite",
     ],
     configure_args = [
@@ -21,4 +20,5 @@ package(
         "-DMBGL_WITH_WERROR=OFF",
         "-DMBGL_WITH_RTTI=ON",
     ],
+    visibility = ["PUBLIC"],
 )

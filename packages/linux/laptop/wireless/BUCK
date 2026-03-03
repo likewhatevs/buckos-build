@@ -4,7 +4,6 @@ filegroup(
     name = "wifi",
     srcs = [
         "//packages/linux/laptop/wireless/iwd:iwd",
-        "//packages/linux/laptop/wireless/wpa_supplicant:wpa_supplicant",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -31,7 +30,6 @@ filegroup(
     name = "all-wireless",
     srcs = [
         "//packages/linux/laptop/wireless/iwd:iwd",
-        "//packages/linux/laptop/wireless/wpa_supplicant:wpa_supplicant",
         "//packages/linux/laptop/wireless/bluez:bluez",
         "//packages/linux/laptop/wireless/blueman:blueman",
     ],

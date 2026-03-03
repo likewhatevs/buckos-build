@@ -13,7 +13,6 @@ package(
         "//packages/linux/dev-libs/python/geopandas:geopandas",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/networkx:networkx",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/pyproj:pyproj",
         "//packages/linux/dev-libs/python/python-dateutil:python-dateutil",
@@ -22,18 +21,16 @@ package(
     ],
     use_deps = {
         "entropy": [
-            "//packages/linux/dev-libs/python/scipy:scipy",
         ],
         "neighbors": [
             "//packages/linux/dev-libs/python/scikit-learn:scikit-learn",
-            "//packages/linux/dev-libs/python/scipy:scipy",
         ],
         "raster": [
-            "//packages/linux/graphics/geospatial/gdal:gdal",
             "//packages/linux/dev-libs/python/rasterio:rasterio",
         ],
         "web_map": [
             "//packages/linux/dev-libs/python/folium:folium",
         ],
     },
+    visibility = ["PUBLIC"],
 )

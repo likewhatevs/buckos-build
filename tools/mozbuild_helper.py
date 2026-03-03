@@ -19,7 +19,7 @@ import subprocess
 import sys
 import json
 
-from _env import clean_env, sanitize_filenames, sanitize_global_env
+from _env import clean_env, sanitize_filenames, sanitize_global_env, write_pkg_config_wrapper
 
 
 def _resolve(path):
@@ -49,14 +49,7 @@ def _setup_writable_source(source_dir, work_dir):
 
 def _setup_pkg_config_wrapper(bin_dir):
     """Create pkg-config wrapper that uses --define-prefix."""
-    os.makedirs(bin_dir, exist_ok=True)
-    wrapper = os.path.join(bin_dir, "pkg-config")
-    with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\n'
-                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
-                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
-    os.chmod(wrapper, 0o755)
-    return bin_dir
+    return write_pkg_config_wrapper(bin_dir)
 
 
 def _build_dep_env(dep_base_dirs, pkg_config_path, base_path=None):
@@ -232,6 +225,13 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
 
     # pkg-config wrapper with --define-prefix (MUST be first in PATH)
     env["PATH"] = pkg_config_bin_dir + ":" + env.get("PATH", "")
+
+    # User-specified environment variables
+    if hasattr(args, 'extra_env') and args.extra_env:
+        for entry in args.extra_env:
+            key, _, value = entry.partition("=")
+            if key:
+                env[key] = value
 
     # Mozconfig
     mozconfig = os.path.join(src_dir, "mozconfig")
@@ -428,6 +428,8 @@ def main():
                         help="Mozconfig ac_add_options value (repeatable)")
     parser.add_argument("--dep-base-dirs", default=None,
                         help="Colon-separated dep base directories")
+    parser.add_argument("--dep-base-dirs-file", default=None,
+                        help="File with dep base directories (one per line)")
     parser.add_argument("--hermetic-path", action="append", dest="hermetic_path", default=[],
                         help="Set PATH to only these dirs (replaces host PATH, repeatable)")
     parser.add_argument("--allow-host-path", action="store_true",
@@ -436,11 +438,19 @@ def main():
                         help="Start with empty PATH (populated by --path-prepend)")
     parser.add_argument("--path-prepend", action="append", dest="path_prepend", default=[],
                         help="Directory to prepend to PATH (repeatable, resolved to absolute)")
+    parser.add_argument("--env", action="append", dest="extra_env", default=[],
+                        help="Extra environment variable KEY=VALUE (repeatable)")
 
     args = parser.parse_args()
     args._host_path = _host_path
 
     sanitize_global_env()
+
+    # Merge --dep-base-dirs-file into --dep-base-dirs (flag file takes precedence)
+    if args.dep_base_dirs_file:
+        with open(os.path.abspath(args.dep_base_dirs_file)) as f:
+            dirs = [line.strip() for line in f if line.strip()]
+        args.dep_base_dirs = ":".join(dirs)
 
     args.source_dir = _resolve(args.source_dir)
     args.output_dir = _resolve(args.output_dir)

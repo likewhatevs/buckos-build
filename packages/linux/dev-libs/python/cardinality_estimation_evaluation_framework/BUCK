@@ -9,8 +9,6 @@ package(
     deps = [
         "//packages/linux/dev-libs/python/absl-py:absl-py",
         "//packages/linux/dev-libs/python/lxml:lxml",
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/matplotlib:matplotlib",
         "//packages/linux/dev-libs/python/tqdm:tqdm",
     ],

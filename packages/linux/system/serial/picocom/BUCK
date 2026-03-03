@@ -9,8 +9,13 @@ package(
     description = "Minimal serial communications program",
     homepage = "https://github.com/npat-efault/picocom",
     license = "GPL-2.0-or-later",
+    skip_configure = True,
+    pre_build_cmds = [
+        "printf 'install:\\n' >> Makefile",
+    ],
     post_install_cmds = ["""
-install -Dm755 picocom "$DESTDIR/usr/bin/picocom"
-install -Dm644 picocom.1 "$DESTDIR/usr/share/man/man1/picocom.1"
+install -Dm755 "$BUILD_DIR/picocom" "$OUT/usr/bin/picocom"
+install -Dm644 "$BUILD_DIR/picocom.1" "$OUT/usr/share/man/man1/picocom.1"
 """],
+    visibility = ["PUBLIC"],
 )

@@ -16,8 +16,6 @@ package(
         "-DCMAKE_INSTALL_PREFIX=/usr",
     ],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
-        "//packages/linux/graphics/video/gstreamer:gstreamer",
         "//packages/linux/desktop/qt:qt5",
         "//packages/linux/audio/daemons/pulseaudio:pulseaudio",
         "//packages/linux/graphics/video/v4l-utils:v4l-utils",

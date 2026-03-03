@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -104,6 +104,8 @@ def main():
                         help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
     parser.add_argument("--path-file", default=None,
                         help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--lib-dirs-file", default=None,
+                        help="File with lib dirs for LD_LIBRARY_PATH (one per line, from tset projection)")
     args = parser.parse_args()
 
     # Read flag files early — tset-propagated values are base defaults.
@@ -113,27 +115,23 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
+    file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
     if not os.path.isdir(args.source_dir):
         print(f"error: source directory not found: {args.source_dir}", file=sys.stderr)
         sys.exit(1)
 
     os.makedirs(args.build_dir, exist_ok=True)
+    register_cleanup(os.path.abspath(args.build_dir))
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
     import tempfile
-    wrapper_dir = tempfile.mkdtemp(prefix="pkgconf-wrapper-")
-    wrapper = os.path.join(wrapper_dir, "pkg-config")
-    with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\n'
-                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
-                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
-    os.chmod(wrapper, 0o755)
+    wrapper_dir = write_pkg_config_wrapper(tempfile.mkdtemp(prefix="pkgconf-wrapper-"))
 
     env = clean_env()
 
@@ -164,20 +162,20 @@ def main():
         prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
-        # Derive LD_LIBRARY_PATH from dep bin dirs so dynamically linked
-        # dep tools (e.g. buckos python needing libpython3.12.so) work
-        # during meson setup.  This is scoped to the setup subprocess
-        # and doesn't affect the ninja build phase.
-        _dep_lib_dirs = []
-        for _bp in all_path_prepend:
-            _parent = os.path.dirname(os.path.abspath(_bp))
-            for _ld in ("lib", "lib64"):
-                _d = os.path.join(_parent, _ld)
-                if os.path.isdir(_d):
-                    _dep_lib_dirs.append(_d)
-        if _dep_lib_dirs:
-            _existing = env.get("LD_LIBRARY_PATH", "")
-            env["LD_LIBRARY_PATH"] = ":".join(_dep_lib_dirs) + (":" + _existing if _existing else "")
+
+    # Merge tset-provided lib dirs into LD_LIBRARY_PATH so dynamically
+    # linked dep tools (e.g. buckos python needing libpython3.12.so)
+    # can execute during meson setup.
+    if file_lib_dirs:
+        resolved = [os.path.abspath(d) for d in file_lib_dirs if os.path.isdir(d)]
+        if resolved:
+            existing = env.get("LD_LIBRARY_PATH", "")
+            merged = ":".join(resolved)
+            env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
 
     # Apply extra environment variables first (toolchain flags like -march).
     for entry in args.extra_env:

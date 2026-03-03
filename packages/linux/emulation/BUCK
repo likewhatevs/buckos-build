@@ -15,6 +15,7 @@ filegroup(
         "//packages/linux/emulation/hypervisors:all-hypervisors",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Virtualization management tools
@@ -24,6 +25,7 @@ filegroup(
         "//packages/linux/emulation/virtualization:all-virtualization",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Container runtimes
@@ -33,6 +35,7 @@ filegroup(
         "//packages/linux/emulation/containers:all-containers",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Kernel virtualization tools
@@ -42,6 +45,7 @@ filegroup(
         "//packages/linux/emulation/kernel:all-kernel-tools",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Utilities
@@ -51,6 +55,7 @@ filegroup(
         "//packages/linux/emulation/utilities:all-utilities",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Essential emulation packages (QEMU + libvirt)
@@ -63,6 +68,7 @@ filegroup(
         "//packages/linux/emulation/utilities/spice:spice-server",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Server virtualization (headless)
@@ -74,6 +80,7 @@ filegroup(
         "//packages/linux/emulation/containers:docker-full",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Desktop virtualization (with GUI)
@@ -86,6 +93,7 @@ filegroup(
         "//packages/linux/emulation/utilities/spice:spice-full",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Cloud/microVM hypervisors
@@ -97,6 +105,7 @@ filegroup(
         "//packages/linux/emulation/utilities/crosvm:crosvm",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Development tools for kernel testing
@@ -105,9 +114,9 @@ filegroup(
     srcs = [
         "//packages/linux/emulation/hypervisors/qemu:qemu",
         "//packages/linux/emulation/kernel:all-kernel-tools",
-        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Guest additions and agents (for VMs)
@@ -118,6 +127,7 @@ filegroup(
         "//packages/linux/emulation/utilities/spice:spice-vdagent",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Docker ecosystem
@@ -127,6 +137,7 @@ filegroup(
         "//packages/linux/emulation/containers:docker-full",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Podman ecosystem
@@ -136,6 +147,7 @@ filegroup(
         "//packages/linux/emulation/containers:podman-full",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor full stack (CH + virtiofsd + firmware)
@@ -143,11 +155,11 @@ filegroup(
     name = "cloud-hypervisor-full",
     srcs = [
         "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
-        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
         "//packages/linux/boot/rust-hypervisor-firmware:rust-hypervisor-firmware",
         "//packages/linux/boot/edk2-cloudhv:edk2-cloudhv",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Cloud Hypervisor minimal (CH + virtiofsd only)
@@ -155,9 +167,9 @@ filegroup(
     name = "cloud-hypervisor-minimal",
     srcs = [
         "//packages/linux/emulation/utilities/cloud-hypervisor:cloud-hypervisor",
-        "//packages/linux/emulation/utilities/virtiofsd:virtiofsd",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # All emulation packages
@@ -171,4 +183,5 @@ filegroup(
         ":utilities",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

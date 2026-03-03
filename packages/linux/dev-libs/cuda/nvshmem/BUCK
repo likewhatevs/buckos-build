@@ -18,7 +18,6 @@ package(
         "-DNVSHMEM_BUILD_PYTHON_LIB=OFF",
     ],
     deps = [
-        "//packages/linux/system/gpu/libraries/nccl:nccl",
         "//packages/linux/network/libs/rdma-core:rdma-core",
     ],
     labels = ["buckos:hw:cuda", "buckos:hw:rdma"],

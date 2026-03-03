@@ -10,7 +10,9 @@ with only functional vars, pin determinism vars, and let each helper add
 what it needs on top.
 """
 
+import atexit
 import os
+import signal
 import shutil
 import sys
 
@@ -30,6 +32,11 @@ _DETERMINISM_PINS = {
     "CCACHE_DISABLE": "1",
     "RUSTC_WRAPPER": "",
     "CARGO_BUILD_RUSTC_WRAPPER": "",
+    # Prevent pkg-config from falling through to host system .pc files.
+    # The compiled-in default search path (/usr/lib64/pkgconfig, etc.) is
+    # replaced with a nonexistent dir — helpers set PKG_CONFIG_PATH to
+    # buckos deps.  Empty string doesn't work: pkgconf treats "" as unset.
+    "PKG_CONFIG_LIBDIR": "/nonexistent-buckos-pkgconfig",
 }
 
 
@@ -78,6 +85,43 @@ def sanitize_filenames(*roots):
                         pass
 
 
+# ── Guaranteed cleanup ────────────────────────────────────────────────
+# Helpers register directories here so sanitize_filenames runs on ANY
+# exit path — normal return, exception, or SIGTERM.  Only SIGKILL
+# bypasses this (unavoidable).
+
+_cleanup_dirs = []
+_cleanup_ran = False
+
+
+def register_cleanup(*dirs):
+    """Register directories for filename sanitization on exit.
+
+    Call early (before builds start) so cleanup runs even if the
+    build is interrupted.
+    """
+    _cleanup_dirs.extend(d for d in dirs if d)
+
+
+def _run_cleanup():
+    global _cleanup_ran
+    if _cleanup_ran:
+        return
+    _cleanup_ran = True
+    sanitize_filenames(*_cleanup_dirs)
+
+
+atexit.register(_run_cleanup)
+
+
+def _sigterm_cleanup(signum, frame):
+    _run_cleanup()
+    sys.exit(128 + signum)
+
+
+signal.signal(signal.SIGTERM, _sigterm_cleanup)
+
+
 def add_path_args(parser):
     """Register the standard three-way PATH arguments on an argparse parser."""
     parser.add_argument("--hermetic-path", action="append",
@@ -111,6 +155,88 @@ def setup_path(args, env, host_path=""):
     if hasattr(args, 'path_prepend') and args.path_prepend:
         prepend = ":".join(os.path.abspath(p) for p in args.path_prepend)
         env["PATH"] = prepend + (":" + env["PATH"] if env.get("PATH") else "")
+        derive_lib_paths(args.path_prepend, env)
+
+
+def derive_lib_paths(bin_dirs, env):
+    """Derive LD_LIBRARY_PATH from bin dirs.
+
+    Given {prefix}/usr/bin, adds {prefix}/usr/lib and {prefix}/usr/lib64
+    so dynamically linked host tools (e.g. python → libpython3.so)
+    can find their shared libraries.
+    """
+    lib_parts = []
+    for bin_dir in bin_dirs:
+        parent = os.path.dirname(os.path.abspath(bin_dir))
+        for ld in ("lib", "lib64"):
+            d = os.path.join(parent, ld)
+            if os.path.isdir(d):
+                lib_parts.append(d)
+    if lib_parts:
+        existing = env.get("LD_LIBRARY_PATH", "")
+        merged = ":".join(lib_parts)
+        env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+
+
+def filter_path_flags(flags):
+    """Filter out -I/-L/-Wl,-rpath-link flags for non-existent directories.
+
+    Tset projections emit flags for every possible lib layout
+    ({prefix}/usr/lib64, usr/lib, lib64, lib) but most only exist
+    for one or two.  Filtering avoids blowing the execve arg limit
+    on packages with 100+ transitive deps.
+    """
+    result = []
+    for flag in flags:
+        if flag.startswith("-I"):
+            if os.path.isdir(os.path.abspath(flag[2:])):
+                result.append(flag)
+        elif flag.startswith("-L"):
+            if os.path.isdir(os.path.abspath(flag[2:])):
+                result.append(flag)
+        elif flag.startswith("-Wl,-rpath-link,"):
+            if os.path.isdir(os.path.abspath(flag[16:])):
+                result.append(flag)
+        else:
+            result.append(flag)
+    return result
+
+
+def write_pkg_config_wrapper(wrapper_dir):
+    """Write a pkg-config wrapper that passes --define-prefix.
+
+    Uses a Python script (not shell) so it works in environments
+    without /bin/sh (e.g. remote execution).  The wrapper removes
+    its own directory from PATH to avoid infinite recursion, then
+    execs the real pkg-config with --define-prefix prepended.
+    """
+    os.makedirs(wrapper_dir, exist_ok=True)
+    wrapper = os.path.join(wrapper_dir, "pkg-config")
+    with open(wrapper, "w") as f:
+        f.write(
+            '#!/usr/bin/env python3\n'
+            'import os, sys\n'
+            'sd = os.path.dirname(os.path.abspath(__file__))\n'
+            'p = os.environ.get("PATH", "").split(":")\n'
+            'os.environ["PATH"] = ":".join(d for d in p if os.path.abspath(d) != sd)\n'
+            'os.execvp("pkg-config", ["pkg-config", "--define-prefix"] + sys.argv[1:])\n'
+        )
+    os.chmod(wrapper, 0o755)
+    return wrapper_dir
+
+
+def write_stub_script(path, exit_code=0):
+    """Write a no-op stub script (e.g. for makeinfo, autotools regen).
+
+    Uses Python instead of shell so it works without /bin/sh.
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(
+            '#!/usr/bin/env python3\n'
+            'import sys; sys.exit({})\n'.format(exit_code)
+        )
+    os.chmod(path, 0o755)
 
 
 def sanitize_global_env():

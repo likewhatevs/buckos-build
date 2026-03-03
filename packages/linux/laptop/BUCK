@@ -8,6 +8,7 @@ filegroup(
         "//packages/linux/laptop/power:all-power",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Brightness control
@@ -17,6 +18,7 @@ filegroup(
         "//packages/linux/laptop/brightness:all-brightness",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Hardware monitoring
@@ -26,6 +28,7 @@ filegroup(
         "//packages/linux/laptop/monitoring:all-monitoring",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Input devices (touchpad, stylus)
@@ -35,6 +38,7 @@ filegroup(
         "//packages/linux/laptop/input:all-input",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Wireless (WiFi, Bluetooth)
@@ -44,6 +48,7 @@ filegroup(
         "//packages/linux/laptop/wireless:all-wireless",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Battery utilities
@@ -53,6 +58,7 @@ filegroup(
         "//packages/linux/laptop/battery:all-battery",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Essential laptop packages - minimal set for basic functionality
@@ -67,26 +73,24 @@ filegroup(
         "//packages/linux/laptop/battery:battery-essential",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Console-only laptop packages (no GUI)
 filegroup(
     name = "console",
     srcs = [
-        "//packages/linux/laptop/power/tlp:tlp",
         "//packages/linux/system/apps/acpid:acpid",
-        "//packages/linux/laptop/power/cpupower:cpupower",
         "//packages/linux/laptop/brightness/brightnessctl:brightnessctl",
-        "//packages/linux/laptop/brightness/light:light",
         "//packages/linux/laptop/monitoring/lm-sensors:lm-sensors",
         "//packages/linux/laptop/monitoring/acpi:acpi",
-        "//packages/linux/laptop/monitoring/powertop:powertop",
         "//packages/linux/system/libs/input/libevdev:libevdev",
         "//packages/linux/system/libs/input/libinput:libinput",
         "//packages/linux/laptop/wireless/iwd:iwd",
         "//packages/linux/laptop/battery/upower:upower",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Desktop/GUI laptop packages
@@ -95,9 +99,9 @@ filegroup(
     srcs = [
         ":essential",
         "//packages/linux/laptop/wireless/blueman:blueman",
-        "//packages/linux/laptop/brightness/ddcutil:ddcutil",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # ThinkPad-specific packages
@@ -105,10 +109,9 @@ filegroup(
     name = "thinkpad",
     srcs = [
         ":essential",
-        "//packages/linux/laptop/battery/tp_smapi:tp_smapi",
-        "//packages/linux/laptop/battery/acpi_call:acpi_call",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Intel-specific packages
@@ -116,23 +119,19 @@ filegroup(
     name = "intel",
     srcs = [
         ":essential",
-        "//packages/linux/laptop/power/thermald:thermald",
-        "//packages/linux/laptop/monitoring/i7z:i7z",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # Power-efficient profile for maximum battery life
 filegroup(
     name = "power-efficient",
     srcs = [
-        "//packages/linux/laptop/power/tlp:tlp",
         "//packages/linux/laptop/power/auto-cpufreq:auto-cpufreq",
-        "//packages/linux/laptop/power/thermald:thermald",
-        "//packages/linux/laptop/monitoring/powertop:powertop",
-        "//packages/linux/laptop/battery/laptop-mode-tools:laptop-mode-tools",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )
 
 # All laptop packages
@@ -147,4 +146,5 @@ filegroup(
         ":battery",
     ],
     default_target_platform = "//platforms:linux-target",
+    visibility = ["PUBLIC"],
 )

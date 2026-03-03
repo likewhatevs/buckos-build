@@ -11,8 +11,6 @@ package(
     license = "MIT",
     deps = [
         "//packages/linux/lang/python:python",
-        "//packages/linux/dev-libs/python/numpy:numpy",
-        "//packages/linux/dev-libs/python/scipy:scipy",
         "//packages/linux/dev-libs/python/pandas:pandas",
         "//packages/linux/dev-libs/python/opencv-python:opencv-python",
         "//packages/linux/dev-libs/python/scikit-image:scikit-image",
@@ -22,4 +20,5 @@ package(
         "//packages/linux/dev-libs/python/tqdm:tqdm",
         "//packages/linux/dev-libs/python/pycocotools:pycocotools",
     ],
+    visibility = ["PUBLIC"],
 )

@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import sys
 
-from _env import clean_env, sanitize_filenames
+from _env import clean_env, derive_lib_paths, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _can_unshare_net():
@@ -193,9 +193,9 @@ def main():
         with open(path) as f:
             return [line.rstrip("\n") for line in f if line.strip()]
 
-    file_cflags = _read_flag_file(args.cflags_file)
-    file_ldflags = _read_flag_file(args.ldflags_file)
-    file_pkg_config = _read_flag_file(args.pkg_config_file)
+    file_cflags = filter_path_flags(_read_flag_file(args.cflags_file))
+    file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
+    file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
@@ -207,6 +207,7 @@ def main():
 
     build_dir = os.path.abspath(args.build_dir)
     output_dir = os.path.abspath(args.output_dir)
+    register_cleanup(output_dir)
 
     if not os.path.isdir(build_dir):
         print(f"error: build directory not found: {build_dir}", file=sys.stderr)
@@ -595,14 +596,7 @@ def main():
 
     # Create a pkg-config wrapper that always passes --define-prefix so
     # .pc files in Buck2 dep directories resolve paths correctly.
-    wrapper_dir = os.path.join(output_dir, ".pkgconf-wrapper")
-    os.makedirs(wrapper_dir, exist_ok=True)
-    wrapper = os.path.join(wrapper_dir, "pkg-config")
-    with open(wrapper, "w") as f:
-        f.write('#!/bin/sh\n'
-                'SELF_DIR="$(cd "$(dirname "$0")" && pwd)"\n'
-                'PATH="${PATH#"$SELF_DIR:"}" exec pkg-config --define-prefix "$@"\n')
-    os.chmod(wrapper, 0o755)
+    wrapper_dir = write_pkg_config_wrapper(os.path.join(output_dir, ".pkgconf-wrapper"))
 
     # Apply extra environment variables first (toolchain flags like -march).
     for entry in args.extra_env:
@@ -670,6 +664,10 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
+    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
+    # shared libraries (e.g. python → libpython3.so) can execute.
+    derive_lib_paths(all_path_prepend, env)
+
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found by custom generators.
     _path_sources = list(args.hermetic_path) + list(all_path_prepend)
@@ -713,32 +711,47 @@ def main():
     _host_python = shutil.which("python3") if _dep_python3 else None
     if _dep_python3 and _host_python:
         _dep_python3_abs = os.path.abspath(_dep_python3)
+        # Skip replacement if host python is a substring of dep python —
+        # str.replace would corrupt the already-correct dep path by
+        # matching "/usr/bin/python3" inside ".../installed/usr/bin/python3".
+        _skip_host_replace = (_host_python != _dep_python3_abs and
+                              _host_python in _dep_python3_abs)
         _all_ninja_files = _glob.glob(
             os.path.join(output_dir, "**/build.ninja"), recursive=True,
         )
         _top_ninja = os.path.join(output_dir, "build.ninja")
         if os.path.isfile(_top_ninja) and _top_ninja not in _all_ninja_files:
             _all_ninja_files.append(_top_ninja)
-        # Collect pyvenv bin dirs that exist in the build tree
-        _pyvenv_replacements = {}
+        # Collect pyvenv bin dirs that exist in the build tree.
+        # Register longest paths first — "python3" before "python" — so
+        # str.replace doesn't match a substring and leave a trailing "3"
+        # (e.g. replacing "pyvenv/bin/python" inside "pyvenv/bin/python3"
+        # would produce ".../python33" instead of ".../python3").
+        _pyvenv_replacements = []
         for _pvd in _glob.glob(os.path.join(output_dir, "**/pyvenv/bin"), recursive=True):
+            _pv_python3 = os.path.join(_pvd, "python3")
             _pv_python = os.path.join(_pvd, "python")
-            if os.path.exists(_pv_python):
-                _pyvenv_replacements[_pv_python] = _dep_python3_abs
+            if os.path.exists(_pv_python3):
+                _pyvenv_replacements.append((_pv_python3, _dep_python3_abs))
+            elif os.path.exists(_pv_python):
+                _pyvenv_replacements.append((_pv_python, _dep_python3_abs))
             _pv_meson = os.path.join(_pvd, "meson")
             if os.path.exists(_pv_meson) and _dep_meson:
-                _pyvenv_replacements[_pv_meson] = os.path.abspath(_dep_meson)
+                _pyvenv_replacements.append((_pv_meson, os.path.abspath(_dep_meson)))
+        # Sort longest-first to avoid substring collisions
+        _pyvenv_replacements.sort(key=lambda x: len(x[0]), reverse=True)
         for _nf in _all_ninja_files:
             try:
                 _nf_stat = os.stat(_nf)
                 with open(_nf, "r") as f:
                     _nf_content = f.read()
                 _nf_orig = _nf_content
-                # Replace host python references
-                if _host_python in _nf_content:
+                # Replace host python references (skip if it would corrupt
+                # an already-correct dep python path via substring match)
+                if not _skip_host_replace and _host_python in _nf_content:
                     _nf_content = _nf_content.replace(_host_python, _dep_python3_abs)
                 # Replace pyvenv python/meson references
-                for _old, _new in _pyvenv_replacements.items():
+                for _old, _new in _pyvenv_replacements:
                     if _old in _nf_content:
                         _nf_content = _nf_content.replace(_old, _new)
                 if _nf_content != _nf_orig:
@@ -752,9 +765,18 @@ def main():
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
 
+    # Find buckos bash for shell=True subprocesses (pre-cmds).
+    _buckos_bash = None
+    for _d in env.get("PATH", "").split(":"):
+        _bash = os.path.join(_d, "bash") if _d else ""
+        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
+            _buckos_bash = _bash
+            break
+
     # Run pre-build commands (e.g. Kconfig setup)
     for cmd_str in args.pre_cmds:
-        result = subprocess.run(cmd_str, shell=True, cwd=output_dir, env=env)
+        result = subprocess.run(cmd_str, shell=True, cwd=output_dir, env=env,
+                                executable=_buckos_bash)
         if result.returncode != 0:
             print(f"error: pre-cmd failed with exit code {result.returncode}: {cmd_str}",
                   file=sys.stderr)
@@ -783,6 +805,13 @@ def main():
             cmd.append(f"{key}={_resolve_env_paths(value)}")
         else:
             cmd.append(arg)
+
+    # Override make's SHELL so recipe lines use buckos bash instead of
+    # /bin/sh (which doesn't exist on remote execution workers).
+    if args.build_system == "make" and _buckos_bash:
+        _has_shell_arg = any(a.startswith("SHELL=") for a in args.make_args)
+        if not _has_shell_arg:
+            cmd.append(f"SHELL={_buckos_bash}")
 
     # Wrap with unshare --net for network isolation (reproducibility)
     if _NETWORK_ISOLATED:

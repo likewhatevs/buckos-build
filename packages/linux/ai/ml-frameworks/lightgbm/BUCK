@@ -9,6 +9,6 @@ package(
     deps = [],
     configure_args = [
         "-DCMAKE_BUILD_TYPE=Release",
-        "-DUSE_OPENMP=ON",
+        "-DUSE_OPENMP=OFF",
     ],
 )

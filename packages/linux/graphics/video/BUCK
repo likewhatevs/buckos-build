@@ -5,21 +5,10 @@
 filegroup(
     name = "libraries",
     srcs = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/media/video/x264:x264",
         "//packages/linux/media/video/x265:x265",
-        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/media/video/dav1d:dav1d",
         "//packages/linux/graphics/video/aom:aom",
-        "//packages/linux/graphics/video/gstreamer:gstreamer",
-        "//packages/linux/graphics/video/gstreamer:gst-plugins-base",
-        "//packages/linux/graphics/video/gstreamer:gst-plugins-good",
-        "//packages/linux/graphics/video/gstreamer:gst-plugins-bad",
-        "//packages/linux/graphics/video/gstreamer:gst-plugins-ugly",
-        "//packages/linux/graphics/video/gstreamer:gst-libav",
-        "//packages/linux/graphics/video/libva:libva",
-        "//packages/linux/graphics/video/libva:libva-utils",
-        "//packages/linux/graphics/video/libva:intel-media-driver",
         "//packages/linux/graphics/video/vdpau:vdpau",
         "//packages/linux/graphics/video/vdpau:libvdpau-va-gl",
     ],
@@ -63,8 +52,6 @@ filegroup(
     name = "utilities",
     srcs = [
         "//packages/linux/graphics/video/handbrake:handbrake",
-        "//packages/linux/graphics/video/yt-dlp:yt-dlp",
-        "//packages/linux/graphics/video/mkvtoolnix:mkvtoolnix",
         "//packages/linux/graphics/video/v4l-utils:v4l-utils",
         "//packages/linux/graphics/video/dvdauthor:dvdauthor",
     ],
@@ -89,10 +76,8 @@ filegroup(
 filegroup(
     name = "essential-codecs",
     srcs = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/media/video/x264:x264",
         "//packages/linux/media/video/x265:x265",
-        "//packages/linux/media/video/libvpx:libvpx",
         "//packages/linux/media/video/dav1d:dav1d",
         "//packages/linux/graphics/video/aom:aom",
     ],
@@ -103,9 +88,6 @@ filegroup(
 filegroup(
     name = "hw-accel",
     srcs = [
-        "//packages/linux/graphics/video/libva:libva",
-        "//packages/linux/graphics/video/libva:libva-utils",
-        "//packages/linux/graphics/video/libva:intel-media-driver",
         "//packages/linux/graphics/video/vdpau:vdpau",
         "//packages/linux/graphics/video/vdpau:libvdpau-va-gl",
     ],
@@ -116,9 +98,7 @@ filegroup(
 filegroup(
     name = "minimal",
     srcs = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
         "//packages/linux/graphics/video/mpv:mpv",
-        "//packages/linux/graphics/video/yt-dlp:yt-dlp",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -142,7 +122,6 @@ filegroup(
         "//packages/linux/graphics/video/obs-studio:obs-studio",
         "//packages/linux/graphics/video/natron:natron",
         "//packages/linux/graphics/video/handbrake:handbrake",
-        "//packages/linux/graphics/video/mkvtoolnix:mkvtoolnix",
     ],
     default_target_platform = "//platforms:linux-target",
 )
@@ -152,8 +131,6 @@ filegroup(
     name = "streaming",
     srcs = [
         "//packages/linux/graphics/video/obs-studio:obs-studio",
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
-        "//packages/linux/graphics/video/gstreamer:gstreamer",
         "//packages/linux/graphics/video/v4l-utils:v4l-utils",
     ],
     default_target_platform = "//platforms:linux-target",

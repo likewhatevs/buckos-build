@@ -9,7 +9,6 @@ package(
     deps = [
         "//packages/linux/ai/ml-frameworks/pytorch:pytorch",
         "//packages/linux/ai/ml-frameworks/pytorch:torchvision",
-        "//packages/linux/dev-libs/python/numpy:numpy",
         "//packages/linux/dev-libs/python/opencv:opencv-python",
     ],
 )

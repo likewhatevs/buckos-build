@@ -46,7 +46,7 @@ def _src_prepare(ctx, source):
     return output
 
 def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
-                   pkg_config_file = None, path_file = None):
+                   pkg_config_file = None, path_file = None, lib_dirs_file = None):
     """Run ./configure with toolchain env and dep flags.
 
     When skip_configure is True, only copies the source tree without
@@ -128,6 +128,7 @@ def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
         add_flag_file(cmd, "--ldflags-file", ldflags_file)
         add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
         add_flag_file(cmd, "--path-file", path_file)
+        add_flag_file(cmd, "--lib-dirs-file", lib_dirs_file)
 
     ctx.actions.run(cmd, category = "autotools_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
     return output
@@ -180,6 +181,15 @@ def _src_compile(ctx, configured, cflags_file = None, ldflags_file = None,
     # of trying to run aclocal/automake/autoconf which may not be available.
     for var in ["ACLOCAL=true", "AUTOMAKE=true", "AUTOCONF=true", "AUTOHEADER=true", "MAKEINFO=true"]:
         cmd.add(cmd_args("--make-arg=", var, delimiter = ""))
+    # When skip_configure is True, there's no ./configure --prefix=/usr.
+    # Pass PREFIX=/usr to make so Makefile-based packages use the standard
+    # buckos install prefix (consistent with the autoconf default on line 92).
+    if ctx.attrs.skip_configure:
+        cmd.add("--make-arg=PREFIX=/usr")
+
+    if ctx.attrs.build_subdir:
+        cmd.add("--build-subdir", ctx.attrs.build_subdir)
+
     for pre_cmd in ctx.attrs.pre_build_cmds:
         cmd.add("--pre-cmd", pre_cmd)
     for arg in ctx.attrs.make_args:
@@ -232,12 +242,18 @@ def _src_install(ctx, built, cflags_file = None, ldflags_file = None,
     for key, value in ctx.attrs.env.items():
         cmd.add("--env", "{}={}".format(key, value))
 
+    if ctx.attrs.build_subdir:
+        cmd.add("--build-subdir", ctx.attrs.build_subdir)
     if ctx.attrs.install_prefix_var:
         cmd.add("--destdir-var", ctx.attrs.install_prefix_var)
     # Override install targets when explicit ordering is needed (e.g.
     # e2fsprogs: install-shlibs must finish before install-progs).
     for target in ctx.attrs.install_targets:
         cmd.add("--make-target", target)
+    # When skip_configure is True, pass PREFIX=/usr to install (same as compile).
+    if ctx.attrs.skip_configure:
+        cmd.add("--make-arg=PREFIX=/usr")
+
     # Suppress autotools regeneration during install (same as compile phase)
     for var in ["ACLOCAL=true", "AUTOMAKE=true", "AUTOCONF=true", "AUTOHEADER=true", "MAKEINFO=true"]:
         cmd.add(cmd_args("--make-arg=", var, delimiter = ""))
@@ -274,7 +290,7 @@ def _autotools_package_impl(ctx):
 
     # Phase 3: src_configure
     configured = _src_configure(ctx, prepared, cflags_file, ldflags_file,
-                                pkg_config_file, path_file)
+                                pkg_config_file, path_file, lib_dirs_file)
 
     # Phase 4: src_compile
     built = _src_compile(ctx, configured, cflags_file, ldflags_file,
@@ -321,6 +337,7 @@ autotools_package = rule(
         "configure_prefix_deps": attrs.dict(attrs.string(), attrs.dep(), default = {}),
         "configure_script": attrs.option(attrs.string(), default = None),
         "skip_configure": attrs.bool(default = False),
+        "build_subdir": attrs.option(attrs.string(), default = None),
         "pre_build_cmds": attrs.list(attrs.string(), default = []),
         "make_args": attrs.list(attrs.string(), default = []),
         "install_args": attrs.list(attrs.string(), default = []),

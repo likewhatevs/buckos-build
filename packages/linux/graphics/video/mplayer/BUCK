@@ -135,8 +135,6 @@ package(
 DESTDIR=$OUT make install
 """],
     deps = [
-        "//packages/linux/media/video/ffmpeg:ffmpeg",
-                "//packages/linux/graphics/video/libva:libva",
                 "//packages/linux/graphics/video/vdpau:vdpau",
                 "//packages/linux/system/libs/audio/alsa-lib:alsa-lib",
                 "//packages/linux/audio/daemons/pulseaudio:pulseaudio",

@@ -2,7 +2,7 @@ load("//defs:package.bzl", "package")
 
 # LWP - The World-Wide Web library for Perl
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "lwp",
     url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/libwww-perl-6.76.tar.gz",
 
@@ -11,7 +11,6 @@ package(
     description = "The World-Wide Web library for Perl",
     homepage = "https://metacpan.org/pod/LWP",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/web:uri",
@@ -22,7 +21,7 @@ package(
 
 # HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "http-tiny",
     url = "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/HTTP-Tiny-0.088.tar.gz",
 
@@ -31,7 +30,6 @@ package(
     description = "A small, simple, correct HTTP/1.1 client",
     homepage = "https://metacpan.org/pod/HTTP::Tiny",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -39,7 +37,7 @@ package(
 
 # HTTP::Message - HTTP style message (base class)
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "http-message",
     url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Message-6.45.tar.gz",
 
@@ -48,7 +46,6 @@ package(
     description = "HTTP style message (base class)",
     homepage = "https://metacpan.org/pod/HTTP::Message",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/web:uri",
@@ -57,7 +54,7 @@ package(
 
 # HTTP::Cookies - HTTP cookie jars
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "http-cookies",
     url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Cookies-6.11.tar.gz",
 
@@ -66,7 +63,6 @@ package(
     description = "HTTP cookie jars",
     homepage = "https://metacpan.org/pod/HTTP::Cookies",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":http-message",
@@ -75,7 +71,7 @@ package(
 
 # IO::Socket::SSL - SSL sockets with IO::Socket interface
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "io-socket-ssl",
     url = "https://cpan.metacpan.org/authors/id/S/SU/SULLR/IO-Socket-SSL-2.085.tar.gz",
 
@@ -84,7 +80,6 @@ package(
     description = "SSL sockets with IO::Socket interface",
     homepage = "https://metacpan.org/pod/IO::Socket::SSL",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":net-ssleay",
@@ -93,7 +88,7 @@ package(
 
 # Net::SSLeay - Perl bindings for OpenSSL
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "net-ssleay",
     url = "https://cpan.metacpan.org/authors/id/C/CH/CHRISN/Net-SSLeay-1.94.tar.gz",
 
@@ -102,7 +97,6 @@ package(
     description = "Perl bindings for OpenSSL",
     homepage = "https://metacpan.org/pod/Net::SSLeay",
     license = "Artistic-2.0",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -110,7 +104,7 @@ package(
 
 # Socket - Networking constants and support functions
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "socket",
     url = "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/Socket-2.038.tar.gz",
 
@@ -119,7 +113,6 @@ package(
     description = "Networking constants and support functions",
     homepage = "https://metacpan.org/pod/Socket",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -127,7 +120,7 @@ package(
 
 # Net::DNS - Perl Interface to the Domain Name System
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "net-dns",
     url = "https://cpan.metacpan.org/authors/id/N/NL/NLNETLABS/Net-DNS-1.44.tar.gz",
 
@@ -136,7 +129,6 @@ package(
     description = "Perl Interface to the Domain Name System",
     homepage = "https://metacpan.org/pod/Net::DNS",
     license = "MIT",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -144,7 +136,7 @@ package(
 
 # Net::SMTP - Simple Mail Transfer Protocol Client
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "libnet",
     url = "https://cpan.metacpan.org/authors/id/S/SH/SHAY/libnet-3.15.tar.gz",
 
@@ -153,7 +145,6 @@ package(
     description = "Collection of network protocol modules",
     homepage = "https://metacpan.org/pod/Net::SMTP",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -161,7 +152,7 @@ package(
 
 # Email::MIME - Easy MIME message handling
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "email-mime",
     url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Email-MIME-1.953.tar.gz",
 
@@ -170,7 +161,6 @@ package(
     description = "Easy MIME message handling",
     homepage = "https://metacpan.org/pod/Email::MIME",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
     ],
@@ -178,7 +168,7 @@ package(
 
 # Email::Sender - A library for sending email
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "email-sender",
     url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Email-Sender-2.601.tar.gz",
 
@@ -187,7 +177,6 @@ package(
     description = "A library for sending email",
     homepage = "https://metacpan.org/pod/Email::Sender",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         "//packages/linux/lang/perl/oop:moo",
@@ -197,7 +186,7 @@ package(
 
 # WWW::Mechanize - Handy web browsing in a Perl object
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "www-mechanize",
     url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/WWW-Mechanize-2.18.tar.gz",
 
@@ -206,7 +195,6 @@ package(
     description = "Handy web browsing in a Perl object",
     homepage = "https://metacpan.org/pod/WWW::Mechanize",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":lwp",
@@ -216,7 +204,7 @@ package(
 
 # Furl - Lightning-fast URL fetcher
 package(
-    build_rule = "autotools",
+    build_rule = "perl",
     name = "furl",
     url = "https://cpan.metacpan.org/authors/id/S/SY/SYOHEX/Furl-3.14.tar.gz",
 
@@ -225,7 +213,6 @@ package(
     description = "Lightning-fast URL fetcher",
     homepage = "https://metacpan.org/pod/Furl",
     license = "Artistic-1.0-Perl OR GPL-1.0-or-later",
-    configure_args = [],
     deps = [
         "//packages/linux/lang/perl:perl",
         ":http-message",
