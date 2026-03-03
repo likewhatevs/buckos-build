@@ -5,6 +5,7 @@ Assembly rules that take rootfs/kernel/initramfs deps and produce images.
 """
 
 load("//defs:providers.bzl", "IsoImageInfo", "KernelInfo", "Stage3Info", "get_kernel_image")
+load("//defs:host_tools.bzl", "host_tool_path_args")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_path_args")
 
 # =============================================================================
@@ -92,6 +93,8 @@ def _iso_image_impl(ctx: AnalysisContext) -> list[Provider]:
     # Hermetic PATH from toolchain
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
+    for arg in host_tool_path_args(ctx):
+        cmd.add(arg)
 
     ctx.actions.run(cmd, category = "iso", identifier = ctx.attrs.name, allow_cache_upload = True)
 
@@ -117,6 +120,7 @@ _iso_image_rule = rule(
         "kernel_args": attrs.string(default = "quiet"),
         "arch": attrs.string(default = "x86_64"),  # x86_64 or aarch64
         "syslinux": attrs.option(attrs.dep(), default = None),
+        "host_deps": attrs.list(attrs.dep(), default = []),
         "labels": attrs.list(attrs.string(), default = []),
         "_iso_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:iso_helper"),

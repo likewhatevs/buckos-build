@@ -2608,6 +2608,7 @@ iso_image(
     volume_label = "BUCKOS_LIVE",
     # Systemd initrd boot parameters (no serial console)
     kernel_args = "console=tty0 loglevel=7 rd.systemd.show_status=true",
+    host_deps = ["//packages/linux/system/filesystem/native/squashfs-tools:squashfs-tools"],
     visibility = ["PUBLIC"],
 )
 
@@ -2620,6 +2621,7 @@ iso_image(
     boot_mode = "hybrid",
     volume_label = "BUCKOS_LIVE",
     kernel_args = "console=tty0 console=ttyS0,115200 rdinit=/init nokaslr",
+    host_deps = ["//packages/linux/system/filesystem/native/squashfs-tools:squashfs-tools"],
     visibility = ["PUBLIC"],
 )
 
@@ -2632,6 +2634,7 @@ iso_image(
     boot_mode = "efi",  # ARM boards typically use UEFI
     volume_label = "BUCKOS_LIVE_ARM64",
     kernel_args = "console=tty0 console=ttyAMA0,115200 init=/init quiet systemd.unified_cgroup_hierarchy=1",
+    host_deps = ["//packages/linux/system/filesystem/native/squashfs-tools:squashfs-tools"],
     default_target_platform = "//platforms:linux-aarch64-target",
     visibility = ["PUBLIC"],
 )
