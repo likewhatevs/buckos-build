@@ -33,7 +33,14 @@ package(
             "//packages/linux/core/libclc:libclc",
         ],
     },
+    pre_configure_cmds = [
+        # DirectX-Headers.wrap in mesa 26 is empty (0 bytes), which meson
+        # rejects as "Missing sections". Remove it so meson doesn't try to
+        # validate or fetch it; softpipe/virgl don't need D3D headers.
+        "rm -f subprojects/DirectX-Headers.wrap",
+    ],
     configure_args = [
+        "--wrap-mode=nofallback",
         # Core features for mesa 26.0.0
         "-Degl=enabled",
         "-Dgbm=enabled",
