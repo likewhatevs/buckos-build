@@ -34,10 +34,10 @@ package(
         ],
     },
     pre_configure_cmds = [
-        # DirectX-Headers.wrap in mesa 26 is empty (0 bytes), which meson
-        # rejects as "Missing sections". Remove it so meson doesn't try to
-        # validate or fetch it; softpipe/virgl don't need D3D headers.
-        "rm -f subprojects/DirectX-Headers.wrap",
+        # Mesa 26 ships all subproject .wrap files as empty placeholders (0 bytes).
+        # Meson rejects empty wrap files with "Missing sections". Remove them all;
+        # dependencies are provided via pkg-config from deps, not subproject downloads.
+        "rm -f subprojects/*.wrap",
     ],
     configure_args = [
         "--wrap-mode=nofallback",
