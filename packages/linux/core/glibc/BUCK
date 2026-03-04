@@ -10,7 +10,7 @@ package(
     version = "2.42",
     url = "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
     sha256 = None,
-    source = "//tc/bootstrap/stage1:glibc-src",
+    source = "//tc/bootstrap/sources:glibc-src",
     description = "GNU C Library (glibc) - the standard C library for GNU/Linux systems",
     homepage = "https://www.gnu.org/software/libc/",
     license = "LGPL-2.1+ GPL-2+",
