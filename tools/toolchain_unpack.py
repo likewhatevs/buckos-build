@@ -6,6 +6,7 @@ contents SHA256 matches what was recorded at pack time.
 """
 
 import argparse
+import glob as _glob
 import hashlib
 import json
 import os
@@ -179,6 +180,87 @@ def _rewrite_interpreters(toolchain_dir):
         print(f"  patched ELF interpreter in {patched} binaries", file=sys.stderr)
 
 
+def _install_cross_specs(toolchain_dir, target_triple="x86_64-buckos-linux-gnu"):
+    """Install GCC specs so cross-compiled programs run on the build host.
+
+    The cross-compiler produces buckos binaries linked against the
+    sysroot's glibc (2.42).  On hosts with older glibc, these binaries
+    segfault because the default ELF interpreter (/lib64/ld-linux-x86-64.so.2)
+    loads the host's incompatible libc.
+
+    Dump the cross-compiler's built-in specs and replace the dynamic
+    linker path with the absolute path to the sysroot's ld-linux.
+    Combined with LD_LIBRARY_PATH (set by the build helpers to include
+    host-tools/lib64), cross-compiled test programs and HOSTCC output
+    find the matching buckos ld-linux + libc at runtime.
+    """
+    gcc = os.path.join(toolchain_dir, "tools", "bin", f"{target_triple}-gcc")
+    sysroot = os.path.join(toolchain_dir, "tools", target_triple, "sys-root")
+    sysroot_ld = os.path.join(sysroot, "lib64", "ld-linux-x86-64.so.2")
+
+    if not os.path.exists(gcc) or not os.path.exists(sysroot_ld):
+        return
+
+    gcc_abs = os.path.abspath(gcc)
+    sysroot_ld_abs = os.path.abspath(sysroot_ld)
+
+    # Dump current specs — the cross-compiler's interpreter is already
+    # patched by _rewrite_interpreters, and it finds host libs via
+    # the system's ld.so.cache.
+    result = subprocess.run(
+        [gcc_abs, "-dumpspecs"],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        print(f"  warning: could not dump GCC specs: {result.stderr.strip()}",
+              file=sys.stderr)
+        return
+
+    specs = result.stdout
+
+    # Replace the default dynamic linker with the sysroot's ld-linux.
+    # The linker uses the last --dynamic-linker when multiple appear,
+    # but a direct string replacement is cleaner.
+    old_interp = "/lib64/ld-linux-x86-64.so.2"
+    if old_interp not in specs:
+        print("  warning: dynamic linker path not found in specs", file=sys.stderr)
+        return
+
+    specs = specs.replace(old_interp, sysroot_ld_abs)
+
+    # Find GCC's install directory for the specs file
+    result2 = subprocess.run(
+        [gcc_abs, "-print-search-dirs"],
+        capture_output=True, text=True,
+    )
+    if result2.returncode != 0:
+        return
+
+    gcc_libdir = None
+    for line in result2.stdout.splitlines():
+        if line.startswith("install:"):
+            gcc_libdir = line.split(":", 1)[1].strip()
+            break
+
+    if not gcc_libdir:
+        # Fallback: glob for the GCC lib directory
+        pattern = os.path.join(toolchain_dir, "tools", "lib", "gcc", target_triple, "*")
+        candidates = sorted(_glob.glob(pattern))
+        if candidates:
+            gcc_libdir = candidates[-1]
+
+    if not gcc_libdir or not os.path.isdir(gcc_libdir):
+        print("  warning: could not find GCC lib directory for specs", file=sys.stderr)
+        return
+
+    specs_path = os.path.join(gcc_libdir, "specs")
+    with open(specs_path, "w") as f:
+        f.write(specs)
+
+    print(f"  installed cross-compiler specs with sysroot dynamic linker",
+          file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Unpack prebuilt toolchain archive")
     parser.add_argument("--archive", required=True, help="Input archive path")
@@ -265,6 +347,10 @@ def main():
 
     # Patch ELF interpreters to use bundled ld-linux
     _rewrite_interpreters(output)
+
+    # Install GCC specs so cross-compiled programs use the sysroot's
+    # ld-linux instead of the host's (avoids glibc version mismatch).
+    _install_cross_specs(output)
 
     # Read metadata
     meta_path = os.path.join(output, "metadata.json")
