@@ -102,9 +102,11 @@ for script in $OUT/usr/lib*/libc.so $OUT/usr/lib*/libpthread.so $OUT/usr/lib*/li
     fi
 done
 
-# Create dynamic linker symlink
-mkdir -p "$OUT/lib64"
-ln -sfv ../usr/lib64/ld-linux-x86-64.so.2 "$OUT/lib64/ld-linux-x86-64.so.2"
+# Do NOT create /lib64/ld-linux-x86-64.so.2 symlink here.
+# The rootfs baselayout provides /lib64 -> usr/lib64 (merged-usr),
+# so /lib64/ld-linux-x86-64.so.2 resolves to usr/lib64/ automatically.
+# Creating a symlink here would clobber the real ELF file when tar
+# extracts through the directory symlink with --keep-directory-symlink.
 
 # Generate C.UTF-8 locale
 echo "Generating C.UTF-8 locale..."
