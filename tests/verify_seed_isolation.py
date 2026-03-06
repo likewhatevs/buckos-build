@@ -62,6 +62,43 @@ def check_rpath(elf_path, forbidden_patterns):
     return violations
 
 
+def check_interp_padded(elf_path):
+    """Check that .interp has a padded interpreter (leading ///)."""
+    output = run(["readelf", "-p", ".interp", elf_path])
+    if not output:
+        return None  # no .interp — statically linked or shared lib
+    for line in output.splitlines():
+        if "ld-linux" not in line and "ld.so" not in line:
+            continue
+        # Extract the string value — readelf -p format: "  [     0]  /path..."
+        idx = line.find("]")
+        if idx < 0:
+            continue
+        interp = line[idx + 1:].strip()
+        if interp and not interp.startswith("///"):
+            return interp  # unpadded — return the bad value
+        return None  # padded — OK
+    return None
+
+
+def check_has_rpath(elf_path):
+    """Check that a dynamically-linked binary has RPATH/RUNPATH with $ORIGIN."""
+    output = run(["readelf", "-d", elf_path])
+    if not output:
+        return None
+    has_needed = False
+    has_rpath = False
+    for line in output.splitlines():
+        if "NEEDED" in line:
+            has_needed = True
+        if "RPATH" in line or "RUNPATH" in line:
+            if "$ORIGIN" in line:
+                has_rpath = True
+    if has_needed and not has_rpath:
+        return True  # dynamically linked but no $ORIGIN RPATH
+    return None
+
+
 def check_strings_for_leaks(elf_path, forbidden_patterns):
     """Scan binary strings for leaked build paths."""
     violations = []
@@ -213,6 +250,40 @@ def main():
                 if "/bin/" in os.path.relpath(elf, ht_dir):
                     for v in check_strings_for_leaks(elf, rpath_forbidden):
                         warnings.append(f"host-tools string: {v}")
+
+            # Every dynamically-linked host-tools binary must have been
+            # built by our GCC (padded interp + $ORIGIN RPATH).  Binaries
+            # missing these fall back to host libc — a hermeticity leak.
+            unpadded = []
+            no_rpath = []
+            for elf in ht_elfs:
+                bad_interp = check_interp_padded(elf)
+                if bad_interp is not None:
+                    unpadded.append(
+                        f"{os.path.relpath(elf, ht_dir)}: interp={bad_interp}"
+                    )
+                # Only check RPATH on executables (have .interp), not
+                # shared libs which are found via the executable's RPATH.
+                has_interp = run(["readelf", "-p", ".interp", elf])
+                if has_interp and "ld-linux" in has_interp:
+                    if check_has_rpath(elf) is not None:
+                        no_rpath.append(os.path.relpath(elf, ht_dir))
+            if unpadded:
+                failures.append(
+                    f"{len(unpadded)} host-tools binaries have unpadded "
+                    f"interpreter (not built by buckos GCC):\n"
+                    + "\n".join(f"    {u}" for u in unpadded[:20])
+                    + (f"\n    ... and {len(unpadded) - 20} more"
+                       if len(unpadded) > 20 else "")
+                )
+            if no_rpath:
+                failures.append(
+                    f"{len(no_rpath)} host-tools binaries have no $ORIGIN "
+                    f"RPATH (will fall back to host libc):\n"
+                    + "\n".join(f"    {p}" for p in no_rpath[:20])
+                    + (f"\n    ... and {len(no_rpath) - 20} more"
+                       if len(no_rpath) > 20 else "")
+                )
 
             # Positive check: host-tools ELFs should be buckos-linked
             for elf in ht_elfs:
