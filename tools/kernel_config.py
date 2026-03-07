@@ -218,7 +218,11 @@ def _gcc14_workaround(build_dir, cc_bin):
     os.makedirs(wrapper_dir, exist_ok=True)
     wrapper_path = os.path.join(wrapper_dir, "gcc")
     with open(wrapper_path, "w") as f:
-        f.write(f"#!/bin/bash\nexec {cc_path} \"$@\" -std=gnu11\n")
+        f.write(
+            '#!/usr/bin/env python3\n'
+            'import os, sys\n'
+            f'os.execv("{cc_path}", ["{cc_path}"] + sys.argv[1:] + ["-std=gnu11"])\n'
+        )
     os.chmod(wrapper_path, 0o755)
 
     return [f"CC={wrapper_path}", f"HOSTCC={wrapper_path}"]
