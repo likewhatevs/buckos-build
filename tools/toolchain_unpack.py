@@ -150,7 +150,11 @@ def _rewrite_interpreters(toolchain_dir):
     ld-linux versions causes segfaults.  Patch all binaries to use the
     bundled buckos ld-linux so the toolchain is self-contained.
     """
+    # Check both the direct path and the glibc-isolated path (pack-time
+    # _isolate_glibc moves ld-linux from lib64/ to lib64/glibc/).
     ld_linux = os.path.join(toolchain_dir, "host-tools", "lib64", "ld-linux-x86-64.so.2")
+    if not os.path.exists(ld_linux):
+        ld_linux = os.path.join(toolchain_dir, "host-tools", "lib64", "glibc", "ld-linux-x86-64.so.2")
     if not os.path.exists(ld_linux):
         return
 
@@ -217,10 +221,15 @@ def _install_gcc_specs(toolchain_dir, target_triple="x86_64-buckos-linux-gnu"):
             installed += 1
 
     # Host-tools GCC: host-tools/lib64/gcc/<triple>/<ver>/specs
-    # Uses host-tools ld-linux as dynamic linker.
+    # Uses host-tools ld-linux as dynamic linker.  Check the glibc-isolated
+    # path too (pack-time _isolate_glibc moves ld-linux to lib64/glibc/).
     host_ld = os.path.join(
         toolchain_dir, "host-tools", "lib64", "ld-linux-x86-64.so.2",
     )
+    if not os.path.exists(host_ld):
+        host_ld = os.path.join(
+            toolchain_dir, "host-tools", "lib64", "glibc", "ld-linux-x86-64.so.2",
+        )
     if os.path.exists(host_ld):
         host_ld_abs = os.path.abspath(host_ld)
         # Host-tools GCC may use a different triple (e.g. x86_64-pc-linux-gnu)
