@@ -1797,7 +1797,7 @@ mkdir -p "$OUT/etc"
 
 TARBALL="$(location :buckos-build-tarball)"
 # Detect the top-level directory name in the archive (varies with commit SHA)
-PREFIX=$(tar -tzf "$TARBALL" | head -1 | cut -d/ -f1)
+PREFIX=`tar -tzf "$TARBALL" | head -1 | cut -d/ -f1`
 # Extract defs/ directory (required by buckos CLI)
 tar -xzf "$TARBALL" --strip-components=1 -C "$OUT/var/db/repos/buckos-build" "$PREFIX/defs"
 # Extract config/ directory (Fedora build flags and other config)
