@@ -61,7 +61,8 @@ mount -t devpts devpts /dev/pts
 # Mount /run
 mount -t tmpfs tmpfs /run
 # Set hostname
-hostname buckos
+echo buckos > /etc/hostname
+command -v hostname >/dev/null 2>&1 && hostname buckos
 # Configure loopback
 ip link set lo up
 echo "System initialization complete."
