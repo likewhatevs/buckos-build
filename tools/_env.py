@@ -32,11 +32,6 @@ _DETERMINISM_PINS = {
     "CCACHE_DISABLE": "1",
     "RUSTC_WRAPPER": "",
     "CARGO_BUILD_RUSTC_WRAPPER": "",
-    # Prevent rustup from intercepting rustc/cargo via host toolchains.
-    # cargo discovers rustc from PATH; rustup interposes by installing
-    # proxies in ~/.cargo/bin that redirect to ~/.rustup/toolchains/.
-    # Pinning RUSTUP_HOME to nonexistent prevents this.
-    "RUSTUP_HOME": "/nonexistent-buckos-rustup",
     # Prevent pkg-config from falling through to host system .pc files.
     # The compiled-in default search path (/usr/lib64/pkgconfig, etc.) is
     # replaced with a nonexistent dir — helpers set PKG_CONFIG_PATH to
@@ -57,9 +52,12 @@ def clean_env():
         if val is not None:
             env[key] = val
     env.update(_DETERMINISM_PINS)
-    # Isolate cargo from host ~/.cargo — cargo checks $CARGO_HOME/bin
-    # for tools and $CARGO_HOME/config.toml for settings.  Use a scratch
-    # dir so cargo can write registry/cache if needed.
+    # Isolate cargo from host ~/.cargo — cargo reads
+    # $CARGO_HOME/config.toml and shells may add ~/.cargo/bin to PATH.
+    # RUSTUP_HOME is NOT redirected here because rustup proxies need
+    # a configured toolchain in $RUSTUP_HOME; empty dir causes
+    # "no default toolchain" errors.  Helpers that need rustup
+    # isolation (mozbuild_helper) set RUSTUP_HOME themselves.
     scratch = env.get("BUCK_SCRATCH_PATH") or env.get("TMPDIR") or "/tmp"
     env["CARGO_HOME"] = os.path.join(scratch, "buckos-cargo-home")
     return env

@@ -306,12 +306,10 @@ def main():
         check(os.path.join(dep_dir, "usr/share/pkgconfig") in pc_path,
               f"share/pkgconfig in PKG_CONFIG_PATH")
 
-        print("=== _build_dep_env: bin paths prepended to PATH ===")
+        print("=== _build_dep_env: dep bin dirs NOT added to PATH ===")
         path = env.get("PATH", "")
-        check(path.startswith(os.path.join(dep_dir, "usr/bin")),
-              f"usr/bin first in PATH: {path[:80]}")
-        check(path.endswith("/usr/bin"),
-              f"base_path at end of PATH: ...{path[-20:]}")
+        check(os.path.join(dep_dir, "usr/bin") not in path,
+              "dep usr/bin not in PATH (deps provide libs, not build tools)")
 
         print("=== _build_dep_env: LIBRARY_PATH set from lib dirs ===")
         lib_path = env.get("LIBRARY_PATH", "")
@@ -361,13 +359,10 @@ def main():
         check(env4["DEP_BASE_DIRS"] == empty_dep,
               "DEP_BASE_DIRS always set")
 
-        print("=== _build_dep_env: no base_path -> no host PATH leakage ===")
+        print("=== _build_dep_env: no base_path -> no PATH set ===")
         env5 = _build_dep_env([dep_dir], None, base_path=None)
-        path5 = env5.get("PATH", "")
-        # base_path=None falls back to "" — no host PATH leakage
-        # PATH should contain dep bin dirs and end with empty base_path
-        check(path5.endswith(":"),
-              f"no base_path -> PATH ends with empty base")
+        check("PATH" not in env5,
+              "no base_path and no dep bins -> no PATH set")
 
     finally:
         os.chdir(saved_cwd)
