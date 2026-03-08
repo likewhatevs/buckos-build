@@ -106,6 +106,8 @@ def main():
                         help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
     parser.add_argument("--path-file", default=None,
                         help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--path-append-file", default=None,
+                        help="File with PATH dirs to append (one per line, from tset projection)")
     parser.add_argument("--lib-dirs-file", default=None,
                         help="File with lib dirs for LD_LIBRARY_PATH (one per line, from tset projection)")
     args = parser.parse_args()
@@ -121,6 +123,7 @@ def main():
     file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
     file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
+    file_path_append_dirs = _read_flag_file(args.path_append_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
     if not os.path.isdir(args.source_dir):
@@ -169,6 +172,12 @@ def main():
         prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
+
+    # Append dep bin dirs for *-config discovery scripts
+    if file_path_append_dirs:
+        append = ":".join(os.path.abspath(p) for p in file_path_append_dirs if os.path.isdir(p))
+        if append:
+            env["PATH"] = env.get("PATH", "") + ":" + append
 
     # Merge tset-provided lib dirs into LD_LIBRARY_PATH so dynamically
     # linked dep tools (e.g. buckos python needing libpython3.12.so)

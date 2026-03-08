@@ -17,7 +17,7 @@ load("//defs/rules:_common.bzl",
      "COMMON_PACKAGE_ATTRS",
      "add_flag_file", "build_package_tsets", "collect_dep_tsets",
      "collect_host_path_children", "src_prepare",
-     "write_compile_flags", "write_lib_dirs_with_hosts",
+     "write_bin_dirs", "write_compile_flags", "write_lib_dirs_with_hosts",
      "write_link_flags", "write_pkg_config_paths",
 )
 load("//defs:toolchain_helpers.bzl", "toolchain_env_args", "toolchain_extra_cflags", "toolchain_extra_ldflags", "toolchain_path_args")
@@ -26,7 +26,8 @@ load("//defs:host_tools.bzl", "host_tool_path_args")
 # ── Phase helpers ─────────────────────────────────────────────────────
 
 def _meson_setup(ctx, source, cflags_file = None, ldflags_file = None,
-                 pkg_config_file = None, lib_dirs_file = None):
+                 pkg_config_file = None, lib_dirs_file = None,
+                 bin_dirs_file = None):
     """Run meson setup with toolchain env and dep flags.
 
     Dep flags are propagated via tset projection files — the meson_helper
@@ -83,6 +84,9 @@ def _meson_setup(ctx, source, cflags_file = None, ldflags_file = None,
     add_flag_file(cmd, "--ldflags-file", ldflags_file)
     add_flag_file(cmd, "--pkg-config-file", pkg_config_file)
     add_flag_file(cmd, "--lib-dirs-file", lib_dirs_file)
+
+    # Dep bin dirs appended to PATH for *-config discovery scripts
+    add_flag_file(cmd, "--path-append-file", bin_dirs_file)
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
@@ -192,10 +196,11 @@ def _meson_package_impl(ctx):
     pkg_config_file = write_pkg_config_paths(ctx, dep_compile)
     host_path_children = collect_host_path_children(ctx)
     lib_dirs_file = write_lib_dirs_with_hosts(ctx, dep_path, host_path_children)
+    bin_dirs_file = write_bin_dirs(ctx, dep_path)
 
     # Phase 3: meson_setup
     configured = _meson_setup(ctx, prepared, cflags_file, ldflags_file,
-                              pkg_config_file, lib_dirs_file)
+                              pkg_config_file, lib_dirs_file, bin_dirs_file)
 
     # Phase 4: src_compile (source passed as hidden input for out-of-tree builds)
     built = _src_compile(ctx, configured, prepared, lib_dirs_file)

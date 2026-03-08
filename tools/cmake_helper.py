@@ -108,6 +108,8 @@ def main():
                         help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
     parser.add_argument("--path-file", default=None,
                         help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--path-append-file", default=None,
+                        help="File with PATH dirs to append (one per line, from tset projection)")
     parser.add_argument("--prefix-path-file", default=None,
                         help="File with CMAKE_PREFIX_PATH entries (one per line, from tset projection)")
     parser.add_argument("--lib-dirs-file", default=None,
@@ -125,6 +127,7 @@ def main():
     file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
     file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
+    file_path_append_dirs = _read_flag_file(args.path_append_file)
     file_prefix_paths = _read_flag_file(args.prefix_path_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
@@ -187,6 +190,12 @@ def main():
         prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
+
+    # Append dep bin dirs for *-config discovery scripts
+    if file_path_append_dirs:
+        append = ":".join(os.path.abspath(p) for p in file_path_append_dirs if os.path.isdir(p))
+        if append:
+            env["PATH"] = env.get("PATH", "") + ":" + append
 
     # Merge flag file pkg-config paths into env
     if file_pkg_config:

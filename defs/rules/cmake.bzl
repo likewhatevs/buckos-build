@@ -17,7 +17,7 @@ load("//defs/rules:_common.bzl",
      "COMMON_PACKAGE_ATTRS",
      "add_flag_file", "build_package_tsets", "collect_dep_tsets",
      "collect_host_path_children", "src_prepare",
-     "write_cmake_prefix_paths", "write_compile_flags",
+     "write_bin_dirs", "write_cmake_prefix_paths", "write_compile_flags",
      "write_lib_dirs_with_hosts", "write_link_flags", "write_pkg_config_paths",
 )
 load("//defs:toolchain_helpers.bzl", "toolchain_env_args", "toolchain_extra_cflags", "toolchain_extra_ldflags", "toolchain_path_args")
@@ -27,7 +27,8 @@ load("//defs:host_tools.bzl", "host_tool_path_args")
 
 def _cmake_configure(ctx, source, cflags_file = None, ldflags_file = None,
                      pkg_config_file = None,
-                     prefix_path_file = None, lib_dirs_file = None):
+                     prefix_path_file = None, lib_dirs_file = None,
+                     bin_dirs_file = None):
     """Run cmake configure with toolchain env and dep flags.
 
     Dep flags are propagated via tset projection files — the cmake_helper
@@ -84,6 +85,9 @@ def _cmake_configure(ctx, source, cflags_file = None, ldflags_file = None,
 
     add_flag_file(cmd, "--prefix-path-file", prefix_path_file)
     add_flag_file(cmd, "--lib-dirs-file", lib_dirs_file)
+
+    # Dep bin dirs appended to PATH for *-config discovery scripts
+    add_flag_file(cmd, "--path-append-file", bin_dirs_file)
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
@@ -204,11 +208,12 @@ def _cmake_package_impl(ctx):
     prefix_path_file = write_cmake_prefix_paths(ctx, dep_path)
     host_path_children = collect_host_path_children(ctx)
     lib_dirs_file = write_lib_dirs_with_hosts(ctx, dep_path, host_path_children)
+    bin_dirs_file = write_bin_dirs(ctx, dep_path)
 
     # Phase 3: cmake_configure
     configured = _cmake_configure(ctx, prepared, cflags_file, ldflags_file,
                                   pkg_config_file,
-                                  prefix_path_file, lib_dirs_file)
+                                  prefix_path_file, lib_dirs_file, bin_dirs_file)
 
     # Phase 4: src_compile (source passed as hidden input for cmake out-of-tree builds)
     built = _src_compile(ctx, configured, prepared, lib_dirs_file)

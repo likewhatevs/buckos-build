@@ -128,6 +128,8 @@ def main():
                         help="File with PKG_CONFIG_PATH entries (one per line, from tset projection)")
     parser.add_argument("--path-file", default=None,
                         help="File with PATH dirs to prepend (one per line, from tset projection)")
+    parser.add_argument("--path-append-file", default=None,
+                        help="File with PATH dirs to append (one per line, from tset projection)")
     parser.add_argument("--lib-dirs-file", default=None,
                         help="File with lib dirs for LD_LIBRARY_PATH (one per line, from tset projection)")
     args = parser.parse_args()
@@ -144,6 +146,7 @@ def main():
     file_ldflags = filter_path_flags(_read_flag_file(args.ldflags_file))
     file_pkg_config = [p for p in _read_flag_file(args.pkg_config_file) if os.path.isdir(os.path.abspath(p))]
     file_path_dirs = _read_flag_file(args.path_file)
+    file_path_append_dirs = _read_flag_file(args.path_append_file)
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
     source_dir = os.path.abspath(args.source_dir)
@@ -250,6 +253,15 @@ def main():
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
 
+    # Append dep bin dirs AFTER hermetic PATH for *-config discovery scripts
+    # (gpg-error-config, curl-config, xml2-config, etc.).  Appended so seed
+    # host-tools always take priority — prevents ENOEXEC from dep binaries
+    # with unrewritten padded ELF interpreters shadowing seed tools.
+    if file_path_append_dirs:
+        append = ":".join(os.path.abspath(p) for p in file_path_append_dirs if os.path.isdir(p))
+        if append:
+            env["PATH"] = env.get("PATH", "") + ":" + append
+
     # Merge tset-provided lib dirs into LD_LIBRARY_PATH so dynamically
     # linked dep tools (e.g. buckos python needing libpython3.12.so)
     # can execute during configure probes.
@@ -277,7 +289,7 @@ def main():
     # Auto-detect automake Perl modules and aclocal dirs from dep
     # prefixes.  The Buck2-installed automake hardcodes /usr/share/...
     # paths which don't resolve to the artifact directory.
-    _path_sources = list(args.hermetic_path) + list(all_path_prepend)
+    _path_sources = list(args.hermetic_path) + list(all_path_prepend) + list(file_path_append_dirs)
     if _path_sources:
         perl5lib = []
         aclocal_dirs = []
