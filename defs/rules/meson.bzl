@@ -16,8 +16,8 @@ load("//defs:providers.bzl", "PackageInfo")
 load("//defs/rules:_common.bzl",
      "COMMON_PACKAGE_ATTRS",
      "add_flag_file", "build_package_tsets", "collect_dep_tsets",
-     "src_prepare",
-     "write_bin_dirs", "write_compile_flags", "write_lib_dirs",
+     "collect_host_path_children", "src_prepare",
+     "write_bin_dirs", "write_compile_flags", "write_lib_dirs_with_hosts",
      "write_link_flags", "write_pkg_config_paths",
 )
 load("//defs:toolchain_helpers.bzl", "toolchain_env_args", "toolchain_extra_cflags", "toolchain_extra_ldflags", "toolchain_path_args")
@@ -194,7 +194,8 @@ def _meson_package_impl(ctx):
     ldflags_file = write_link_flags(ctx, dep_link)
     pkg_config_file = write_pkg_config_paths(ctx, dep_compile)
     path_file = write_bin_dirs(ctx, dep_path)
-    lib_dirs_file = write_lib_dirs(ctx, dep_path) if dep_path else None
+    host_path_children = collect_host_path_children(ctx)
+    lib_dirs_file = write_lib_dirs_with_hosts(ctx, dep_path, host_path_children)
 
     # Phase 3: meson_setup
     configured = _meson_setup(ctx, prepared, cflags_file, ldflags_file,

@@ -177,9 +177,9 @@ def _elf_data_ranges(data):
 def _scrub_home_paths(directory):
     """Replace /home/... paths in ELF data sections with zeroes.
 
-    Build-machine home directories leak the builder's identity into
-    shipped artifacts.  Only scrubs data sections (rodata, strtab,
-    debug info) — never touches executable code sections.
+    Build-machine home directories should not appear in shipped
+    artifacts.  Only scrubs data sections (rodata, strtab, debug
+    info) — never touches executable code sections.
     """
     pattern = re.compile(rb'/home/[^\x00]+')
     scrubbed = 0
@@ -444,9 +444,9 @@ def main():
         print("Scrubbing build paths...", file=sys.stderr)
         _scrub_build_paths(stage_copy)
 
-        # Scrub /home/... paths from data sections to prevent builder
-        # identity leaking into shipped artifacts.  Section-aware: only
-        # touches rodata, strtab, debug — never executable code.
+        # Scrub /home/... paths from data sections so build-machine
+        # paths don't appear in shipped artifacts.  Section-aware:
+        # only touches rodata, strtab, debug — never executable code.
         print("Scrubbing home paths...", file=sys.stderr)
         _scrub_home_paths(stage_copy)
         if has_host_tools:

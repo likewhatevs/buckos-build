@@ -9,7 +9,10 @@ Four discrete cacheable actions:
 """
 
 load("//defs:providers.bzl", "BuildToolchainInfo", "PackageInfo")
-load("//defs/rules:_common.bzl", "COMMON_PACKAGE_ATTRS", "build_package_tsets")
+load("//defs/rules:_common.bzl",
+     "COMMON_PACKAGE_ATTRS", "build_package_tsets",
+     "collect_host_path_children", "write_host_lib_dirs",
+)
 load("//defs:toolchain_helpers.bzl",
      "toolchain_extra_cflags", "toolchain_extra_ldflags")
 load("//defs:host_tools.bzl", "host_tool_env_paths")
@@ -151,6 +154,15 @@ def _install(ctx, source):
 
     if dep_paths:
         env["_DEP_BIN_PATHS"] = cmd_args(dep_paths, delimiter = ":")
+
+    # Write host tool transitive dep lib dirs so host tools can find
+    # their shared lib deps even when cached from a different machine.
+    host_path_children = collect_host_path_children(ctx)
+    host_lib_result = write_host_lib_dirs(ctx, host_path_children)
+    if host_lib_result:
+        artifact, projection = host_lib_result
+        env["_HOST_LIB_DIRS_FILE"] = cmd_args(artifact)
+        cmd.add(cmd_args(hidden = [projection]))
 
     # Inject user-specified environment variables (last — overrides everything)
     for key, value in ctx.attrs.env.items():

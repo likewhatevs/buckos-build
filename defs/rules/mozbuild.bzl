@@ -17,7 +17,7 @@ load("//defs/rules:_common.bzl",
      "src_prepare",
      "write_dep_prefixes",
 )
-load("//defs:toolchain_helpers.bzl", "toolchain_path_args")
+load("//defs:toolchain_helpers.bzl", "toolchain_ld_linux_args", "toolchain_path_args")
 load("//defs:host_tools.bzl", "host_tool_path_args")
 
 # ── Phase helpers ─────────────────────────────────────────────────────
@@ -45,6 +45,11 @@ def _configure(ctx, source, dep_prefixes_file = None):
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
+        cmd.add(arg)
+
+    # Disable posix_spawn in child Python processes (mach runs rustc/cargo
+    # which have padded ELF interpreters that fail with ENOEXEC on Python 3.14+)
+    for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
 
     ctx.actions.run(cmd, category = "mozbuild_configure", identifier = ctx.attrs.name, allow_cache_upload = True)
@@ -82,6 +87,9 @@ def _build(ctx, source, configured, dep_prefixes_file = None):
     for arg in host_tool_path_args(ctx):
         cmd.add(arg)
 
+    for arg in toolchain_ld_linux_args(ctx):
+        cmd.add(arg)
+
     ctx.actions.run(cmd, category = "mozbuild_build", identifier = ctx.attrs.name, allow_cache_upload = True)
     return output
 
@@ -110,6 +118,9 @@ def _install(ctx, source, built, dep_prefixes_file = None):
 
     # Add host_deps bin dirs to PATH
     for arg in host_tool_path_args(ctx):
+        cmd.add(arg)
+
+    for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
 
     ctx.actions.run(cmd, category = "mozbuild_install", identifier = ctx.attrs.name, allow_cache_upload = True)

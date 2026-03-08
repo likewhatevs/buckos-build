@@ -2,7 +2,7 @@
 """Verify seed toolchain isolation and integrity.
 
 Unpacks the seed archive and scans all ELF binaries to ensure:
-  - No build directory paths leak into RPATH/RUNPATH
+  - No build directory paths in RPATH/RUNPATH
   - Host tools don't reference cross-compiler sysroot paths
   - Sysroot libraries are self-contained
   - All symlinks resolve within the archive
@@ -105,8 +105,8 @@ def check_has_rpath(elf_path):
     return None
 
 
-def check_strings_for_leaks(elf_path, forbidden_patterns):
-    """Scan binary strings for leaked build paths."""
+def check_strings_for_forbidden(elf_path, forbidden_patterns):
+    """Scan binary strings for build paths that should not be shipped."""
     violations = []
     output = run(["strings", elf_path])
     if not output:
@@ -203,8 +203,7 @@ def main():
         ]
 
         # ── Patterns that must never appear in any binary string ─────
-        # Build-machine home dirs leak the builder's identity into
-        # shipped artifacts.
+        # Build-machine home dirs should not appear in shipped artifacts.
         string_forbidden = [
             "/home/",
         ]
@@ -222,10 +221,10 @@ def main():
             # Binaries in tools/bin/ — check for build path strings
             for elf in tools_elfs:
                 if "/bin/" in os.path.relpath(elf, tools_dir):
-                    for v in check_strings_for_leaks(elf, rpath_forbidden):
+                    for v in check_strings_for_forbidden(elf, rpath_forbidden):
                         warnings.append(f"tools string: {v}")
-                    for v in check_strings_for_leaks(elf, string_forbidden):
-                        failures.append(f"tools identity leak: {v}")
+                    for v in check_strings_for_forbidden(elf, string_forbidden):
+                        failures.append(f"tools build path: {v}")
         else:
             failures.append("tools/ directory not found in archive")
 
@@ -260,22 +259,29 @@ def main():
                 for v in check_rpath(elf, ht_forbidden):
                     failures.append(f"host-tools RPATH: {v}")
 
-            # String leak check on host-tools binaries
+            # Forbidden string check on host-tools binaries
             for elf in ht_elfs:
                 if "/bin/" in os.path.relpath(elf, ht_dir):
-                    for v in check_strings_for_leaks(elf, rpath_forbidden):
+                    for v in check_strings_for_forbidden(elf, rpath_forbidden):
                         warnings.append(f"host-tools string: {v}")
 
-            # Build-machine identity check for host-tools.  Home paths
-            # are scrubbed section-aware at pack time (data sections only,
-            # never executable code).
+            # Build path check for host-tools executables.  Home paths
+            # are scrubbed section-aware at pack time (data sections
+            # only, never executable code).
+            #
+            # Only executables in bin/ are checked — shared libraries
+            # and upstream artifacts contain source-level string literals
+            # with /home/ (Rust stdlib test examples, Go debug fixtures,
+            # QEMU firmware paths) that are not build-path issues.
             for elf in ht_elfs:
-                for v in check_strings_for_leaks(elf, string_forbidden):
-                    failures.append(f"host-tools identity leak: {v}")
+                if "/bin/" not in os.path.relpath(elf, ht_dir):
+                    continue
+                for v in check_strings_for_forbidden(elf, string_forbidden):
+                    failures.append(f"host-tools build path: {v}")
 
             # Every dynamically-linked host-tools binary must have been
             # built by our GCC (padded interp + $ORIGIN RPATH).  Binaries
-            # missing these fall back to host libc — a hermeticity leak.
+            # missing these fall back to host libc — a hermeticity issue.
             #
             # Excluded from this check:
             # - testdata/: Go stdlib ships upstream ELF test fixtures

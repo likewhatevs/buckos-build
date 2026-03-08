@@ -75,7 +75,7 @@ def main():
                 "_HERMETIC_EMPTY", "_PATH_PREPEND",
                 "CFLAGS", "LDFLAGS",
                 "CPPFLAGS", "PKG_CONFIG_PATH", "_DEP_BIN_PATHS", "DEP_BASE_DIRS",
-                "_DEP_LD_LIBRARY_PATH", "MAKE_JOBS"):
+                "_DEP_LD_LIBRARY_PATH", "_HOST_LIB_DIRS_FILE", "MAKE_JOBS"):
         val = os.environ.get(key)
         if val is not None:
             starlark_vars[key] = val
@@ -233,6 +233,27 @@ def main():
     if _dep_ld:
         existing = env.get("LD_LIBRARY_PATH", "")
         env["LD_LIBRARY_PATH"] = _dep_ld + (":" + existing if existing else "")
+
+    # Merge host tool transitive dep lib dirs into LD_LIBRARY_PATH.
+    # Host tool binaries cached in NativeLink CAS may have RUNPATH with
+    # absolute paths from the original build machine.  On a different
+    # machine those paths don't exist — LD_LIBRARY_PATH bridges the gap.
+    _host_lib_file = env.pop("_HOST_LIB_DIRS_FILE", None)
+    if _host_lib_file:
+        _host_lib_file = resolve(_host_lib_file)
+        if os.path.isfile(_host_lib_file):
+            _host_dirs = []
+            with open(_host_lib_file) as f:
+                for line in f:
+                    d = line.strip()
+                    if d:
+                        d = resolve(d) if not os.path.isabs(d) else d
+                        if os.path.isdir(d):
+                            _host_dirs.append(d)
+            if _host_dirs:
+                existing = env.get("LD_LIBRARY_PATH", "")
+                merged = ":".join(_host_dirs)
+                env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
     # Prepend dep bin paths to PATH
     dep_bin = env.get("_DEP_BIN_PATHS")
