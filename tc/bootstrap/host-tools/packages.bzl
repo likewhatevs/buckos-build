@@ -11,6 +11,7 @@ HOST_TOOL_PACKAGES = [
     # Core utilities
     "//packages/linux/system/apps/coreutils:coreutils",
     "//packages/linux/system/apps/findutils:findutils",
+    "//packages/linux/system/apps/rsync:rsync",
     "//packages/linux/system/apps/tar:tar",
     "//packages/linux/system/apps/which:which",
     "//packages/linux/editors/diffutils:diffutils",
@@ -52,7 +53,11 @@ HOST_TOOL_PACKAGES = [
     "//packages/linux/dev-tools/build-systems/libtool:libtool",
     "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
 
+    # Editors
+    "//packages/linux/editors/ed:ed",
+
     # Dev utilities
+    "//packages/linux/dev-tools/dev-utils/bc:bc",
     "//packages/linux/dev-tools/dev-utils/bison:bison",
     "//packages/linux/dev-tools/dev-utils/flex:flex",
 
@@ -105,6 +110,9 @@ HOST_TOOL_PACKAGES = [
     "//packages/linux/system/libs/cpio:cpio",
     "//packages/linux/boot/grub:grub",
     "//packages/linux/emulation/hypervisors/qemu:qemu",
+
+    # Crypto / TLS
+    "//packages/linux/system/libs/crypto/openssl:openssl",
 
     # Security / signing
     "//packages/linux/system/security/ima-evm-utils:ima-evm-utils",
