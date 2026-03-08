@@ -29,7 +29,7 @@ mkdir -p "$OUT/usr/bin"
 install -m 0755 target/release/buckos-installer "$OUT/usr/bin/buckos-installer"
 """,
     deps = [
-        "//packages/linux/desktop/qt:qt6",
+        "//packages/linux/desktop/qt:qt6-native",
         "//packages/linux/system/libs/crypto/openssl:openssl",
     ],
 )

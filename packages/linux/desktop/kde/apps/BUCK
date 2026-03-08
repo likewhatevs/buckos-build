@@ -110,7 +110,7 @@ _KDE_APP_COMPILE = _KDE_HOST_LD_SETUP + """cmake --build "$S/build" -j${MAKEOPTS
 # Shared transitive deps needed for rpath-link when linking against KDE/Qt6
 _KDE_COMMON_DEPS = [
 ] + KF_FRAMEWORKS + [
-    "//packages/linux/desktop/qt:qt6",
+    "//packages/linux/desktop/qt:qt6-native",
     "//packages/linux/desktop/kde/ecm:extra-cmake-modules",
     "//packages/linux/dev-libs/glib:glib",
     "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
@@ -128,7 +128,7 @@ _KDE_COMMON_DEPS = [
     "//packages/linux/system/libs/font/fontconfig:fontconfig",
     "//packages/linux/desktop/mesa:mesa",
     # Mesa's radeonsi driver depends on LLVM and elfutils; LLVM depends on libxml2
-    # "//packages/linux/core/llvm:llvm",  # disabled: long build, not needed yet
+    # "//packages/linux/core/llvm:llvm-native",  # disabled: long build, not needed yet
     "//packages/linux/dev-libs/elfutils:elfutils",
     "//packages/linux/system/libs/data/libxml2:libxml2",
     "//packages/linux/desktop/libdrm:libdrm",
@@ -141,7 +141,7 @@ _KDE_COMMON_DEPS = [
     "//packages/linux/system/libs/audio/libogg:libogg",
     "//packages/linux/core/util-linux:util-linux",
     "//packages/linux/dev-tools/build-systems/libtool:libtool",
-    "//packages/linux/system/libs/utility/icu:icu",
+    "//packages/linux/system/libs/utility/icu:icu-native",
     "//packages/linux/system/libs/compression/zstd:zstd",  # Qt6Core depends on zstd
     "//packages/linux/desktop/kde:syndication",  # KNewStuff depends on syndication
 ]

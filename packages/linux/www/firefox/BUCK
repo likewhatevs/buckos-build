@@ -101,7 +101,7 @@ PYEOF""",
         "//packages/linux/system/terminal/ncurses:ncurses",
     ],
     host_deps = [
-        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/core/llvm:llvm-native",
         "//packages/linux/lang/linkers:mold",
         "//packages/linux/lang/rust:rust",
         "//packages/linux/lang/nodejs:nodejs",

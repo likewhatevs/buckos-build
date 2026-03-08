@@ -51,6 +51,6 @@ package(
         "//packages/linux/system/libs/compression/bzip2:bzip2",
         "//packages/linux/system/libs/compression/xz:xz",
         "//packages/linux/core/zlib:zlib",
-        "//packages/linux/system/libs/utility/icu:icu",
+        "//packages/linux/system/libs/utility/icu:icu-native",
     ],
 )

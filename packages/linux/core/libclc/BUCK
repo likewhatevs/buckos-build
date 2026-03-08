@@ -16,7 +16,7 @@ package(
         "-DLIBCLC_TARGETS_TO_BUILD=amdgcn-mesa-mesa3d;amdgcn--amdhsa;clspv--;clspv64--",
     ],
     deps = [
-        "//packages/linux/core/llvm:llvm",
+        "//packages/linux/core/llvm:llvm-native",
     ],
     labels = ["buckos:hw:opencl"],
 )

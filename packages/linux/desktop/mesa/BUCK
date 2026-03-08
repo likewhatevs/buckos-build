@@ -29,7 +29,7 @@ package(
             "//packages/linux/graphics/xorg/xorgproto:xorgproto",
         ],
         "llvm": [
-            "//packages/linux/core/llvm:llvm",
+            "//packages/linux/core/llvm:llvm-native",
             "//packages/linux/core/libclc:libclc",
         ],
     },
