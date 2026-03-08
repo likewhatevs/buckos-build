@@ -278,6 +278,140 @@ def write_pkg_config_wrapper(wrapper_dir):
     return wrapper_dir
 
 
+def find_buckos_shell(env):
+    """Find a buckos shell binary on PATH for hermetic script execution.
+
+    Returns the absolute path to bash (preferred) or sh, or None if
+    neither is found.  Callers should use the result for CONFIG_SHELL,
+    SHELL, and shebang rewriting.
+    """
+    for name in ("bash", "sh"):
+        for d in env.get("PATH", "").split(":"):
+            candidate = os.path.join(d, name) if d else ""
+            if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+                return candidate
+    return None
+
+
+def _build_path_lookup(env):
+    """Build a dict mapping binary names to their absolute paths on PATH.
+
+    Used by rewrite_shebangs to resolve interpreter names to buckos
+    paths.  Only includes the first occurrence of each name.
+    """
+    lookup = {}
+    for d in env.get("PATH", "").split(":"):
+        if not d or not os.path.isdir(d):
+            continue
+        try:
+            entries = os.listdir(d)
+        except OSError:
+            continue
+        for name in entries:
+            if name not in lookup:
+                full = os.path.join(d, name)
+                if os.path.isfile(full) and os.access(full, os.X_OK):
+                    lookup[name] = full
+    return lookup
+
+
+def _parse_shebang(line, path_lookup):
+    """Parse a shebang line and resolve the interpreter via PATH.
+
+    Returns (new_interpreter_path, args_suffix) if the interpreter
+    basename exists on PATH, otherwise (None, None).
+
+    Handles:
+      #!/path/to/interp [args...]
+      #!/usr/bin/env interp [args...]
+    """
+    if not line.startswith(b"#!"):
+        return None, None
+    rest = line[2:].strip()
+    # #!/usr/bin/env interp [args...]
+    if rest.startswith(b"/usr/bin/env ") or rest.startswith(b"/usr/bin/env\t"):
+        parts = rest.split(None, 2)  # [b"/usr/bin/env", b"interp", b"args..."]
+        if len(parts) < 2:
+            return None, None
+        interp_name = parts[1].decode("ascii", errors="replace")
+        buckos_path = path_lookup.get(interp_name)
+        if not buckos_path:
+            return None, None
+        suffix = b" " + parts[2] if len(parts) > 2 else b""
+        return buckos_path.encode(), suffix
+    # #!/path/to/interp [args...]
+    parts = rest.split(None, 1)
+    if not parts:
+        return None, None
+    interp_path = parts[0]
+    # Only rewrite absolute paths (skip relative shebangs)
+    if not interp_path.startswith(b"/"):
+        return None, None
+    interp_name = os.path.basename(interp_path).decode("ascii", errors="replace")
+    buckos_path = path_lookup.get(interp_name)
+    if not buckos_path:
+        return None, None
+    # Don't rewrite if already pointing to a buckos path
+    if interp_path == buckos_path.encode():
+        return None, None
+    suffix = b" " + parts[1] if len(parts) > 1 else b""
+    return buckos_path.encode(), suffix
+
+
+def rewrite_shebangs(root, env):
+    """Rewrite shebangs in a directory tree to use buckos interpreters.
+
+    After copytree() copies source into the build directory, this walks
+    the tree and replaces hardcoded shebangs (#!/bin/sh, #!/usr/bin/bash,
+    #!/usr/bin/perl, #!/usr/bin/python3, etc.) with the corresponding
+    buckos binary found on PATH.  Preserves shebang arguments.
+
+    This prevents the kernel from using host binaries when executing
+    scripts during build.  Only rewrites text files; binary files
+    (ELF, archives) are skipped.
+    """
+    if not root or not os.path.isdir(root):
+        return
+    path_lookup = _build_path_lookup(env)
+    if not path_lookup:
+        return
+    for dirpath, _dirnames, filenames in os.walk(root):
+        for fname in filenames:
+            path = os.path.join(dirpath, fname)
+            if os.path.islink(path):
+                continue
+            try:
+                with open(path, "rb") as f:
+                    head = f.read(128)
+            except (OSError, PermissionError):
+                continue
+            if not head.startswith(b"#!"):
+                continue
+            if b"\x00" in head:
+                continue
+            first_line_end = head.find(b"\n")
+            if first_line_end < 0:
+                continue
+            first_line = head[:first_line_end].rstrip()
+            new_interp, suffix = _parse_shebang(first_line, path_lookup)
+            if new_interp is None:
+                continue
+            new_shebang = b"#!" + new_interp + suffix + b"\n"
+            try:
+                with open(path, "rb") as f:
+                    content = f.read()
+                old_end = content.find(b"\n")
+                if old_end < 0:
+                    continue
+                new_content = new_shebang + content[old_end + 1:]
+                mode = os.stat(path).st_mode
+                with open(path, "wb") as f:
+                    f.write(new_content)
+                os.chmod(path, mode)
+            except (OSError, PermissionError):
+                continue
+
+
 def write_stub_script(path, exit_code=0):
     """Write a no-op stub script (e.g. for makeinfo, autotools regen).
 

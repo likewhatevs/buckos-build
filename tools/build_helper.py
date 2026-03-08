@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import sys
 
-from _env import clean_env, disable_posix_spawn, derive_lib_paths, file_prefix_map_flags, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, disable_posix_spawn, derive_lib_paths, file_prefix_map_flags, filter_path_flags, find_buckos_shell, register_cleanup, rewrite_shebangs, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _can_unshare_net():
@@ -789,13 +789,13 @@ def main():
     if args.ld_linux:
         disable_posix_spawn(env)
 
-    # Find buckos bash for shell=True subprocesses (pre-cmds).
-    _buckos_bash = None
-    for _d in env.get("PATH", "").split(":"):
-        _bash = os.path.join(_d, "bash") if _d else ""
-        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
-            _buckos_bash = _bash
-            break
+    # Find buckos shell for pre-cmds and make SHELL override.
+    _buckos_bash = find_buckos_shell(env)
+    if _buckos_bash:
+        env["SHELL"] = _buckos_bash
+        # Rewrite shebangs in the build tree so scripts invoked by
+        # make recipes use buckos shell instead of host /bin/sh.
+        rewrite_shebangs(output_dir, env)
 
     # Run pre-build commands (e.g. Kconfig setup)
     for cmd_str in args.pre_cmds:

@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import sys
 
-from _env import clean_env, disable_posix_spawn, derive_lib_paths, file_prefix_map_flags, filter_path_flags, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, disable_posix_spawn, derive_lib_paths, file_prefix_map_flags, filter_path_flags, find_buckos_shell, register_cleanup, rewrite_shebangs, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _resolve_env_paths(value):
@@ -331,17 +331,16 @@ def main():
     if args.ld_linux:
         disable_posix_spawn(env)
 
-    # Find buckos bash on PATH for running configure and pre-cmds.
-    # CONFIG_SHELL tells autotools configure to re-exec sub-configures
-    # under this shell instead of #!/bin/sh (which doesn't exist on
-    # remote execution workers).
-    _config_shell = None
-    for _d in env.get("PATH", "").split(":"):
-        _bash = os.path.join(_d, "bash") if _d else ""
-        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
-            _config_shell = _bash
-            env["CONFIG_SHELL"] = _bash
-            break
+    # Find buckos shell on PATH for running configure, pre-cmds, and
+    # shebang rewriting.  CONFIG_SHELL tells autotools to re-exec
+    # sub-configures under this shell.  SHELL is inherited by make.
+    _config_shell = find_buckos_shell(env)
+    if _config_shell:
+        env["CONFIG_SHELL"] = _config_shell
+        env["SHELL"] = _config_shell
+        # Rewrite #!/bin/sh, #!/usr/bin/bash, etc. in the copied source
+        # tree so the kernel uses buckos shell instead of host shell.
+        rewrite_shebangs(output_dir, env)
 
     # Run pre-configure commands (e.g. autoreconf, libtoolize, or
     # bootstrap src_prepare steps like symlinking in-tree libraries).

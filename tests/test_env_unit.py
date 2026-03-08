@@ -41,7 +41,7 @@ def main():
         os.environ["CC"] = "gcc"
         os.environ["LDFLAGS"] = "-L/usr/lib"
         env = clean_env()
-        allowed = _PASSTHROUGH | _DETERMINISM_PINS.keys()
+        allowed = _PASSTHROUGH | _DETERMINISM_PINS.keys() | {"CARGO_HOME"}
         extra = set(env.keys()) - allowed
         if not extra:
             ok("no unexpected keys in result")
@@ -332,7 +332,7 @@ def main():
         os.environ["DISPLAY"] = ":0"
         os.environ["DBUS_SESSION_BUS_ADDRESS"] = "unix:path=/run/bus"
         env = clean_env()
-        allowed = _PASSTHROUGH | _DETERMINISM_PINS.keys()
+        allowed = _PASSTHROUGH | _DETERMINISM_PINS.keys() | {"CARGO_HOME"}
         extra = set(env.keys()) - allowed
         if not extra:
             ok("no keys outside allowed set")

@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, file_prefix_map_flags, register_cleanup, sanitize_filenames, write_stub_script
+from _env import clean_env, file_prefix_map_flags, find_buckos_shell, register_cleanup, rewrite_shebangs, sanitize_filenames, write_stub_script
 
 
 def _resolve_flag_paths(value, project_root):
@@ -330,20 +330,21 @@ def main():
     else:
         cwd = project_root
 
-    # Override make's SHELL via MAKEFLAGS so any make invocation inside
-    # the install script uses buckos bash instead of /bin/sh (which
-    # doesn't exist on remote execution workers).
-    for _d in env.get("PATH", "").split(":"):
-        _bash = os.path.join(_d, "bash") if _d else ""
-        if _bash and os.path.isfile(_bash) and os.access(_bash, os.X_OK):
-            existing_flags = env.get("MAKEFLAGS", "")
-            if "SHELL=" not in existing_flags:
-                env["MAKEFLAGS"] = (existing_flags + " " if existing_flags else "") + f"SHELL={_bash}"
-            break
+    # Find buckos shell and use it for install script execution, make
+    # SHELL override, and shebang rewriting in the writable source copy.
+    _buckos_bash = find_buckos_shell(env)
+    if _buckos_bash:
+        env["SHELL"] = _buckos_bash
+        existing_flags = env.get("MAKEFLAGS", "")
+        if "SHELL=" not in existing_flags:
+            env["MAKEFLAGS"] = (existing_flags + " " if existing_flags else "") + f"SHELL={_buckos_bash}"
+        if os.path.isdir(source_dir):
+            rewrite_shebangs(writable_src, env)
 
     # Run install script via bash -e (matching original `source` semantics)
+    _bash_cmd = _buckos_bash or "bash"
     result = subprocess.run(
-        ["bash", "-e", install_script],
+        [_bash_cmd, "-e", install_script],
         env=env,
         cwd=cwd,
     )
