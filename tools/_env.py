@@ -199,7 +199,7 @@ def disable_posix_spawn(env, scratch_dir=None):
 
 
 def derive_lib_paths(bin_dirs, env):
-    """Derive LD_LIBRARY_PATH and tool data dirs from bin dirs.
+    """Derive LD_LIBRARY_PATH, LIBRARY_PATH, and tool data dirs from bin dirs.
 
     Given {prefix}/bin, adds {prefix}/lib and {prefix}/lib64 to
     LD_LIBRARY_PATH so dynamically linked host tools can find their
@@ -211,23 +211,35 @@ def derive_lib_paths(bin_dirs, env):
     find glibc via $ORIGIN RPATH set at build time by GCC specs.
     Including glibc in LD_LIBRARY_PATH would poison the cross-compiler
     (a host binary) causing segfaults on hosts with older glibc.
+
+    LIBRARY_PATH (link-time search) includes ALL lib dirs without the
+    glibc exclusion.  The linker needs these to resolve transitive
+    DT_NEEDED chains (e.g. libelf -> libbz2) but does not load them
+    at runtime, so there is no ABI mismatch risk.
     """
-    lib_parts = []
+    ld_parts = []
+    all_parts = []
     for bin_dir in bin_dirs:
         parent = os.path.dirname(os.path.abspath(bin_dir))
         for ld in ("lib", "lib64"):
             d = os.path.join(parent, ld)
-            if os.path.isdir(d) and not os.path.exists(os.path.join(d, "libc.so.6")):
-                lib_parts.append(d)
+            if os.path.isdir(d):
+                all_parts.append(d)
+                if not os.path.exists(os.path.join(d, "libc.so.6")):
+                    ld_parts.append(d)
         # Bison looks for data at compiled-in /usr/share/bison; set
         # BISON_PKGDATADIR so it finds data in the relocated prefix.
         bison_data = os.path.join(parent, "share", "bison")
         if os.path.isdir(bison_data) and "BISON_PKGDATADIR" not in env:
             env["BISON_PKGDATADIR"] = bison_data
-    if lib_parts:
+    if ld_parts:
         existing = env.get("LD_LIBRARY_PATH", "")
-        merged = ":".join(lib_parts)
+        merged = ":".join(ld_parts)
         env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
+    if all_parts:
+        existing = env.get("LIBRARY_PATH", "")
+        merged = ":".join(all_parts)
+        env["LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
 
 def filter_path_flags(flags):
