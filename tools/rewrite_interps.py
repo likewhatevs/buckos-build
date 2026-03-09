@@ -122,6 +122,48 @@ def main():
     print(f"Rewrote interpreter in {patched} binaries -> {ld_linux}",
           file=sys.stderr)
 
+    # Rewrite script shebangs containing buck-out paths.  Build-time
+    # shebangs like #!/.../buck-out/.../bash become stale when the remote
+    # cache restores actions on a different machine.  Replace with
+    # #!/usr/bin/env <interpreter> so scripts find tools via PATH.
+    rewritten = 0
+    for dirpath, _, filenames in os.walk(output_dir):
+        for name in filenames:
+            fpath = os.path.join(dirpath, name)
+            if os.path.islink(fpath) or not os.path.isfile(fpath):
+                continue
+            try:
+                with open(fpath, "rb") as f:
+                    first = f.read(2)
+                    if first != b"#!":
+                        continue
+                    line = first + f.readline()
+            except (PermissionError, OSError):
+                continue
+            shebang = line.decode("utf-8", errors="replace").strip()
+            if "buck-out" not in shebang:
+                continue
+            # Extract interpreter basename (e.g. bash, perl, python3)
+            interp_path = shebang[2:].strip().split()[0]
+            interp_name = os.path.basename(interp_path)
+            if not interp_name:
+                continue
+            try:
+                with open(fpath, "r") as f:
+                    content = f.read()
+                orig_mode = os.stat(fpath).st_mode
+                os.chmod(fpath, stat.S_IRUSR | stat.S_IWUSR)
+                with open(fpath, "w") as f:
+                    f.write(f"#!/usr/bin/env {interp_name}\n")
+                    f.write(content[content.index("\n") + 1:])
+                os.chmod(fpath, orig_mode)
+                rewritten += 1
+            except (ValueError, OSError):
+                continue
+    if rewritten:
+        print(f"Rewrote {rewritten} script shebangs (buck-out -> /usr/bin/env)",
+              file=sys.stderr)
+
     # Cross-link lib/ and lib64/ so RPATH entries for either directory
     # resolve all shared libraries.  Some binaries (e.g. librustc_driver)
     # have RUNPATH=$ORIGIN/../lib while others search lib64/.  The linker

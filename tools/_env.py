@@ -422,6 +422,70 @@ def rewrite_shebangs(root, env):
                 continue
 
 
+def portabilize_shebangs(root):
+    """Rewrite shebangs containing buck-out paths to #!/usr/bin/env <interp>.
+
+    Installed outputs may contain shebangs pointing to absolute buck-out
+    interpreter paths (e.g. /home/.../buck-out/.../bash).  These break when
+    the output is cached and restored on a different machine.  This pass
+    makes shebangs portable by converting them to #!/usr/bin/env form.
+
+    Called after make install / package install on the output prefix.
+    """
+    if not root or not os.path.isdir(root):
+        return
+    rewritten = 0
+    for dirpath, _, filenames in os.walk(root):
+        for fname in filenames:
+            path = os.path.join(dirpath, fname)
+            if os.path.islink(path):
+                continue
+            try:
+                with open(path, "rb") as f:
+                    head = f.read(256)
+            except (OSError, PermissionError):
+                continue
+            if not head.startswith(b"#!"):
+                continue
+            if b"\x00" in head:
+                continue
+            first_nl = head.find(b"\n")
+            if first_nl < 0:
+                continue
+            first_line = head[:first_nl]
+            if b"buck-out" not in first_line:
+                continue
+            # Extract interpreter basename
+            rest = first_line[2:].strip()
+            parts = rest.split(None, 1)
+            if not parts:
+                continue
+            interp_path = parts[0]
+            interp_name = os.path.basename(interp_path).decode("ascii", errors="replace")
+            if not interp_name:
+                continue
+            # Preserve arguments after interpreter path
+            args_suffix = b" " + parts[1] if len(parts) > 1 else b""
+            new_shebang = b"#!/usr/bin/env " + interp_name.encode() + args_suffix + b"\n"
+            try:
+                with open(path, "rb") as f:
+                    content = f.read()
+                old_end = content.find(b"\n")
+                if old_end < 0:
+                    continue
+                new_content = new_shebang + content[old_end + 1:]
+                mode = os.stat(path).st_mode
+                with open(path, "wb") as f:
+                    f.write(new_content)
+                os.chmod(path, mode)
+                rewritten += 1
+            except (OSError, PermissionError):
+                continue
+    if rewritten:
+        print(f"Portabilized {rewritten} shebangs (buck-out -> /usr/bin/env)",
+              file=sys.stderr)
+
+
 def write_stub_script(path, exit_code=0):
     """Write a no-op stub script (e.g. for makeinfo, autotools regen).
 

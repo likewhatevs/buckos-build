@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, disable_posix_spawn, derive_lib_paths, file_prefix_map_flags, filter_path_flags, find_buckos_shell, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
+from _env import clean_env, disable_posix_spawn, derive_lib_paths, file_prefix_map_flags, filter_path_flags, find_buckos_shell, portabilize_shebangs, register_cleanup, sanitize_filenames, write_pkg_config_wrapper
 
 
 def _rewrite_file(fpath, old, new):
@@ -1039,6 +1039,7 @@ def main():
             sys.exit(1)
 
     sanitize_filenames(prefix, make_dir)
+    portabilize_shebangs(prefix)
 
 
 if __name__ == "__main__":

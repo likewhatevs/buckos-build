@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from _env import clean_env, file_prefix_map_flags, find_buckos_shell, register_cleanup, rewrite_shebangs, sanitize_filenames, write_stub_script
+from _env import clean_env, file_prefix_map_flags, find_buckos_shell, portabilize_shebangs, register_cleanup, rewrite_shebangs, sanitize_filenames, write_stub_script
 
 
 def _resolve_flag_paths(value, project_root):
@@ -344,6 +344,7 @@ def main():
     )
 
     sanitize_filenames(output_dir, workdir)
+    portabilize_shebangs(output_dir)
 
     sys.exit(result.returncode)
 
