@@ -373,6 +373,11 @@ def main():
     if os.path.isfile(_install_dat):
         import pickle as _pickle
 
+        import types as _types
+
+        _stub_cache = {}
+        _fake_modules = {}
+
         class _StubUnpickler(_pickle.Unpickler):
             """Unpickler that stubs missing modules (e.g. mesonbuild).
 
@@ -380,34 +385,32 @@ def main():
             build_helper pex doesn't ship mesonbuild.  We only need to
             walk __dict__ and rewrite strings, so a generic stub class
             that preserves attributes is sufficient.
+
+            Stub classes are registered in sys.modules so pickle can
+            serialize them back using their original module.name path.
             """
             def find_class(self, module, name):
                 try:
                     return super().find_class(module, name)
                 except (ModuleNotFoundError, AttributeError):
-                    # Return a stub that accepts arbitrary pickle state
                     type_key = f"{module}.{name}"
                     if type_key not in _stub_cache:
                         class _Stub:
                             def __init__(self, *args, **kwargs):
-                                # Accept constructor args (e.g. OctalInt(value))
-                                # that pickle passes via __reduce__ tuples.
                                 if args:
                                     self._args = args
-                            def __reduce__(self):
-                                return (_make_stub, (type_key,), self.__dict__)
                             def __setstate__(self, state):
                                 if isinstance(state, dict):
                                     self.__dict__.update(state)
                         _Stub.__qualname__ = _Stub.__name__ = name
                         _Stub.__module__ = module
                         _stub_cache[type_key] = _Stub
+                        # Register in sys.modules so pickle can find it
+                        if module not in _fake_modules:
+                            _fake_modules[module] = _types.ModuleType(module)
+                            sys.modules[module] = _fake_modules[module]
+                        setattr(_fake_modules[module], name, _Stub)
                     return _stub_cache[type_key]
-
-        _stub_cache = {}
-
-        def _make_stub(type_key):
-            return _stub_cache[type_key]()
 
         stat = os.stat(_install_dat)
         with open(_install_dat, "rb") as f:
