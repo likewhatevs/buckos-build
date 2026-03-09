@@ -788,10 +788,19 @@ def main():
                 with open(_nf, "r") as f:
                     _nf_content = f.read()
                 _nf_orig = _nf_content
-                # Replace host python references (skip if it would corrupt
-                # an already-correct dep python path via substring match)
+                # Replace host python references.  Use regex with
+                # lookbehind and lookahead to avoid corrupting longer
+                # paths that contain the host python as a substring —
+                # e.g. .../installed/usr/bin/python3 contains
+                # /usr/bin/python3.  Only match when preceded by
+                # whitespace/= (path start) and not followed by path
+                # continuation chars.
                 if not _skip_host_replace and _host_python in _nf_content:
-                    _nf_content = _nf_content.replace(_host_python, _dep_python3_abs)
+                    _nf_content = re.sub(
+                        r'(?<=[\s=])' + re.escape(_host_python) + r'(?![.\w/])',
+                        _dep_python3_abs,
+                        _nf_content,
+                    )
                 # Replace pyvenv python/meson references
                 for _old, _new in _pyvenv_replacements:
                     if _old in _nf_content:

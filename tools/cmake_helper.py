@@ -207,18 +207,27 @@ def main():
     # so the wrapper is always available regardless of PATH mode)
     env["PATH"] = wrapper_dir + ":" + env.get("PATH", "")
 
-    # Extract --sysroot= from CC/CXX and pass as CMAKE_SYSROOT instead.
-    # CMake's automoc mishandles sysroot embedded in the compiler command,
-    # generating broken ninja rules with escaped-space before --sysroot.
+    # Extract --sysroot= and -specs= from CC/CXX.  When cmake sees a
+    # multi-word CXX it splits into CMAKE_CXX_COMPILER + COMPILER_ARG1.
+    # COMPILER_ARG1 gets a leading space that ninja escapes as "\ ",
+    # which the shell turns into a literal space in the argument —
+    # gcc then treats " -specs=..." as a filename, not a flag.
+    #
+    # Pass --sysroot as CMAKE_SYSROOT and -specs via CMAKE_*_FLAGS
+    # so the compiler variable is a bare binary path.
     _cmake_sysroot = None
+    _specs_flags = []
     for _cc_key in ("CC", "CXX"):
         _cc_val = env.get(_cc_key, "")
-        if "--sysroot=" in _cc_val:
+        if "--sysroot=" in _cc_val or "-specs=" in _cc_val:
             parts = _cc_val.split()
             clean = []
             for p in parts:
                 if p.startswith("--sysroot="):
                     _cmake_sysroot = p[len("--sysroot="):]
+                elif p.startswith("-specs="):
+                    if p not in _specs_flags:
+                        _specs_flags.append(p)
                 else:
                     clean.append(p)
             env[_cc_key] = " ".join(clean)
@@ -319,6 +328,16 @@ def main():
                      "CMAKE_MODULE_LINKER_FLAGS"):
             existing = cmake_defines.get(key, "")
             cmake_defines[key] = (_ld + " " + existing).strip() if existing else _ld
+
+    # Inject -specs= flags stripped from CC/CXX into all flag variables
+    # so they apply to both compile and link commands.
+    if _specs_flags:
+        _sf = _resolve_env_paths(" ".join(_specs_flags))
+        for key in ("CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS",
+                     "CMAKE_EXE_LINKER_FLAGS", "CMAKE_SHARED_LINKER_FLAGS",
+                     "CMAKE_MODULE_LINKER_FLAGS"):
+            existing = cmake_defines.get(key, "")
+            cmake_defines[key] = (_sf + " " + existing).strip() if existing else _sf
 
     # Write long defines (CMAKE_*_FLAGS with hundreds of dep flags) to an
     # initial-cache file instead of the command line.  Packages with 100+
