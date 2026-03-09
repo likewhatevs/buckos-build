@@ -238,6 +238,54 @@ def _scrub_home_paths(directory):
 
 
 
+def _create_rpath_symlinks(host_tools_dir):
+    """Create lib64/lib symlinks so $ORIGIN/../lib64 resolves from any depth.
+
+    GCC specs inject RPATH=$ORIGIN/../lib64:$ORIGIN/../lib.  For a binary
+    at host-tools/bin/foo this resolves to host-tools/lib64/ — correct.
+    For host-tools/libexec/gcc/triple/ver/cc1 it resolves to
+    host-tools/libexec/gcc/triple/lib64/ — wrong.
+
+    Walk all directories containing ELF files and create lib64/lib
+    symlinks in their parent directories pointing back to the prefix root.
+    """
+    root = os.path.abspath(host_tools_dir)
+    # Directories that already have real lib64/lib
+    skip = {root}
+    created = 0
+
+    # Find all directories containing ELF executables/shared libs
+    elf_dirs = set()
+    for dirpath, _, filenames in os.walk(root):
+        for name in filenames:
+            fpath = os.path.join(dirpath, name)
+            if os.path.islink(fpath) or not os.path.isfile(fpath):
+                continue
+            try:
+                with open(fpath, "rb") as f:
+                    if f.read(4) == b"\x7fELF":
+                        elf_dirs.add(dirpath)
+            except (PermissionError, OSError):
+                pass
+
+    for elf_dir in elf_dirs:
+        # $ORIGIN/../lib64 means the parent of the binary's directory
+        parent = os.path.dirname(elf_dir)
+        if parent in skip or parent == elf_dir:
+            continue
+        for libdir in ("lib64", "lib"):
+            target = os.path.join(root, libdir)
+            link = os.path.join(parent, libdir)
+            if os.path.isdir(target) and not os.path.exists(link):
+                rel = os.path.relpath(target, parent)
+                os.symlink(rel, link)
+                created += 1
+
+    if created:
+        print(f"  created {created} RPATH symlinks for nested binaries",
+              file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Pack bootstrap toolchain into archive")
     parser.add_argument("--stage-dir", required=True, help="Stage 2 output directory")
@@ -299,9 +347,16 @@ def main():
             _scrub_home_paths(host_tools_dst)
 
         # All host-tools binaries are built by our GCC with specs, so they
-        # have padded interp + $ORIGIN RPATH at link time.  No pack-time
-        # ELF patching needed — RPATH is correct from build time, and
-        # unpack rewrites the padded interp to the actual seed path.
+        # have padded interp + $ORIGIN RPATH at link time.  Unpack
+        # rewrites the padded interp to the actual seed path.
+        #
+        # However, specs inject $ORIGIN/../lib64 which only resolves for
+        # binaries directly in bin/.  Deeply-nested binaries (e.g.
+        # libexec/gcc/.../cc1) need more ../ levels.  Create lib64
+        # symlinks in intermediate directories so $ORIGIN/../lib64
+        # resolves from any depth.
+        if has_host_tools:
+            _create_rpath_symlinks(host_tools_dst)
 
         # Create per-package archives if --package was given
         pkg_manifest = {}
