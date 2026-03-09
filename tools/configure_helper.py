@@ -272,8 +272,10 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
-    # shared libraries (e.g. python → libpython3.so) can execute.
+    # Derive LD_LIBRARY_PATH, GCONV_PATH, BISON_PKGDATADIR from hermetic
+    # and path-prepend dirs so host tools find shared libraries and data.
+    if args.hermetic_path:
+        derive_lib_paths(args.hermetic_path, env)
     derive_lib_paths(all_path_prepend, env)
 
     # Pin PYTHON/PYTHON3 to buckos python so autotools build scripts

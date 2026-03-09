@@ -224,16 +224,27 @@ def main():
     # Python modules (e.g. mako for mesa) are found without manual
     # PYTHONPATH wiring.  --path-prepend dirs are {prefix}/usr/bin;
     # derive {prefix}/usr/lib/python*/site-packages from them.
+    # Also scan tset lib dirs — deps without bin dirs (e.g. python
+    # packaging) only expose lib dirs via the tset.
     _path_sources = list(args.hermetic_path) + list(all_path_prepend)
-    if _path_sources:
+    if _path_sources or file_lib_dirs:
         python_paths = []
+        _seen_sp = set()
         for bin_dir in _path_sources:
             usr_dir = os.path.dirname(os.path.abspath(bin_dir))
             for pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
                 for sp in _glob.glob(os.path.join(usr_dir, pattern)):
-                    if os.path.isdir(sp):
+                    if os.path.isdir(sp) and sp not in _seen_sp:
                         python_paths.append(sp)
+                        _seen_sp.add(sp)
+        for _ld in file_lib_dirs:
+            _abs_ld = os.path.abspath(_ld)
+            for pattern in ("python*/site-packages", "python*/dist-packages"):
+                for sp in _glob.glob(os.path.join(_abs_ld, pattern)):
+                    if os.path.isdir(sp) and sp not in _seen_sp:
+                        python_paths.append(sp)
+                        _seen_sp.add(sp)
         if python_paths:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")

@@ -690,22 +690,35 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
-    # shared libraries (e.g. python → libpython3.so) can execute.
+    # Derive LD_LIBRARY_PATH, GCONV_PATH, BISON_PKGDATADIR from hermetic
+    # and path-prepend dirs so host tools find shared libraries and data.
+    if args.hermetic_path:
+        derive_lib_paths(args.hermetic_path, env)
     derive_lib_paths(all_path_prepend, env)
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found by custom generators.
     _path_sources = list(args.hermetic_path) + list(all_path_prepend) + list(file_path_append_dirs)
-    if _path_sources:
+    if _path_sources or file_lib_dirs:
         python_paths = []
+        _seen_sp = set()
         for bin_dir in _path_sources:
             usr_dir = os.path.dirname(os.path.abspath(bin_dir))
             for pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
                             "lib64/python*/site-packages", "lib64/python*/dist-packages"):
                 for sp in _glob.glob(os.path.join(usr_dir, pattern)):
-                    if os.path.isdir(sp):
+                    if os.path.isdir(sp) and sp not in _seen_sp:
                         python_paths.append(sp)
+                        _seen_sp.add(sp)
+        # Also scan tset-provided lib dirs — deps without bin dirs (e.g.
+        # python packaging) only expose lib dirs via the tset.
+        for lib_dir in file_lib_dirs:
+            abs_ld = os.path.abspath(lib_dir)
+            for pattern in ("python*/site-packages", "python*/dist-packages"):
+                for sp in _glob.glob(os.path.join(abs_ld, pattern)):
+                    if os.path.isdir(sp) and sp not in _seen_sp:
+                        python_paths.append(sp)
+                        _seen_sp.add(sp)
         if python_paths:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(python_paths) + (":" + existing if existing else "")

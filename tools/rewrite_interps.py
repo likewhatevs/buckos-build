@@ -139,6 +139,13 @@ def _cross_link_lib_dirs(output_dir):
     lib_dir = os.path.join(output_dir, "lib")
     lib64_dir = os.path.join(output_dir, "lib64")
 
+    # Never cross-link libc.so.6 — derive_lib_paths uses its presence
+    # as a sentinel to exclude directories from LD_LIBRARY_PATH (to
+    # prevent poisoning host processes with buckos glibc).  Symlinking
+    # it into lib/ causes both dirs to be excluded, breaking transitive
+    # DT_NEEDED resolution for the linker.
+    _GLIBC_SKIP = {"libc.so.6"}
+
     linked = 0
     for src_dir, dst_dir, label in [
         (lib64_dir, lib_dir, "lib/ -> lib64/"),
@@ -148,6 +155,8 @@ def _cross_link_lib_dirs(output_dir):
             continue
         os.makedirs(dst_dir, exist_ok=True)
         for name in os.listdir(src_dir):
+            if name in _GLIBC_SKIP:
+                continue
             dst_path = os.path.join(dst_dir, name)
             if not os.path.exists(dst_path) and not os.path.islink(dst_path):
                 src_path = os.path.join(src_dir, name)

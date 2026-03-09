@@ -415,22 +415,33 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Derive LD_LIBRARY_PATH from path-prepend dirs so host tools with
-    # shared libraries (e.g. python → libpython3.so) can execute.
+    # Derive LD_LIBRARY_PATH, GCONV_PATH, BISON_PKGDATADIR from hermetic
+    # and path-prepend dirs so host tools find shared libraries and data.
+    if args.hermetic_path:
+        derive_lib_paths(args.hermetic_path, env)
     derive_lib_paths(all_path_prepend, env)
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. packaging for gdbus-codegen) are found.
     _path_sources = list(args.hermetic_path) + list(all_path_prepend) + list(file_path_append_dirs)
-    if _path_sources:
+    if _path_sources or file_lib_dirs:
         _py_paths = []
+        _seen_sp = set()
         for _bp in _path_sources:
             _parent = os.path.dirname(os.path.abspath(_bp))
             for _pattern in ("lib/python*/site-packages", "lib/python*/dist-packages",
                              "lib64/python*/site-packages", "lib64/python*/dist-packages"):
                 for _sp in _glob.glob(os.path.join(_parent, _pattern)):
-                    if os.path.isdir(_sp):
+                    if os.path.isdir(_sp) and _sp not in _seen_sp:
                         _py_paths.append(_sp)
+                        _seen_sp.add(_sp)
+        for _ld in file_lib_dirs:
+            _abs_ld = os.path.abspath(_ld)
+            for _pattern in ("python*/site-packages", "python*/dist-packages"):
+                for _sp in _glob.glob(os.path.join(_abs_ld, _pattern)):
+                    if os.path.isdir(_sp) and _sp not in _seen_sp:
+                        _py_paths.append(_sp)
+                        _seen_sp.add(_sp)
         if _py_paths:
             _existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = ":".join(_py_paths) + (":" + _existing if _existing else "")
