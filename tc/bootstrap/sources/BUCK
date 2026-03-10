@@ -17,9 +17,9 @@ extract_source(name = "binutils-src", source = ":binutils-archive")
 
 http_file(
     name = "linux-archive",
-    urls = ["https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.60.tar.xz"],
-    sha256 = "a63096b2147411d683cecbf87622bb2ff4885bac2b3641d3d4f10250c89cdcf8",
-    out = "linux-6.12.60.tar.xz",
+    urls = ["https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz"],
+    sha256 = "9106a4605da9e31ff17659d958782b815f9591ab308d03b0ee21aad6c7dced4b",
+    out = "linux-6.18.tar.xz",
 )
 extract_source(name = "linux-src", source = ":linux-archive")
 

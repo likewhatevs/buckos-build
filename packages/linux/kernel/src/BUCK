@@ -46,10 +46,10 @@ extract_source(
     format = "tar.xz",
 )
 
-# Default alias points to stable (recommended for most users)
+# Default alias — all kernel builds use this
 alias(
     name = "linux-src",
-    actual = ":linux-6.17-src",
+    actual = ":linux-6.18-src",
 )
 
 # Convenience aliases
