@@ -39,9 +39,9 @@ CONFIG_LONG_OPTS=y
 CONFIG_STATIC=y
 
 # glibc 2.42 libc.a references _Unwind_Resume from libgcc_eh.
-# Use --whole-archive so libgcc_eh symbols are unconditionally
-# included before gcc's implicit -lc is linked.
-CONFIG_EXTRA_LDFLAGS="-Wl,--whole-archive -lgcc_eh -Wl,--no-whole-archive"
+# LDLIBS is appended after -lc in the link line, resolving the
+# circular dependency (LDFLAGS goes before -lc and doesn't help).
+CONFIG_EXTRA_LDLIBS="gcc_eh"
 
 # Disable problematic features
 # CONFIG_PAM is not set

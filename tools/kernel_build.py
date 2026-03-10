@@ -209,14 +209,18 @@ def main():
         make_cmd.append(f"KCFLAGS={args.kcflags}")
     if args.cross_compile:
         make_cmd.append(f"CROSS_COMPILE={args.cross_compile}")
-    # HOSTCC gets headers/libs from the seed's host-tools via
-    # C_INCLUDE_PATH and LIBRARY_PATH (set above from hermetic PATH
-    # bin dirs).  All HOSTCC deps (glibc, zlib, elfutils) must be in
-    # tc/bootstrap/host-tools/packages.bzl.
-    #
-    # Do NOT use --sysroot for HOSTCFLAGS: it interacts with gcc's
-    # include-fixed headers, and C_INCLUDE_PATH already provides the
-    # seed's glibc/zlib/elfutils headers from host-tools.
+    # In hermetic mode, set HOSTCC with --sysroot pointing to the
+    # host-tools root so the seed's gcc-native finds seed headers/libs
+    # instead of falling through to the host system's /usr/include/.
+    # The seed's gcc-native has --disable-fixincludes, so there's no
+    # include-fixed conflict with --sysroot (unlike host system gcc).
+    if args.hermetic_path:
+        for bin_dir in args.hermetic_path:
+            root = os.path.dirname(os.path.abspath(bin_dir))
+            if os.path.isdir(os.path.join(root, "usr", "include")):
+                make_cmd.append(f"HOSTCC=gcc --sysroot={root}")
+                make_cmd.append(f"HOSTCXX=g++ --sysroot={root}")
+                break
     if cc_override:
         make_cmd.extend(cc_override)
     for flag in args.make_flags:
