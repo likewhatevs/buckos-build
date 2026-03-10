@@ -18,12 +18,13 @@ def _buckos_toolchain_select():
       DEFAULT        — read from [buckos].default_toolchain in .buckconfig
       stage3         — stage 2 toolchain (hermetic rebuild)
       bootstrap      — host PATH toolchain (escape hatch)
-      host-target    — host toolchain (for exec_dep targets / cross-build)
+      host-target    — seed exec toolchain (native gcc + hermetic PATH),
+                        falls back to host PATH when bootstrapping
     """
     return select({
         "//tc/exec:is-stage3-mode": "//tc/bootstrap:stage2-toolchain",
         "//tc/exec:is-bootstrap-mode": "//tc/host:host-toolchain",
-        "//tc/exec:is-host-target": "//tc/host:host-toolchain",
+        "//tc/exec:is-host-target": "//tc/seed:seed-exec-toolchain",
         "DEFAULT": read_config("buckos", "default_toolchain", "toolchains//:buckos"),
     })
 

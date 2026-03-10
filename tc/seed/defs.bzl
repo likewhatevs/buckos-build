@@ -1,6 +1,6 @@
 """Seed toolchain resolution helper."""
 
-load("//tc:toolchain_rules.bzl", "buckos_bootstrap_toolchain")
+load("//tc:toolchain_rules.bzl", "buckos_bootstrap_toolchain", "buckos_toolchain")
 load("//defs/rules:toolchain_import.bzl", "toolchain_import")
 
 def maybe_export_seed():
@@ -69,6 +69,19 @@ def seed_toolchain():
             labels = ["buckos:seed"],
             visibility = ["PUBLIC"],
         )
+        # Exec toolchain: uses seed's native gcc (host-tools/bin/gcc)
+        # for building exec deps (tools that run on the host).  Provides
+        # hermetic PATH from host-tools so exec deps don't need host
+        # make/lzip/python/etc.
+        toolchain_import(
+            name = "seed-exec-toolchain",
+            archive = archive,
+            target_triple = "x86_64-buckos-linux-gnu",
+            has_host_tools = True,
+            exec_mode = True,
+            labels = ["buckos:seed-exec"],
+            visibility = ["PUBLIC"],
+        )
     else:
         buckos_bootstrap_toolchain(
             name = "seed-toolchain",
@@ -79,5 +92,12 @@ def seed_toolchain():
                 "-Wl,--dynamic-linker," + "/" * 228 + "lib64/ld-linux-x86-64.so.2",
                 "-Wl,-rpath,$ORIGIN/../lib64:$ORIGIN/../lib",
             ],
+            visibility = ["PUBLIC"],
+        )
+        # Bootstrap mode: no seed, fall back to host PATH toolchain.
+        # Can't alias a toolchain rule into a toolchain_dep, so create
+        # a separate instance with the same host PATH settings.
+        buckos_toolchain(
+            name = "seed-exec-toolchain",
             visibility = ["PUBLIC"],
         )
