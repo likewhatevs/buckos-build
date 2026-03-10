@@ -97,6 +97,11 @@ ACLOCAL_DIR="${SCRIPT_DIR}/../share/aclocal"
 # libtoolize uses _lt_pkgdatadir to override the master repository location
 export _lt_pkgdatadir="$SHARE_DIR"
 export aclocaldir="$ACLOCAL_DIR"
+# Override configure-baked absolute paths to sed/grep with PATH lookups
+export SED="sed"
+export GREP="grep"
+export EGREP="grep -E"
+export FGREP="grep -F"
 exec "$SCRIPT_DIR/libtoolize.real" "$@"
 WRAPPER_EOF
             chmod +x "$BINDIR/libtoolize"
@@ -111,6 +116,11 @@ WRAPPER_EOF
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SHARE_DIR="${SCRIPT_DIR}/../share/libtool"
 export pkgdatadir="$SHARE_DIR"
+# Override configure-baked absolute paths to sed/grep with PATH lookups
+export SED="sed"
+export GREP="grep"
+export EGREP="grep -E"
+export FGREP="grep -F"
 exec "$SCRIPT_DIR/libtool.real" "$@"
 WRAPPER_EOF
             chmod +x "$BINDIR/libtool"

@@ -18,7 +18,6 @@ load("//tc:toolchain_rules.bzl", "buckos_bootstrap_toolchain")
 load("//tc:transitions.bzl", "default_dep", "stage3_dep")
 load("//defs/rules:toolchain_export.bzl", "toolchain_export")
 load("//defs/rules:host_tools_exec.bzl", "host_tools_exec")
-load("//tc/bootstrap/host-tools:packages.bzl", "HOST_TOOL_PACKAGES")
 
 buckos_bootstrap_toolchain(
     name = "bootstrap-toolchain",
@@ -82,7 +81,6 @@ toolchain_export(
     name = "seed-export",
     stage = "//tc/bootstrap/stage1:stage1",
     host_tools = "//tc/bootstrap/host-tools:host-tools",
-    host_packages = HOST_TOOL_PACKAGES,
     gcc_version = "14.3.0",
     glibc_version = "2.42",
     visibility = ["PUBLIC"],

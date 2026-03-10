@@ -4,14 +4,10 @@
 Collects compiler binaries, sysroot, support libraries, and GCC internal
 tools, generates metadata.json, and packs everything into a compressed tar.
 
-Archive format (v2):
+Archive layout:
   tools/                  cross-compiler (stage 1 output)
-  host-tools/             merged FHS tree (hermetic PATH, backwards compat)
-  packages/               per-package archives (granular invalidation)
-    bash-5.2.37.tar.zst
-    rust-1.91.0.tar.zst
-    ...
-  metadata.json           provenance + package manifest
+  host-tools/             merged FHS tree (hermetic PATH)
+  metadata.json           provenance
 """
 
 import argparse
@@ -296,9 +292,6 @@ def main():
     parser.add_argument("--compression", choices=["zst", "xz", "gz"], default="zst")
     parser.add_argument("--host-tools-dir", default=None,
                         help="Directory containing host tools to include as host-tools/")
-    parser.add_argument("--package", nargs=4, action="append", default=[],
-                        metavar=("LABEL", "NAME", "VERSION", "PREFIX"),
-                        help="Per-package archive: label name version prefix_dir (repeatable)")
     args = parser.parse_args()
     sanitize_global_env()
 
@@ -358,49 +351,13 @@ def main():
         if has_host_tools:
             _create_rpath_symlinks(host_tools_dst)
 
-        # Create per-package archives if --package was given
-        pkg_manifest = {}
-        if args.package:
-            pkg_dir = os.path.join(tmpdir, "packages")
-            os.makedirs(pkg_dir, exist_ok=True)
-            for label, name, version, prefix in args.package:
-                prefix = os.path.abspath(prefix)
-                if not os.path.isdir(prefix):
-                    print(f"warning: package prefix not found, skipping: {prefix}", file=sys.stderr)
-                    continue
-                archive_name = f"{name}-{version}.tar.zst"
-                archive_path = os.path.join(pkg_dir, archive_name)
-                print(f"  packing package {name}-{version}...", file=sys.stderr)
-                tar_p = subprocess.Popen(
-                    ["tar", "-cf", "-", "-C", prefix, "."],
-                    stdout=subprocess.PIPE, env=clean_env(),
-                )
-                zstd_p = subprocess.Popen(
-                    ["zstd", "-T0", "-9", "-o", archive_path],
-                    stdin=tar_p.stdout, env=clean_env(),
-                )
-                tar_p.stdout.close()
-                zstd_p.wait()
-                rc = tar_p.wait() or zstd_p.returncode
-                if rc != 0:
-                    print(f"error: failed to pack package {name}", file=sys.stderr)
-                    sys.exit(1)
-                pkg_manifest[label] = {
-                    "archive": f"packages/{archive_name}",
-                    "sha256": sha256_file(archive_path),
-                    "name": name,
-                    "version": version,
-                }
-            print(f"Packed {len(pkg_manifest)} per-package archives", file=sys.stderr)
-
         # Compute content hash from scrubbed stage
         print("Computing content hash...", file=sys.stderr)
         contents_sha256 = sha256_directory(stage_copy)
 
         # Generate metadata
-        fmt_version = 2 if pkg_manifest else 1
         metadata = {
-            "format_version": fmt_version,
+            "format_version": 1,
             "target_triple": args.target_triple,
             "gcc_version": args.gcc_version,
             "glibc_version": args.glibc_version,
@@ -409,8 +366,6 @@ def main():
         }
         if has_host_tools:
             metadata["has_host_tools"] = True
-        if pkg_manifest:
-            metadata["packages"] = pkg_manifest
 
         meta_path = os.path.join(tmpdir, "metadata.json")
         with open(meta_path, "w") as f:
@@ -425,8 +380,6 @@ def main():
         tar_items.extend(["-C", tmpdir, "metadata.json"])
         if has_host_tools:
             tar_items.extend(["-C", tmpdir, "host-tools"])
-        if pkg_manifest:
-            tar_items.extend(["-C", tmpdir, "packages"])
 
         if args.compression == "zst":
             tar_p = subprocess.Popen(
