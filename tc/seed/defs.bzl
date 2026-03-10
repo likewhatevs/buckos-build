@@ -83,10 +83,14 @@ def seed_toolchain():
             visibility = ["PUBLIC"],
         )
     else:
+        # Source mode: no prebuilt seed, bootstrap from scratch.
+        # Cannot depend on host-tools-exec here — that creates a cycle
+        # (seed-toolchain → host-tools-exec → stage1 → extract_source
+        # → resolve exec platform → seed-toolchain).  Bootstrap builds
+        # use host PATH for make/sed/etc. via allows_host_path=True.
         buckos_bootstrap_toolchain(
             name = "seed-toolchain",
             bootstrap_stage = "//tc/bootstrap/stage1:stage1",
-            host_tools = "//tc/bootstrap:host-tools-exec",
             extra_cflags = ["-march=x86-64-v3"],
             extra_ldflags = [
                 "-Wl,--dynamic-linker," + "/" * 228 + "lib64/ld-linux-x86-64.so.2",

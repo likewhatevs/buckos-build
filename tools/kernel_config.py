@@ -128,8 +128,12 @@ def main():
         # scripts/cc-version.sh quotes "$CC" so multi-word values fail.
         bare_cc = cc.split()[0]
         make_base.append(f"CC={bare_cc}")
-        if hostcc:
-            make_base.append(f"HOSTCC={hostcc}")
+
+    # HOSTCC is independent of CC — always set when provided.
+    # Uses the native gcc (not cross-compiler) with --sysroot to avoid
+    # picking up incompatible host headers.
+    if hostcc:
+        make_base.append(f"HOSTCC={hostcc}")
 
     # Step 1: Generate base config
     if args.defconfig:
