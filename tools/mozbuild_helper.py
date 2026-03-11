@@ -13,13 +13,83 @@ output directory that Buck2 can cache independently.
 """
 
 import argparse
+import glob as _glob_mod
 import os
+import re
 import shutil
 import subprocess
 import sys
 import json
 
 from _env import clean_env, disable_posix_spawn, sanitize_filenames, sanitize_global_env, write_pkg_config_wrapper
+
+
+# ── Portable path placeholders (cross-machine cache) ─────────────────
+#
+# Configure bakes absolute paths into config.status, Makefiles, etc.
+# To make cached configure output portable across hosts:
+#   phase_configure: project root → @MOZBUILD_PROJECT_ROOT@  (before cache)
+#   consuming phases: @MOZBUILD_PROJECT_ROOT@ → os.getcwd()  (after cache)
+#
+# Fallback: if cached output has raw absolute paths (old cache entries
+# without placeholders), detect and rewrite them directly.
+
+_PLACEHOLDER = "@MOZBUILD_PROJECT_ROOT@"
+
+_BUCK_OUT_RE = re.compile(r'(/[^\s"\']+?)/buck-out/')
+
+_BINARY_EXTS = frozenset((
+    ".o", ".a", ".so", ".gch", ".pcm", ".pch", ".d",
+    ".png", ".jpg", ".gif", ".ico", ".gz", ".xz", ".bz2",
+    ".wasm", ".pyc", ".qm",
+))
+
+
+def _rewrite_tree(tree, old, new):
+    """Replace old with new in all non-binary text files under tree."""
+    for dirpath, _dirnames, filenames in os.walk(tree):
+        for fname in filenames:
+            if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                continue
+            fpath = os.path.join(dirpath, fname)
+            if os.path.islink(fpath):
+                continue
+            try:
+                stat = os.stat(fpath)
+                with open(fpath, "r") as f:
+                    content = f.read()
+                if old not in content:
+                    continue
+                with open(fpath, "w") as f:
+                    f.write(content.replace(old, new))
+                os.utime(fpath, (stat.st_atime, stat.st_mtime))
+            except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                    FileNotFoundError):
+                pass
+
+
+def _portabilize_paths(tree):
+    """Replace the current project root with a placeholder before caching."""
+    _rewrite_tree(tree, os.getcwd(), _PLACEHOLDER)
+
+
+def _absolutize_paths(tree):
+    """Replace placeholder with the current project root after cache retrieval."""
+    current_root = os.getcwd()
+    _rewrite_tree(tree, _PLACEHOLDER, current_root)
+
+    # Fallback: handle old cache entries that have raw absolute paths
+    # instead of placeholders (from before this change).
+    for cs in _glob_mod.glob(os.path.join(tree, "**/config.status"), recursive=True):
+        try:
+            with open(cs, "r") as f:
+                content = f.read()
+        except (UnicodeDecodeError, PermissionError, OSError):
+            continue
+        m = _BUCK_OUT_RE.search(content)
+        if m and m.group(1) != current_root:
+            _rewrite_tree(tree, m.group(1), current_root)
+            break
 
 
 def _resolve(path):
@@ -301,6 +371,10 @@ def phase_configure(args):
     _run([sys.executable if shutil.which("python3") is None else "python3",
           "./mach", "configure"], cwd=src_dir, env=env)
 
+    # Replace absolute project root with portable placeholder before
+    # caching — makes the output identical regardless of host.
+    _portabilize_paths(src_dir)
+
     # Copy the configured source (with objdir) to output
     output = _resolve(args.output_dir)
     shutil.copytree(src_dir, output, symlinks=True)
@@ -322,6 +396,8 @@ def phase_rust_deps(args):
                 if not os.path.exists(obj_dst):
                     shutil.copytree(obj_src, obj_dst, symlinks=True)
                 break
+
+    _absolutize_paths(src_dir)
 
     pkg_config_bin = _setup_pkg_config_wrapper(
         os.path.join(args.work_dir, "bin"))
@@ -389,6 +465,10 @@ def phase_build(args):
                         os.chmod(fp, os.stat(fp).st_mode | 0o644)
                 break
 
+    # Rewrite stale absolute paths from cross-machine cache (e.g. CI
+    # runner path baked into config.status by ./mach configure).
+    _absolutize_paths(src_dir)
+
     # Pre-warm cargo target dir from rust-deps phase
     if args.rust_deps_dir:
         rust_deps = _resolve(args.rust_deps_dir)
@@ -419,6 +499,9 @@ def phase_build(args):
     # Full build
     _run(["python3", "./mach", "build"], cwd=src_dir, env=env)
 
+    # Portabilize before caching
+    _portabilize_paths(src_dir)
+
     # Copy built tree to output
     output = _resolve(args.output_dir)
     shutil.copytree(src_dir, output, symlinks=True)
@@ -438,6 +521,8 @@ def phase_install(args):
                 if not os.path.exists(obj_dst):
                     shutil.copytree(obj_src, obj_dst, symlinks=True)
                 break
+
+    _absolutize_paths(src_dir)
 
     pkg_config_bin = _setup_pkg_config_wrapper(
         os.path.join(args.work_dir, "bin"))
