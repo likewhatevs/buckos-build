@@ -209,45 +209,14 @@ def disable_posix_spawn(env, scratch_dir=None):
 
 
 def sysroot_lib_paths(ld_linux_path, env):
-    """Set LD_LIBRARY_PATH for sysroot so buckos compiler can execute.
+    """Disable posix_spawn for buckos-built binaries.
 
-    The buckos GCC binary runs via the host's dynamic linker (its
-    PT_INTERP resolves to /lib64/ld-linux on the host).  GCC's
-    libstdc++ needs buckos glibc symbols (GLIBC_2.38+) that the
-    host glibc may lack.  Adding sysroot glibc and GCC runtime
-    lib dirs to LD_LIBRARY_PATH lets the host ld-linux satisfy
-    those references.
-
-    Only sysroot dirs (glibc + gcc runtime) are added — dep-specific
-    lib dirs are handled separately by derive_lib_paths() which
-    excludes glibc to avoid host tool contamination.
+    Compiler binary ELF interpreters are patched to the sysroot
+    ld-linux by the toolchain rule (patch_compiler action), so
+    LD_LIBRARY_PATH is not needed.  The sysroot ld-linux loads
+    sysroot glibc directly — matching versions, no ABI mismatch.
     """
     disable_posix_spawn(env)
-
-    ld_linux = os.path.abspath(ld_linux_path)
-    # sysroot is two dirs up from ld-linux:
-    # <sysroot>/lib64/ld-linux-x86-64.so.2
-    sysroot = os.path.dirname(os.path.dirname(ld_linux))
-
-    lib_dirs = []
-    for sub in ("lib64", "lib", "usr/lib64", "usr/lib"):
-        d = os.path.join(sysroot, sub)
-        if os.path.isdir(d):
-            lib_dirs.append(d)
-
-    # GCC's libstdc++/libgcc_s live alongside the sysroot:
-    # sysroot = <prefix>/x86_64-buckos-linux-gnu/sys-root
-    # libstdc++ = <prefix>/x86_64-buckos-linux-gnu/lib64
-    gcc_target = os.path.dirname(sysroot)
-    for sub in ("lib64", "lib"):
-        d = os.path.join(gcc_target, sub)
-        if os.path.isdir(d):
-            lib_dirs.append(d)
-
-    if lib_dirs:
-        existing = env.get("LD_LIBRARY_PATH", "")
-        merged = ":".join(lib_dirs)
-        env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
 
 def derive_lib_paths(bin_dirs, env):

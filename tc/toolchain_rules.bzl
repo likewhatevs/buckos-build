@@ -122,12 +122,38 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
     and its make/pkg-config are used instead of host PATH lookups.
     """
     stage = ctx.attrs.bootstrap_stage[BootstrapStageInfo]
+    stage_dir = ctx.attrs.bootstrap_stage[DefaultInfo].default_outputs[0]
+    triple = stage.target_triple
 
-    cc_args = cmd_args(stage.cc)
-    cc_args.add(cmd_args("--sysroot=", stage.sysroot, delimiter = ""))
+    # Patch compiler binary ELF interpreters to the sysroot ld-linux.
+    # Compiler binaries have padded interpreters (///...///lib64/ld-linux)
+    # that resolve to the HOST ld-linux.  When host glibc is older than
+    # buckos glibc, the binaries segfault or fail with missing symbols.
+    # Rewriting to the sysroot ld-linux ensures the compiler loads buckos
+    # glibc (matching version).  Same approach as host_tools_exec.
+    patched = ctx.actions.declare_output("patched-compiler", dir = True)
+    sysroot_ld = stage.sysroot.project("lib64/ld-linux-x86-64.so.2")
+    rewrite_cmd = cmd_args(ctx.attrs._rewrite_tool[RunInfo])
+    rewrite_cmd.add("--tools-dir", stage_dir)
+    rewrite_cmd.add("--ld-linux", sysroot_ld)
+    rewrite_cmd.add("--output-dir", patched.as_output())
+    ctx.actions.run(
+        rewrite_cmd,
+        category = "patch_compiler",
+        identifier = ctx.label.name,
+        local_only = True,
+        allow_cache_upload = False,
+    )
 
-    cxx_args = cmd_args(stage.cxx)
-    cxx_args.add(cmd_args("--sysroot=", stage.sysroot, delimiter = ""))
+    # Use patched compiler binaries + sysroot
+    patched_sysroot = patched.project("tools/" + triple + "/sys-root")
+    patched_ld = patched_sysroot.project("lib64/ld-linux-x86-64.so.2")
+
+    cc_args = cmd_args(patched.project("tools/bin/" + triple + "-gcc"))
+    cc_args.add(cmd_args("--sysroot=", patched_sysroot, delimiter = ""))
+
+    cxx_args = cmd_args(patched.project("tools/bin/" + triple + "-g++"))
+    cxx_args.add(cmd_args("--sysroot=", patched_sysroot, delimiter = ""))
 
     # Expose Python from bootstrap stage if available
     python_run_info = None
@@ -164,12 +190,12 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         else:
             remaining_ldflags.append(flag)
 
-    sysroot_ld = stage.sysroot.project("lib64/ld-linux-x86-64.so.2")
     specs_file = ctx.actions.declare_output("gcc-link.specs")
     gen_cmd = cmd_args(ctx.attrs._gen_specs_tool[RunInfo])
-    gen_cmd.add("--ld-linux", sysroot_ld)
-    if stage.gcc_lib_dir:
-        gen_cmd.add("--gcc-lib-dir", stage.gcc_lib_dir)
+    gen_cmd.add("--ld-linux", patched_ld)
+    patched_gcc_lib_dir = patched.project("tools/" + triple + "/" + "lib64") if stage.gcc_lib_dir else None
+    if patched_gcc_lib_dir:
+        gen_cmd.add("--gcc-lib-dir", patched_gcc_lib_dir)
     if rpath_val:
         gen_cmd.add("--rpath", rpath_val)
     gen_cmd.add("--output", specs_file.as_output())
@@ -183,18 +209,18 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
     # when linking C programs against C++ shared libraries.  The GCC
     # runtime libs live outside the sysroot — add them as rpath-link.
     ldflags = list(remaining_ldflags)
-    if stage.gcc_lib_dir:
-        ldflags.append(cmd_args("-Wl,-rpath-link,", stage.gcc_lib_dir, delimiter = ""))
+    if patched_gcc_lib_dir:
+        ldflags.append(cmd_args("-Wl,-rpath-link,", patched_gcc_lib_dir, delimiter = ""))
 
     info = BuildToolchainInfo(
         cc = RunInfo(args = cc_args),
         cxx = RunInfo(args = cxx_args),
-        ar = RunInfo(args = cmd_args(stage.ar)),
+        ar = RunInfo(args = cmd_args(patched.project("tools/bin/" + triple + "-ar"))),
         strip = RunInfo(args = cmd_args(ctx.attrs.strip_bin)),
         make = RunInfo(args = make_cmd),
         pkg_config = RunInfo(args = pkg_config_cmd),
-        target_triple = stage.target_triple,
-        sysroot = stage.sysroot,
+        target_triple = triple,
+        sysroot = patched_sysroot,
         python = python_run_info,
         host_bin_dir = host_bin,
         allows_host_path = ctx.attrs.host_tools == None,
@@ -216,6 +242,9 @@ buckos_bootstrap_toolchain = rule(
         "extra_ldflags": attrs.list(attrs.string(), default = []),
         "_gen_specs_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:gen_specs"),
+        ),
+        "_rewrite_tool": attrs.default_only(
+            attrs.exec_dep(default = "//tools:rewrite_interps"),
         ),
     },
 )
