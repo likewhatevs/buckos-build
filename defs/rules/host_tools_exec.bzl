@@ -1,10 +1,10 @@
 """
-host_tools_exec rule: make stage3 host tools executable on the build host.
+host_tools_exec rule: make host tools executable on the build host.
 
-Stage3 host tools are hermetically built with GCC specs that inject a
-padded ELF interpreter (///...///lib64/ld-linux-x86-64.so.2).  This
-resolves to the host /lib64/ld-linux-x86-64.so.2 at runtime, but using
-the host ld-linux with buckos-built glibc can cause ABI mismatches
+Host tools are hermetically built with GCC specs that inject a padded
+ELF interpreter (///...///lib64/ld-linux-x86-64.so.2).  This resolves
+to the host /lib64/ld-linux-x86-64.so.2 at runtime, but using the host
+ld-linux with buckos-built glibc can cause ABI mismatches
 (GLIBC_PRIVATE symbol version conflicts when ld-linux 2.39 loads
 libc.so.6 2.42).
 

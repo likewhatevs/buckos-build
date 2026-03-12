@@ -1,14 +1,15 @@
 """
-Bootstrap Stage 1: Cross-compilation toolchain.
+Bootstrap Stage 2: Cross-compilation toolchain (Gentoo stage 2).
 
-Build chain:
+Builds a cross-compiler with its own glibc using the host GCC:
+
   Host GCC + host binutils
     -> cross-binutils (--target=x86_64-buckos-linux-gnu)
     -> linux-headers (make ARCH=x86_64 headers + stub sys/sdt.h)
     -> cross-gcc-pass1 (C only, --without-headers, --with-newlib)
     -> glibc (full build with cross-gcc-pass1)
     -> cross-gcc-pass2 (C + C++, --with-sysroot, libstdc++)
-    -> BootstrapStageInfo(stage=1)
+    -> BootstrapStageInfo(stage=2)
 """
 
 load("//defs/rules:bootstrap.bzl",
@@ -17,7 +18,7 @@ load("//defs/rules:bootstrap.bzl",
     "bootstrap_glibc",
     "bootstrap_linux_headers",
 )
-load(":defs.bzl", "stage1_aggregator")
+load(":defs.bzl", "stage2_aggregator")
 
 # ── Cross-binutils ───────────────────────────────────────────────────
 
@@ -86,14 +87,14 @@ bootstrap_gcc(
     with_headers = True,
     host_cc = "gcc -std=gnu11 -Wno-error=implicit-function-declaration -fcf-protection=none",
     host_cxx = "g++ -std=gnu++11 -fcf-protection=none",
-    stage_number = 1,
+    stage_number = 2,
     visibility = ["PUBLIC"],
 )
 
-# ── Stage 1 aggregator ──────────────────────────────────────────────
+# ── Stage 2 aggregator ──────────────────────────────────────────────
 
-stage1_aggregator(
-    name = "stage1",
+stage2_aggregator(
+    name = "stage2",
     gcc_pass2 = ":gcc-pass2",
     visibility = ["PUBLIC"],
 )

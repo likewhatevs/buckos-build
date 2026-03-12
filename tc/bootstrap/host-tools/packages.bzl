@@ -26,7 +26,8 @@ HOST_TOOL_PACKAGES = [
     "//packages/linux/system/libs/compression/gzip:gzip",
     "//packages/linux/system/libs/compression/xz:xz",
     "//packages/linux/system/libs/compression/bzip2:bzip2",
-    "//packages/linux/system/libs/compression/zstd:zstd",
+    # zstd CLI omitted — no bootstrap sources use .tar.zst.
+    # Packages needing libzstd (gcc, mold, kmod, etc.) have it in deps.
     "//packages/linux/system/libs/compression/lzip:lzip",
 
     # Core libraries (needed by HOSTCC tools: kernel libbpf, resolve_btfids)
@@ -40,7 +41,7 @@ HOST_TOOL_PACKAGES = [
 
     # Kernel UAPI headers -- glibc headers reference linux/*.h and asm/*.h.
     # Uses bootstrap rule (no TOOLCHAIN_ATTRS) to avoid circular dep with seed.
-    "//tc/bootstrap/stage1:linux-headers",
+    "//tc/bootstrap/stage2:linux-headers",
 
     # C library + kernel headers -- gcc-native needs glibc CRT files
     # (Scrt1.o, crti.o, crtn.o), headers (sys/types.h, stdio.h), and

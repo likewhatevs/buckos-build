@@ -1,18 +1,9 @@
 """
 Host tools for the hermetic seed toolchain.
 
-Built twice during bootstrap (Gentoo-style stages):
-
-  Stage 2  — TOOLCHAIN_ATTRS → seed (stage 1 only, no hermetic PATH).
-             Cross-compiled to buckos-native but host PATH leaks into
-             the build environment (make, sed, etc. from the build host).
-
-  Stage 3  — TOOLCHAIN_ATTRS → stage2-toolchain (stage 1 + stage 2 tools).
-             Rebuilt with hermetic PATH from stage 2 output.  No host
-             tools or libraries visible.  This is what ships in the seed.
-
-The stage3 transition (applied by toolchain_export on the host_tools dep)
-selects the stage 2 toolchain automatically.
+Built using TOOLCHAIN_ATTRS → seed (stage 2 cross-compiler).
+Cross-compiled to buckos-native; host tool deps come from per-rule
+exec_deps via auto_tool_deps in package.bzl.
 
 The host_tools_aggregator merges all package bin/lib/share dirs into one
 FHS-like prefix that becomes the seed's hermetic PATH.

@@ -51,26 +51,10 @@ COMMON_PACKAGE_ATTRS = {
 
     # Base host tools: fundamental build prerequisites that every package
     # needs (shell, coreutils, make, etc.).  These are exec_deps so they
-    # provide hermetic PATH entries.
-    #
-    # Only populated in stage3 mode — the seed toolchain already provides
-    # these via host_bin_dir (--hermetic-path), and bootstrap mode uses
-    # host PATH.  Restricting to stage3 also breaks dependency cycles:
-    # exec_deps resolve at the exec platform (DEFAULT config) where this
-    # select evaluates to [], so bash doesn't depend on itself.
-    "_base_host_tools": attrs.default_only(attrs.list(attrs.exec_dep(), default = select({
-        "//tc/exec:is-stage3-mode": [
-            "//packages/linux/core/bash:bash",
-            "//packages/linux/system/apps/coreutils:coreutils",
-            "//packages/linux/dev-tools/build-systems/make:make",
-            "//packages/linux/editors/sed:sed",
-            "//packages/linux/editors/grep:grep",
-            "//packages/linux/editors/gawk:gawk",
-            "//packages/linux/system/apps/findutils:findutils",
-            "//packages/linux/editors/diffutils:diffutils",
-        ],
-        "DEFAULT": [],
-    }))),
+    # provide hermetic PATH entries.  Currently empty — auto_tool_deps in
+    # package.bzl handles injection in source mode; seed mode provides
+    # tools via hermetic PATH.
+    "_base_host_tools": attrs.default_only(attrs.list(attrs.exec_dep(), default = [])),
 } | TOOLCHAIN_ATTRS
 
 # ── Tset construction ────────────────────────────────────────────────

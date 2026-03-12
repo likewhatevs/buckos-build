@@ -28,9 +28,9 @@ _SOURCE_TARGETS = [
     ":mpc-src",
 ]
 
-# Bootstrap rule targets remain in stage1.
-_STAGE1_PATH = "//tc/bootstrap/stage1"
-_STAGE1_TARGETS = [
+# Bootstrap rule targets remain in stage2.
+_STAGE2_PATH = "//tc/bootstrap/stage2"
+_STAGE2_TARGETS = [
     ":cross-binutils",
     ":gcc-pass1",
     ":gcc-pass2",
@@ -46,7 +46,7 @@ def _normalize(label_str):
     return label_str
 
 def run(ctx):
-    """Verify pinned stage 1 targets have exactly one <base> configuration.
+    """Verify pinned stage 2 targets have exactly one <base> configuration.
 
     Returns:
         (passed, failed, details) tuple.
@@ -72,7 +72,7 @@ def run(ctx):
                 base_configs[raw] = []
             base_configs[raw].append(full)
 
-    for path, suffixes in [(_SOURCES_PATH, _SOURCE_TARGETS), (_STAGE1_PATH, _STAGE1_TARGETS)]:
+    for path, suffixes in [(_SOURCES_PATH, _SOURCE_TARGETS), (_STAGE2_PATH, _STAGE2_TARGETS)]:
         for suffix in suffixes:
             target = path + suffix
             short = suffix.lstrip(":")
@@ -97,9 +97,8 @@ def run(ctx):
 
     # ── Host-tools dedup ──────────────────────────────────────────────
     #
-    # Host-tools targets (stage 2 packages) should appear in at most 2
-    # distinct configurations: DEFAULT and stage3-transition.  More than
-    # 2 means duplicate actions.
+    # Host-tools targets should appear in at most 2
+    # distinct configurations.  More than 2 means duplicate actions.
     host_tools_configs = {}
     for node in all_deps:
         raw = _normalize(str(node.label.raw_target()))

@@ -5,7 +5,6 @@ toolchain_env_args() (inject CC/CXX/AR into Python helper cmd_args).
 
 The _toolchain attr uses select() on the bootstrap mode constraint:
   DEFAULT        → [buckos].default_toolchain from .buckconfig
-  is-stage3-mode → stage 2 toolchain (stage 1 + stage 2 host tools)
   is-bootstrap-mode → host PATH toolchain (escape hatch)
 """
 
@@ -14,15 +13,13 @@ load("//defs:providers.bzl", "BuildToolchainInfo")
 def _buckos_toolchain_select():
     """Config-driven toolchain selection via select().
 
-    Four modes:
+    Three modes:
       DEFAULT        — read from [buckos].default_toolchain in .buckconfig
-      stage3         — stage 2 toolchain (hermetic rebuild)
       bootstrap      — host PATH toolchain (escape hatch)
       host-target    — seed exec toolchain (native gcc + hermetic PATH),
                         falls back to host PATH when bootstrapping
     """
     return select({
-        "//tc/exec:is-stage3-mode": "//tc/bootstrap:stage2-toolchain",
         "//tc/exec:is-bootstrap-mode": "//tc/host:host-toolchain",
         "//tc/exec:is-host-target": "//tc/seed:seed-exec-toolchain",
         "DEFAULT": read_config("buckos", "default_toolchain", "toolchains//:buckos"),
