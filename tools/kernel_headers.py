@@ -39,7 +39,25 @@ def main():
     args = parser.parse_args()
 
     _host_path = os.environ.get("PATH", "")
+    _cc_val = os.environ.get("CC", "")
+    _project_root = os.getcwd()
     sanitize_global_env()
+    # Resolve CC paths to absolute (relative buck-out paths break after make -C)
+    if _cc_val:
+        _resolved_parts = []
+        for _tok in _cc_val.split():
+            for _pfx in ("--sysroot=", "-specs="):
+                if _tok.startswith(_pfx):
+                    _path = _tok[len(_pfx):]
+                    if not os.path.isabs(_path):
+                        _tok = _pfx + os.path.join(_project_root, _path)
+                    break
+            else:
+                if not _tok.startswith("-") and "/" in _tok and not os.path.isabs(_tok):
+                    _tok = os.path.join(_project_root, _tok)
+            _resolved_parts.append(_tok)
+        _cc_val = " ".join(_resolved_parts)
+        os.environ["CC"] = _cc_val
 
     # Apply PATH from toolchain flags
     if args.hermetic_path:
@@ -95,6 +113,14 @@ def main():
     ]
     if args.cross_compile:
         make_cmd.append(f"CROSS_COMPILE={args.cross_compile}")
+    # Pass HOSTCC and flags so make uses buckos compiler for fixdep.
+    # Split multi-token CC into HOSTCC (binary) + HOSTCFLAGS (flags).
+    _cc_val = os.environ.get("CC", "")
+    if _cc_val:
+        _parts = _cc_val.split()
+        make_cmd.append(f"HOSTCC={_parts[0]}")
+        if len(_parts) > 1:
+            make_cmd.append(f"HOSTCFLAGS={' '.join(_parts[1:])}")
 
     print(f"Installing kernel headers to {output_dir}")
     print(f"  + {' '.join(make_cmd)}")

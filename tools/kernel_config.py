@@ -193,7 +193,7 @@ def _resolve_cc_path(cc_str):
     parts = cc_str.split()
     resolved = []
     for p in parts:
-        for prefix in ("--sysroot=", "-I", "-L"):
+        for prefix in ("--sysroot=", "-specs=", "-I", "-L"):
             if p.startswith(prefix):
                 path = p[len(prefix):]
                 if not os.path.isabs(path) and (path.startswith("buck-out") or os.path.exists(path)):
@@ -237,24 +237,8 @@ def _gcc14_workaround(build_dir, cc_bin):
     if major < 14:
         return []
 
-    # Find actual gcc path
-    cc_path = shutil.which(cc)
-    if not cc_path:
-        return []
-
-    print(f"GCC {major} detected, creating -std=gnu11 wrapper")
-    wrapper_dir = os.path.join(build_dir, ".cc-wrapper")
-    os.makedirs(wrapper_dir, exist_ok=True)
-    wrapper_path = os.path.join(wrapper_dir, "gcc")
-    with open(wrapper_path, "w") as f:
-        f.write(
-            '#!/usr/bin/env python3\n'
-            'import os, sys\n'
-            f'os.execv("{cc_path}", ["{cc_path}"] + sys.argv[1:] + ["-std=gnu11"])\n'
-        )
-    os.chmod(wrapper_path, 0o755)
-
-    return [f"CC={wrapper_path}"]
+    print(f"GCC {major} detected, adding -std=gnu11")
+    return [f"CC={cc} -std=gnu11"]
 
 
 def _run(cmd, cwd=None, env=None):

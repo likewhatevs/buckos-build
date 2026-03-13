@@ -65,6 +65,15 @@ bootstrap_transition = rule(
     is_configuration_rule = True,
 )
 
+host_tools_transition = rule(
+    impl = _config_transition_impl,
+    attrs = {
+        "_setting": attrs.dep(default = "//tc/exec:bootstrap-mode-setting"),
+        "_value": attrs.dep(default = "//tc/exec:host-tools-mode"),
+    },
+    is_configuration_rule = True,
+)
+
 def _default_dep_impl(ctx):
     """Forward a dep's DefaultInfo through the default transition.
 

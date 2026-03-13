@@ -26,7 +26,11 @@ package(
         # scanner itself there is no pre-existing one — make it optional.
         # The scanner binary is self-contained (scanner.c + expat) and
         # doesn't need protocol code generation.
-        "sed -i \"s/dependency('wayland-scanner')/dependency('wayland-scanner', required: false)/g\" src/meson.build",
+        # The cross-build path (line 83) tries to find a pre-existing
+        # wayland-scanner binary, which doesn't exist when building
+        # the scanner itself.  Force the else branch (use the scanner
+        # we're building) by making the condition always false.
+        "sed -i 's/meson.is_cross_build() or not /false and not /' src/meson.build",
     ],
     meson_args = [
         "-Ddocumentation=false",

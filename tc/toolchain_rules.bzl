@@ -172,8 +172,8 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         host_bin = ht_dir.project("bin")
         make_cmd = cmd_args(host_bin.project("make"))
         pkg_config_cmd = cmd_args(host_bin.project("pkg-config"))
-        if not python_run_info:
-            python_run_info = RunInfo(args = cmd_args(host_bin.project("python3")))
+        # Python comes from auto_tool_deps (python-host exec_dep)
+        # when not in the base host tools.
 
     # Generate GCC link specs that inject the sysroot dynamic linker
     # and RPATH unconditionally at link time.  Uses the actual sysroot
@@ -219,13 +219,16 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
         cc = RunInfo(args = cc_args),
         cxx = RunInfo(args = cxx_args),
         ar = RunInfo(args = cmd_args(patched.project("tools/bin/" + triple + "-ar"))),
-        strip = RunInfo(args = cmd_args(ctx.attrs.strip_bin)),
+        strip = RunInfo(args = cmd_args(patched.project("tools/bin/" + triple + "-strip"))),
         make = RunInfo(args = make_cmd),
         pkg_config = RunInfo(args = pkg_config_cmd),
         target_triple = triple,
         sysroot = patched_sysroot,
         python = python_run_info,
         host_bin_dir = host_bin,
+        # Host PATH fallback only when no host_tools provided (bootstrap
+        # cycle-breaker for base tool builds).  When host_tools is set
+        # (seed toolchains), PATH is fully hermetic from host_bin_dir.
         allows_host_path = ctx.attrs.host_tools == None,
         extra_cflags = ctx.attrs.extra_cflags,
         extra_ldflags = ldflags,

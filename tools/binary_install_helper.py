@@ -133,6 +133,7 @@ def main():
     for key in ("CFLAGS", "LDFLAGS", "CPPFLAGS"):
         if key in starlark_vars:
             env[key] = _resolve_flag_paths(starlark_vars[key], project_root)
+
     for key in ("PKG_CONFIG_PATH", "_DEP_BIN_PATHS", "DEP_BASE_DIRS",
                 "_DEP_LD_LIBRARY_PATH", "_HERMETIC_PATH", "_PATH_PREPEND"):
         if key in starlark_vars:
@@ -249,10 +250,16 @@ def main():
                 merged = ":".join(_host_dirs)
                 env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Prepend dep bin paths to PATH
+    # Prepend dep bin paths to PATH and derive tool data dirs
     dep_bin = env.get("_DEP_BIN_PATHS")
     if dep_bin:
         env["PATH"] = dep_bin + ":" + env.get("PATH", "")
+        # Derive BISON_PKGDATADIR so relocated bison finds its data files.
+        for _bp in dep_bin.split(":"):
+            _parent = os.path.dirname(_bp)
+            bison_data = os.path.join(_parent, "share", "bison")
+            if os.path.isdir(bison_data) and "BISON_PKGDATADIR" not in env:
+                env["BISON_PKGDATADIR"] = bison_data
 
     # Stub makeinfo if not on PATH
     workdir = env["WORKDIR"]

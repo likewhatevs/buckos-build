@@ -68,15 +68,33 @@ def main():
     if args.rpath:
         # Sysroot libs first (for test programs), then $ORIGIN (for installed binaries)
         combined_rpath = sysroot_rpath + ":" + args.rpath if sysroot_rpath else args.rpath
-        parts.append(f"-rpath {combined_rpath}")
+        # Use DT_RPATH (not DT_RUNPATH) so search paths propagate to
+        # loaded shared libraries.  DT_RUNPATH only covers the main
+        # binary — deps like librustc_driver.so would fall back to
+        # /lib64/libstdc++.so.6 (host) without propagation.
+        parts.append(f"--disable-new-dtags -rpath {combined_rpath}")
 
     # GCC specs format:
     # *link:            — override/append the link spec
     # +                 — append to the built-in spec (don't replace)
-    # %{!shared:...}    — only for non-shared, non-static links
+    #
+    # Split into two clauses:
+    # 1. --dynamic-linker: only for executables (%{!shared:%{!static:...}})
+    # 2. -rpath/--disable-new-dtags: for executables AND shared libs
+    #    (%{!static:...}) so .so files like librustc_driver.so also get
+    #    sysroot RPATH and find buckos libstdc++ at runtime.
+    interp_parts = [p for p in parts if "dynamic-linker" in p]
+    rpath_parts = [p for p in parts if "dynamic-linker" not in p]
+
+    clauses = []
+    if interp_parts:
+        clauses.append(f"%{{!shared:%{{!static:{' '.join(interp_parts)}}}}}")
+    if rpath_parts:
+        clauses.append(f"%{{!static:{' '.join(rpath_parts)}}}")
+
     specs = (
         "*link:\n"
-        f"+ %{{!shared:%{{!static:{' '.join(parts)}}}}}\n"
+        f"+ {' '.join(clauses)}\n"
         "\n"
     )
 

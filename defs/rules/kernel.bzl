@@ -10,7 +10,7 @@ Rules:
 """
 
 load("//defs:empty_registry.bzl", "PATCH_REGISTRY")
-load("//defs:providers.bzl", "BuildToolchainInfo", "KernelBtfInfo", "KernelConfigInfo", "KernelHeadersInfo", "KernelInfo")
+load("//defs:providers.bzl", "BuildToolchainInfo", "KernelBtfInfo", "KernelConfigInfo", "KernelHeadersInfo", "KernelInfo", "PackageInfo")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_env_args", "toolchain_ld_linux_args", "toolchain_path_args")
 load("//tc:transitions.bzl", "strip_toolchain_mode")
 
@@ -42,19 +42,22 @@ def _kernel_config_impl(ctx: AnalysisContext) -> list[Provider]:
     tc = ctx.attrs._toolchain[BuildToolchainInfo]
     cmd.add("--cc", cmd_args(tc.cc.args, delimiter = " "))
 
-    # HOSTCC: native gcc from hermetic PATH for host tools (fixdep, etc.).
-    # Must have --sysroot to avoid picking up incompatible host headers
-    # (e.g. Ubuntu multiarch glibc at /usr/include on CI runners).
-    if tc.host_bin_dir and tc.sysroot:
-        hostcc_args = cmd_args(tc.host_bin_dir.project("gcc"))
-        hostcc_args.add(cmd_args("--sysroot=", tc.sysroot, delimiter = ""))
-        cmd.add("--hostcc", cmd_args(hostcc_args, delimiter = " "))
+    # HOSTCC: use the toolchain's CC for kernel host tools (fixdep, etc.).
+    # The buckos cross-compiler targets the same architecture, so it
+    # works as HOSTCC.  Sysroot prevents host header contamination.
+    cmd.add("--hostcc", cmd_args(tc.cc.args, delimiter = " "))
 
     # Hermetic PATH from toolchain
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
     for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
+
+    # flex/bison needed by Kconfig
+    for dep_attr in ("_flex", "_bison"):
+        dep = getattr(ctx.attrs, dep_attr, None)
+        if dep and PackageInfo in dep:
+            cmd.add("--path-prepend", dep[PackageInfo].prefix.project("usr/bin"))
 
     ctx.actions.run(
         cmd,
@@ -82,6 +85,13 @@ _kernel_config_rule = rule(
         "labels": attrs.list(attrs.string(), default = []),
         "_kernel_config_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:kernel_config"),
+        ),
+        # Kconfig needs flex/bison to build the conf tool
+        "_flex": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-tools/dev-utils/flex:flex"),
+        ),
+        "_bison": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-tools/dev-utils/bison:bison"),
         ),
     } | TOOLCHAIN_ATTRS,
     cfg = strip_toolchain_mode,
@@ -175,20 +185,54 @@ def _kernel_build_impl(ctx: AnalysisContext) -> list[Provider]:
     for env_arg in toolchain_env_args(ctx):
         cmd.add("--make-flag", env_arg)
 
-    # HOSTCC: native gcc from hermetic PATH for host tools (fixdep,
-    # resolve_btfids, etc.).  Must have --sysroot to avoid picking up
-    # incompatible host headers (e.g. Ubuntu multiarch glibc).
+    # HOSTCC: native gcc for host tools (fixdep, resolve_btfids, etc.).
+    # kernel_build.py splits multi-token HOSTCC into binary + flags.
     tc = ctx.attrs._toolchain[BuildToolchainInfo]
-    if tc.host_bin_dir and tc.sysroot:
-        hostcc_args = cmd_args(tc.host_bin_dir.project("gcc"))
-        hostcc_args.add(cmd_args("--sysroot=", tc.sysroot, delimiter = ""))
-        cmd.add("--make-flag", cmd_args("HOSTCC=", cmd_args(hostcc_args, delimiter = " "), delimiter = ""))
+    cmd.add("--make-flag", cmd_args("HOSTCC=", cmd_args(tc.cc.args, delimiter = " "), delimiter = ""))
 
     # Hermetic PATH from toolchain
     for arg in toolchain_path_args(ctx):
         cmd.add(arg)
     for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
+
+    # flex/bison/bc/elfutils/cpio needed by kernel build
+    for dep_attr in ("_flex", "_bison", "_bc", "_elfutils", "_cpio"):
+        dep = getattr(ctx.attrs, dep_attr, None)
+        if dep and PackageInfo in dep:
+            cmd.add("--path-prepend", dep[PackageInfo].prefix.project("usr/bin"))
+
+    # Pass elfutils + zlib include/lib dirs to HOSTCC for objtool/resolve_btfids.
+    # elfutils' libelf depends on zlib — both must be on the link path.
+    _host_cflags = []
+    _host_ldflags = []
+    # elfutils: usr/lib (not lib64)
+    elfutils_dep = ctx.attrs._elfutils
+    if elfutils_dep and PackageInfo in elfutils_dep:
+        elfutils_pfx = elfutils_dep[PackageInfo].prefix
+        _host_cflags.append(cmd_args("-I", elfutils_pfx.project("usr/include"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-L", elfutils_pfx.project("usr/lib"), delimiter = ""))
+    # zlib: usr/lib64, elfutils + openssl: usr/lib
+    zlib_dep = ctx.attrs._zlib
+    if zlib_dep and PackageInfo in zlib_dep:
+        zlib_pfx = zlib_dep[PackageInfo].prefix
+        _host_cflags.append(cmd_args("-I", zlib_pfx.project("usr/include"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-L", zlib_pfx.project("usr/lib64"), delimiter = ""))
+    openssl_dep = ctx.attrs._openssl
+    if openssl_dep and PackageInfo in openssl_dep:
+        openssl_pfx = openssl_dep[PackageInfo].prefix
+        _host_cflags.append(cmd_args("-I", openssl_pfx.project("usr/include"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-L", openssl_pfx.project("usr/lib"), delimiter = ""))
+    if _host_cflags:
+        _hcf_val = cmd_args(delimiter = " ")
+        for _f in _host_cflags:
+            _hcf_val.add(_f)
+        cmd.add(cmd_args("--make-flag=HOSTCFLAGS=", _hcf_val, delimiter = ""))
+    if _host_ldflags:
+        _hlf_val = cmd_args(delimiter = " ")
+        for _f in _host_ldflags:
+            _hlf_val.add(_f)
+        cmd.add(cmd_args("--make-flag=HOSTLDFLAGS=", _hlf_val, delimiter = ""))
 
     ctx.actions.run(
         cmd,
@@ -231,6 +275,27 @@ _kernel_build_rule = rule(
         "labels": attrs.list(attrs.string(), default = []),
         "_kernel_build_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:kernel_build"),
+        ),
+        "_flex": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-tools/dev-utils/flex:flex"),
+        ),
+        "_bison": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-tools/dev-utils/bison:bison"),
+        ),
+        "_bc": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-tools/dev-utils/bc:bc"),
+        ),
+        "_elfutils": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/elfutils:elfutils"),
+        ),
+        "_zlib": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/core/zlib:zlib"),
+        ),
+        "_openssl": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/crypto/openssl:openssl"),
+        ),
+        "_cpio": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/cpio:cpio"),
         ),
     } | TOOLCHAIN_ATTRS,
 )
@@ -316,7 +381,19 @@ def _kernel_headers_impl(ctx: AnalysisContext) -> list[Provider]:
     for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
 
-    ctx.actions.run(cmd, category = "kernel_headers", identifier = ctx.attrs.name, allow_cache_upload = True)
+    # rsync needed by make headers_install
+    rsync_dep = ctx.attrs._rsync
+    if rsync_dep and PackageInfo in rsync_dep:
+        cmd.add("--path-prepend", rsync_dep[PackageInfo].prefix.project("usr/bin"))
+
+    # Pass CC in action env so the helper can pass HOSTCC to make.
+    tc = ctx.attrs._toolchain[BuildToolchainInfo]
+    action_env = {
+        "CC": cmd_args(tc.cc.args, delimiter = " "),
+    }
+
+    ctx.actions.run(cmd, category = "kernel_headers", identifier = ctx.attrs.name,
+                    allow_cache_upload = True, env = action_env)
 
     return [
         DefaultInfo(default_output = install_dir),
@@ -336,6 +413,9 @@ _kernel_headers_rule = rule(
         "labels": attrs.list(attrs.string(), default = []),
         "_kernel_headers_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:kernel_headers"),
+        ),
+        "_rsync": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/apps/rsync:rsync"),
         ),
     } | TOOLCHAIN_ATTRS,
     cfg = strip_toolchain_mode,

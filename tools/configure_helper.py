@@ -102,6 +102,8 @@ def main():
                         help="PKG_CONFIG_PATH entries (repeatable)")
     parser.add_argument("--skip-configure", action="store_true",
                         help="Copy source but skip running ./configure (for Kconfig packages)")
+    parser.add_argument("--skip-cc-arg", action="store_true",
+                        help="Don't auto-inject CC as a configure argument")
     parser.add_argument("--configure-script", default="configure",
                         help="Name of the configure script (default: configure, e.g. Configure for OpenSSL)")
     parser.add_argument("--env", action="append", dest="extra_env", default=[],
@@ -207,6 +209,27 @@ def main():
                 env[key] = resolved + " " + env[key]
             else:
                 env[key] = resolved
+
+    # Create gcc/cc symlinks on PATH so libtool sub-configures
+    # (which search PATH for gcc/cc independently of the parent's CC)
+    # find the buckos compiler.  CC stays multi-token — don't split it.
+    # Every invocation of $CC includes --sysroot and -specs, ensuring
+    # compiled programs get the right interpreter and RPATH.
+    _symlink_dir = os.path.join(output_dir, ".cc-symlinks")
+    _need_symlink_path = False
+    _cc_has_spaces = False
+    for _var, _names in [("CC", ("cc", "gcc")), ("CXX", ("c++", "g++"))]:
+        _val = env.get(_var, "")
+        if " " in _val:
+            _cc_has_spaces = True
+            _cc_bin = os.path.abspath(_val.split()[0])
+            if os.path.isfile(_cc_bin):
+                os.makedirs(_symlink_dir, exist_ok=True)
+                for _name in _names:
+                    _link = os.path.join(_symlink_dir, _name)
+                    if not os.path.exists(_link):
+                        os.symlink(_cc_bin, _link)
+                _need_symlink_path = True
     if args.hermetic_path:
         env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
         # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
@@ -248,6 +271,9 @@ def main():
         prepend = ":".join(os.path.abspath(p) for p in all_path_prepend if os.path.isdir(p))
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
+    # Add CC symlink dir to PATH so libtool sub-configures find gcc/cc.
+    if _need_symlink_path:
+        env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
 
     # Append dep bin dirs AFTER hermetic PATH for *-config discovery scripts
     # (gpg-error-config, curl-config, xml2-config, etc.).  Appended so seed
@@ -401,16 +427,32 @@ def main():
         except OSError:
             _use_config_shell = True
 
-    # Pass CC/CXX as configure arguments too — hand-written configure
-    # scripts (e.g. GNU ed, lzip) ignore env vars and only accept these
-    # as command-line KEY=VALUE pairs.  Autoconf scripts accept both.
-    # Only inject if not already specified in configure_args.
+    # Pass CC/CXX as configure arguments.  Required for:
+    # 1. Hand-written scripts (GNU ed, lzip) that ignore env vars
+    # 2. Autotools with multi-token CC — `test -f "$CC"` fails when CC
+    #    has spaces, but CC=... as a configure argument bypasses this
+    #    via eval.  Only autotools scripts handle CC= arguments; non-
+    #    autotools scripts (zlib) reject them as unknown options.
     _arg_keys = {a.split("=", 1)[0] for a in resolved_args if "=" in a}
     _cc_args = []
-    if args.cc and "CC" not in _arg_keys:
-        _cc_args.append(f"CC={_resolve_env_paths(args.cc)}")
-    if args.cxx and "CXX" not in _arg_keys:
-        _cc_args.append(f"CXX={_resolve_env_paths(args.cxx)}")
+    # Detect autotools by checking for "GNU Autoconf" marker
+    _is_autotools = False
+    _abs_configure = os.path.join(configure_cwd, configure) if not os.path.isabs(configure) else configure
+    try:
+        with open(_abs_configure, "rb") as _f:
+            _head = _f.read(1024)
+            _is_autotools = b"Autoconf" in _head
+    except OSError:
+        pass
+    _inject_cc = args.cc or (_cc_has_spaces and _is_autotools and not args.skip_cc_arg)
+    if _inject_cc and "CC" not in _arg_keys:
+        _cc_val = args.cc or env.get("CC", "")
+        if _cc_val:
+            _cc_args.append(f"CC={_resolve_env_paths(_cc_val)}")
+    if _inject_cc and "CXX" not in _arg_keys:
+        _cxx_val = args.cxx or env.get("CXX", "")
+        if _cxx_val:
+            _cc_args.append(f"CXX={_resolve_env_paths(_cxx_val)}")
 
     if _use_config_shell:
         cmd = [_config_shell, configure] + resolved_args + _cc_args

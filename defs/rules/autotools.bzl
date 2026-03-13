@@ -75,6 +75,8 @@ def _src_configure(ctx, source, cflags_file = None, ldflags_file = None,
     if ctx.attrs.cc_as_configure_arg:
         cmd.add("--cc", cmd_args(tc.cc.args, delimiter = " "))
         cmd.add("--cxx", cmd_args(tc.cxx.args, delimiter = " "))
+    if ctx.attrs.skip_cc_auto_arg:
+        cmd.add("--skip-cc-arg")
 
     # Hermetic PATH and ld-linux from seed toolchain
     for arg in toolchain_path_args(ctx):
@@ -383,6 +385,7 @@ autotools_package = rule(
         "configure_script": attrs.option(attrs.string(), default = None),
         "skip_configure": attrs.bool(default = False),
         "cc_as_configure_arg": attrs.bool(default = False),
+        "skip_cc_auto_arg": attrs.bool(default = False),
         "skip_host_arg": attrs.bool(default = False),
         "build_subdir": attrs.option(attrs.string(), default = None),
         "pre_build_cmds": attrs.list(attrs.string(), default = []),

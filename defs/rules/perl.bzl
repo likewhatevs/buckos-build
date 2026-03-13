@@ -32,6 +32,11 @@ def _perl_build(ctx, source):
     for arg in host_tool_path_args(ctx):
         cmd.add(arg)
 
+    # Perl interpreter for Makefile.PL / Build.PL
+    perl_dep = ctx.attrs._perl_interp
+    if perl_dep and PackageInfo in perl_dep:
+        cmd.add("--path-prepend", perl_dep[PackageInfo].prefix.project("usr/bin"))
+
     # Inject toolchain CC/CXX/AR (needed for XS modules)
     for env_arg in toolchain_env_args(ctx):
         cmd.add("--env", env_arg)
@@ -101,6 +106,9 @@ perl_module = rule(
         "pre_build_cmds": attrs.list(attrs.string(), default = []),
         "_perl_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:perl_helper"),
+        ),
+        "_perl_interp": attrs.default_only(
+            attrs.dep(default = "//packages/linux/lang/perl:perl"),
         ),
     },
 )

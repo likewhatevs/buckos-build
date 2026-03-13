@@ -76,27 +76,29 @@ def seed_toolchain():
         )
     else:
         # Source mode: no prebuilt seed, bootstrap from scratch.
-        # Mirror stage3-toolchain config so packages get the stage2
-        # cross-compiler with sysroot ld-linux + RPATH specs.
-        # Host tools (make, sed, etc.) come from per-rule exec_deps
-        # via auto_tool_deps in package.bzl.  The dynamic linker
-        # comes from the sysroot directly (via gen_specs).
+        # Uses stage2 cross-compiler with sysroot ld-linux + RPATH specs.
+        # Host tools (make, sed, bash, etc.) come from host-tools-exec
+        # (bootstrap-built, interpreter-patched).  allows_host_path = False
+        # because host_tools is provided — no host fallback, fully hermetic.
+        #
+        # The host-tools-aggregator uses bootstrap_transition to build its
+        # packages with the host-PATH toolchain, breaking the cycle:
+        # seed-toolchain → host-tools-exec → host-tools → packages →
+        # (bootstrap-toolchain, not seed-toolchain).
         buckos_bootstrap_toolchain(
             name = "seed-toolchain",
             bootstrap_stage = "//tc/bootstrap/stage2:stage2",
+            host_tools = "//tc/bootstrap:host-tools-exec",
             extra_cflags = ["-march=x86-64-v3"],
             extra_ldflags = [
                 "-Wl,-rpath,$ORIGIN/../lib64:$ORIGIN/../lib",
             ],
             visibility = ["PUBLIC"],
         )
-        # Exec deps use the same bootstrap toolchain so exec_dep
-        # binaries (awk, sed, bash, etc.) use buckos ld-linux and
-        # buckos glibc.  Without this, exec_dep tools built against
-        # buckos libs fail on hosts with older glibc.
         buckos_bootstrap_toolchain(
             name = "seed-exec-toolchain",
             bootstrap_stage = "//tc/bootstrap/stage2:stage2",
+            host_tools = "//tc/bootstrap:host-tools-exec",
             extra_cflags = ["-march=x86-64-v3"],
             extra_ldflags = [
                 "-Wl,-rpath,$ORIGIN/../lib64:$ORIGIN/../lib",

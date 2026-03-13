@@ -132,14 +132,21 @@ def main():
     _lib_parts, _inc_parts = [], []
     for bin_dir in _all_bin_dirs:
         parent = os.path.dirname(os.path.abspath(bin_dir))
-        for ld in ("usr/lib64", "usr/lib", "lib64", "lib"):
-            d = os.path.join(parent, ld)
-            if os.path.isdir(d) and d not in _lib_parts:
-                _lib_parts.append(d)
-        for inc in ("usr/include", "include"):
-            d = os.path.join(parent, inc)
-            if os.path.isdir(d) and d not in _inc_parts:
-                _inc_parts.append(d)
+        # Check both flat layout (<prefix>/bin → <prefix>/usr/include)
+        # and FHS layout (<prefix>/usr/bin → <prefix>/usr/include)
+        search_roots = [parent]
+        grandparent = os.path.dirname(parent)
+        if os.path.basename(parent) in ("usr", "local"):
+            search_roots.append(grandparent)
+        for root in search_roots:
+            for ld in ("usr/lib64", "usr/lib", "lib64", "lib"):
+                d = os.path.join(root, ld)
+                if os.path.isdir(d) and d not in _lib_parts:
+                    _lib_parts.append(d)
+            for inc in ("usr/include", "include"):
+                d = os.path.join(root, inc)
+                if os.path.isdir(d) and d not in _inc_parts:
+                    _inc_parts.append(d)
     # Note: cross-toolchain sysroot paths are intentionally NOT added
     # here.  HOSTCC gets all headers from host-tools (glibc, linux-headers,
     # zlib, elfutils) via C_INCLUDE_PATH above.  The cross-compiler (CC)
@@ -218,6 +225,8 @@ def main():
     # in tc/bootstrap/host-tools/packages.bzl.
     if cc_override:
         make_cmd.extend(cc_override)
+    _hostcflags = []
+    _hostldflags = []
     for flag in args.make_flags:
         # Resolve relative buck-out paths in KEY=VALUE flags so they
         # work when make runs in the build tree directory.
@@ -227,7 +236,7 @@ def main():
             resolved = []
             for t in tokens:
                 # Handle --sysroot=path and bare path tokens
-                for prefix in ("--sysroot=", "-I", "-L"):
+                for prefix in ("--sysroot=", "-specs=", "-I", "-L"):
                     if t.startswith(prefix):
                         path = t[len(prefix):]
                         if not os.path.isabs(path) and (path.startswith("buck-out") or os.path.exists(path)):
@@ -237,15 +246,39 @@ def main():
                     if not os.path.isabs(t) and (t.startswith("buck-out") or os.path.exists(t)):
                         t = os.path.abspath(t)
                 resolved.append(t)
-            if key in ("CC", "CXX") and len(resolved) > 1:
-                # Kernel doesn't use --sysroot or -specs — bare compiler
-                # only.  scripts/cc-version.sh quotes "$CC" so multi-word
-                # values fail with "unknown C compiler".
+            if key in ("CC", "CXX", "HOSTCC", "HOSTCXX") and len(resolved) > 1:
+                # Kernel/make quotes "$CC"/"$HOSTCC" so multi-word values
+                # fail.  Split into binary + flags.  Extra flags go into
+                # HOSTCFLAGS/HOSTLDFLAGS for HOSTCC.
                 make_cmd.append(f"{key}={resolved[0]}")
+                if key.startswith("HOST"):
+                    _extra_flags = " ".join(resolved[1:])
+                    _hostcflags.append(_extra_flags)
+                    _hostldflags.append(_extra_flags)
             else:
                 make_cmd.append(f"{key}={' '.join(resolved)}")
         else:
             make_cmd.append(flag)
+
+    # Merge HOSTCC-split flags into existing HOSTCFLAGS/HOSTLDFLAGS.
+    # The loop above may have already appended HOSTCFLAGS=... from make_flags;
+    # update those entries to include the HOSTCC-derived flags.
+    if _hostcflags or _hostldflags:
+        _new_make_cmd = []
+        _found_hcf = _found_hlf = False
+        for _mc in make_cmd:
+            if _mc.startswith("HOSTCFLAGS=") and _hostcflags:
+                _mc = _mc + " " + " ".join(_hostcflags)
+                _found_hcf = True
+            elif _mc.startswith("HOSTLDFLAGS=") and _hostldflags:
+                _mc = _mc + " " + " ".join(_hostldflags)
+                _found_hlf = True
+            _new_make_cmd.append(_mc)
+        if not _found_hcf and _hostcflags:
+            _new_make_cmd.append(f"HOSTCFLAGS={' '.join(_hostcflags)}")
+        if not _found_hlf and _hostldflags:
+            _new_make_cmd.append(f"HOSTLDFLAGS={' '.join(_hostldflags)}")
+        make_cmd = _new_make_cmd
 
     # Configure
     config_file = os.path.abspath(args.config) if args.config else ""

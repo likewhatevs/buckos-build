@@ -663,6 +663,31 @@ def main():
         if prepend:
             env["PATH"] = prepend + ":" + env.get("PATH", "")
 
+    # Create gcc/cc/g++ symlinks so scripts that invoke bare `gcc`
+    # (e.g. busybox scripts/gcc-version.sh) find the buckos compiler.
+    # These are real symlinks, not wrapper scripts — no recursion risk.
+    # Use scratch dir (not build_dir which is a buck2 input artifact).
+    _cc_val = env.get("CC", "")
+    if _cc_val:
+        _cc_bin = os.path.abspath(_cc_val.split()[0])
+        if os.path.isfile(_cc_bin):
+            _scratch = env.get("BUCK_SCRATCH_PATH", env.get("TMPDIR", "/tmp"))
+            _symlink_dir = os.path.join(os.path.abspath(_scratch), "cc-symlinks")
+            os.makedirs(_symlink_dir, exist_ok=True)
+            for _name in ("gcc", "cc"):
+                _link = os.path.join(_symlink_dir, _name)
+                if not os.path.exists(_link):
+                    os.symlink(_cc_bin, _link)
+            _cxx_val = env.get("CXX", "")
+            if _cxx_val:
+                _cxx_bin = os.path.abspath(_cxx_val.split()[0])
+                if os.path.isfile(_cxx_bin):
+                    for _name in ("g++", "c++"):
+                        _link = os.path.join(_symlink_dir, _name)
+                        if not os.path.exists(_link):
+                            os.symlink(_cxx_bin, _link)
+            env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
+
     # Append dep bin dirs for *-config discovery scripts (gpg-error-config,
     # curl-config, etc.).  Appended so seed/host tools take priority.
     if file_path_append_dirs:
@@ -835,6 +860,11 @@ def main():
         # Rewrite shebangs in the build tree so scripts invoked by
         # make recipes use buckos shell instead of host /bin/sh.
         rewrite_shebangs(output_dir, env)
+
+    # Set HOSTCC from CC so Kconfig (busybox, kernel) builds don't
+    # search PATH for bare `gcc`.  HOSTCC ?= gcc in Makefiles.
+    if "CC" in env and "HOSTCC" not in env:
+        env["HOSTCC"] = env["CC"]
 
     # Run pre-build commands (e.g. Kconfig setup)
     for cmd_str in args.pre_cmds:

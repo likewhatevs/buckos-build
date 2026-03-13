@@ -31,6 +31,9 @@ genrule(
 buckos_bootstrap_toolchain(
     name = "bootstrap-toolchain",
     bootstrap_stage = "//tc/bootstrap/stage2:stage2",
+    extra_ldflags = [
+        "-Wl,-rpath,$ORIGIN/../lib64:$ORIGIN/../lib",
+    ],
     visibility = ["PUBLIC"],
 )
 

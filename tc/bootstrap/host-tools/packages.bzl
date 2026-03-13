@@ -1,69 +1,79 @@
-"""Shared list of host tool packages for seed bootstrap.
+"""Host tool package lists for seed bootstrap.
 
-Used by both the host_tools_aggregator (merged FHS tree for hermetic PATH)
-and toolchain_export (per-package archives in the seed).
+BASE_TOOL_PACKAGES: simple POSIX tools with no deep dep chains.
+Built via host_tools_transition (buckos compiler + host PATH fallback).
+These become the seed toolchains' hermetic PATH — no host fallback
+needed for any package that uses the seed toolchain.
+
+EXTENDED_TOOL_PACKAGES: complex packages with deep dep chains (glibc,
+gcc, llvm, rust, kernel tools, etc.).  Built normally with the seed
+toolchain.  Included in the full seed export but NOT in the base
+host_tools (to avoid cycles).
+
+HOST_TOOL_PACKAGES = BASE + EXTENDED, used by toolchain_export for
+the complete seed archive.
 """
 
-HOST_TOOL_PACKAGES = [
+BASE_TOOL_PACKAGES = [
     # Shell
     "//packages/linux/core/bash:bash",
 
-    # Core utilities
+    # Core POSIX utilities
     "//packages/linux/system/apps/coreutils:coreutils",
     "//packages/linux/system/apps/findutils:findutils",
-    "//packages/linux/system/apps/rsync:rsync",
     "//packages/linux/system/apps/tar:tar",
-    "//packages/linux/system/apps/which:which",
     "//packages/linux/editors/diffutils:diffutils",
     "//packages/linux/editors/sed:sed",
     "//packages/linux/editors/grep:grep",
     "//packages/linux/editors/gawk:gawk",
     "//packages/linux/editors/patch:patch",
-    "//packages/linux/core/file:file",
-    "//packages/linux/core/util-linux:util-linux",
+    "//packages/linux/editors/ed:ed",
 
     # Compression
     "//packages/linux/system/libs/compression/gzip:gzip",
     "//packages/linux/system/libs/compression/xz:xz",
     "//packages/linux/system/libs/compression/bzip2:bzip2",
-    # zstd CLI omitted — no bootstrap sources use .tar.zst.
-    # Packages needing libzstd (gcc, mold, kmod, etc.) have it in deps.
     "//packages/linux/system/libs/compression/lzip:lzip",
 
-    # Core libraries (needed by HOSTCC tools: kernel libbpf, resolve_btfids)
-    "//packages/linux/core/zlib:zlib",
-
-    # Binary utilities (strip, objcopy, ar, as, ld, etc.)
+    # Binary utilities (ar, ranlib, strip, objcopy — called by Makefiles)
     "//packages/linux/dev-tools/build-systems/binutils:binutils",
 
-    # Native C/C++ compiler (needed by Kconfig, kernel builds, etc.)
+    # Build systems (simple autotools packages)
+    "//packages/linux/dev-tools/build-systems/make:make",
+    "//packages/linux/dev-tools/build-systems/m4:m4",
+    "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+]
+
+EXTENDED_TOOL_PACKAGES = [
+    # Core utilities with deeper deps
+    "//packages/linux/system/apps/rsync:rsync",
+    "//packages/linux/core/file:file",
+    "//packages/linux/core/util-linux:util-linux",
+
+    # Core libraries
+    "//packages/linux/core/zlib:zlib",
+
+    # Binary utilities (already in BASE)
+
+    # Native C/C++ compiler
     "//packages/linux/lang/gcc:gcc-native",
 
-    # Kernel UAPI headers -- glibc headers reference linux/*.h and asm/*.h.
-    # Uses bootstrap rule (no TOOLCHAIN_ATTRS) to avoid circular dep with seed.
+    # Kernel UAPI headers
     "//tc/bootstrap/stage2:linux-headers",
 
-    # C library + kernel headers -- gcc-native needs glibc CRT files
-    # (Scrt1.o, crti.o, crtn.o), headers (sys/types.h, stdio.h), and
-    # shared libs to compile and link host programs.
+    # C library + kernel headers
     "//packages/linux/core/glibc:glibc",
     "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
 
-    # GCC dependencies (libs must be in merged tree for gcc to find them)
+    # GCC dependencies
     "//packages/linux/system/libs/utility/gmp:gmp",
     "//packages/linux/system/libs/utility/mpfr:mpfr",
     "//packages/linux/system/libs/utility/mpc:mpc",
 
-    # Build systems
-    "//packages/linux/dev-tools/build-systems/make:make",
-    "//packages/linux/dev-tools/build-systems/m4:m4",
+    # Build systems (need perl or complex deps)
     "//packages/linux/dev-tools/build-systems/autoconf:autoconf",
     "//packages/linux/dev-tools/build-systems/automake:automake",
     "//packages/linux/dev-tools/build-systems/libtool:libtool",
-    "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
-
-    # Editors
-    "//packages/linux/editors/ed:ed",
 
     # Dev utilities
     "//packages/linux/dev-tools/dev-utils/bc:bc",
@@ -81,10 +91,10 @@ HOST_TOOL_PACKAGES = [
     "//packages/linux/lang/perl:perl",
     "//packages/linux/lang/python:python",
 
-    # Documentation tools (needed by bison, automake, etc.)
+    # Documentation tools
     "//packages/linux/dev-tools/documentation/help2man:help2man",
 
-    # LLVM/Clang (Rust uses clang as linker)
+    # LLVM/Clang
     "//packages/linux/core/llvm:llvm-native",
 
     # Linker
@@ -105,7 +115,7 @@ HOST_TOOL_PACKAGES = [
     # ELF / DWARF
     "//packages/linux/dev-tools/dev-utils/dwarves:dwarves",
 
-    # ISO image tools (xorriso, grub-mkimage, mksquashfs, mtools)
+    # ISO image tools
     "//packages/linux/dev-libs/iso/libisofs:libisofs",
     "//packages/linux/dev-libs/iso/libburn:libburn",
     "//packages/linux/dev-libs/iso/libisoburn:libisoburn",
@@ -128,3 +138,5 @@ HOST_TOOL_PACKAGES = [
     # Security / signing
     "//packages/linux/system/security/ima-evm-utils:ima-evm-utils",
 ]
+
+HOST_TOOL_PACKAGES = BASE_TOOL_PACKAGES + EXTENDED_TOOL_PACKAGES

@@ -6,7 +6,7 @@ Two variants:
 - dracut_initramfs: dracut-based initramfs with live boot support
 """
 
-load("//defs:providers.bzl", "KernelInfo", "get_kernel_image")
+load("//defs:providers.bzl", "KernelInfo", "PackageInfo", "get_kernel_image")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_ld_linux_args", "toolchain_path_args")
 
 def _initramfs_impl(ctx):
@@ -25,6 +25,10 @@ def _initramfs_impl(ctx):
         cmd.add(arg)
     for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
+    # cpio needed for creating the archive
+    cpio_dep = ctx.attrs._cpio
+    if cpio_dep and PackageInfo in cpio_dep:
+        cmd.add("--path-prepend", cpio_dep[PackageInfo].prefix.project("usr/bin"))
 
     if ctx.attrs.init_script:
         init_script_src = ctx.attrs.init_script[DefaultInfo].default_outputs[0]
@@ -44,6 +48,9 @@ _initramfs_rule = rule(
         "labels": attrs.list(attrs.string(), default = []),
         "_initramfs_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:initramfs_builder"),
+        ),
+        "_cpio": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/cpio:cpio"),
         ),
     } | TOOLCHAIN_ATTRS,
 )

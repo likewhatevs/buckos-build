@@ -57,12 +57,37 @@ config_setting(
     visibility = ["PUBLIC"],
 )
 
+# Host-tools mode: buckos compiler + host PATH fallback, no host_tools
+# dep.  Used by host_tools_aggregator to build base tools without
+# creating a cycle back to the seed toolchain.
+constraint_value(
+    name = "host-tools-mode",
+    constraint_setting = ":bootstrap-mode-setting",
+    visibility = ["PUBLIC"],
+)
+
+config_setting(
+    name = "is-host-tools-mode",
+    constraint_values = [":host-tools-mode"],
+    visibility = ["PUBLIC"],
+)
+
 # ── Transition targets ─────────────────────────────────────────────
 
-load("//tc:transitions.bzl", "default_transition")
+load("//tc:transitions.bzl", "bootstrap_transition", "default_transition", "host_tools_transition")
 
 default_transition(
     name = "default-transition",
+    visibility = ["PUBLIC"],
+)
+
+bootstrap_transition(
+    name = "bootstrap-transition",
+    visibility = ["PUBLIC"],
+)
+
+host_tools_transition(
+    name = "host-tools-transition",
     visibility = ["PUBLIC"],
 )
 

@@ -234,6 +234,105 @@ def _scrub_home_paths(directory):
 
 
 
+def _sanitize_rpath(directory):
+    """Strip build-machine paths from ELF RPATH/RUNPATH, keep $ORIGIN.
+
+    GCC specs inject RPATH with both absolute sysroot paths (build-machine
+    specific) and $ORIGIN-relative paths (portable).  The general home-path
+    scrub would zero the entire RPATH string because the regex matches from
+    /home/ to null, destroying the $ORIGIN entries too.
+
+    This pass runs first: split RPATH by ':', discard build-path entries,
+    keep $ORIGIN entries, and write back.  After this, _scrub_home_paths
+    safely handles any remaining /home/ strings in other .dynstr entries.
+    """
+    sanitized = 0
+    for dirpath, _, filenames in os.walk(directory):
+        for name in filenames:
+            fpath = os.path.join(dirpath, name)
+            if os.path.islink(fpath) or not os.path.isfile(fpath):
+                continue
+            try:
+                with open(fpath, "rb") as f:
+                    data = bytearray(f.read())
+                if data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
+                    continue
+                if b"/home/" not in data and b"buck-out" not in data:
+                    continue
+
+                e_shoff = struct.unpack_from("<Q", data, 40)[0]
+                e_shentsize = struct.unpack_from("<H", data, 58)[0]
+                e_shnum = struct.unpack_from("<H", data, 60)[0]
+
+                # Find .dynamic section to get RPATH/RUNPATH string offsets
+                SHT_DYNAMIC = 6
+                SHT_STRTAB = 3
+                dyn_offset = dyn_size = dyn_link = 0
+                strtab_sections = {}
+                for i in range(e_shnum):
+                    sh_off = e_shoff + i * e_shentsize
+                    sh_type = struct.unpack_from("<I", data, sh_off + 4)[0]
+                    sh_offset = struct.unpack_from("<Q", data, sh_off + 24)[0]
+                    sh_size = struct.unpack_from("<Q", data, sh_off + 32)[0]
+                    sh_link = struct.unpack_from("<I", data, sh_off + 40)[0]
+                    if sh_type == SHT_DYNAMIC:
+                        dyn_offset = sh_offset
+                        dyn_size = sh_size
+                        dyn_link = sh_link
+                    if sh_type == SHT_STRTAB:
+                        strtab_sections[i] = sh_offset
+
+                if not dyn_offset or dyn_link not in strtab_sections:
+                    continue
+
+                dynstr_offset = strtab_sections[dyn_link]
+
+                # Parse .dynamic entries for DT_RPATH(15) and DT_RUNPATH(29)
+                DT_RPATH = 15
+                DT_RUNPATH = 29
+                modified = False
+                pos = dyn_offset
+                while pos < dyn_offset + dyn_size:
+                    d_tag = struct.unpack_from("<q", data, pos)[0]
+                    d_val = struct.unpack_from("<Q", data, pos + 8)[0]
+                    if d_tag == 0:  # DT_NULL
+                        break
+                    if d_tag in (DT_RPATH, DT_RUNPATH):
+                        # d_val is offset into .dynstr
+                        str_off = dynstr_offset + d_val
+                        str_end = data.find(0, str_off)
+                        if str_end < 0:
+                            pos += 16
+                            continue
+                        rpath = data[str_off:str_end].decode("ascii", errors="replace")
+                        parts = rpath.split(":")
+                        clean = [p for p in parts
+                                 if p and "/home/" not in p and "buck-out" not in p
+                                 and "/usr/lib" not in p]
+                        new_rpath = ":".join(clean)
+                        new_bytes = new_rpath.encode("ascii")
+                        old_len = str_end - str_off
+                        if len(new_bytes) <= old_len:
+                            data[str_off:str_off + len(new_bytes)] = new_bytes
+                            for j in range(len(new_bytes), old_len):
+                                data[str_off + j] = 0
+                            modified = True
+                    pos += 16
+
+                if modified:
+                    orig_mode = os.stat(fpath).st_mode
+                    os.chmod(fpath, stat.S_IRUSR | stat.S_IWUSR)
+                    with open(fpath, "wb") as f:
+                        f.write(data)
+                    os.chmod(fpath, orig_mode)
+                    sanitized += 1
+            except (PermissionError, OSError, struct.error):
+                pass
+
+    if sanitized:
+        print(f"  sanitized RPATH in {sanitized} ELF files", file=sys.stderr)
+
+
 def _pad_unpadded_interpreters(host_tools_dir):
     """Pad standard ELF interpreters so the unpack step can rewrite them.
 
@@ -404,6 +503,15 @@ def main():
         # time — scrubbing truncates those to "/build" which breaks exec().
         print("Scrubbing build paths...", file=sys.stderr)
         _scrub_build_paths(stage_copy)
+
+        # Sanitize RPATH/RUNPATH: strip build-machine paths, keep $ORIGIN.
+        # Must run BEFORE _scrub_home_paths because the general scrub's
+        # regex matches /home/ to null, destroying $ORIGIN entries that
+        # follow sysroot paths in the same RPATH string.
+        print("Sanitizing RPATH...", file=sys.stderr)
+        _sanitize_rpath(stage_copy)
+        if has_host_tools:
+            _sanitize_rpath(host_tools_dst)
 
         # Scrub /home/... paths from data sections so build-machine
         # paths don't appear in shipped artifacts.  Section-aware:

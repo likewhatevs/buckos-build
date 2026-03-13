@@ -15,10 +15,15 @@ Add more tools here as hermeticity testing reveals missing ones:
 """
 
 load(":defs.bzl", "host_tools_aggregator")
-load(":packages.bzl", "HOST_TOOL_PACKAGES")
+load(":packages.bzl", "BASE_TOOL_PACKAGES")
 
+# Base tools only — simple POSIX utilities built via host_tools_transition
+# (buckos compiler + host PATH fallback).  These become the seed
+# toolchains' hermetic PATH, breaking the bootstrap cycle.
+# Extended tools (glibc, gcc, llvm, etc.) are built as regular
+# packages with the seed toolchain and included in the seed export.
 host_tools_aggregator(
     name = "host-tools",
-    packages = HOST_TOOL_PACKAGES,
+    packages = BASE_TOOL_PACKAGES,
     visibility = ["PUBLIC"],
 )
