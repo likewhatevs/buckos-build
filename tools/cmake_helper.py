@@ -282,16 +282,11 @@ def main():
 
     # Derive GCONV_PATH, BISON_PKGDATADIR (and LD_LIBRARY_PATH when no
     # sysroot ld-linux) from path-prepend dirs so host tools find shared
-    # libraries and data.  With sysroot ld-linux and per-package RPATH,
-    # buckos binaries find deps via RPATH.  Skip LD_LIBRARY_PATH to
-    # avoid contaminating host tools.
-    _save_ldlp = env.get("LD_LIBRARY_PATH") if args.ld_linux else None
+    # Derive LD_LIBRARY_PATH, GETTEXTDATADIRS, BISON_PKGDATADIR from
+    # path-prepend dirs.  Host_dep tools (qtpaths, moc) need non-sysroot
+    # package libs via LD_LIBRARY_PATH.  derive_lib_paths excludes dirs
+    # containing libc.so.6 to prevent glibc contamination.
     derive_lib_paths(all_path_prepend, env)
-    if args.ld_linux:
-        if _save_ldlp is not None:
-            env["LD_LIBRARY_PATH"] = _save_ldlp
-        else:
-            env.pop("LD_LIBRARY_PATH", None)
 
     if args.ld_linux:
         sysroot_lib_paths(args.ld_linux, env)

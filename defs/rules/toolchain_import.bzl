@@ -74,6 +74,9 @@ def _toolchain_import_impl(ctx):
         gcc_lib_dir = unpacked.project("tools/" + triple + "/lib64")
         ldflags = list(ctx.attrs.extra_ldflags)
         ldflags.append(cmd_args("-Wl,-rpath-link,", gcc_lib_dir, delimiter = ""))
+        # Explicit -L for sysroot lib dirs — see toolchain_rules.bzl comment.
+        ldflags.append(cmd_args("-L", sysroot.project("usr/lib64"), delimiter = ""))
+        ldflags.append(cmd_args("-L", sysroot.project("usr/lib"), delimiter = ""))
 
     info = BuildToolchainInfo(
         cc = RunInfo(args = cc_args),

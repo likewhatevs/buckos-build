@@ -215,6 +215,14 @@ def _buckos_bootstrap_toolchain_impl(ctx: AnalysisContext) -> list[Provider]:
     if patched_gcc_lib_dir:
         ldflags.append(cmd_args("-Wl,-rpath-link,", patched_gcc_lib_dir, delimiter = ""))
 
+    # Explicit -L for sysroot lib dirs so the linker finds sysroot libc
+    # before any stray host paths (-L/usr/lib64) injected by pkg-config
+    # or meson.  --sysroot only affects default search paths, not explicit
+    # -L flags — a stray -L/usr/lib64 makes ld find the host's older libc
+    # instead of the sysroot glibc, causing undefined __isoc23_* symbols.
+    ldflags.append(cmd_args("-L", patched_sysroot.project("usr/lib64"), delimiter = ""))
+    ldflags.append(cmd_args("-L", patched_sysroot.project("usr/lib"), delimiter = ""))
+
     info = BuildToolchainInfo(
         cc = RunInfo(args = cc_args),
         cxx = RunInfo(args = cxx_args),

@@ -245,6 +245,15 @@ def derive_lib_paths(bin_dirs, env):
         bison_data = os.path.join(parent, "share", "bison")
         if os.path.isdir(bison_data) and "BISON_PKGDATADIR" not in env:
             env["BISON_PKGDATADIR"] = bison_data
+        # gettext msgfmt --xml needs ITS rules from its versioned data dir
+        # (e.g. share/gettext-0.26/its/).  GETTEXTDATADIRS tells msgfmt
+        # where to find them.
+        _share = os.path.join(parent, "share")
+        if os.path.isdir(_share) and "GETTEXTDATADIRS" not in env:
+            for _entry in os.listdir(_share):
+                if _entry.startswith("gettext-") and os.path.isdir(os.path.join(_share, _entry, "its")):
+                    env["GETTEXTDATADIRS"] = os.path.join(_share, _entry)
+                    break
         # glibc iconv/msgfmt needs GCONV_PATH to find charset conversion
         # modules in the relocated prefix (otherwise ISO-8859-1 etc. fail).
         for ld in ("lib64", "lib"):

@@ -21,6 +21,7 @@ package(
     source_subdir = "llvm",
     configure_args = [
         "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
         "-DLLVM_ENABLE_PROJECTS=clang;lld",
         "-DLLVM_ENABLE_RUNTIMES=",
         "-DLLVM_BUILD_LLVM_DYLIB=ON",

@@ -674,7 +674,7 @@ def main():
             _scratch = env.get("BUCK_SCRATCH_PATH", env.get("TMPDIR", "/tmp"))
             _symlink_dir = os.path.join(os.path.abspath(_scratch), "cc-symlinks")
             os.makedirs(_symlink_dir, exist_ok=True)
-            for _name in ("gcc", "cc"):
+            for _name in ("gcc", "cc", "clang"):
                 _link = os.path.join(_symlink_dir, _name)
                 if not os.path.exists(_link):
                     os.symlink(_cc_bin, _link)
@@ -682,7 +682,7 @@ def main():
             if _cxx_val:
                 _cxx_bin = os.path.abspath(_cxx_val.split()[0])
                 if os.path.isfile(_cxx_bin):
-                    for _name in ("g++", "c++"):
+                    for _name in ("g++", "c++", "clang++"):
                         _link = os.path.join(_symlink_dir, _name)
                         if not os.path.exists(_link):
                             os.symlink(_cxx_bin, _link)
@@ -695,13 +695,11 @@ def main():
         if append:
             env["PATH"] = env.get("PATH", "") + ":" + append
 
-    # Merge tset-provided lib dirs into LD_LIBRARY_PATH so dynamically
-    # linked dep libraries (e.g. libbz2.so, libexpat.so) are found at
-    # build time.  Scoped to the subprocess env dict — never poisons the
-    # host Python process (fixes pyexpat ABI mismatch with buckos expat).
-    # With sysroot ld-linux and per-package RPATH, buckos binaries find
-    # deps via RPATH.  Skip LD_LIBRARY_PATH to avoid contaminating host
-    # tools.
+    # Merge tset-provided lib dirs into LD_LIBRARY_PATH when no sysroot
+    # ld-linux.  With sysroot ld-linux, buckos binaries find deps via
+    # RPATH.  Packages whose build tools need non-sysroot libs at runtime
+    # should add those deps as host_deps (puts lib dirs in path-prepend
+    # → derive_lib_paths → LD_LIBRARY_PATH).
     if file_lib_dirs and not args.ld_linux:
         resolved = [os.path.abspath(d) for d in file_lib_dirs if os.path.isdir(d)]
         if resolved:
@@ -709,20 +707,16 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Derive GCONV_PATH, BISON_PKGDATADIR (and LD_LIBRARY_PATH when no
-    # sysroot ld-linux) from hermetic and path-prepend dirs so host tools
-    # find shared libraries and data.  With sysroot ld-linux and
-    # per-package RPATH, buckos binaries find deps via RPATH.  Skip
-    # LD_LIBRARY_PATH to avoid contaminating host tools.
-    _save_ldlp = env.get("LD_LIBRARY_PATH") if args.ld_linux else None
+    # Derive GCONV_PATH, BISON_PKGDATADIR, GETTEXTDATADIRS, and
+    # LD_LIBRARY_PATH from hermetic and path-prepend dirs.  Host_dep
+    # tools (gdk-pixbuf-pixdata, glib-compile-resources, etc.) use
+    # the sysroot ld-linux but need LD_LIBRARY_PATH for non-sysroot
+    # package libs (e.g. libglib-2.0.so from the glib package).
+    # derive_lib_paths excludes dirs containing libc.so.6 to prevent
+    # loading buckos glibc via LD_LIBRARY_PATH.
     if args.hermetic_path:
         derive_lib_paths(args.hermetic_path, env)
     derive_lib_paths(all_path_prepend, env)
-    if args.ld_linux:
-        if _save_ldlp is not None:
-            env["LD_LIBRARY_PATH"] = _save_ldlp
-        else:
-            env.pop("LD_LIBRARY_PATH", None)
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. mako for mesa) are found by custom generators.
@@ -898,6 +892,18 @@ def main():
             cmd.append(f"{key}={_resolve_env_paths(value)}")
         else:
             cmd.append(arg)
+
+    # Inject CC/CXX/AR as make command-line overrides for Makefile-only
+    # packages (skip_configure=True).  Kbuild-style Makefiles (busybox,
+    # pciutils) define CC=gcc internally, which overrides env CC.  Make
+    # command-line variables have highest precedence.  Skip this for
+    # autotools packages that ran configure — configure already captured
+    # CC and the Makefile uses the configured value.
+    if args.build_system == "make" and not os.path.exists(os.path.join(make_dir, "config.status")):
+        for _var in ("CC", "CXX", "AR"):
+            _val = env.get(_var, "")
+            if _val and not any(a.startswith(f"{_var}=") for a in args.make_args):
+                cmd.append(f"{_var}={_val}")
 
     # Override make's SHELL so recipe lines use buckos bash instead of
     # /bin/sh (which doesn't exist on remote execution workers).

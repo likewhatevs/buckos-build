@@ -71,6 +71,9 @@ package(
         "//packages/linux/dev-libs/python/markupsafe:markupsafe",
         "//packages/linux/dev-libs/python/packaging:packaging",
         "//packages/linux/dev-libs/python/pyyaml:pyyaml",
+        # GLSL parser needs bison/flex
+        "//packages/linux/dev-tools/dev-utils/bison:bison",
+        "//packages/linux/dev-tools/dev-utils/flex:flex",
     ],
 )
 

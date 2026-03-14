@@ -193,18 +193,7 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Derive GCONV_PATH, BISON_PKGDATADIR (and LD_LIBRARY_PATH when no
-    # sysroot ld-linux) from path-prepend dirs so host tools find shared
-    # libraries and data.  With sysroot ld-linux and per-package RPATH,
-    # buckos binaries find deps via RPATH.  Skip LD_LIBRARY_PATH to
-    # avoid contaminating host tools.
-    _save_ldlp = env.get("LD_LIBRARY_PATH") if args.ld_linux else None
     derive_lib_paths(all_path_prepend, env)
-    if args.ld_linux:
-        if _save_ldlp is not None:
-            env["LD_LIBRARY_PATH"] = _save_ldlp
-        else:
-            env.pop("LD_LIBRARY_PATH", None)
 
     # Apply extra environment variables first (toolchain flags like -march).
     for entry in args.extra_env:
@@ -291,6 +280,30 @@ def main():
     if _dep_python3:
         env["PYTHON"] = _dep_python3
         env["PYTHON3"] = _dep_python3
+
+    # Create gcc/cc symlinks so meson's native compiler detection (and
+    # cross-build code generators like fribidi gen.tab) find a build-
+    # machine C compiler on PATH.  The hermetic PATH only has the
+    # cross-compiler (x86_64-buckos-linux-gnu-gcc), not bare cc/gcc.
+    _cc_val = env.get("CC", "")
+    if _cc_val:
+        _cc_bin = os.path.abspath(_cc_val.split()[0])
+        if os.path.isfile(_cc_bin):
+            _symlink_dir = os.path.join(_build_dir_abs, ".cc-symlinks")
+            os.makedirs(_symlink_dir, exist_ok=True)
+            for _name in ("gcc", "cc", "clang"):
+                _link = os.path.join(_symlink_dir, _name)
+                if not os.path.exists(_link):
+                    os.symlink(_cc_bin, _link)
+            _cxx_val = env.get("CXX", "")
+            if _cxx_val:
+                _cxx_bin = os.path.abspath(_cxx_val.split()[0])
+                if os.path.isfile(_cxx_bin):
+                    for _name in ("g++", "c++", "clang++"):
+                        _link = os.path.join(_symlink_dir, _name)
+                        if not os.path.exists(_link):
+                            os.symlink(_cxx_bin, _link)
+            env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
 
     # Generate a meson native file pinning tool paths so meson embeds
     # the correct absolute paths in build.ninja from the start, rather

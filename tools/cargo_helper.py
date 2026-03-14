@@ -166,26 +166,75 @@ def main():
     if args.ld_linux:
         sysroot_lib_paths(args.ld_linux, env)
 
-    # Use the toolchain CC as the Rust linker so rustc invokes GCC
-    # instead of rust-lld.  Modern Rust passes -fuse-ld=lld to the
-    # linker driver, making GCC delegate to rust-lld which doesn't
-    # honour --sysroot and can't find CRT files on minimal hosts.
-    # Override with -fuse-ld=bfd so GCC invokes ld.bfd which does
-    # honour --sysroot (injected via GCC specs at unpack time).
-    # Use the toolchain CC as the Rust linker for all targets.
-    # Write to .cargo/config.toml so it overrides any upstream
-    # [target.*] sections that might set linker = "clang" or similar.
+    # Pass the FULL CC (with --sysroot and -specs) through RUSTFLAGS
+    # so rustc invokes GCC with the buckos specs file.  The specs
+    # inject sysroot ld-linux as the interpreter and sysroot lib dirs
+    # as DT_RPATH into every linked binary — build scripts and target
+    # alike.  Build scripts then use sysroot ld-linux + sysroot libc
+    # (matching pair), avoiding host glibc version mismatches.
+    # -fuse-ld=bfd forces ld.bfd which honours --sysroot (rust-lld
+    # does not).
     cc = env.get("CC", "")
-    cc_bin = cc.split()[0] if cc else ""
-    # Append buckos overrides to .cargo/config.toml, preserving any
-    # upstream config (vendor sources, target settings, etc.).
+    cc_parts = cc.split() if cc else []
+    cc_bin = cc_parts[0] if cc_parts else ""
+    if cc_bin:
+        link_args = " ".join(f"-C link-arg={flag}" for flag in cc_parts[1:])
+        rustflags = f'-C linker={cc_bin} {link_args} -C link-arg=-fuse-ld=bfd'.strip()
+        env["RUSTFLAGS"] = rustflags
+
+        # Create gcc/cc/clang symlinks so build scripts that invoke
+        # a C compiler directly (e.g. cc crate, openssl-sys) find
+        # one on the hermetic PATH.
+        _cc_abs = os.path.abspath(cc_bin)
+        if os.path.isfile(_cc_abs):
+            _scratch = os.environ.get("BUCK_SCRATCH_PATH", os.environ.get("TMPDIR", "/tmp"))
+            _symlink_dir = os.path.join(os.path.abspath(_scratch), "cc-symlinks")
+            os.makedirs(_symlink_dir, exist_ok=True)
+            for _name in ("gcc", "cc", "clang"):
+                _link = os.path.join(_symlink_dir, _name)
+                if not os.path.exists(_link):
+                    os.symlink(_cc_abs, _link)
+            _cxx_val = env.get("CXX", "")
+            if _cxx_val:
+                _cxx_abs = os.path.abspath(_cxx_val.split()[0])
+                if os.path.isfile(_cxx_abs):
+                    for _name in ("g++", "c++", "clang++"):
+                        _link = os.path.join(_symlink_dir, _name)
+                        if not os.path.exists(_link):
+                            os.symlink(_cxx_abs, _link)
+            env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
+
+    # Still write .cargo/config.toml for vendor_dir support; comment out
+    # any existing [build] or [target.x86_64-unknown-linux-gnu] sections
+    # that might conflict.
     cargo_config_dir = os.path.join(args.source_dir, ".cargo")
     os.makedirs(cargo_config_dir, exist_ok=True)
     config_path = os.path.join(cargo_config_dir, "config.toml")
-    with open(config_path, "a") as f:
+    existing_content = ""
+    if os.path.isfile(config_path):
+        with open(config_path) as f:
+            existing_content = f.read()
+    # Comment out any existing [build] or [target.*] sections to avoid conflicts.
+    if "[build]" in existing_content or "[target." in existing_content:
+        lines = existing_content.split("\n")
+        new_lines = []
+        in_section = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("[build]") or stripped.startswith("[target."):
+                in_section = True
+                new_lines.append("# " + line + "  # overridden by buckos")
+            elif stripped.startswith("["):
+                in_section = False
+                new_lines.append(line)
+            elif in_section:
+                new_lines.append("# " + line)
+            else:
+                new_lines.append(line)
+        existing_content = "\n".join(new_lines)
+    with open(config_path, "w") as f:
+        f.write(existing_content)
         f.write("\n# buckos overrides\n")
-        if cc_bin:
-            f.write(f'[build]\nrustflags = ["-C", "linker={cc_bin}", "-C", "link-arg=-fuse-ld=bfd"]\n\n')
         if args.vendor_dir:
             vendor_dir = os.path.abspath(args.vendor_dir)
             f.write(f'[source.crates-io]\nreplace-with = "vendored-sources"\n\n')

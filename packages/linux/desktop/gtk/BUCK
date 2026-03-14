@@ -73,6 +73,8 @@ package(
     ],
     host_deps = [
         "//packages/linux/desktop/gdk-pixbuf:gdk-pixbuf",
+        "//packages/linux/dev-libs/misc/gettext:gettext",
+        "//packages/linux/dev-libs/glib:glib",
     ],
 )
 

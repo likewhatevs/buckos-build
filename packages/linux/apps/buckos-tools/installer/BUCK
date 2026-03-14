@@ -26,6 +26,9 @@ cargo build --release -p buckos-installer
 mkdir -p "$OUT/usr/bin"
 install -m 0755 target/release/buckos-installer "$OUT/usr/bin/buckos-installer"
 """,
+    host_deps = [
+        "//packages/linux/lang/rust:rust",
+    ],
     deps = [
         "//packages/linux/desktop/qt:qt6-native",
         "//packages/linux/system/libs/crypto/openssl:openssl",

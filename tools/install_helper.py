@@ -419,20 +419,12 @@ def main():
             merged = ":".join(resolved)
             env["LD_LIBRARY_PATH"] = (merged + ":" + existing).rstrip(":") if existing else merged
 
-    # Derive GCONV_PATH, BISON_PKGDATADIR (and LD_LIBRARY_PATH when no
-    # sysroot ld-linux) from hermetic and path-prepend dirs so host tools
-    # find shared libraries and data.  With sysroot ld-linux and
-    # per-package RPATH, buckos binaries find deps via RPATH.  Skip
-    # LD_LIBRARY_PATH to avoid contaminating host tools.
-    _save_ldlp = env.get("LD_LIBRARY_PATH") if args.ld_linux else None
+    # Derive LD_LIBRARY_PATH, GETTEXTDATADIRS, BISON_PKGDATADIR from
+    # hermetic and path-prepend dirs.  Host_dep tools need non-sysroot
+    # package libs via LD_LIBRARY_PATH.
     if args.hermetic_path:
         derive_lib_paths(args.hermetic_path, env)
     derive_lib_paths(all_path_prepend, env)
-    if args.ld_linux:
-        if _save_ldlp is not None:
-            env["LD_LIBRARY_PATH"] = _save_ldlp
-        else:
-            env.pop("LD_LIBRARY_PATH", None)
 
     # Auto-detect Python site-packages from dep prefixes so build-time
     # Python modules (e.g. packaging for gdbus-codegen) are found.
@@ -476,6 +468,30 @@ def main():
     _buckos_bash = find_buckos_shell(env)
     if _buckos_bash:
         env["SHELL"] = _buckos_bash
+
+    # Create gcc/cc/g++/c++ symlinks so install-phase Makefiles that invoke
+    # bare `gcc` (e.g. busybox scripts/basic/fixdep) find the buckos compiler.
+    # Mirrors build_helper.py:666-689 and binary_install_helper.py.
+    _cc_val = env.get("CC", "")
+    if _cc_val:
+        _cc_bin = os.path.abspath(_cc_val.split()[0])
+        if os.path.isfile(_cc_bin):
+            _scratch = os.environ.get("BUCK_SCRATCH_PATH", os.environ.get("TMPDIR", "/tmp"))
+            _symlink_dir = os.path.join(os.path.abspath(_scratch), "cc-symlinks")
+            os.makedirs(_symlink_dir, exist_ok=True)
+            for _name in ("gcc", "cc", "clang"):
+                _link = os.path.join(_symlink_dir, _name)
+                if not os.path.exists(_link):
+                    os.symlink(_cc_bin, _link)
+            _cxx_val = env.get("CXX", "")
+            if _cxx_val:
+                _cxx_bin = os.path.abspath(_cxx_val.split()[0])
+                if os.path.isfile(_cxx_bin):
+                    for _name in ("g++", "c++", "clang++"):
+                        _link = os.path.join(_symlink_dir, _name)
+                        if not os.path.exists(_link):
+                            os.symlink(_cxx_bin, _link)
+            env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
 
     prefix = os.path.abspath(args.prefix)
     os.makedirs(prefix, exist_ok=True)
@@ -1011,6 +1027,15 @@ def main():
                 cmd.append(f"{key}={_resolve_env_paths(value)}")
             else:
                 cmd.append(arg)
+
+    # Inject CC/CXX/AR as make command-line overrides for Makefile-only
+    # packages (no config.status = no configure ran).  Same logic as
+    # build_helper.py.
+    if args.build_system == "make" and not os.path.exists(os.path.join(os.path.abspath(args.build_dir), "config.status")):
+        for _var in ("CC", "CXX", "AR"):
+            _val = env.get(_var, "")
+            if _val and not any(a.startswith(f"{_var}=") for a in args.make_args):
+                cmd.append(f"{_var}={_val}")
 
     # Override make's SHELL so recipe lines use buckos bash instead of
     # /bin/sh (which doesn't exist on remote execution workers).

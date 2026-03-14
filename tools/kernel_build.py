@@ -236,7 +236,7 @@ def main():
             resolved = []
             for t in tokens:
                 # Handle --sysroot=path and bare path tokens
-                for prefix in ("--sysroot=", "-specs=", "-I", "-L"):
+                for prefix in ("--sysroot=", "-specs=", "-I", "-L", "-Wl,-rpath-link,"):
                     if t.startswith(prefix):
                         path = t[len(prefix):]
                         if not os.path.isabs(path) and (path.startswith("buck-out") or os.path.exists(path)):

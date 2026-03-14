@@ -196,33 +196,52 @@ def _kernel_build_impl(ctx: AnalysisContext) -> list[Provider]:
     for arg in toolchain_ld_linux_args(ctx):
         cmd.add(arg)
 
-    # flex/bison/bc/elfutils/cpio needed by kernel build
-    for dep_attr in ("_flex", "_bison", "_bc", "_elfutils", "_cpio"):
+    # flex/bison/bc/elfutils/cpio/perl/openssl/zstd/rsync needed by kernel build
+    for dep_attr in ("_flex", "_bison", "_bc", "_elfutils", "_cpio", "_perl", "_openssl", "_zstd", "_rsync"):
         dep = getattr(ctx.attrs, dep_attr, None)
         if dep and PackageInfo in dep:
             cmd.add("--path-prepend", dep[PackageInfo].prefix.project("usr/bin"))
 
-    # Pass elfutils + zlib include/lib dirs to HOSTCC for objtool/resolve_btfids.
-    # elfutils' libelf depends on zlib — both must be on the link path.
+    # Pass elfutils + zlib + openssl include/lib dirs to HOSTCC for
+    # objtool/resolve_btfids.  elfutils' libelf has DT_NEEDED entries
+    # for libz, libbz2, and liblzma — the linker needs -Wl,-rpath-link
+    # to resolve transitive shared-lib deps (plain -L only helps -l
+    # library searches, not DT_NEEDED resolution).
     _host_cflags = []
     _host_ldflags = []
-    # elfutils: usr/lib (not lib64)
+    # elfutils: usr/lib (autotools default)
     elfutils_dep = ctx.attrs._elfutils
     if elfutils_dep and PackageInfo in elfutils_dep:
         elfutils_pfx = elfutils_dep[PackageInfo].prefix
         _host_cflags.append(cmd_args("-I", elfutils_pfx.project("usr/include"), delimiter = ""))
         _host_ldflags.append(cmd_args("-L", elfutils_pfx.project("usr/lib"), delimiter = ""))
-    # zlib: usr/lib64, elfutils + openssl: usr/lib
+        _host_ldflags.append(cmd_args("-Wl,-rpath-link,", elfutils_pfx.project("usr/lib"), delimiter = ""))
+    # zlib: usr/lib64
     zlib_dep = ctx.attrs._zlib
     if zlib_dep and PackageInfo in zlib_dep:
         zlib_pfx = zlib_dep[PackageInfo].prefix
         _host_cflags.append(cmd_args("-I", zlib_pfx.project("usr/include"), delimiter = ""))
         _host_ldflags.append(cmd_args("-L", zlib_pfx.project("usr/lib64"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-Wl,-rpath-link,", zlib_pfx.project("usr/lib64"), delimiter = ""))
+    # openssl: usr/lib
     openssl_dep = ctx.attrs._openssl
     if openssl_dep and PackageInfo in openssl_dep:
         openssl_pfx = openssl_dep[PackageInfo].prefix
         _host_cflags.append(cmd_args("-I", openssl_pfx.project("usr/include"), delimiter = ""))
         _host_ldflags.append(cmd_args("-L", openssl_pfx.project("usr/lib"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-Wl,-rpath-link,", openssl_pfx.project("usr/lib"), delimiter = ""))
+    # bzip2: usr/lib — transitive dep of elfutils' libelf
+    bzip2_dep = ctx.attrs._bzip2
+    if bzip2_dep and PackageInfo in bzip2_dep:
+        bzip2_pfx = bzip2_dep[PackageInfo].prefix
+        _host_ldflags.append(cmd_args("-L", bzip2_pfx.project("usr/lib"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-Wl,-rpath-link,", bzip2_pfx.project("usr/lib"), delimiter = ""))
+    # xz/lzma: usr/lib — transitive dep of elfutils' libelf
+    xz_dep = ctx.attrs._xz
+    if xz_dep and PackageInfo in xz_dep:
+        xz_pfx = xz_dep[PackageInfo].prefix
+        _host_ldflags.append(cmd_args("-L", xz_pfx.project("usr/lib"), delimiter = ""))
+        _host_ldflags.append(cmd_args("-Wl,-rpath-link,", xz_pfx.project("usr/lib"), delimiter = ""))
     if _host_cflags:
         _hcf_val = cmd_args(delimiter = " ")
         for _f in _host_cflags:
@@ -294,8 +313,23 @@ _kernel_build_rule = rule(
         "_openssl": attrs.default_only(
             attrs.exec_dep(default = "//packages/linux/system/libs/crypto/openssl:openssl"),
         ),
+        "_bzip2": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/compression/bzip2:bzip2"),
+        ),
+        "_xz": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/compression/xz:xz"),
+        ),
+        "_zstd": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/libs/compression/zstd:zstd"),
+        ),
         "_cpio": attrs.default_only(
             attrs.exec_dep(default = "//packages/linux/system/libs/cpio:cpio"),
+        ),
+        "_perl": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/lang/perl:perl"),
+        ),
+        "_rsync": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/system/apps/rsync:rsync"),
         ),
     } | TOOLCHAIN_ATTRS,
 )

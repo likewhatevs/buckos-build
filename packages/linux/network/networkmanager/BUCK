@@ -158,4 +158,7 @@ package(
         "//packages/linux/system/libs/utility/gmp:gmp",
         "//packages/linux/system/libs/compression/zstd:zstd",
     ],
+    host_deps = [
+        "//packages/linux/dev-libs/misc/gettext:gettext",
+    ],
 )

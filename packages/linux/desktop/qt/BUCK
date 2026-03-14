@@ -110,6 +110,7 @@ fi
         "-DINSTALL_TRANSLATIONSDIR=share/qt6/translations",
         # Force system libraries
         "-DQT_FEATURE_relocatable=OFF",
+        "-DQT_FEATURE_gssapi=OFF",
         # Enable fontconfig so Qt can find system fonts
         # Qt fontconfig REQUIRES system_freetype to be ON - the feature condition is:
         # "NOT APPLE AND NOT WIN32 AND QT_FEATURE_system_freetype AND Fontconfig_FOUND"
@@ -182,6 +183,25 @@ fi
         "-DBUILD_qtwebsockets=OFF",
     ],
 
+    # Qt6 builds tools (qlalr, moc, rcc) during compilation that link
+    # against deps.  host_deps puts their lib dirs in LD_LIBRARY_PATH
+    # so tools find shared libs at runtime.
+    host_deps = [
+        "//packages/linux/system/libs/utility/icu:icu-native",
+        "//packages/linux/dev-libs/glib:glib",
+        "//packages/linux/dev-libs/misc/double-conversion:double-conversion",
+        "//packages/linux/system/libs/utility/pcre2:pcre2",
+        "//packages/linux/system/libs/data/expat:expat",
+        "//packages/linux/system/libs/utility/libffi:libffi",
+        "//packages/linux/desktop/mesa:mesa",
+        "//packages/linux/graphics/libglvnd:libglvnd",
+        "//packages/linux/system/libs/font/freetype:freetype",
+        "//packages/linux/system/libs/font/fontconfig:fontconfig",
+        "//packages/linux/desktop/libdrm:libdrm",
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+        "//packages/linux/system/libs/compression/zstd:zstd",
+    ],
     deps = [
         "//packages/linux/core/zlib:zlib",
         "//packages/linux/dev-libs/glib:glib",

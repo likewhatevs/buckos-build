@@ -4,7 +4,7 @@ Image rules: iso_image, raw_disk_image, stage3_tarball.
 Assembly rules that take rootfs/kernel/initramfs deps and produce images.
 """
 
-load("//defs:providers.bzl", "IsoImageInfo", "KernelInfo", "Stage3Info", "get_kernel_image")
+load("//defs:providers.bzl", "IsoImageInfo", "KernelInfo", "PackageInfo", "Stage3Info", "get_kernel_image")
 load("//defs:host_tools.bzl", "host_tool_path_args")
 load("//defs:toolchain_helpers.bzl", "TOOLCHAIN_ATTRS", "toolchain_ld_linux_args", "toolchain_path_args")
 
@@ -100,6 +100,17 @@ def _iso_image_impl(ctx: AnalysisContext) -> list[Provider]:
     for arg in host_tool_path_args(ctx):
         cmd.add(arg)
 
+    # xorriso binary from libisoburn
+    xorriso_dep = ctx.attrs._xorriso
+    if xorriso_dep and PackageInfo in xorriso_dep:
+        cmd.add("--path-prepend", xorriso_dep[PackageInfo].prefix.project("usr/bin"))
+    # Runtime shared libs (libisofs, libburn) — project usr/lib for
+    # LD_LIBRARY_PATH derivation so xorriso finds them at runtime.
+    for _iso_lib_attr in ("_libisofs", "_libburn"):
+        _dep = getattr(ctx.attrs, _iso_lib_attr, None)
+        if _dep and PackageInfo in _dep:
+            cmd.add("--path-prepend", _dep[PackageInfo].prefix.project("usr/lib"))
+
     ctx.actions.run(cmd, category = "iso", identifier = ctx.attrs.name, allow_cache_upload = True)
 
     return [
@@ -128,6 +139,19 @@ _iso_image_rule = rule(
         "labels": attrs.list(attrs.string(), default = []),
         "_iso_tool": attrs.default_only(
             attrs.exec_dep(default = "//tools:iso_helper"),
+        ),
+        # xorriso (from libisoburn) is required for ISO creation.
+        # libisofs and libburn are transitive deps whose shared libs
+        # xorriso loads at runtime — they need their lib dirs on
+        # LD_LIBRARY_PATH via --path-prepend derivation.
+        "_xorriso": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-libs/iso/libisoburn:libisoburn"),
+        ),
+        "_libisofs": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-libs/iso/libisofs:libisofs"),
+        ),
+        "_libburn": attrs.default_only(
+            attrs.exec_dep(default = "//packages/linux/dev-libs/iso/libburn:libburn"),
         ),
     } | TOOLCHAIN_ATTRS,
 )

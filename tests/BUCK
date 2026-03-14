@@ -445,14 +445,14 @@ buckos_test(
     test = "verify_iso_boot.py",
     deps = [
         "//packages/linux/kernel/buckos-kernel:buckos-kernel",
-        "//packages/linux/system:buckos-initramfs",
+        "//packages/linux/system:buckos-live-initramfs-busybox",
         "//packages/linux/system:buckos-minimal-iso",
         "//packages/linux/emulation/hypervisors/qemu:qemu",
         ":qemu-env",
     ],
     env = {
         "KERNEL": "$(location //packages/linux/kernel/buckos-kernel:buckos-kernel)",
-        "INITRAMFS": "$(location //packages/linux/system:buckos-initramfs)",
+        "INITRAMFS": "$(location //packages/linux/system:buckos-live-initramfs-busybox)",
         "ISO": "$(location //packages/linux/system:buckos-minimal-iso)",
         "QEMU_DIR": "$(location //packages/linux/emulation/hypervisors/qemu:qemu)",
         "RUN_ENV": "$(location :qemu-env)",
@@ -466,14 +466,14 @@ buckos_test(
     test = "verify_iso_boot.py",
     deps = [
         "//tests/fixtures:test-kernel",
-        "//packages/linux/system:buckos-initramfs",
+        "//packages/linux/system:buckos-live-initramfs-busybox",
         "//tests/fixtures:test-minimal-iso",
         "//packages/linux/emulation/hypervisors/qemu:qemu",
         ":qemu-env",
     ],
     env = {
         "KERNEL": "$(location //tests/fixtures:test-kernel)",
-        "INITRAMFS": "$(location //packages/linux/system:buckos-initramfs)",
+        "INITRAMFS": "$(location //packages/linux/system:buckos-live-initramfs-busybox)",
         "ISO": "$(location //tests/fixtures:test-minimal-iso)",
         "QEMU_DIR": "$(location //packages/linux/emulation/hypervisors/qemu:qemu)",
         "RUN_ENV": "$(location :qemu-env)",

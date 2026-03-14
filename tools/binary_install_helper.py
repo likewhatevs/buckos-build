@@ -272,6 +272,29 @@ def main():
         write_stub_script(os.path.join(stub_dir, "makeinfo"))
         env["PATH"] = stub_dir + ":" + env.get("PATH", "")
 
+    # Create gcc/cc/g++/c++ symlinks so install scripts that invoke bare
+    # `gcc` (e.g. libcap _makenames, busybox gcc-version.sh) find the
+    # buckos compiler.  Mirrors build_helper.py:666-689.
+    _cc_val = env.get("CC", "")
+    if _cc_val:
+        _cc_bin = os.path.abspath(_cc_val.split()[0])
+        if os.path.isfile(_cc_bin):
+            _symlink_dir = os.path.join(workdir, "cc-symlinks")
+            os.makedirs(_symlink_dir, exist_ok=True)
+            for _name in ("gcc", "cc", "clang"):
+                _link = os.path.join(_symlink_dir, _name)
+                if not os.path.exists(_link):
+                    os.symlink(_cc_bin, _link)
+            _cxx_val = env.get("CXX", "")
+            if _cxx_val:
+                _cxx_bin = os.path.abspath(_cxx_val.split()[0])
+                if os.path.isfile(_cxx_bin):
+                    for _name in ("g++", "c++", "clang++"):
+                        _link = os.path.join(_symlink_dir, _name)
+                        if not os.path.exists(_link):
+                            os.symlink(_cxx_bin, _link)
+            env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
+
     # Copy source to writable directory
     if os.path.isdir(source_dir):
         os.makedirs(workdir, exist_ok=True)
