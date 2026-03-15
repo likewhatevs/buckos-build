@@ -105,6 +105,9 @@ EXTENDED_TOOL_PACKAGES = [
     "//packages/linux/dev-tools/build-systems/ninja:ninja",
     "//packages/linux/dev-tools/build-systems/meson:meson",
 
+    # Compiler cache
+    "//packages/linux/dev-tools/dev-utils/ccache:ccache",
+
     # Languages
     "//packages/linux/lang/rust:rust",
     "//packages/linux/lang/go:go",

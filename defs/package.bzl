@@ -74,6 +74,39 @@ _HAS_PREBUILT_SEED = bool(
 )
 _SOURCE_MODE = not _HAS_PREBUILT_SEED
 
+# ── Compiler cache configuration (read once at module load) ───────────
+_CACHE_MODE = read_config("buckos.cache", "mode", "enabled")
+_CACHE_LOCATION = read_config("buckos.cache", "location", "internal")
+_CCACHE_SIZE = read_config("buckos.cache", "ccache_size", "100G")
+_SCCACHE_SIZE = read_config("buckos.cache", "sccache_size", "100G")
+_CACHE_ENABLED = _CACHE_MODE == "enabled"
+
+def _cache_env(build_rule, name = ""):
+    """Return env dict entries for ccache/sccache when caching is enabled."""
+    if not _CACHE_ENABLED:
+        return {}
+    _CACHE_BLOCKLIST = ("ccache", "sccache")
+    if name in _CACHE_BLOCKLIST:
+        return {}
+    ccache_dir = ".buckos/cache/ccache" if _CACHE_LOCATION == "internal" else "~/.buckos/caches/ccache"
+    sccache_dir = ".buckos/cache/sccache" if _CACHE_LOCATION == "internal" else "~/.buckos/caches/sccache"
+    env = {
+        "BUCKOS_CCACHE": "1",
+        "CCACHE_DIR": ccache_dir,
+        "CCACHE_COMPILERCHECK": "content",
+        "CCACHE_NOHASHDIR": "1",
+        "CCACHE_MAXSIZE": _CCACHE_SIZE,
+        "CCACHE_SLOPPINESS": "pch_defines,time_macros,include_file_mtime",
+    }
+    if build_rule in ("cargo", "mozbuild"):
+        env.update({
+            "BUCKOS_SCCACHE": "1",
+            "SCCACHE_DIR": sccache_dir,
+            "SCCACHE_CACHE_SIZE": _SCCACHE_SIZE,
+            "SCCACHE_IDLE_TIMEOUT": "0",
+        })
+    return env
+
 
 def _merge_private_registry(name, patches, configure_args, extra_cflags):
     """Merge public args with private patch registry entries.
@@ -281,6 +314,8 @@ def package(
         "coreutils", "findutils", "sed", "gawk", "grep",
         "diffutils", "patch", "tar", "gzip", "xz", "bzip2",
         "m4", "pkg-config", "meson", "ninja", "cmake",
+        # Compiler caches (prevent self-cycles)
+        "ccache", "sccache",
         # Deps of the above (would create cycles if injected)
         "zlib", "expat", "libffi", "ncurses", "readline", "pcre2",
         "sqlite",  # dep of python-host (_sqlite3)
@@ -324,6 +359,20 @@ def package(
                 "//packages/linux/dev-tools/build-systems/cmake:cmake",
                 "//packages/linux/dev-tools/build-systems/ninja:ninja",
             ])
+        # Compiler caches when [buckos.cache] mode = enabled.
+        # ccache for C/C++ (all configurable rules), sccache for Rust.
+        # Separate blocklist for cache tools — ccache's own deps (zstd)
+        # must not get ccache injected (cycle), but still get their
+        # normal build tools (meson, ninja, etc.).
+        _CACHE_BLOCKLIST = _TOOL_BLOCKLIST + ("zstd",)
+        if _CACHE_ENABLED and name not in _CACHE_BLOCKLIST:
+            _auto_tool_deps.append(
+                "//packages/linux/dev-tools/dev-utils/ccache:ccache",
+            )
+        if _CACHE_ENABLED and name not in _CACHE_BLOCKLIST and build_rule in ("cargo", "mozbuild"):
+            _auto_tool_deps.append(
+                "//packages/linux/dev-tools/dev-utils/sccache:sccache",
+            )
 
     # Auto-inject build host tools.  In source mode, tools must be built
     # as exec_deps since the host may not have them.  With a prebuilt
@@ -444,6 +493,15 @@ def package(
 
     _all_labels = _auto_labels + build_kwargs.pop("labels", [])
     build_kwargs["labels"] = _all_labels
+
+    # -- Inject compiler cache env vars (ccache/sccache) ---------------------
+    _cache = _cache_env(build_rule, name)
+    if _cache:
+        _existing_env = build_kwargs.pop("env", {})
+        # Cache env vars go first, package-specific env can override
+        _merged_env = dict(_cache)
+        _merged_env.update(_existing_env)
+        build_kwargs["env"] = _merged_env
 
     # -- 4. Create the build target -----------------------------------------
     build_target = name + "-build"

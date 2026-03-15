@@ -19,6 +19,31 @@ TARGET_TRIPLE = "x86_64-buckos-linux-gnu"
 
 # ── Shared helpers ───────────────────────────────────────────────────
 
+# ── Compiler cache for bootstrap (opportunistic host ccache) ─────────
+_BOOTSTRAP_CACHE_MODE = read_config("buckos.cache", "mode", "enabled")
+_BOOTSTRAP_CACHE_LOCATION = read_config("buckos.cache", "location", "internal")
+_BOOTSTRAP_CCACHE_SIZE = read_config("buckos.cache", "ccache_size", "100G")
+
+def _bootstrap_cache_env():
+    """Return cache env dict for bootstrap builds.
+
+    Uses the same buckconfig-controlled settings as normal builds
+    (CCACHE_DIR, COMPILERCHECK, etc.) but relies on the host's ccache
+    binary.  If ccache isn't on the host PATH, setup_ccache_symlinks()
+    in the helper is a no-op — no error.
+    """
+    if _BOOTSTRAP_CACHE_MODE != "enabled":
+        return {}
+    ccache_dir = ".buckos/cache/ccache" if _BOOTSTRAP_CACHE_LOCATION == "internal" else "~/.buckos/caches/ccache"
+    return {
+        "BUCKOS_CCACHE": "1",
+        "CCACHE_DIR": ccache_dir,
+        "CCACHE_COMPILERCHECK": "content",
+        "CCACHE_NOHASHDIR": "1",
+        "CCACHE_MAXSIZE": _BOOTSTRAP_CCACHE_SIZE,
+        "CCACHE_SLOPPINESS": "pch_defines,time_macros,include_file_mtime",
+    }
+
 def _env_args(cmd, env_dict):
     """Append --env KEY=VALUE flags to a cmd_args."""
     for k, v in env_dict.items():
@@ -27,6 +52,8 @@ def _env_args(cmd, env_dict):
 def _toolchain_env(ctx):
     """Build environment dict from BootstrapStageInfo or host_cc attrs."""
     env = {}
+    # Compiler cache env first — toolchain env can override if needed.
+    env.update(_bootstrap_cache_env())
     if getattr(ctx.attrs, "prev_stage", None) and BootstrapStageInfo in ctx.attrs.prev_stage:
         stage = ctx.attrs.prev_stage[BootstrapStageInfo]
         env["CC"] = stage.cc

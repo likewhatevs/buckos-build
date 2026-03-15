@@ -1,0 +1,27 @@
+load("//defs:package.bzl", "package")
+
+# sccache — shared compilation cache for C/C++ and Rust.
+# Built with no remote backends (local disk cache only) to minimize
+# deps and build time.  The default "all" feature enables S3/GCS/Redis
+# etc. which pull in network crates we don't need.
+#
+# TODO: fill in correct version + sha256 once archive is downloaded.
+# Use: curl -sL <url> | sha256sum
+package(
+    build_rule = "cargo",
+    name = "sccache",
+    version = "0.10.0",
+    url = "https://github.com/mozilla/sccache/archive/refs/tags/v0.10.0.tar.gz",
+    sha256 = "2c9f82c43ce6a1b1d9b34f029ce6862bedc2f01deff45cde5dffc079deeba801",
+    description = "Shared compilation cache for C/C++ and Rust",
+    homepage = "https://github.com/mozilla/sccache",
+    license = "Apache-2.0",
+    cargo_args = ["--no-default-features"],
+    deps = [
+        "//packages/linux/system/libs/crypto/openssl:openssl",
+        "//packages/linux/core/zlib:zlib",
+    ],
+    host_deps = [
+        "//packages/linux/lang/rust:rust",
+    ],
+)

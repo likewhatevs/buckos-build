@@ -68,6 +68,92 @@ def clean_env():
     return env
 
 
+def apply_cache_config(env):
+    """Override determinism pins based on BUCKOS_CCACHE/BUCKOS_SCCACHE env vars.
+
+    Must be called after extra_env is applied to the env dict so
+    BUCKOS_CCACHE/BUCKOS_SCCACHE are present.  Resolves relative/~
+    paths for cache dirs and creates them if needed.
+    """
+    if env.get("BUCKOS_CCACHE") == "1":
+        env.pop("CCACHE_DISABLE", None)
+        ccache_dir = env.get("CCACHE_DIR", "")
+        if ccache_dir:
+            ccache_dir = os.path.abspath(os.path.expanduser(ccache_dir))
+            env["CCACHE_DIR"] = ccache_dir
+            os.makedirs(ccache_dir, exist_ok=True)
+        # Prefix CC/CXX with ccache so full-path compiler invocations
+        # are cached.  PATH symlink masquerading doesn't work for buckos
+        # because autotools records the full absolute CC path.
+        # apply_cache_config runs AFTER extra_env but BEFORE symlink
+        # creation, so helpers that do cc.split()[0] for symlinks will
+        # get "ccache" — they should skip symlink creation when CC
+        # starts with ccache (the real gcc is still findable via the
+        # second token).
+        # Skip CC/CXX prefixing for cmake (uses CMAKE_COMPILER_LAUNCHER).
+        if env.get("_BUCKOS_CCACHE_NO_CC_PREFIX") != "1":
+            _ccache_bin = shutil.which("ccache", path=env.get("PATH", ""))
+            if _ccache_bin:
+                for _var in ("CC", "CXX"):
+                    _val = env.get(_var, "")
+                    if _val and "ccache" not in _val:
+                        env[_var] = _ccache_bin + " " + _val
+    if env.get("BUCKOS_SCCACHE") == "1":
+        # Set RUSTC_WRAPPER unconditionally — sccache will be on PATH
+        # by the time cargo runs (added via --path-prepend from host_deps).
+        # sccache is in _CACHE_BLOCKLIST so it never gets BUCKOS_SCCACHE=1
+        # for its own build (no self-cycle).
+        env["RUSTC_WRAPPER"] = "sccache"
+        env["CARGO_BUILD_RUSTC_WRAPPER"] = "sccache"
+        sccache_dir = env.get("SCCACHE_DIR", "")
+        if sccache_dir:
+            sccache_dir = os.path.abspath(os.path.expanduser(sccache_dir))
+            env["SCCACHE_DIR"] = sccache_dir
+            os.makedirs(sccache_dir, exist_ok=True)
+
+
+def setup_ccache_symlinks(env, scratch_dir):
+    """Create ccache masquerade symlinks and prepend to PATH.
+
+    When BUCKOS_CCACHE=1, creates a directory with gcc/cc/g++/etc.
+    symlinks pointing to ccache.  This dir is prepended to PATH BEFORE
+    the real gcc symlink dir.  ccache's find_non_ccache_executable()
+    skips itself by inode and finds the real gcc further down PATH.
+
+    Also creates symlinks for cross-prefixed compiler names found in
+    CC/CXX env vars (e.g. x86_64-buckos-linux-gnu-gcc) so ccache
+    intercepts cross-compilation during bootstrap.
+
+    Returns the ccache symlink dir path, or None if ccache is disabled
+    or ccache is not found on PATH.
+    """
+    if env.get("BUCKOS_CCACHE") != "1":
+        return None
+    ccache_bin = shutil.which("ccache", path=env.get("PATH", ""))
+    if not ccache_bin:
+        return None
+    ccache_dir = os.path.join(os.path.abspath(scratch_dir), "ccache-symlinks")
+    os.makedirs(ccache_dir, exist_ok=True)
+    names = ["gcc", "cc", "clang", "g++", "c++", "clang++"]
+    # Add cross-prefixed names from CC/CXX only if the real compiler is
+    # already on PATH under that name (bootstrap).  In non-bootstrap
+    # builds, CC is a full path — masquerading the cross name breaks
+    # sub-configures that find the ccache symlink but ccache can't
+    # locate the real compiler.
+    for var in ("CC", "CXX"):
+        val = env.get(var, "")
+        if val:
+            basename = os.path.basename(val.split()[0])
+            if basename not in names and shutil.which(basename, path=env.get("PATH", "")):
+                names.append(basename)
+    for name in names:
+        link = os.path.join(ccache_dir, name)
+        if not os.path.exists(link):
+            os.symlink(ccache_bin, link)
+    env["PATH"] = ccache_dir + ":" + env.get("PATH", "")
+    return ccache_dir
+
+
 def _has_unsafe_chars(name):
     """True if *name* contains characters Buck2 cannot relativize."""
     return any(ord(c) < 32 or ord(c) == 127 or c == '\\' for c in name)
@@ -369,6 +455,14 @@ def find_buckos_shell(env):
             if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
                 return candidate
     return None
+
+
+def preferred_linker_flag(env):
+    """Return -fuse-ld=mold if ld.mold is on PATH, else empty string."""
+    for d in env.get("PATH", "").split(":"):
+        if d and os.path.isfile(os.path.join(d, "ld.mold")):
+            return "-fuse-ld=mold"
+    return ""
 
 
 def _build_path_lookup(env):

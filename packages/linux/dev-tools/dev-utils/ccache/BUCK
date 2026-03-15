@@ -5,10 +5,6 @@ package(
     build_rule = "cmake",
     name = "ccache",
     version = "4.9.1",
-    use_configure = {
-        "redis": ("-DENABLE_REDIS=ON", "-DENABLE_REDIS=OFF"),
-        "static-c++": ("-DENABLE_STATIC_C++=ON", "-DENABLE_STATIC_C++=OFF"),
-    },
     url = "https://github.com/ccache/ccache/releases/download/v4.9.1/ccache-4.9.1.tar.xz",
     sha256 = "4c03bc840699127d16c3f0e6112e3f40ce6a230d5873daa78c60a59c7ef59d25",
     description = "Fast C/C++ compiler cache",
@@ -19,5 +15,13 @@ package(
         "-DENABLE_DOCUMENTATION=OFF",
         "-DENABLE_TESTING=OFF",
     ],
-    deps = [],
+    deps = [
+        "//packages/linux/system/libs/compression/zstd:zstd",
+    ],
+    # ccache is in _TOOL_BLOCKLIST (prevents self-cycle), so cmake/ninja
+    # aren't auto-injected — declare them explicitly.
+    host_deps = [
+        "//packages/linux/dev-tools/build-systems/cmake:cmake",
+        "//packages/linux/dev-tools/build-systems/ninja:ninja",
+    ],
 )

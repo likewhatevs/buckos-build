@@ -42,6 +42,9 @@ __pycache__/
 Thumbs.db
 .buckconfig.local
 
+# Compiler cache (ccache/sccache)
+.buckos/
+
 # Prebuilt toolchain archives (build artifacts, not source)
 prebuilt/*.tar.*
 tc/prebuilt/*.tar.*

@@ -49,11 +49,9 @@ COMMON_PACKAGE_ATTRS = {
         attrs.exec_dep(default = "//tools:patch_helper"),
     ),
 
-    # Base host tools: fundamental build prerequisites that every package
-    # needs (shell, coreutils, make, etc.).  These are exec_deps so they
-    # provide hermetic PATH entries.  Currently empty — auto_tool_deps in
-    # package.bzl handles injection in source mode; seed mode provides
-    # tools via hermetic PATH.
+    # Base host tools: build prerequisites available to every package.
+    # ccache is injected via _auto_tool_deps in package.bzl where the
+    # blocklist check prevents self-cycles.
     "_base_host_tools": attrs.default_only(attrs.list(attrs.exec_dep(), default = [])),
 } | TOOLCHAIN_ATTRS
 
