@@ -21,7 +21,7 @@ import subprocess
 import sys
 import json
 
-from _env import clean_env, find_dep_python3, sanitize_filenames, sanitize_global_env, sysroot_lib_paths, write_pkg_config_wrapper
+from _env import apply_cache_config, clean_env, find_buckos_shell, find_dep_python3, preferred_linker_flag, sanitize_filenames, sanitize_global_env, setup_ccache_symlinks, sysroot_lib_paths, write_pkg_config_wrapper
 
 
 # ── Portable path placeholders (cross-machine cache) ─────────────────
@@ -245,12 +245,13 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
     env["MOZBUILD_STATE_PATH"] = mozbuild_state
     env["NO_MERCURIAL_SETUP_CHECK"] = "1"
 
-    # Don't let mach use system Python packages
-    env["MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE"] = "pip"
+    # Don't let mach pip-install native Python packages (glean-sdk etc.)
+    # — they hang trying to download from PyPI in a hermetic build.
+    # Telemetry is disabled via MACH_NO_TELEMETRY=1 so glean isn't needed.
+    env["MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE"] = "none"
 
-    # Disable compiler caches
-    env["CCACHE_DISABLE"] = "1"
-    env["CARGO_BUILD_RUSTC_WRAPPER"] = ""
+    # Safety net: prevent pip from accessing the internet at all.
+    env["PIP_NO_INDEX"] = "1"
 
     # Prevent mach from discovering host rustup/cargo via $HOME/.cargo/bin.
     # mach's rust_search_path explicitly expands $CARGO_HOME (or ~/.cargo)
@@ -342,6 +343,11 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
             if key:
                 env[key] = value
 
+    apply_cache_config(env)
+
+    # ccache masquerade symlinks for mach's compiler invocations.
+    setup_ccache_symlinks(env, args.work_dir)
+
     # Mozconfig
     mozconfig = os.path.join(src_dir, "mozconfig")
     env["MOZCONFIG"] = mozconfig
@@ -351,6 +357,34 @@ def _common_env(args, src_dir, pkg_config_bin_dir):
     # buckos-native dep binaries.
     if hasattr(args, 'ld_linux') and args.ld_linux:
         sysroot_lib_paths(args.ld_linux, env)
+        # Cargo build scripts (bindgen) dlopen libclang.so which requires
+        # sysroot glibc.  Build scripts are HOST compilations — RUSTFLAGS
+        # only affects TARGET.  Set CARGO_TARGET_*_LINKER to a wrapper
+        # that calls gcc with sysroot/specs, giving build scripts sysroot
+        # ld-linux + DT_RPATH.
+        _sysroot = os.path.dirname(os.path.dirname(os.path.abspath(args.ld_linux)))
+        _specs = os.path.join(_sysroot, "..", "..", "..", "..", "gcc-link.specs")
+        if os.path.isfile(_specs):
+            _specs = os.path.abspath(_specs)
+            _gcc_bin_dir = os.path.join(_sysroot, "..", "..", "bin")
+            _gcc = None
+            if os.path.isdir(_gcc_bin_dir):
+                for _f in os.listdir(_gcc_bin_dir):
+                    if _f.endswith("-gcc") and os.path.isfile(os.path.join(_gcc_bin_dir, _f)):
+                        _gcc = os.path.abspath(os.path.join(_gcc_bin_dir, _f))
+                        break
+            if _gcc:
+                _shell = find_buckos_shell(env)
+                if _shell:
+                    _wrapper = os.path.join(args.work_dir, "buckos-cargo-linker")
+                    _ld_flag = preferred_linker_flag(env)
+                    _fuse_ld = _ld_flag if _ld_flag else ""
+                    with open(_wrapper, "w") as f:
+                        f.write(f"#!{_shell}\n")
+                        f.write(f'exec "{_gcc}" "--sysroot={_sysroot}" '
+                                f'"-specs={_specs}" {_fuse_ld} "$@"\n')
+                    os.chmod(_wrapper, 0o755)
+                    env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER"] = _wrapper
 
     return env
 
@@ -569,6 +603,32 @@ def phase_full(args):
 
     _dep_dirs = [_resolve(d) for d in args.dep_base_dirs.split(":") if d] if args.dep_base_dirs else []
     _write_mozconfig(os.path.join(src_dir, "mozconfig"), args.mozconfig_options, _dep_dirs)
+
+    # Cargo build scripts need sysroot ld-linux to dlopen libclang.so
+    # (which requires sysroot glibc).  Mach records cargo's absolute
+    # path in config.status during configure, so the wrapper must be on
+    # PATH BEFORE configure runs.  The wrapper injects -Z host-config
+    # to set the build-script linker to buckos gcc with sysroot specs.
+    _cargo_linker = env.get("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER")
+    if _cargo_linker:
+        import shutil as _shutil
+        _real_cargo = _shutil.which("cargo", path=env.get("PATH", ""))
+        _shell = find_buckos_shell(env)
+        if _real_cargo and _shell:
+            _cargo_dir = os.path.join(args.work_dir, "cargo-wrapper-bin")
+            os.makedirs(_cargo_dir, exist_ok=True)
+            _cargo_wrapper = os.path.join(_cargo_dir, "cargo")
+            with open(_cargo_wrapper, "w") as f:
+                f.write(f"#!{_shell}\n")
+                f.write(f'export __CARGO_TEST_CHANNEL_OVERRIDE_DO_NOT_USE_THIS=nightly\n')
+                f.write(f'exec "{_real_cargo}" '
+                        f'-Z target-applies-to-host '
+                        f'-Z host-config '
+                        f'--config target-applies-to-host=false '
+                        f'--config \'host.linker="{_cargo_linker}"\' '
+                        f'"$@"\n')
+            os.chmod(_cargo_wrapper, 0o755)
+            env["PATH"] = _cargo_dir + ":" + env.get("PATH", "")
 
     _run(["python3", "./mach", "configure"], cwd=src_dir, env=env)
     _run(["python3", "./mach", "build"], cwd=src_dir, env=env)

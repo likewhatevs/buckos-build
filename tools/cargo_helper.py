@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 
-from _env import clean_env, sysroot_lib_paths
+from _env import apply_cache_config, clean_env, preferred_linker_flag, setup_ccache_symlinks, sysroot_lib_paths
 
 
 def _can_unshare_net():
@@ -110,6 +110,9 @@ def main():
         key, _, value = entry.partition("=")
         if key:
             env[key] = _resolve_env_paths(value)
+
+    apply_cache_config(env)
+
     if args.hermetic_path:
         env["PATH"] = ":".join(os.path.abspath(p) for p in args.hermetic_path)
         # Derive LD_LIBRARY_PATH from hermetic bin dirs so dynamically
@@ -172,14 +175,19 @@ def main():
     # as DT_RPATH into every linked binary — build scripts and target
     # alike.  Build scripts then use sysroot ld-linux + sysroot libc
     # (matching pair), avoiding host glibc version mismatches.
-    # -fuse-ld=bfd forces ld.bfd which honours --sysroot (rust-lld
-    # does not).
+    # -fuse-ld=mold uses the mold linker (on PATH via host-tools).
+    # rust-lld does not honour --sysroot.
     cc = env.get("CC", "")
     cc_parts = cc.split() if cc else []
+    # Skip ccache prefix — the real compiler binary is the next token.
+    if cc_parts and os.path.basename(cc_parts[0]) == "ccache":
+        cc_parts = cc_parts[1:]
     cc_bin = cc_parts[0] if cc_parts else ""
     if cc_bin:
         link_args = " ".join(f"-C link-arg={flag}" for flag in cc_parts[1:])
-        rustflags = f'-C linker={cc_bin} {link_args} -C link-arg=-fuse-ld=bfd'.strip()
+        _ld_flag = preferred_linker_flag(env)
+        _fuse_ld = f'-C link-arg={_ld_flag}' if _ld_flag else ''
+        rustflags = f'-C linker={cc_bin} {link_args} {_fuse_ld}'.strip()
         env["RUSTFLAGS"] = rustflags
 
         # Create gcc/cc/clang symlinks so build scripts that invoke
@@ -203,6 +211,39 @@ def main():
                         if not os.path.exists(_link):
                             os.symlink(_cxx_abs, _link)
             env["PATH"] = _symlink_dir + ":" + env.get("PATH", "")
+
+        # ccache masquerade symlinks — prepended before gcc symlinks.
+        setup_ccache_symlinks(env, _scratch)
+
+        # Set CARGO_HOST_LINKER so build scripts use buckos gcc with
+        # sysroot specs.  When cargo is invoked with --target, RUSTFLAGS
+        # linker only applies to target, not build scripts.
+        if args.ld_linux:
+            _sysroot = os.path.dirname(os.path.dirname(os.path.abspath(args.ld_linux)))
+            _specs = os.path.join(_sysroot, "..", "..", "..", "..", "gcc-link.specs")
+            if os.path.isfile(_specs):
+                _specs = os.path.abspath(_specs)
+                _shell = None
+                for _d in env.get("PATH", "").split(":"):
+                    for _sh in ("bash", "sh"):
+                        _c = os.path.join(_d, _sh) if _d else ""
+                        if _c and os.path.isfile(_c) and os.access(_c, os.X_OK):
+                            _shell = _c
+                            break
+                    if _shell:
+                        break
+                if _shell:
+                    _wrapper = os.path.join(os.path.abspath(
+                        os.environ.get("BUCK_SCRATCH_PATH",
+                                       os.environ.get("TMPDIR", "/tmp"))),
+                        "buckos-cargo-host-linker")
+                    _fuse = preferred_linker_flag(env)
+                    with open(_wrapper, "w") as f:
+                        f.write(f"#!{_shell}\n")
+                        f.write(f'exec "{_cc_abs}" "--sysroot={_sysroot}" '
+                                f'"-specs={_specs}" {_fuse} "$@"\n')
+                    os.chmod(_wrapper, 0o755)
+                    env["CARGO_HOST_LINKER"] = _wrapper
 
     # Still write .cargo/config.toml for vendor_dir support; comment out
     # any existing [build] or [target.x86_64-unknown-linux-gnu] sections

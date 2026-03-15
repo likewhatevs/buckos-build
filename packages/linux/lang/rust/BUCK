@@ -8,6 +8,12 @@ load("//defs/rules:source.bzl", "extract_source")
 # The stage0 runs during the build only — the OUTPUT is compiled by our
 # GCC with specs, giving every binary padded interp + RPATH.
 #
+# Stage 1 is sufficient: bootstrap.toml sets cc/cxx/linker to our GCC
+# wrappers, so stage 1 binaries are linked by buckos GCC with specs
+# (padded interp + RPATH).  Stage 2 would only re-compile with a
+# Rust compiler that is itself GCC-linked — the C/C++ link step that
+# determines interp/RPATH is the same either way.
+#
 # Per Rust policy, bootstrap requires version N or N-1.  Using the same
 # version (1.91.0) as stage0 is the simplest approach.
 
@@ -113,7 +119,7 @@ libdir = "lib"
 [rust]
 optimize = true
 debug = false
-codegen-units-std = 1
+codegen-units-std = 0
 lto = "thin"
 download-rustc = false
 # Enable Rust's RPATH so binaries get $ORIGIN/../lib at link time.
@@ -153,11 +159,12 @@ done
 echo "Pre-linked GCC runtime libs into stage1/lib/"
 ls -la "$STAGE1_LIB"/lib{std,gcc}* 2>/dev/null || true
 
-# Build stage 2 (full Rust built by our GCC)
-python3 x.py build --stage 2 -j$(nproc)
+# Stage 1 is built by our GCC (cc/cxx/linker in bootstrap.toml point to
+# buckos wrappers) — binaries get padded interp + RPATH from specs.
+python3 x.py build --stage 1 -j$(nproc)
 
 # Install
-DESTDIR="$OUT" python3 x.py install
+DESTDIR="$OUT" python3 x.py install --stage 1
 
 mkdir -p "$OUT/usr/bin"
 echo "Rust 1.91.0 installed"
