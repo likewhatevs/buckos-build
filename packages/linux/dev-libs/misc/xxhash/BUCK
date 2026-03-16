@@ -9,6 +9,9 @@ package(
     description = "Extremely fast non-cryptographic hash algorithm",
     homepage = "https://xxhash.com/",
     license = "BSD-2-Clause",
+    configure_args = [
+        "-DBUILD_SHARED_LIBS=OFF",
+    ],
     source_subdir = "cmake_unofficial",
     host_deps = [
         "//packages/linux/dev-tools/build-systems/cmake:cmake",
