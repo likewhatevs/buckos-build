@@ -104,6 +104,8 @@ def _cache_env(build_rule, name = ""):
             "SCCACHE_DIR": sccache_dir,
             "SCCACHE_CACHE_SIZE": _SCCACHE_SIZE,
             "SCCACHE_IDLE_TIMEOUT": "0",
+            # buck-out paths exceed the 108-char Unix socket limit
+            "SCCACHE_SERVER_UDS": "/tmp/buckos-sccache.sock",
         })
     return env
 
