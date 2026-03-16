@@ -21,6 +21,20 @@ set -e
 OUT="$1"; shift
 SRC="$1"; shift
 mkdir -p "$OUT/usr/bin"
+# Absolutize relative buck-out paths in CC so GCC specs %R produces
+# correct absolute interpreter paths in the binary.
+_CC=""
+for _w in $CC; do
+    case "$_w" in
+        --sysroot=buck-out*|-specs=buck-out*)
+            _f="${{_w%%=*}}="
+            _p="${{_w#*=}}"
+            _CC="$_CC ${{_f}}$(pwd)/$_p"
+            ;;
+        *) _CC="$_CC $_w" ;;
+    esac
+done
+CC=$_CC
 $CC "$@" -o "$OUT/usr/bin/{binary}" "$SRC"
 """.format(binary = ctx.attrs.binary_name),
         is_executable = True,
@@ -83,6 +97,19 @@ set -e
 OUT="$1"; shift
 SRC="$1"; shift
 mkdir -p "$OUT/usr/lib64"
+# Absolutize relative buck-out paths in CC (see test_c_binary).
+_CC=""
+for _w in $CC; do
+    case "$_w" in
+        --sysroot=buck-out*|-specs=buck-out*)
+            _f="${{_w%%=*}}="
+            _p="${{_w#*=}}"
+            _CC="$_CC ${{_f}}$(pwd)/$_p"
+            ;;
+        *) _CC="$_CC $_w" ;;
+    esac
+done
+CC=$_CC
 $CC -shared -fPIC "$@" -o "$OUT/usr/lib64/{lib}" "$SRC"
 """.format(lib = ctx.attrs.lib_name),
         is_executable = True,

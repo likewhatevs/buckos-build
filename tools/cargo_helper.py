@@ -30,7 +30,7 @@ _NETWORK_ISOLATED = _can_unshare_net()
 
 def _resolve_env_paths(value):
     """Resolve relative Buck2 artifact paths in env values to absolute."""
-    _FLAG_PREFIXES = ["-specs="]
+    _FLAG_PREFIXES = ["-specs=", "--sysroot="]
 
     parts = []
     for token in value.split():
