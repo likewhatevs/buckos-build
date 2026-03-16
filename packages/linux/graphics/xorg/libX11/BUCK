@@ -14,8 +14,11 @@ package(
     # gcc -E defines 'unix' even with -undef (GCC target triple behavior).
     # libX11 configure's RAWCPP check greps for 'unix' and errors out.
     # Patch the error to a warning so configure continues.
+    # gcc -E fails libX11's RAWCPP heuristics (unix define, whitespace
+    # preservation) because it behaves differently from standalone cpp.
+    # Downgrade all RAWCPP "I don't know what to do" errors to warnings.
     pre_configure_cmds = [
-        "sed -i '/defines unix with or without/s/as_fn_error/echo WARNING:/' configure",
+        "sed -i \"/I don't know what to do/s/as_fn_error/echo WARNING:/\" configure",
     ],
     configure_args = [
         "--prefix=/usr",
