@@ -14,9 +14,13 @@ package(
         "-DREDIS_STORAGE_BACKEND=OFF",  # Disable redis to avoid network fetch of hiredis
         "-DENABLE_DOCUMENTATION=OFF",
         "-DENABLE_TESTING=OFF",
+        "-DDEP_XXHASH=SYSTEM",  # Use packaged deps instead of FetchContent download
+        "-DDEP_FMT=SYSTEM",
     ],
     deps = [
         "//packages/linux/system/libs/compression/zstd:zstd",
+        "//packages/linux/dev-libs/misc/xxhash:xxhash",
+        "//packages/linux/dev-libs/misc/fmt:fmt",
     ],
     # ccache is in _TOOL_BLOCKLIST (prevents self-cycle), so cmake/ninja
     # aren't auto-injected — declare them explicitly.

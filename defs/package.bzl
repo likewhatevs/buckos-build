@@ -351,6 +351,7 @@ def package(
         "sqlite",  # dep of python-host (_sqlite3)
         "acl", "attr", "libcap", "gettext", "autoconf", "automake", "libtool",
         "libxcrypt", "help2man",
+        "fmt", "xxhash",  # deps of ccache
     )
 
     _CONFIGURABLE_RULES = ("autotools", "meson", "cmake", "mozbuild")
