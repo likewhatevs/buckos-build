@@ -111,12 +111,13 @@ def apply_cache_config(env):
                     if _val and "ccache" not in _val:
                         env[_var] = _ccache_bin + " " + _val
     if env.get("BUCKOS_SCCACHE") == "1":
-        # Set RUSTC_WRAPPER unconditionally — sccache will be on PATH
-        # by the time cargo runs (added via --path-prepend from host_deps).
-        # sccache is in _CACHE_BLOCKLIST so it never gets BUCKOS_SCCACHE=1
-        # for its own build (no self-cycle).
-        env["RUSTC_WRAPPER"] = "sccache"
-        env["CARGO_BUILD_RUSTC_WRAPPER"] = "sccache"
+        # Resolve sccache to absolute path — buck-out relative paths
+        # exceed the 108-char Unix socket limit (SUN_LEN) that sccache
+        # uses for server discovery based on argv[0].
+        _sccache_bin = shutil.which("sccache", path=env.get("PATH", ""))
+        _sccache_name = os.path.abspath(_sccache_bin) if _sccache_bin else "sccache"
+        env["RUSTC_WRAPPER"] = _sccache_name
+        env["CARGO_BUILD_RUSTC_WRAPPER"] = _sccache_name
         sccache_dir = env.get("SCCACHE_DIR", "")
         if sccache_dir:
             sccache_dir = os.path.abspath(os.path.expanduser(sccache_dir))
