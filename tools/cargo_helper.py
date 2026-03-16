@@ -7,6 +7,7 @@ under the target directory.
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 
@@ -149,8 +150,12 @@ def main():
 
     # Isolate cargo from user-level config (~/.cargo/config.toml) which
     # may set linker=clang, rustc-wrapper, or other host-specific options.
-    _scratch = os.environ.get("BUCK_SCRATCH_PATH", os.environ.get("TMPDIR", "/tmp"))
-    _cargo_home = os.path.join(os.path.abspath(_scratch), "cargo-home")
+    # Use /tmp to keep the path short — sccache creates a Unix socket
+    # inside CARGO_HOME and paths > 108 chars hit the SUN_LEN limit.
+    import hashlib as _hl
+    _scratch = os.environ.get("BUCK_SCRATCH_PATH", "cargo")
+    _cargo_hash = _hl.sha256(_scratch.encode()).hexdigest()[:12]
+    _cargo_home = f"/tmp/buckos-cargo-{_cargo_hash}"
     os.makedirs(_cargo_home, exist_ok=True)
     env["CARGO_HOME"] = _cargo_home
 
@@ -210,15 +215,16 @@ def main():
     if args.ld_linux:
         sysroot_lib_paths(args.ld_linux, env)
 
-    # Resolve sccache to absolute path now that PATH is configured.
-    # buck-out relative paths (122 chars) exceed the 108-char Unix
-    # socket limit (SUN_LEN) that sccache uses for server discovery.
-    if env.get("RUSTC_WRAPPER") == "sccache":
-        _sccache_abs = shutil.which("sccache", path=env.get("PATH", ""))
-        if _sccache_abs:
-            _sccache_abs = os.path.abspath(_sccache_abs)
-            env["RUSTC_WRAPPER"] = _sccache_abs
-            env["CARGO_BUILD_RUSTC_WRAPPER"] = _sccache_abs
+    # Force sccache to TCP instead of Unix sockets — sccache computes
+    # its default UDS path from current_exe() (/proc/self/exe resolves
+    # to the full buck-out path, >108 chars, hitting SUN_LEN).  TCP
+    # localhost avoids the socket path length issue entirely.
+    if env.get("SCCACHE_SERVER_UDS"):
+        del env["SCCACHE_SERVER_UDS"]
+    env["SCCACHE_SERVER_PORT"] = "4226"
+    print(f"DEBUG sccache: RUSTC_WRAPPER={env.get('RUSTC_WRAPPER','')}", file=sys.stderr)
+    print(f"DEBUG sccache: SCCACHE_SERVER_UDS={env.get('SCCACHE_SERVER_UDS','')}", file=sys.stderr)
+    print(f"DEBUG sccache: CARGO_HOME={env.get('CARGO_HOME','')}", file=sys.stderr)
 
     # Pass the FULL CC (with --sysroot and -specs) through RUSTFLAGS
     # so rustc invokes GCC with the buckos specs file.  The specs

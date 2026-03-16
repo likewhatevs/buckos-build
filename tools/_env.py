@@ -116,7 +116,6 @@ def apply_cache_config(env):
         # here because apply_cache_config runs before PATH setup.
         env["RUSTC_WRAPPER"] = "sccache"
         env["CARGO_BUILD_RUSTC_WRAPPER"] = "sccache"
->>>>>>> 1bd38ee9 (Resolve sccache to absolute path for RUSTC_WRAPPER)
         sccache_dir = env.get("SCCACHE_DIR", "")
         if sccache_dir:
             sccache_dir = os.path.abspath(os.path.expanduser(sccache_dir))

@@ -201,7 +201,7 @@ def main():
                                 # Remove them entirely — initramfs has
                                 # libs in standard paths (/lib64 etc.)
                                 # that ld.so finds by default.
-                                struct.pack_into(fmt + "q", mdata, entry_off, 0x6ffffff0)
+                                struct.pack_into(fmt + "q", mdata, entry_off, 0x70000000)
                                 struct.pack_into(fmt + "Q", mdata, entry_off + 8, 0)
                                 modified = True
                     if modified:
