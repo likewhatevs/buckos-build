@@ -63,12 +63,13 @@ genrule(
 
         cp "$BINARY" "$WORK/ima-test"
         # evmctl --sigfile exits non-zero (xattr set fails on raw files
-        # without CAP_SYS_ADMIN) but still creates the .sig sidecar
-        evmctl ima_sign --sigfile --key "$KEY" "$WORK/ima-test" 2>/dev/null || true
+        # without CAP_SYS_ADMIN) but still creates the .sig sidecar.
+        # Don't redirect stderr so failures are visible in CI.
+        evmctl ima_sign --sigfile --key "$KEY" "$WORK/ima-test" || true
         test -f "$WORK/ima-test.sig"
 
         echo "IMA-FILE-CONTENT" > "$WORK/test-data.txt"
-        evmctl ima_sign --sigfile --key "$KEY" "$WORK/test-data.txt" 2>/dev/null || true
+        evmctl ima_sign --sigfile --key "$KEY" "$WORK/test-data.txt" || true
         test -f "$WORK/test-data.txt.sig"
 
         printf 'write %s /ima-test\\nset_inode_field /ima-test mode 0100755\\nea_set /ima-test security.ima -f %s\\n' \
@@ -132,7 +133,7 @@ genrule(
         mke2fs -t ext4 -d "$WORK/empty" "$OUT" 8M 2>/dev/null
 
         cp "$BINARY" "$WORK/ima-test"
-        evmctl ima_sign --sigfile --key "$KEY" "$WORK/ima-test" 2>/dev/null || true
+        evmctl ima_sign --sigfile --key "$KEY" "$WORK/ima-test" || true
         test -f "$WORK/ima-test.sig"
 
         echo "IMA-FILE-CONTENT" > "$WORK/test-data.txt"
