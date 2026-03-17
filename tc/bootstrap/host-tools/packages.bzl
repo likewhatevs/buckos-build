@@ -6,8 +6,11 @@ EXTENDED_TOOL_PACKAGES: complex packages with deep dep chains (glibc,
 gcc, llvm, rust, kernel tools, etc.).
 
 Both are built via host_tools_transition → bootstrap-toolchain (stage 2
-cross-compiler + host PATH fallback).  The transition breaks any
-dependency on the seed toolchain — there is no cycle.
+cross-compiler + host PATH fallback).  The transition breaks the
+direct seed dependency, but cycles still exist through exec_deps:
+glibc → linux-headers → kernel-config → flex (exec) → tar (exec)
+→ seed-exec-toolchain → host-tools.  Packages already in the
+sysroot (glibc, linux-headers) must NOT be included here.
 
 HOST_TOOL_PACKAGES = BASE + EXTENDED, used by the host_tools_aggregator
 for the complete seed archive.
@@ -52,17 +55,15 @@ EXTENDED_TOOL_PACKAGES = [
     # Core libraries
     "//packages/linux/core/zlib:zlib",
 
-    # Binary utilities (already in BASE)
-
     # Native C/C++ compiler
     "//packages/linux/lang/gcc:gcc-native",
 
-    # Kernel UAPI headers
-    "//tc/bootstrap/stage2:linux-headers",
-
-    # C library + kernel headers
-    "//packages/linux/core/glibc:glibc",
-    "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
+    # NOTE: glibc, linux-headers, and libxcrypt are NOT included here.
+    # They're already in the sysroot (tools/<triple>/sys-root/) and
+    # host-tools binaries find them via RPATH symlinks created at
+    # unpack time.  Including glibc here creates a cycle:
+    # host-tools → glibc → linux-headers → kernel-config → flex
+    # (exec) → tar (exec) → seed-exec-toolchain → host-tools.
 
     # GCC dependencies
     "//packages/linux/system/libs/utility/gmp:gmp",
