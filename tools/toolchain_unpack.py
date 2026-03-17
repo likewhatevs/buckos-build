@@ -562,6 +562,44 @@ def _pipe_extract(producer_cmd, consumer_cmd):
     return type("R", (), {"returncode": rc})()
 
 
+def _symlink_sysroot_libs(toolchain_dir):
+    """Symlink sysroot shared libs into host-tools/lib64/.
+
+    Host-tools binaries have RPATH=$ORIGIN/../lib64 which resolves to
+    host-tools/lib64/.  But glibc (libc.so.6, libm.so.6, etc.) lives
+    in the sysroot, not in host-tools.  Without these symlinks, the
+    dynamic linker falls through to the host's glibc which may be an
+    incompatible version (e.g. missing __nptl_change_stack_perm).
+    """
+    ht_lib64 = os.path.join(toolchain_dir, "host-tools", "lib64")
+    if not os.path.isdir(ht_lib64):
+        return
+
+    # Find sysroot lib dirs
+    sysroot_lib_dirs = []
+    for triple_dir in sorted(_glob.glob(os.path.join(toolchain_dir, "tools", "*-linux-gnu"))):
+        for subdir in ("sys-root/usr/lib64", "sys-root/usr/lib", "sys-root/lib64", "sys-root/lib"):
+            d = os.path.join(triple_dir, subdir)
+            if os.path.isdir(d):
+                sysroot_lib_dirs.append(d)
+
+    linked = 0
+    for src_dir in sysroot_lib_dirs:
+        for name in os.listdir(src_dir):
+            if not (name.endswith(".so") or ".so." in name):
+                continue
+            src = os.path.join(src_dir, name)
+            dst = os.path.join(ht_lib64, name)
+            if os.path.exists(dst):
+                continue
+            rel = os.path.relpath(src, ht_lib64)
+            os.symlink(rel, dst)
+            linked += 1
+
+    if linked:
+        print(f"  symlinked {linked} sysroot libs into host-tools/lib64/", file=sys.stderr)
+
+
 def _symlink_host_crts(toolchain_dir):
     """Symlink glibc CRT objects into host-tools/lib64/ for gcc-native.
 
@@ -695,6 +733,10 @@ def main():
 
     # Patch ELF interpreters to use bundled ld-linux
     _rewrite_interpreters(output)
+
+    # Symlink sysroot shared libs into host-tools/lib64/ so the
+    # $ORIGIN/../lib64 RPATH in host-tools binaries finds glibc.
+    _symlink_sysroot_libs(output)
 
     # Inject RPATH into host-tools binaries that lack one (e.g. lzip)
     _inject_missing_rpath(output)
