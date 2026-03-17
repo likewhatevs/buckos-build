@@ -599,6 +599,20 @@ def _symlink_sysroot_libs(toolchain_dir):
     if linked:
         print(f"  symlinked {linked} sysroot libs into host-tools/lib64/", file=sys.stderr)
 
+    # Symlink sysroot gconv modules into host-tools/lib/gconv/ so
+    # msgfmt (from gettext) can find charset conversion modules.
+    for src_dir in sysroot_lib_dirs:
+        gconv_src = os.path.join(src_dir, "gconv")
+        if os.path.isdir(gconv_src):
+            ht_lib = os.path.join(toolchain_dir, "host-tools", "lib")
+            os.makedirs(ht_lib, exist_ok=True)
+            gconv_dst = os.path.join(ht_lib, "gconv")
+            if not os.path.exists(gconv_dst):
+                rel = os.path.relpath(gconv_src, ht_lib)
+                os.symlink(rel, gconv_dst)
+                print(f"  symlinked sysroot gconv into host-tools/lib/gconv/", file=sys.stderr)
+            break
+
 
 def _symlink_host_crts(toolchain_dir):
     """Symlink glibc CRT objects into host-tools/lib64/ for gcc-native.
