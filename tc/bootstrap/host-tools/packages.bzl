@@ -1,17 +1,16 @@
 """Host tool package lists for seed bootstrap.
 
 BASE_TOOL_PACKAGES: simple POSIX tools with no deep dep chains.
-Built via host_tools_transition (buckos compiler + host PATH fallback).
-These become the seed toolchains' hermetic PATH — no host fallback
-needed for any package that uses the seed toolchain.
 
 EXTENDED_TOOL_PACKAGES: complex packages with deep dep chains (glibc,
-gcc, llvm, rust, kernel tools, etc.).  Built normally with the seed
-toolchain.  Included in the full seed export but NOT in the base
-host_tools (to avoid cycles).
+gcc, llvm, rust, kernel tools, etc.).
 
-HOST_TOOL_PACKAGES = BASE + EXTENDED, used by toolchain_export for
-the complete seed archive.
+Both are built via host_tools_transition → bootstrap-toolchain (stage 2
+cross-compiler + host PATH fallback).  The transition breaks any
+dependency on the seed toolchain — there is no cycle.
+
+HOST_TOOL_PACKAGES = BASE + EXTENDED, used by the host_tools_aggregator
+for the complete seed archive.
 """
 
 BASE_TOOL_PACKAGES = [
