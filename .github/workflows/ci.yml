@@ -138,7 +138,7 @@ jobs:
           done
           [ "$failed" -eq 0 ]
       - name: Tests
-        run: buck2 test //tests:
+        run: "buck2 test //tests:"
 
   test-seed:
     name: test with seed
