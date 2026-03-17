@@ -73,7 +73,7 @@ jobs:
         run: |
           # Force fresh seed build — DICE cache on self-hosted runner may
           # serve stale archive missing host-tools from prior runs.
-          buck2 killall 2>/dev/null || true
+          buck2 clean 2>/dev/null || true
           buck2 build //tc/bootstrap:seed-export --out seed-toolchain.tar.zst 2>&1 | tail -5
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
@@ -101,6 +101,7 @@ jobs:
   test-seed:
     name: test with seed
     needs: [test]
+    if: always() && needs.test.result != 'cancelled'
     runs-on: ubuntu-latest
     env:
       SCCACHE_GHA_ENABLED: "true"
