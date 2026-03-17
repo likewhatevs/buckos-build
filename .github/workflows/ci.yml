@@ -116,6 +116,8 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           clean: false
+      - name: Apply local config
+        run: cp /opt/gha/.buckconfig.local .buckconfig.local
       - name: Install buck2
         run: |
           mkdir -p "$HOME/.local/bin"
