@@ -669,6 +669,13 @@ def main():
         print(f"error: extraction failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(1)
 
+    # Verify extraction produced expected content
+    extracted = os.listdir(output)
+    print(f"Extracted contents: {sorted(extracted)}", file=sys.stderr)
+    if "tools" not in extracted:
+        print("error: seed archive missing 'tools/' directory", file=sys.stderr)
+        sys.exit(1)
+
     # Patch ELF interpreters to use bundled ld-linux
     _rewrite_interpreters(output)
 

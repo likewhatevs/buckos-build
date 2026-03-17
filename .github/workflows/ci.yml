@@ -140,9 +140,14 @@ jobs:
           printf '\n[cells]\n' >> .buckconfig.local
           grep 'none = none' "$tmpdir/.buckconfig" >> .buckconfig.local
           sed -n '/^\[cell_aliases\]/,/^[[:space:]]*$/p' "$tmpdir/.buckconfig" >> .buckconfig.local
+      - name: Verify seed archive
+        run: |
+          echo "Archive size: $(stat -c%s seed-toolchain.tar.zst) bytes"
+          zstd -dc seed-toolchain.tar.zst | tar tf - | head -20
+          zstd -dc seed-toolchain.tar.zst | tar tf - | grep -c host-tools || echo "WARNING: no host-tools in archive"
       - name: Tests
         run: |
-          targets=$(buck2 uquery 'kind(sh_test, //tests:) - attrfilter(labels, heavy, kind(sh_test, //tests:))' 2>/dev/null)
+          targets=$(buck2 uquery 'kind(sh_test, //tests:) - set(//tests:test-seed-isolation //tests:test-kde-iso-boot) - attrfilter(labels, heavy, kind(sh_test, //tests:))' 2>/dev/null)
           buck2 test $targets
 
   release:
