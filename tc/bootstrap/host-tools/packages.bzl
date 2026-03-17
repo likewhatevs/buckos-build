@@ -44,6 +44,9 @@ BASE_TOOL_PACKAGES = [
     "//packages/linux/dev-tools/build-systems/make:make",
     "//packages/linux/dev-tools/build-systems/m4:m4",
     "//packages/linux/dev-tools/build-systems/pkg-config:pkg-config",
+
+    # Code generators (needed by extended tool deps like libseccomp)
+    "//packages/linux/dev-tools/dev-utils/gperf:gperf",
 ]
 
 EXTENDED_TOOL_PACKAGES = [
