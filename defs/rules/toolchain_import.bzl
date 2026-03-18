@@ -27,9 +27,10 @@ def _toolchain_import_impl(ctx):
     make_cmd = cmd_args(host_bin.project("make")) if host_bin else cmd_args("make")
     pkg_config_cmd = cmd_args(host_bin.project("pkg-config")) if host_bin else cmd_args("pkg-config")
 
+    # Don't project python3 from host_bin — the binary may have a
+    # build-machine ELF interpreter.  Python rules find python3 on
+    # the hermetic PATH (host-tools/bin) at runtime instead.
     python_cmd = None
-    if host_bin:
-        python_cmd = RunInfo(args = cmd_args(host_bin.project("python3")))
 
     if ctx.attrs.exec_mode:
         # Exec mode: cross-compiler for building exec deps (tools
