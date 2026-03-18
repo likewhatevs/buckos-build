@@ -308,11 +308,13 @@ def _rewrite_script_shebangs(toolchain_dir):
     if not os.path.isdir(host_bin):
         return
 
-    # Build a map of available interpreters in host-tools/bin
+    # Build a map of available interpreters in host-tools/bin.
+    # Include symlinks (e.g. sh -> bash) so shebangs like #!/usr/sbin/sh
+    # get rewritten to the seed's sh.
     available = {}
     for name in os.listdir(host_bin):
         fpath = os.path.join(host_bin, name)
-        if os.path.isfile(fpath) and not os.path.islink(fpath):
+        if os.path.isfile(fpath) or (os.path.islink(fpath) and os.path.exists(fpath)):
             available[name] = os.path.abspath(fpath)
 
     patched = 0
