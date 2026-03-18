@@ -1,17 +1,20 @@
 """Host tool package lists for seed bootstrap.
 
 BASE_TOOL_PACKAGES: simple POSIX tools with no deep dep chains.
-Built via host_tools_transition (buckos compiler + host PATH fallback).
-These become the seed toolchains' hermetic PATH — no host fallback
-needed for any package that uses the seed toolchain.
 
-EXTENDED_TOOL_PACKAGES: complex packages with deep dep chains (glibc,
-gcc, llvm, rust, kernel tools, etc.).  Built normally with the seed
-toolchain.  Included in the full seed export but NOT in the base
-host_tools (to avoid cycles).
+EXTENDED_TOOL_PACKAGES: build system tools and compilers needed for
+building packages.  Only includes tools actually used at build time —
+NOT test tools (qemu), image tools (grub, mtools), or signing tools.
 
-HOST_TOOL_PACKAGES = BASE + EXTENDED, used by toolchain_export for
-the complete seed archive.
+Both are built via host_tools_transition → bootstrap-toolchain (stage 2
+cross-compiler + host PATH fallback).  The transition breaks the
+direct seed dependency, but cycles still exist through exec_deps:
+glibc → linux-headers → kernel-config → flex (exec) → tar (exec)
+→ seed-exec-toolchain → host-tools.  Packages already in the
+sysroot (glibc, linux-headers) must NOT be included here.
+
+HOST_TOOL_PACKAGES = BASE + EXTENDED, used by the host_tools_aggregator
+for the complete seed archive.
 """
 
 BASE_TOOL_PACKAGES = [
@@ -46,24 +49,19 @@ BASE_TOOL_PACKAGES = [
 
 EXTENDED_TOOL_PACKAGES = [
     # Core utilities with deeper deps
-    "//packages/linux/system/apps/rsync:rsync",
     "//packages/linux/core/file:file",
     "//packages/linux/core/util-linux:util-linux",
 
     # Core libraries
     "//packages/linux/core/zlib:zlib",
 
-    # Binary utilities (already in BASE)
-
     # Native C/C++ compiler
     "//packages/linux/lang/gcc:gcc-native",
 
-    # Kernel UAPI headers
-    "//tc/bootstrap/stage2:linux-headers",
-
-    # C library + kernel headers
-    "//packages/linux/core/glibc:glibc",
-    "//packages/linux/system/libs/crypto/libxcrypt:libxcrypt",
+    # NOTE: glibc, linux-headers, and libxcrypt are NOT included here.
+    # They're already in the sysroot (tools/<triple>/sys-root/) and
+    # host-tools binaries find them via RPATH symlinks created at
+    # unpack time.
 
     # GCC dependencies
     "//packages/linux/system/libs/utility/gmp:gmp",
@@ -79,6 +77,7 @@ EXTENDED_TOOL_PACKAGES = [
     "//packages/linux/dev-tools/dev-utils/bc:bc",
     "//packages/linux/dev-tools/dev-utils/bison:bison",
     "//packages/linux/dev-tools/dev-utils/flex:flex",
+    "//packages/linux/dev-tools/dev-utils/gperf:gperf",
 
     # ELF tools
     "//packages/linux/system/libs/elfutils:elfutils",
@@ -118,28 +117,8 @@ EXTENDED_TOOL_PACKAGES = [
     # ELF / DWARF
     "//packages/linux/dev-tools/dev-utils/dwarves:dwarves",
 
-    # ISO image tools
-    "//packages/linux/dev-libs/iso/libisofs:libisofs",
-    "//packages/linux/dev-libs/iso/libburn:libburn",
-    "//packages/linux/dev-libs/iso/libisoburn:libisoburn",
-    "//packages/linux/system/apps/mtools:mtools",
-
-    # Image / filesystem tools
-    "//packages/linux/system/filesystem/native/squashfs-tools:squashfs-tools",
-    "//packages/linux/system/filesystem/native/e2fsprogs:e2fsprogs",
-    "//packages/linux/system/filesystem/native/dosfstools:dosfstools",
-    "//packages/linux/system/filesystem/native/btrfs-progs:btrfs-progs",
-    "//packages/linux/system/filesystem/native/xfsprogs:xfsprogs",
-    "//packages/linux/system/filesystem/management/gptfdisk:gptfdisk",
-    "//packages/linux/system/libs/cpio:cpio",
-    "//packages/linux/boot/grub:grub",
-    "//packages/linux/emulation/hypervisors/qemu:qemu",
-
-    # Crypto / TLS
+    # Crypto / TLS (needed by many packages at configure time)
     "//packages/linux/system/libs/crypto/openssl:openssl",
-
-    # Security / signing
-    "//packages/linux/system/security/ima-evm-utils:ima-evm-utils",
 ]
 
 HOST_TOOL_PACKAGES = BASE_TOOL_PACKAGES + EXTENDED_TOOL_PACKAGES

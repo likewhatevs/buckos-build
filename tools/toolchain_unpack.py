@@ -148,9 +148,23 @@ def _rewrite_interpreters(toolchain_dir):
     ld-linux versions causes segfaults.  Patch all binaries to use the
     bundled buckos ld-linux so the toolchain is self-contained.
     """
+    # Try host-tools first, fall back to sysroot ld-linux.
+    # host-tools/lib64/ may not have ld-linux if glibc wasn't copied there.
     ld_linux = os.path.join(toolchain_dir, "host-tools", "lib64", "ld-linux-x86-64.so.2")
     if not os.path.exists(ld_linux):
-        return
+        # Sysroot ld-linux — always present in cross-compiler output.
+        for triple_dir in _glob.glob(os.path.join(toolchain_dir, "tools", "*-linux-gnu")):
+            candidate = os.path.join(triple_dir, "sys-root", "lib64", "ld-linux-x86-64.so.2")
+            if os.path.exists(candidate):
+                ld_linux = candidate
+                print(f"  using sysroot ld-linux: {ld_linux}", file=sys.stderr)
+                break
+        else:
+            print(f"warning: no ld-linux found in {toolchain_dir}, skipping interpreter rewrite", file=sys.stderr)
+            print(f"  tools dirs: {_glob.glob(os.path.join(toolchain_dir, 'tools', '*'))}", file=sys.stderr)
+            return
+    else:
+        print(f"  using host-tools ld-linux: {ld_linux}", file=sys.stderr)
 
     new_interp = os.path.abspath(ld_linux)
     patched = 0
@@ -203,7 +217,14 @@ def _inject_missing_rpath(toolchain_dir):
 
     # Set up env so patchelf can run (it needs the bundled ld-linux)
     env = clean_env()
+    # Find ld-linux for LD_LIBRARY_PATH — try host-tools then sysroot.
     ld_linux = os.path.join(host_tools, "lib64", "ld-linux-x86-64.so.2")
+    if not os.path.exists(ld_linux):
+        for triple_dir in _glob.glob(os.path.join(toolchain_dir, "tools", "*-linux-gnu")):
+            candidate = os.path.join(triple_dir, "sys-root", "lib64", "ld-linux-x86-64.so.2")
+            if os.path.exists(candidate):
+                ld_linux = candidate
+                break
     if os.path.exists(ld_linux):
         env["LD_LIBRARY_PATH"] = os.path.abspath(os.path.dirname(ld_linux))
 
@@ -287,11 +308,13 @@ def _rewrite_script_shebangs(toolchain_dir):
     if not os.path.isdir(host_bin):
         return
 
-    # Build a map of available interpreters in host-tools/bin
+    # Build a map of available interpreters in host-tools/bin.
+    # Include symlinks (e.g. sh -> bash) so shebangs like #!/usr/sbin/sh
+    # get rewritten to the seed's sh.
     available = {}
     for name in os.listdir(host_bin):
         fpath = os.path.join(host_bin, name)
-        if os.path.isfile(fpath) and not os.path.islink(fpath):
+        if os.path.isfile(fpath) or (os.path.islink(fpath) and os.path.exists(fpath)):
             available[name] = os.path.abspath(fpath)
 
     patched = 0
@@ -516,7 +539,7 @@ def _write_specs(gcc_libdir, ld_linux_abs, sysroot=None, host_prefix=None):
         # Cross-compiler: %R-relative paths (machine-independent)
         pad = "/" * 260
         interp = f"{pad}%R/lib64/ld-linux-x86-64.so.2"
-        sysroot_rpath = "%R/lib64:%R/lib:%R/usr/lib64:%R/usr/lib"
+        sysroot_rpath = "%R/../lib64:%R/lib64:%R/lib:%R/usr/lib64:%R/usr/lib"
         link_extra = (
             f"%{{!shared:%{{!static:--dynamic-linker {interp}}}}}"
             f" %{{!static:--disable-new-dtags"
@@ -543,6 +566,58 @@ def _pipe_extract(producer_cmd, consumer_cmd):
     consumer.communicate()
     rc = consumer.returncode or producer.wait()
     return type("R", (), {"returncode": rc})()
+
+
+def _symlink_sysroot_libs(toolchain_dir):
+    """Symlink sysroot shared libs into host-tools/lib64/.
+
+    Host-tools binaries have RPATH=$ORIGIN/../lib64 which resolves to
+    host-tools/lib64/.  But glibc (libc.so.6, libm.so.6, etc.) lives
+    in the sysroot, not in host-tools.  Without these symlinks, the
+    dynamic linker falls through to the host's glibc which may be an
+    incompatible version (e.g. missing __nptl_change_stack_perm).
+    """
+    ht_lib64 = os.path.join(toolchain_dir, "host-tools", "lib64")
+    if not os.path.isdir(ht_lib64):
+        return
+
+    # Find sysroot lib dirs
+    sysroot_lib_dirs = []
+    for triple_dir in sorted(_glob.glob(os.path.join(toolchain_dir, "tools", "*-linux-gnu"))):
+        for subdir in ("sys-root/usr/lib64", "sys-root/usr/lib", "sys-root/lib64", "sys-root/lib"):
+            d = os.path.join(triple_dir, subdir)
+            if os.path.isdir(d):
+                sysroot_lib_dirs.append(d)
+
+    linked = 0
+    for src_dir in sysroot_lib_dirs:
+        for name in os.listdir(src_dir):
+            if not (name.endswith(".so") or ".so." in name):
+                continue
+            src = os.path.join(src_dir, name)
+            dst = os.path.join(ht_lib64, name)
+            if os.path.exists(dst):
+                continue
+            rel = os.path.relpath(src, ht_lib64)
+            os.symlink(rel, dst)
+            linked += 1
+
+    if linked:
+        print(f"  symlinked {linked} sysroot libs into host-tools/lib64/", file=sys.stderr)
+
+    # Symlink sysroot gconv modules into host-tools/lib/gconv/ so
+    # msgfmt (from gettext) can find charset conversion modules.
+    for src_dir in sysroot_lib_dirs:
+        gconv_src = os.path.join(src_dir, "gconv")
+        if os.path.isdir(gconv_src):
+            ht_lib = os.path.join(toolchain_dir, "host-tools", "lib")
+            os.makedirs(ht_lib, exist_ok=True)
+            gconv_dst = os.path.join(ht_lib, "gconv")
+            if not os.path.exists(gconv_dst):
+                rel = os.path.relpath(gconv_src, ht_lib)
+                os.symlink(rel, gconv_dst)
+                print(f"  symlinked sysroot gconv into host-tools/lib/gconv/", file=sys.stderr)
+            break
 
 
 def _symlink_host_crts(toolchain_dir):
@@ -669,8 +744,19 @@ def main():
         print(f"error: extraction failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(1)
 
+    # Verify extraction produced expected content
+    extracted = os.listdir(output)
+    print(f"Extracted contents: {sorted(extracted)}", file=sys.stderr)
+    if "tools" not in extracted:
+        print("error: seed archive missing 'tools/' directory", file=sys.stderr)
+        sys.exit(1)
+
     # Patch ELF interpreters to use bundled ld-linux
     _rewrite_interpreters(output)
+
+    # Symlink sysroot shared libs into host-tools/lib64/ so the
+    # $ORIGIN/../lib64 RPATH in host-tools binaries finds glibc.
+    _symlink_sysroot_libs(output)
 
     # Inject RPATH into host-tools binaries that lack one (e.g. lzip)
     _inject_missing_rpath(output)

@@ -1,12 +1,13 @@
 """
 Host tools for the hermetic seed toolchain.
 
-Built using TOOLCHAIN_ATTRS → seed (stage 2 cross-compiler).
-Cross-compiled to buckos-native; host tool deps come from per-rule
-exec_deps via auto_tool_deps in package.bzl.
+Built via host_tools_transition → bootstrap-toolchain (stage 2
+cross-compiler + host PATH).  The transition breaks any dependency
+on the seed toolchain, so there is no cycle even for packages with
+deep dep chains (gcc-native, perl, python, etc.).
 
-The host_tools_aggregator merges all package bin/lib/share dirs into one
-FHS-like prefix that becomes the seed's hermetic PATH.
+The host_tools_aggregator merges all package bin/lib/share dirs into
+one FHS-like prefix that becomes the seed's hermetic PATH.
 
 Add more tools here as hermeticity testing reveals missing ones:
   1. buck2 build //packages/linux/core/zlib:zlib
@@ -15,15 +16,10 @@ Add more tools here as hermeticity testing reveals missing ones:
 """
 
 load(":defs.bzl", "host_tools_aggregator")
-load(":packages.bzl", "BASE_TOOL_PACKAGES")
+load(":packages.bzl", "HOST_TOOL_PACKAGES")
 
-# Base tools only — simple POSIX utilities built via host_tools_transition
-# (buckos compiler + host PATH fallback).  These become the seed
-# toolchains' hermetic PATH, breaking the bootstrap cycle.
-# Extended tools (glibc, gcc, llvm, etc.) are built as regular
-# packages with the seed toolchain and included in the seed export.
 host_tools_aggregator(
     name = "host-tools",
-    packages = BASE_TOOL_PACKAGES,
+    packages = HOST_TOOL_PACKAGES,
     visibility = ["PUBLIC"],
 )

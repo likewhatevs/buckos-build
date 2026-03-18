@@ -34,6 +34,12 @@ load("//defs/rules:mozbuild.bzl", "mozbuild_package")
 load("//defs/rules:python.bzl", "python_package")
 load("//defs/rules:source.bzl", "extract_source")
 load("//defs/rules:transforms.bzl", "ima_sign_package", "stamp_package", "strip_package")
+load("//tc/bootstrap/host-tools:packages.bzl", "HOST_TOOL_PACKAGES")
+
+# Labels of all packages the seed ships in host-tools.  Used to gate
+# explicit host_deps in seed mode — the seed's hermetic PATH provides
+# these at runtime, so they don't need to be built as exec_deps.
+_SEED_HOST_TOOL_LABELS = HOST_TOOL_PACKAGES
 
 # Build rule dispatch table.
 # Each build system has a top-level load() and an entry here.
@@ -396,6 +402,14 @@ def package(
     # are only needed in source mode.
     raw_host_deps = build_kwargs.pop("host_deps", [])
 
+    # Gate explicit host_deps that the seed already provides.  Without
+    # this, packages with e.g. host_deps=["mold", "llvm-native"] force
+    # a from-source build of those tools even though the seed ships them.
+    # Import the package list to build the gate set.
+    if _HAS_PREBUILT_SEED and raw_host_deps and type(raw_host_deps) != "Select":
+        _SEED_PROVIDES = {p.split(":")[-1]: True for p in _SEED_HOST_TOOL_LABELS}
+        raw_host_deps = [d for d in raw_host_deps if d.split(":")[-1] not in _SEED_PROVIDES]
+
     # In bootstrap/host-tools mode, ALL host tools come from host PATH —
     # explicit host_deps would create cycles back to seed-exec-toolchain
     # via their exec_dep resolution.
@@ -409,16 +423,15 @@ def package(
     if _auto_tool_deps:
         if _SOURCE_MODE:
             # In bootstrap/host-tools mode, tools come from host PATH —
-            # no exec_deps needed.  Injecting them would create a cycle:
-            # seed-toolchain → host-tools → package → auto_tool_dep
-            # (exec) → seed-toolchain.
+            # no exec_deps needed.  Injecting them would create a cycle
+            # back through the not-yet-built seed.
             staged_auto_deps = select({
                 "//tc/exec:is-bootstrap-mode": [],
                 "//tc/exec:is-host-tools-mode": [],
                 "DEFAULT": _auto_tool_deps,
             })
         else:
-            # With a prebuilt seed, hermetic PATH provides tools.
+            # With a prebuilt seed, hermetic PATH provides all tools.
             staged_auto_deps = []
         # staged_auto_deps may be a select — always merge it
         if type(raw_host_deps) == "Select":

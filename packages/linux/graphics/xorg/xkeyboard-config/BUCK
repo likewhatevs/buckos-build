@@ -12,5 +12,6 @@ package(
     license = "MIT",
     configure_args = [
         "-Dxorg-rules-symlinks=true",
+        "-Dnls=false",
     ],
 )

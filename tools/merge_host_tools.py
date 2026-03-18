@@ -53,11 +53,16 @@ def main():
 
     output = os.path.abspath(args.output)
 
+    print(f"Received {len(args.prefixes)} prefixes", file=sys.stderr)
     for prefix in args.prefixes:
         prefix = os.path.abspath(prefix)
         usr_dir = os.path.join(prefix, "usr")
         if not os.path.isdir(usr_dir):
+            print(f"  SKIP (no usr/): {prefix}", file=sys.stderr)
             continue
+        usr_bin = os.path.join(usr_dir, "bin")
+        n = len(os.listdir(usr_bin)) if os.path.isdir(usr_bin) else 0
+        print(f"  MERGE ({n} bins): {os.path.basename(os.path.dirname(prefix))}", file=sys.stderr)
         for subdir in ("bin", "sbin", "share", "lib", "lib64", "libexec", "include"):
             src_dir = os.path.join(usr_dir, subdir)
             if not os.path.isdir(src_dir):
