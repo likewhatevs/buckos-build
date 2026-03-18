@@ -173,8 +173,29 @@ jobs:
           targets=$(buck2 uquery 'kind(sh_test, //tests:) - set(//tests:test-seed-isolation //tests:test-kde-iso-boot) - attrfilter(labels, heavy, kind(sh_test, //tests:))' 2>/dev/null)
           buck2 test $targets
 
+  required-checks:
+    name: required checks
+    needs: [test-setup, build, test, test-aarch64, test-seed]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          results=(
+            "${{ needs.test-setup.result }}"
+            "${{ needs.build.result }}"
+            "${{ needs.test.result }}"
+            "${{ needs.test-aarch64.result }}"
+            "${{ needs.test-seed.result }}"
+          )
+          for r in "${results[@]}"; do
+            if [[ "$r" != "success" ]]; then
+              echo "::error::One or more required jobs failed or were cancelled"
+              exit 1
+            fi
+          done
+
   release:
-    needs: [test-setup, test, test-seed]
+    needs: [required-checks]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
