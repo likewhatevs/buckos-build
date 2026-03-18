@@ -103,7 +103,8 @@ jobs:
           name: buckos-minimal-iso
           path: buckos-minimal.iso
           compression-level: 0
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: buckos-kde-iso
           path: buckos-kde.iso
@@ -173,8 +174,29 @@ jobs:
           targets=$(buck2 uquery 'kind(sh_test, //tests:) - set(//tests:test-seed-isolation //tests:test-kde-iso-boot) - attrfilter(labels, heavy, kind(sh_test, //tests:))' 2>/dev/null)
           buck2 test $targets
 
+  required-checks:
+    name: required checks
+    needs: [test-setup, build, test, test-aarch64, test-seed]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          results=(
+            "${{ needs.test-setup.result }}"
+            "${{ needs.build.result }}"
+            "${{ needs.test.result }}"
+            "${{ needs.test-aarch64.result }}"
+            "${{ needs.test-seed.result }}"
+          )
+          for r in "${results[@]}"; do
+            if [[ "$r" != "success" ]]; then
+              echo "::error::One or more required jobs failed or were cancelled"
+              exit 1
+            fi
+          done
+
   release:
-    needs: [test-setup, test, test-seed]
+    needs: [required-checks]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -190,4 +212,4 @@ jobs:
           files: |
             seed-toolchain/seed-toolchain.tar.zst
             buckos-minimal-iso/buckos-minimal.iso
-            buckos-kde-iso/buckos-kde.iso
+            # buckos-kde-iso/buckos-kde.iso  # ~12 GiB; GitHub release assets max is 2 GiB
