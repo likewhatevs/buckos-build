@@ -133,7 +133,6 @@ jobs:
             sudo udevadm trigger --name-match=kvm
           fi
       - name: Restore ccache
-        id: ccache-restore
         uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: .buckos/cache/ccache
@@ -165,7 +164,7 @@ jobs:
           targets=$(buck2 uquery 'kind(sh_test, //tests:) - set(//tests:test-seed-isolation //tests:test-kde-iso-boot) - attrfilter(labels, heavy, kind(sh_test, //tests:))' 2>/dev/null)
           buck2 test $targets
       - name: Save ccache
-        if: always() && steps.ccache-restore.outputs.cache-hit != 'true'
+        if: always()
         uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: .buckos/cache/ccache
