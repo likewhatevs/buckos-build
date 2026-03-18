@@ -49,18 +49,10 @@ def main():
         print(f"error: no patches or commands specified", file=sys.stderr)
         sys.exit(1)
 
-    _final_output = os.path.abspath(args.output_dir)
-
-    # Redirect patch operations to scratch — the declared output is written
-    # once at the end (clean copy of the patched tree, never mutated).
-    _scratch = os.path.abspath(os.environ.get("BUCK_SCRATCH_PATH",
-                                              os.environ.get("TMPDIR", "/tmp")))
-    output_dir = os.path.join(_scratch, "patch-tree")
-
-    # Copy source to scratch
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    shutil.copytree(args.source_dir, output_dir, symlinks=True)
+    # Copy source to output
+    if os.path.exists(args.output_dir):
+        shutil.rmtree(args.output_dir)
+    shutil.copytree(args.source_dir, args.output_dir, symlinks=True)
 
     # Reset timestamps to SOURCE_DATE_EPOCH to prevent autotools regeneration.
     # The copy changes mtime ordering, causing make to think configure.ac is
@@ -68,7 +60,7 @@ def main():
     epoch = os.environ.get("SOURCE_DATE_EPOCH", "315576000")
     subprocess.run(
         ["find", ".", "-exec", "touch", "-h", "-d", f"@{epoch}", "{}", "+"],
-        cwd=output_dir,
+        cwd=args.output_dir,
         capture_output=True,
     )
 
@@ -81,7 +73,7 @@ def main():
         patch_abs = os.path.abspath(patch_file)
         result = subprocess.run(
             ["patch", f"-p{args.strip}", "-i", patch_abs],
-            cwd=output_dir,
+            cwd=args.output_dir,
             capture_output=True,
             text=True,
         )
@@ -97,8 +89,8 @@ def main():
     # Run shell commands in the output directory
     # Set S to the output dir for compatibility with ebuild-style src_prepare scripts
     cmd_env = os.environ.copy()
-    cmd_env["S"] = os.path.abspath(output_dir)
-    cmd_env["WORKDIR"] = cmd_env.get("BUCK_SCRATCH_PATH", os.path.abspath(output_dir))
+    cmd_env["S"] = os.path.abspath(args.output_dir)
+    cmd_env["WORKDIR"] = cmd_env.get("BUCK_SCRATCH_PATH", os.path.abspath(args.output_dir))
 
     # Resolve relative buck-out paths in DEP_BASE_DIRS to absolute
     if "DEP_BASE_DIRS" in cmd_env and cmd_env["DEP_BASE_DIRS"]:
@@ -113,7 +105,7 @@ def main():
     for shell_cmd in args.cmds:
         result = subprocess.run(
             ["bash", "-e", "-c", shell_cmd],
-            cwd=output_dir,
+            cwd=args.output_dir,
             env=cmd_env,
             capture_output=True,
             text=True,
@@ -127,11 +119,6 @@ def main():
             sys.exit(1)
         if result.stdout:
             print(result.stdout, end="")
-
-    # Copy finished patch tree from scratch to the declared output.
-    if os.path.exists(_final_output):
-        shutil.rmtree(_final_output)
-    shutil.copytree(output_dir, _final_output, symlinks=True)
 
 
 if __name__ == "__main__":

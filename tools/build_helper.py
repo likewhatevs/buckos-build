@@ -213,13 +213,6 @@ def main():
     build_dir = os.path.abspath(args.build_dir)
     output_dir = os.path.abspath(args.output_dir)
     register_cleanup(output_dir)
-    _final_output = output_dir
-
-    # Redirect build operations to scratch — the declared output is written
-    # once at the end (clean copy of the finished build, never mutated).
-    _scratch = os.path.abspath(os.environ.get("BUCK_SCRATCH_PATH",
-                                              os.environ.get("TMPDIR", "/tmp")))
-    output_dir = os.path.join(_scratch, "build-tree")
 
     if not os.path.isdir(build_dir):
         print(f"error: build directory not found: {build_dir}", file=sys.stderr)
@@ -899,9 +892,6 @@ def main():
 
     if args.skip_make:
         sanitize_filenames(output_dir)
-        if os.path.exists(_final_output):
-            shutil.rmtree(_final_output)
-        shutil.copytree(output_dir, _final_output, symlinks=True)
         return
 
     jobs = args.jobs or multiprocessing.cpu_count()
@@ -965,11 +955,6 @@ def main():
                 os.makedirs(p, exist_ok=True)
 
     sanitize_filenames(output_dir)
-
-    # Copy finished build tree from scratch to the declared output.
-    if os.path.exists(_final_output):
-        shutil.rmtree(_final_output)
-    shutil.copytree(output_dir, _final_output, symlinks=True)
 
 
 if __name__ == "__main__":
