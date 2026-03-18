@@ -10,6 +10,10 @@ package(
     description = "Perl Compatible Regular Expressions library (version 2)",
     homepage = "https://www.pcre.org/",
     license = "BSD-3-Clause",
+    # Configure creates pcre2_chartables.c as a symlink; the Makefile
+    # has a rule to recreate it that fails if it already exists (ln
+    # without -f).  Remove so make can recreate it cleanly.
+    pre_build_cmds = ["rm -f src/pcre2_chartables.c"],
     configure_args = [
         "--disable-static",
         "--enable-unicode",
