@@ -190,4 +190,4 @@ jobs:
           files: |
             seed-toolchain/seed-toolchain.tar.zst
             buckos-minimal-iso/buckos-minimal.iso
-            buckos-kde-iso/buckos-kde.iso
+            # buckos-kde-iso/buckos-kde.iso  # ~12 GiB; GitHub release assets max is 2 GiB
