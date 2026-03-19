@@ -64,13 +64,14 @@ def target_has_label(query, target_pattern, label):
     return False
 
 def get_labels(query, target_pattern):
-    """Return the list of labels on a target, or [] if none."""
+    """Return the combined list of labels across all matching targets."""
     target_set = query.eval(target_pattern)
+    result = []
     for t in target_set:
         labels = t.get_attr("labels")
         if labels != None:
-            return list(labels)
-    return []
+            result.extend(list(labels))
+    return result
 
 def fmt_actual(items, max_items = 5, max_item_len = 80, max_len = 300):
     """Format a list for display in error messages, truncating if needed."""
