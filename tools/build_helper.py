@@ -211,14 +211,20 @@ def main():
     env["PROJECT_ROOT"] = os.getcwd()
 
     build_dir = os.path.abspath(args.build_dir)
-    output_dir = os.path.abspath(args.output_dir)
+    declared_output = os.path.abspath(args.output_dir)
+
+    # Work in scratch to avoid mutating the declared output (in buck-out)
+    # during the build.  Only the final result is placed at declared_output.
+    _scratch_base = os.path.abspath(os.environ.get("BUCK_SCRATCH_PATH",
+                                                    os.environ.get("TMPDIR", "/tmp")))
+    output_dir = os.path.join(_scratch_base, "build-work")
     register_cleanup(output_dir)
 
     if not os.path.isdir(build_dir):
         print(f"error: build directory not found: {build_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Copy build tree to output dir (Buck2 outputs are read-only after creation)
+    # Copy build tree to scratch for building
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     shutil.copytree(build_dir, output_dir, symlinks=True)
@@ -892,6 +898,37 @@ def main():
 
     if args.skip_make:
         sanitize_filenames(output_dir)
+        # Merge scratch into declared output.  Pre-cmds may have written
+        # directly to declared_output (e.g. bootstrap_linux_headers writes
+        # sdt.h there).  copytree with dirs_exist_ok preserves those writes
+        # while bringing in the scratch content.
+        _skip_scratch = output_dir
+        if os.path.isdir(declared_output):
+            shutil.copytree(output_dir, declared_output, symlinks=True, dirs_exist_ok=True)
+        else:
+            shutil.move(output_dir, declared_output)
+        shutil.rmtree(output_dir, ignore_errors=True)
+        for dirpath, dirnames, filenames in os.walk(declared_output):
+            for entries in (dirnames, filenames):
+                for name in entries:
+                    p = os.path.join(dirpath, name)
+                    if os.path.islink(p):
+                        target = os.readlink(p)
+                        if _skip_scratch in target:
+                            os.unlink(p)
+                            os.symlink(target.replace(_skip_scratch, declared_output), p)
+        for dirpath, _dn, filenames in os.walk(declared_output):
+            for fname in filenames:
+                if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                    continue
+                fpath = os.path.join(dirpath, fname)
+                if os.path.islink(fpath):
+                    continue
+                try:
+                    _rewrite_file(fpath, _skip_scratch, declared_output)
+                except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                        FileNotFoundError):
+                    pass
         return
 
     jobs = args.jobs or multiprocessing.cpu_count()
@@ -955,6 +992,37 @@ def main():
                 os.makedirs(p, exist_ok=True)
 
     sanitize_filenames(output_dir)
+
+    # Merge scratch into declared output.  Pre-cmds may have written
+    # directly to declared_output via absolute artifact paths.  Merge
+    # preserves those writes while bringing in the build result.
+    _scratch_path = output_dir
+    if os.path.isdir(declared_output):
+        shutil.copytree(output_dir, declared_output, symlinks=True, dirs_exist_ok=True)
+    else:
+        shutil.move(output_dir, declared_output)
+    shutil.rmtree(output_dir, ignore_errors=True)
+    for dirpath, dirnames, filenames in os.walk(declared_output):
+        for entries in (dirnames, filenames):
+            for name in entries:
+                p = os.path.join(dirpath, name)
+                if os.path.islink(p):
+                    target = os.readlink(p)
+                    if _scratch_path in target:
+                        os.unlink(p)
+                        os.symlink(target.replace(_scratch_path, declared_output), p)
+    for dirpath, _dirnames, filenames in os.walk(declared_output):
+        for fname in filenames:
+            if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                continue
+            fpath = os.path.join(dirpath, fname)
+            if os.path.islink(fpath):
+                continue
+            try:
+                _rewrite_file(fpath, _scratch_path, declared_output)
+            except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                    FileNotFoundError):
+                pass
 
 
 if __name__ == "__main__":

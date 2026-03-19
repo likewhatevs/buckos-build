@@ -152,7 +152,13 @@ def main():
     file_lib_dirs = _read_flag_file(args.lib_dirs_file)
 
     source_dir = os.path.abspath(args.source_dir)
-    output_dir = os.path.abspath(args.output_dir)
+    declared_output = os.path.abspath(args.output_dir)
+
+    # Work in scratch to avoid mutating the declared output (in buck-out)
+    # during configure.  Only the final result is placed at declared_output.
+    _scratch_base = os.path.abspath(os.environ.get("BUCK_SCRATCH_PATH",
+                                                    os.environ.get("TMPDIR", "/tmp")))
+    output_dir = os.path.join(_scratch_base, "configure-work")
 
     # Register cleanup early so unsafe filenames are removed on any exit
     register_cleanup(output_dir)
@@ -161,7 +167,7 @@ def main():
         print(f"error: source directory not found: {source_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Copy source to output dir for building
+    # Copy source to scratch for configuring
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     shutil.copytree(source_dir, output_dir, symlinks=True)
@@ -425,6 +431,44 @@ def main():
 
     if args.skip_configure:
         sanitize_filenames(output_dir)
+        # Move completed tree to declared output (same as end-of-main).
+        _BINARY_EXTS_SKIP = frozenset((
+            ".o", ".a", ".so", ".gch", ".pcm", ".pch", ".d",
+            ".png", ".jpg", ".gif", ".ico", ".gz", ".xz", ".bz2",
+            ".wasm", ".pyc", ".qm",
+        ))
+        if os.path.exists(declared_output):
+            shutil.rmtree(declared_output)
+        _skip_scratch = output_dir
+        shutil.move(output_dir, declared_output)
+        for dirpath, dirnames, filenames in os.walk(declared_output):
+            for entries in (dirnames, filenames):
+                for name in entries:
+                    p = os.path.join(dirpath, name)
+                    if os.path.islink(p):
+                        target = os.readlink(p)
+                        if _skip_scratch in target:
+                            os.unlink(p)
+                            os.symlink(target.replace(_skip_scratch, declared_output), p)
+        for dirpath, _dn, filenames in os.walk(declared_output):
+            for fname in filenames:
+                if os.path.splitext(fname)[1] in _BINARY_EXTS_SKIP:
+                    continue
+                fpath = os.path.join(dirpath, fname)
+                if os.path.islink(fpath):
+                    continue
+                try:
+                    st = os.stat(fpath)
+                    with open(fpath, "r") as f:
+                        fc = f.read()
+                    if _skip_scratch not in fc:
+                        continue
+                    with open(fpath, "w") as f:
+                        f.write(fc.replace(_skip_scratch, declared_output))
+                    os.utime(fpath, (st.st_atime, st.st_mtime))
+                except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                        FileNotFoundError):
+                    pass
         return
 
     configure = os.path.join(output_dir, args.configure_script)
@@ -499,6 +543,46 @@ def main():
         sys.exit(1)
 
     sanitize_filenames(output_dir)
+
+    # Move configured tree to declared output.  Rewrite embedded scratch
+    # paths so the build phase sees the final artifact location.
+    _BINARY_EXTS = frozenset((
+        ".o", ".a", ".so", ".gch", ".pcm", ".pch", ".d",
+        ".png", ".jpg", ".gif", ".ico", ".gz", ".xz", ".bz2",
+        ".wasm", ".pyc", ".qm",
+    ))
+    if os.path.exists(declared_output):
+        shutil.rmtree(declared_output)
+    _scratch_path = output_dir
+    shutil.move(output_dir, declared_output)
+    for dirpath, dirnames, filenames in os.walk(declared_output):
+        for entries in (dirnames, filenames):
+            for name in entries:
+                p = os.path.join(dirpath, name)
+                if os.path.islink(p):
+                    target = os.readlink(p)
+                    if _scratch_path in target:
+                        os.unlink(p)
+                        os.symlink(target.replace(_scratch_path, declared_output), p)
+    for dirpath, _dirnames, filenames in os.walk(declared_output):
+        for fname in filenames:
+            if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                continue
+            fpath = os.path.join(dirpath, fname)
+            if os.path.islink(fpath):
+                continue
+            try:
+                st = os.stat(fpath)
+                with open(fpath, "r") as f:
+                    fc = f.read()
+                if _scratch_path not in fc:
+                    continue
+                with open(fpath, "w") as f:
+                    f.write(fc.replace(_scratch_path, declared_output))
+                os.utime(fpath, (st.st_atime, st.st_mtime))
+            except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                    FileNotFoundError):
+                pass
 
 
 if __name__ == "__main__":
