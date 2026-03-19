@@ -584,6 +584,48 @@ def main():
                     FileNotFoundError):
                 pass
 
+    # Rewrite meson pickle files (install.dat, build.dat, custom command
+    # serializations).  These embed the build directory as workdir and in
+    # command arguments.  Text rewrite above skips them (binary).
+    # Needed for packages that wrap meson inside autotools (e.g. QEMU).
+    import pickle as _pickle
+
+    def _patch_pickle_paths(obj, old, new):
+        if isinstance(obj, str):
+            return obj.replace(old, new) if old in obj else obj
+        if isinstance(obj, list):
+            return [_patch_pickle_paths(item, old, new) for item in obj]
+        if isinstance(obj, tuple):
+            return tuple(_patch_pickle_paths(item, old, new) for item in obj)
+        if hasattr(obj, "__dict__"):
+            for k, v in obj.__dict__.items():
+                patched = _patch_pickle_paths(v, old, new)
+                if patched is not v:
+                    setattr(obj, k, patched)
+        return obj
+
+    # Locate mesonbuild from PATH so pickle.load can deserialise
+    # meson-internal dataclasses.
+    for _bp in list(getattr(args, 'hermetic_path', [])) + list(getattr(args, 'path_prepend', [])):
+        _parent = os.path.dirname(os.path.abspath(_bp))
+        for _pat in ("lib/python*/site-packages", "lib64/python*/site-packages"):
+            for _sp in _glob.glob(os.path.join(_parent, _pat)):
+                if os.path.isdir(os.path.join(_sp, "mesonbuild")):
+                    if _sp not in sys.path:
+                        sys.path.insert(0, _sp)
+
+    for _mdat in _glob.glob(os.path.join(declared_output, "**/meson-private/*.dat"), recursive=True):
+        try:
+            _dat_stat = os.stat(_mdat)
+            with open(_mdat, "rb") as f:
+                _idata = _pickle.load(f)
+            _patch_pickle_paths(_idata, _scratch_path, declared_output)
+            with open(_mdat, "wb") as f:
+                _pickle.dump(_idata, f)
+            os.utime(_mdat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+        except Exception:
+            pass
+
 
 if __name__ == "__main__":
     main()
