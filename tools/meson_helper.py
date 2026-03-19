@@ -479,6 +479,54 @@ def main():
                     FileNotFoundError):
                 pass
 
+    # Rewrite meson's install.dat pickle — the text rewrite above skips
+    # it (binary).  install.dat stores absolute source paths that meson
+    # install uses to locate .pc files, headers, etc.
+    _install_dat = os.path.join(declared_output, "meson-private", "install.dat")
+    if os.path.isfile(_install_dat):
+        import pickle as _pickle
+
+        def _patch_pickle_paths(obj, old, new):
+            if isinstance(obj, str):
+                return obj.replace(old, new) if old in obj else obj
+            if isinstance(obj, list):
+                return [_patch_pickle_paths(item, old, new) for item in obj]
+            if isinstance(obj, tuple):
+                return tuple(_patch_pickle_paths(item, old, new) for item in obj)
+            if hasattr(obj, "__dict__"):
+                for k, v in obj.__dict__.items():
+                    patched = _patch_pickle_paths(v, old, new)
+                    if patched is not v:
+                        setattr(obj, k, patched)
+            return obj
+
+        # Add mesonbuild to sys.path so pickle can reconstruct objects
+        import sys as _sys
+        _meson_sp_added = []
+        for _bp in list(args.hermetic_path) + list(all_path_prepend):
+            _parent = os.path.dirname(os.path.abspath(_bp))
+            for _pattern in ("lib/python*/site-packages", "lib64/python*/site-packages"):
+                for _sp in __import__("glob").glob(os.path.join(_parent, _pattern)):
+                    if os.path.isdir(os.path.join(_sp, "mesonbuild")):
+                        if _sp not in _sys.path:
+                            _sys.path.insert(0, _sp)
+                            _meson_sp_added.append(_sp)
+
+        try:
+            _dat_stat = os.stat(_install_dat)
+            with open(_install_dat, "rb") as f:
+                _idata = _pickle.load(f)
+            _patch_pickle_paths(_idata, _scratch_path, declared_output)
+            with open(_install_dat, "wb") as f:
+                _pickle.dump(_idata, f)
+            os.utime(_install_dat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+        except Exception as _e:
+            print(f"warning: could not rewrite install.dat: {_e}",
+                  file=__import__("sys").stderr)
+        finally:
+            for _sp in _meson_sp_added:
+                _sys.path.remove(_sp)
+
 
 if __name__ == "__main__":
     main()
