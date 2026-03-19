@@ -623,8 +623,9 @@ def main():
             with open(_mdat, "wb") as f:
                 _pickle.dump(_idata, f)
             os.utime(_mdat, (_dat_stat.st_atime, _dat_stat.st_mtime))
-        except Exception:
-            pass
+        except Exception as _e:
+            print(f"warning: could not rewrite {os.path.basename(_mdat)}: {_e}",
+                  file=sys.stderr)
 
 
 if __name__ == "__main__":
