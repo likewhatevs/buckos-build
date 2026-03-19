@@ -329,12 +329,42 @@ def main():
     _scratch = os.path.abspath(os.environ.get("BUCK_SCRATCH_PATH",
                                               os.environ.get("TMPDIR", "/tmp")))
     _scratch_build = os.path.join(_scratch, "build")
+    _orig_build_dir = build_dir
     shutil.copytree(build_dir, _scratch_build, symlinks=True)
     build_dir = _scratch_build
     register_cleanup(_scratch_build)
     make_dir = _scratch_build
     if args.build_subdir:
         make_dir = os.path.join(_scratch_build, args.build_subdir)
+
+    # Rewrite embedded paths from the sealed declared output to the
+    # scratch copy.  cmake_install.cmake files contain include() with
+    # absolute paths — without this rewrite those include() directives
+    # reference the read-only declared output, bypassing any
+    # modifications we make to the scratch copies (e.g. RPATH_CHANGE
+    # suppression).  Also rewrite symlinks that point into the old tree.
+    if _orig_build_dir != _scratch_build:
+        for dirpath, dirnames, filenames in os.walk(_scratch_build):
+            for entries in (dirnames, filenames):
+                for name in entries:
+                    p = os.path.join(dirpath, name)
+                    if os.path.islink(p):
+                        target = os.readlink(p)
+                        if _orig_build_dir in target:
+                            os.unlink(p)
+                            os.symlink(target.replace(_orig_build_dir, _scratch_build), p)
+        for dirpath, _dirnames, filenames in os.walk(_scratch_build):
+            for fname in filenames:
+                if os.path.splitext(fname)[1] in _BINARY_EXTS:
+                    continue
+                fpath = os.path.join(dirpath, fname)
+                if os.path.islink(fpath):
+                    continue
+                try:
+                    _rewrite_file(fpath, _orig_build_dir, _scratch_build)
+                except (UnicodeDecodeError, PermissionError, IsADirectoryError,
+                        FileNotFoundError):
+                    pass
 
     # Expose the build directory so post-cmds can reference build
     # artifacts (e.g. copying objects not handled by make install).
