@@ -409,18 +409,17 @@ def main():
                         sys.path.insert(0, _sp)
                         _meson_added_paths.append(_sp)
 
-    _install_dat = os.path.join(output_dir, "meson-private", "install.dat")
-    if os.path.isfile(_install_dat):
+    for _mdat in _glob.glob(os.path.join(output_dir, "**/meson-private/*.dat"), recursive=True):
         try:
-            _dat_stat = os.stat(_install_dat)
-            with open(_install_dat, "rb") as f:
+            _dat_stat = os.stat(_mdat)
+            with open(_mdat, "rb") as f:
                 _idata = _pickle.load(f)
             _patch_pickle_paths(_idata, build_dir, output_dir)
-            with open(_install_dat, "wb") as f:
+            with open(_mdat, "wb") as f:
                 _pickle.dump(_idata, f)
-            os.utime(_install_dat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+            os.utime(_mdat, (_dat_stat.st_atime, _dat_stat.st_mtime))
         except Exception as _e:
-            print(f"warning: could not rewrite install.dat: {_e}", file=sys.stderr)
+            print(f"warning: could not rewrite {os.path.basename(_mdat)}: {_e}", file=sys.stderr)
 
     # Detect and rewrite stale cross-machine paths.  When Buck2 restores
     # cached configure outputs from a different machine, files contain the
@@ -508,18 +507,18 @@ def main():
         # build_dir→output_dir so paths resolve to the new location.
         # Uses real mesonbuild classes (added to sys.path earlier) so
         # the re-pickled file is loadable by meson's safe unpickler.
-        if os.path.isfile(_install_dat):
+        for _mdat in _glob.glob(os.path.join(output_dir, "**/meson-private/*.dat"), recursive=True):
             try:
-                _dat_stat2 = os.stat(_install_dat)
-                with open(_install_dat, "rb") as f:
+                _dat_stat2 = os.stat(_mdat)
+                with open(_mdat, "rb") as f:
                     _idata = _pickle.load(f)
                 _patch_pickle_paths(_idata, _stale_root, _current_root)
                 _patch_pickle_paths(_idata, build_dir, output_dir)
-                with open(_install_dat, "wb") as f:
+                with open(_mdat, "wb") as f:
                     _pickle.dump(_idata, f)
-                os.utime(_install_dat, (_dat_stat2.st_atime, _dat_stat2.st_mtime))
+                os.utime(_mdat, (_dat_stat2.st_atime, _dat_stat2.st_mtime))
             except Exception as _e:
-                print(f"warning: could not rewrite install.dat (stale root): {_e}",
+                print(f"warning: could not rewrite {os.path.basename(_mdat)} (stale root): {_e}",
                       file=sys.stderr)
 
     # Reset all file timestamps to a single fixed instant so make doesn't
@@ -1026,20 +1025,20 @@ def main():
                     FileNotFoundError):
                 pass
 
-    # Rewrite meson's install.dat pickle — the text rewrite above skips
-    # it (UnicodeDecodeError).  install.dat embeds the build directory as
-    # workdir for install scripts; without this rewrite the workdir points
-    # to the deleted scratch dir, causing "could not be run" (exit 127).
-    _final_install_dat = os.path.join(declared_output, "meson-private", "install.dat")
-    if os.path.isfile(_final_install_dat):
+    # Rewrite ALL meson pickle files — the text rewrite above skips
+    # them (UnicodeDecodeError).  Meson pickles (install.dat, build.dat,
+    # custom command serializations) embed build/source directory paths
+    # as workdir and in command arguments.  Without rewriting, these
+    # point to the deleted scratch dir, causing FileNotFoundError.
+    for _mdat in _glob.glob(os.path.join(declared_output, "**/meson-private/*.dat"), recursive=True):
         try:
-            _dat_stat = os.stat(_final_install_dat)
-            with open(_final_install_dat, "rb") as f:
+            _dat_stat = os.stat(_mdat)
+            with open(_mdat, "rb") as f:
                 _idata = _pickle.load(f)
             _patch_pickle_paths(_idata, _scratch_path, declared_output)
-            with open(_final_install_dat, "wb") as f:
+            with open(_mdat, "wb") as f:
                 _pickle.dump(_idata, f)
-            os.utime(_final_install_dat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+            os.utime(_mdat, (_dat_stat.st_atime, _dat_stat.st_mtime))
         except Exception as _e:
             print(f"warning: could not rewrite install.dat: {_e}",
                   file=sys.stderr)

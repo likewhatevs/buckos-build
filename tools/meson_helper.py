@@ -481,50 +481,48 @@ def main():
                     FileNotFoundError):
                 pass
 
-    # Rewrite install.dat (meson's binary pickle) to replace scratch
-    # paths with the declared output.  The text rewrite above skips it
-    # (UnicodeDecodeError).  install.dat contains workdir, executable
-    # paths, and meson-private paths; all need updating so the install
-    # phase can find the build directory and run install scripts.
-    _install_dat = os.path.join(declared_output, "meson-private", "install.dat")
-    if os.path.isfile(_install_dat):
-        import pickle as _pickle
+    # Rewrite ALL meson pickle files to replace scratch paths with the
+    # declared output.  The text rewrite above skips them (binary).
+    # Meson pickles (install.dat, build.dat, custom command .dat files)
+    # embed build directory paths as workdir and in command arguments.
+    import pickle as _pickle
 
-        def _patch_pickle_paths(obj, old, new):
-            """Recursively replace old prefix with new in string attrs."""
-            if isinstance(obj, str):
-                return obj.replace(old, new) if old in obj else obj
-            if isinstance(obj, list):
-                return [_patch_pickle_paths(item, old, new) for item in obj]
-            if isinstance(obj, tuple):
-                return tuple(_patch_pickle_paths(item, old, new) for item in obj)
-            if hasattr(obj, "__dict__"):
-                for k, v in obj.__dict__.items():
-                    patched = _patch_pickle_paths(v, old, new)
-                    if patched is not v:
-                        setattr(obj, k, patched)
-            return obj
+    def _patch_pickle_paths(obj, old, new):
+        """Recursively replace old prefix with new in string attrs."""
+        if isinstance(obj, str):
+            return obj.replace(old, new) if old in obj else obj
+        if isinstance(obj, list):
+            return [_patch_pickle_paths(item, old, new) for item in obj]
+        if isinstance(obj, tuple):
+            return tuple(_patch_pickle_paths(item, old, new) for item in obj)
+        if hasattr(obj, "__dict__"):
+            for k, v in obj.__dict__.items():
+                patched = _patch_pickle_paths(v, old, new)
+                if patched is not v:
+                    setattr(obj, k, patched)
+        return obj
 
-        # Locate mesonbuild from hermetic PATH so pickle.load can
-        # deserialise the meson-internal dataclasses.
-        for _bp in list(args.hermetic_path) + list(args.path_prepend):
-            _parent = os.path.dirname(os.path.abspath(_bp))
-            for _pat in ("lib/python*/site-packages", "lib64/python*/site-packages"):
-                for _sp in _glob.glob(os.path.join(_parent, _pat)):
-                    if os.path.isdir(os.path.join(_sp, "mesonbuild")):
-                        if _sp not in sys.path:
-                            sys.path.insert(0, _sp)
+    # Locate mesonbuild from hermetic PATH so pickle.load can
+    # deserialise the meson-internal dataclasses.
+    for _bp in list(args.hermetic_path) + list(args.path_prepend):
+        _parent = os.path.dirname(os.path.abspath(_bp))
+        for _pat in ("lib/python*/site-packages", "lib64/python*/site-packages"):
+            for _sp in _glob.glob(os.path.join(_parent, _pat)):
+                if os.path.isdir(os.path.join(_sp, "mesonbuild")):
+                    if _sp not in sys.path:
+                        sys.path.insert(0, _sp)
 
+    for _mdat in _glob.glob(os.path.join(declared_output, "**/meson-private/*.dat"), recursive=True):
         try:
-            _dat_stat = os.stat(_install_dat)
-            with open(_install_dat, "rb") as f:
+            _dat_stat = os.stat(_mdat)
+            with open(_mdat, "rb") as f:
                 _idata = _pickle.load(f)
             _patch_pickle_paths(_idata, _scratch_path, declared_output)
-            with open(_install_dat, "wb") as f:
+            with open(_mdat, "wb") as f:
                 _pickle.dump(_idata, f)
-            os.utime(_install_dat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+            os.utime(_mdat, (_dat_stat.st_atime, _dat_stat.st_mtime))
         except Exception as _e:
-            print(f"warning: could not rewrite install.dat: {_e}",
+            print(f"warning: could not rewrite {os.path.basename(_mdat)}: {_e}",
                   file=sys.stderr)
 
 
