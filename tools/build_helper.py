@@ -1026,6 +1026,24 @@ def main():
                     FileNotFoundError):
                 pass
 
+    # Rewrite meson's install.dat pickle — the text rewrite above skips
+    # it (UnicodeDecodeError).  install.dat embeds the build directory as
+    # workdir for install scripts; without this rewrite the workdir points
+    # to the deleted scratch dir, causing "could not be run" (exit 127).
+    _final_install_dat = os.path.join(declared_output, "meson-private", "install.dat")
+    if os.path.isfile(_final_install_dat):
+        try:
+            _dat_stat = os.stat(_final_install_dat)
+            with open(_final_install_dat, "rb") as f:
+                _idata = _pickle.load(f)
+            _patch_pickle_paths(_idata, _scratch_path, declared_output)
+            with open(_final_install_dat, "wb") as f:
+                _pickle.dump(_idata, f)
+            os.utime(_final_install_dat, (_dat_stat.st_atime, _dat_stat.st_mtime))
+        except Exception as _e:
+            print(f"warning: could not rewrite install.dat: {_e}",
+                  file=sys.stderr)
+
 
 if __name__ == "__main__":
     main()
