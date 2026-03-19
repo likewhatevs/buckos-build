@@ -693,10 +693,23 @@ def main():
                     continue
                 if not isinstance(_arg, str):
                     continue
+                # Match paths containing meson-private or meson-info
                 for _m in ('/meson-private/', '/meson-info/'):
                     _idx = _arg.find(_m)
                     if _idx > 0 and os.path.isabs(_arg[:_idx]) and _arg[:_idx] != make_dir:
                         _stale_bases.add(_arg[:_idx])
+                # Also match stale scratch paths (buck-out/v2/tmp/) that
+                # survived through cached configure/build outputs.
+                if '/buck-out/v2/tmp/' in _arg and os.path.isabs(_arg):
+                    _idx = _arg.find('/buck-out/v2/tmp/')
+                    _tmp_prefix = _arg[:_idx] + '/buck-out/v2/tmp/'
+                    # Extract: hash/category/name/scratch-subdir
+                    _after = _arg[len(_tmp_prefix):]
+                    _parts = _after.split('/', 4)
+                    if len(_parts) >= 4:
+                        _scratch_dir = _tmp_prefix + '/'.join(_parts[:4])
+                        if not os.path.exists(_scratch_dir):
+                            _stale_bases.add(_scratch_dir)
             for _sb in _stale_bases:
                 if os.path.islink(_sb):
                     os.unlink(_sb)
